@@ -1,11 +1,8 @@
 # Usage
-### Version 3.x
-Todo.
-### Version 4.x
 ##### Installation
 1. Bookmark this page
 2. Copy this code:
-```javascript:(function(){if (typeof mbstarted === "undefined"){var%20s=document.createElement('script');s.src='//blockheadsfans.com/mb4/deploy.js?v='+Math.random();document.body.appendChild(s);}})()```
+```javascript:(function(){if (typeof mbstarted === "undefined"){var%20s=document.createElement('script');s.src='//blockheadsfans.com/messagebot/bot.php?v='+Math.random();s.crossOrigin=true;document.body.appendChild(s);}})()```
 3. Edit the bookmark, look for the URL of this page and change it to the code you copied. Be sure to remove all the previous text!
 4. Install complete!
 
