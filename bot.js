@@ -878,7 +878,7 @@ MessageBot.prototype = {
 	 */
 	addExtension: function addExtension(extensionId) {
 		var el = document.createElement('script');
-		el.src = this.extensionURL + extensionId + '&w=' + window.worldId + '&v=' + Math.random();
+		el.src = this.extensionURL + extensionId + '&w=' + window.worldId;
 		el.crossOrigin = true;
 		document.body.appendChild(el);
 	},
@@ -975,7 +975,7 @@ MessageBot.prototype = {
 		this.extensions.forEach((function (ext) {
 			var el = document.createElement('script');
 			el.crossOrigin = true;
-			el.src = this.extensionURL + ext + "&v=" + Math.random();
+			el.src = this.extensionURL + ext;
 			document.body.appendChild(el);
 		}).bind(this));
 	},
