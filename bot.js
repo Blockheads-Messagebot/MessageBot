@@ -10,7 +10,7 @@
 */
 
 if (document.querySelector('script[crossorigin="true"]') === null) {
-	alert('Your bookmark to launch the bot needs an update, press OK to view the announcement or cancel to update later.');
+	alert('Your bookmark to launch the bot needs an update, redirecting you to the update page.');
 	location.assign('http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=309090&viewfull=1#post309090');
 }
 
@@ -67,14 +67,17 @@ function MessageBotCore() {
 	this.staffList = [];
 	this.getStaff();
 	
+	//Get online players
+	this.getOnlinePlayerList();
+	
 	//Set up our send listener
 	this.toSend = [];
-	setInterval(this.postMessage.bind(this), 1000);
+	this.postMessageReference = setInterval(this.postMessage.bind(this), 1000);
 }
 
 MessageBotCore.prototype = {
 	/**
-	 * Passes the message through checks for changes and then sends it to the server.
+	 * Adds a message to the queue to send when possible.
 	 * 
 	 * @param string message the message to be checked and then sent.
 	 * @return void
@@ -83,6 +86,11 @@ MessageBotCore.prototype = {
 		this.toSend.push(message);
 	},
 	
+	/**
+	 * Sends the oldest message in the queue.
+	 *
+	 * @return void
+	 */
 	postMessage: function postMessage() {
 		if (this.toSend.length > 0) {
 			var tmpMsg = this.toSend.shift();
@@ -213,7 +221,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Method used to tell the bot to start listening to chat
- *
+	 *
 	 * @return void
 	 */
 	startListening: function startListening() {
@@ -234,7 +242,7 @@ MessageBotCore.prototype = {
 
 	/** 
 	 * Method used to add a listener
- *
+	 *
 	 * @param string uniqueId the unique id of the listener
 	 * @param function listener the function which will be attatched to join messages
 	 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
@@ -250,7 +258,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Removes the listener on join messages by the id
- *
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @return void
 	 */
@@ -260,7 +268,7 @@ MessageBotCore.prototype = {
 
 	/** 
 	 * Method used to add a listener
- *
+	 *
 	 * @param string uniqueId the unique id of the listener
 	 * @param function listener the function which will be attatched to join messages
 	 * @return bool true on success, false if the unique ID has already been used
@@ -276,7 +284,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Removes the listener on leave messages by the id
- *
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @return void
 	 */
@@ -286,7 +294,7 @@ MessageBotCore.prototype = {
 
 	/** 
 	 * Method used to add a listener
- *
+	 *
 	 * @param string uniqueId the unique id of the listener
 	 * @param function listener the function which will be attatched to join messages
 	 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
@@ -302,7 +310,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Removes the listener on trigger messages by the id
- *
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @return void
 	 */
@@ -312,7 +320,7 @@ MessageBotCore.prototype = {
 
 	/** 
 	 * Method used to add a listener
- *
+	 *
 	 * @param string uniqueId the unique id of the listener
 	 * @param function listener the function which will be attatched to join messages
 	 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
@@ -328,7 +336,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Removes the listener on server messages by the id
- *
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @return void
 	 */
@@ -338,7 +346,7 @@ MessageBotCore.prototype = {
 
 	/** 
 	 * Method used to add a listener
- *
+	 *
 	 * @param string uniqueId the unique id of the listener
 	 * @param function listener the function which will be attatched to join messages
 	 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
@@ -354,7 +362,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Removes the listener on trigger messages by the id
- *
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @return void
 	 */
@@ -364,7 +372,7 @@ MessageBotCore.prototype = {
 
 	/** 
 	 * Method used to add a listener
- *
+	 *
 	 * @param string uniqueId the unique id of the listener
 	 * @param function listener the function which will be attatched to join messages
 	 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
@@ -380,7 +388,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Removes the listener on checks before sending by the id
- *
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @return void
 	 */
@@ -410,7 +418,7 @@ MessageBotCore.prototype = {
 
 	/* 
 	 * Internal method. Use startListening and stopListening to control this function.
- *
+	 *
 	 * @param MessageBotCore bot a reference to the core.
 	 * @return void
 	 */
@@ -450,7 +458,7 @@ MessageBotCore.prototype = {
 
 	/**
 	 * Internal method. 
- *
+	 *
 	 * Creates an iframe, sets it to the server's list page and reads the admin and mod lists.
 	 */
 	getStaff: function getStaff() {
@@ -507,6 +515,28 @@ MessageBotCore.prototype = {
 			}).bind(this));
 		}).bind(this);
 		xhr.open('GET', 'http://portal.theblockheads.net/worlds/logs/' + window.worldId, true);
+		xhr.send();
+	},
+	
+	/**
+	 * Method used to get a list of the current online players, called once when the bot is launched.
+	 *
+	 * @return void
+	 */
+	getOnlinePlayerList: function getOnlinePlayerList() {
+		var xhr = new XMLHttpRequest();
+		xhr.onload = (function () {
+			var parser = new DOMParser();
+			var doc = parser.parseFromString(xhr.responseText, 'text/html');
+			var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
+			var playerElemsCount = playerElems.length;
+			for (var i = 0; i < playerElemsCount; i++) {
+				if (this.online.indexOf(playerElems[i].textContent) < 0) {
+					this.online.push(playerElems[i].textContent);
+				}
+			}
+		}).bind(this);
+		xhr.open('GET', 'http://portal.theblockheads.net/worlds/' + window.worldId, true);
 		xhr.send();
 	},
 
@@ -741,7 +771,7 @@ MessageBot.prototype = {
 	/**
 	 * Method used to save the bot's current config. 
 	 * Automatically called whenever the config changes
- *
+	 *
 	 * @return void
 	 */
 	saveConfig: function saveConfig() {
@@ -805,7 +835,7 @@ MessageBot.prototype = {
 
 	/** 
 	 * Method used to start the bot and add event listeners
- *
+ 	 *
 	 * @return void
 	 */
 	start: function start() {
@@ -878,7 +908,7 @@ MessageBot.prototype = {
 
 	/** 
 	 * Method used to add an extension manually, by ID or url. 
- *
+	 *
 	 * @return void
 	 */
 	manuallyAddExtension: function manuallyAddExtension() {
@@ -899,7 +929,7 @@ MessageBot.prototype = {
 	 * Calls the uninstall function of the extension if it exists
 	 * Removes the main tabs and settings tab of the extension
 	 * Removes the extension from the bot autoloader
- *
+	 *
 	 * @param string extensionId the ID of the extension to remove
 	 * @return void;
 	 */
@@ -935,7 +965,7 @@ MessageBot.prototype = {
 
 	/**
 	 * Method used to autoload extensions from the config.
- *
+	 *
 	 * @return void
 	 */
 	loadExtensions: function loadExtensions() {
@@ -971,7 +1001,7 @@ MessageBot.prototype = {
 	 * Function used to show/hide the bot
 	 * Should only be called by the user tapping
 	 * on a registered handler
- *
+	 *
 	 * @param eventArgs e
 	 * @return void
 	 */
@@ -988,7 +1018,7 @@ MessageBot.prototype = {
 	/**
 	 * Event handler that should be attatched to the div 
 	 * holding the navigation for a tab set.
- *
+	 *
 	 * @param eventArgs e
 	 * @return void
 	 */
@@ -1033,7 +1063,7 @@ MessageBot.prototype = {
 
 	/**
 	 * Method used to delete messages, calls the save config function if needed.
- *
+	 *
 	 * @param eventArgs e
 	 * @return void;
 	 */
@@ -1048,7 +1078,7 @@ MessageBot.prototype = {
 
 	/**
 	 * Function that handles installation / removal requests by the user
- *
+	 *
 	 * @param EventArgs e the details of the request
 	 * @return void
 	 */
@@ -1084,7 +1114,7 @@ MessageBot.prototype = {
 	/** 
 	 * Utility function used to easily replace all occurances
 	 * of a string with a string in a string. Case sensitive.
- *
+	 *
 	 * @param string string the string which is being searched
 	 * @param string find the string which is searched for
 	 * @param string replace the string which all occurances of find is replaced with
@@ -1193,7 +1223,7 @@ MessageBot.prototype = {
 
 	/**
 	 * Function used to see if users are in defined groups. 
- *
+	 *
 	 * @param string group the group to check 
 	 * @param string name the name of the user to check
 	 * @return boolean
@@ -1299,7 +1329,7 @@ MessageBot.prototype = {
 	/**
 	 * Function called whenever someone says something in chat.
 	 * Should not be called except by the core
- *
+	 *
 	 * @param object data an object containing the message and info on it
 	 */
 	onTrigger: function onTrigger(data) {
@@ -1323,7 +1353,7 @@ MessageBot.prototype = {
 
 	/**
 	 * Function called to send the next announcement, should only be called once.
- *
+	 *
 	 * @param number ind the index of the announcement to send.
 	 */
 	announcementCheck: function announcementCheck(ind) {
@@ -1341,7 +1371,7 @@ MessageBot.prototype = {
 	////////Start page change functions///////
 	/**
 	 * Function to add a tab anywhere on the page
- *
+	 *
 	 * @param string navID the id to the div which holds the tab navigation.
 	 * @param string contentID the id to the div which holds the divs of the tab contents.
 	 * @param string tabName the name of the tab to add.
@@ -1366,7 +1396,7 @@ MessageBot.prototype = {
 
 	/**
 	 * Removes a tab by its name. Should not be directly called by extensions.
- *
+ 	 *
 	 * @param string tabName the name of the tab to be removed.
 	 * @return bool true on success, false on failure.
 	 */
@@ -1414,7 +1444,7 @@ MessageBotExtension.prototype = {
 	/**
 	 * Used to add a settings tab for this extension. After creation, use extension.settingsTab
 	 * to refer to the div which is owned by the extension.
- *
+	 *
 	 * @param string tabText the text to display on the tab
 	 * @return void
 	 */
@@ -1425,7 +1455,7 @@ MessageBotExtension.prototype = {
 	/**
 	 * Used to add a tab next under the Messages tab.
 	 * Adds the tab to the extension.mainTabs object.
- *
+	 *
 	 * @param string tabId the ID of the tab to add
 	 * @param string tabText the text which to place on the tab
 	 * @return void
@@ -1436,7 +1466,7 @@ MessageBotExtension.prototype = {
 
 	/**
 	 * Used to check if the this extension is set to automatically launch, can be used to create 'run once by default' extensions.
- *
+	 *
 	 * @return boolean true if the extension auto launches.
 	 */
 	autoLaunch: function autoLaunch() {
