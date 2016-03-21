@@ -52,6 +52,7 @@ function MessageBotCore() {
 				modList: [],
 				staffList: [],
 				toSend: [],
+				chatMsgMaxCount: 999
 			   };
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
@@ -207,6 +208,10 @@ function MessageBotCore() {
 	 */
 	core.addMsgToPage = function addMsgToPage(msg) {
 		var elclass = '';
+		var chatEl = document.getElementById('chatBox');
+		if (chatEl.children.length > this.chatMsgMaxCount) {
+			chatEl.removeChild(chatEl.childNodes[0]);    
+		}
 		var contEl = document.createElement('tr');
 		var msgEl = document.createElement('td');
 		contEl.appendChild(msgEl);
@@ -227,11 +232,11 @@ function MessageBotCore() {
 			msgEl.textContent = msg;
 		}
 		var chat = document.getElementById('chat');
-		var position = document.getElementById('chatBox').scrollHeight - document.getElementById('chatBox').scrollTop;
+		var position = chatEl.scrollHeight - chatEl.scrollTop;
 		chat.appendChild(contEl);
 		
 		if (position <= 310) {
-			document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+			chatEl.scrollTop = .scrollHeight;
 		}
 			
 	};
