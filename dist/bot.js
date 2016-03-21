@@ -974,7 +974,7 @@ function MessageBot(varName) {
 		bot.leaveArr.forEach(function (msg) {
 			bot.addMsg(document.getElementById('lMsgs'), document.getElementById('jlTemplate'), msg);
 		});
-		this.triggerArr.forEach(function (msg) {
+		bot.triggerArr.forEach(function (msg) {
 			bot.addMsg(document.getElementById('tMsgs'), document.getElementById('tTemplate'), msg);
 		});
 		this.announcementArr.forEach(function (msg) {

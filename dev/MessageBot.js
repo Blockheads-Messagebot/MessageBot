@@ -659,7 +659,7 @@ function MessageBot(varName) {
 		checkPref(bot, 'boolean', 'regexTriggers', false);
 		
 		//Write the page...
-		document.body.innerHTML += '{{inject ../tmp/page.min.html}}';
+		document.body.innerHTML += '{{inject ./tmppage.html}}';
 		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
 		
 		//Fix templates
@@ -730,10 +730,10 @@ function MessageBot(varName) {
 		bot.leaveArr.forEach(function (msg) {
 			bot.addMsg(document.getElementById('lMsgs'), document.getElementById('jlTemplate'), msg);
 		});
-		this.triggerArr.forEach(function (msg) {
+		bot.triggerArr.forEach(function (msg) {
 			bot.addMsg(document.getElementById('tMsgs'), document.getElementById('tTemplate'), msg);
 		});
-		this.announcementArr.forEach(function (msg) {
+		bot.announcementArr.forEach(function (msg) {
 			bot.addMsg(document.getElementById('aMsgs'), document.getElementById('aTemplate'), msg);
 		});
 

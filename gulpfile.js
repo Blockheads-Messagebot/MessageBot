@@ -22,8 +22,8 @@ gulp.task('_min', ['lint'], function() {
 			quoteCharacter: '"', 
 			minifyCSS: true
 		}))
-		.pipe(rename('page.min.html'))
-		.pipe(gulp.dest('tmp'));
+		.pipe(rename('tmppage.html'))
+		.pipe(gulp.dest('dev'));
 });
 
 gulp.task('inject', ['_min'], function() {
@@ -31,11 +31,12 @@ gulp.task('inject', ['_min'], function() {
 		.pipe(injectFile({
 			pattern: '{{inject <filename>}}'
 		}))
-		.pipe(gulp.dest('tmp'));
+		.pipe(rename('tmpMessageBot.js'))
+		.pipe(gulp.dest('dev'));
 });
 
 gulp.task('scripts', ['inject'], function() {
-	return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'tmp/MessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
+	return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'dev/tmpMessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
 		.pipe(concat('bot.js'))
 		.pipe(comments())
 		.pipe(babel({
@@ -45,7 +46,7 @@ gulp.task('scripts', ['inject'], function() {
 });
 
 gulp.task('clean', ['scripts'], function() {
-	return del(['tmp/*']);
+	return del(['dev/tmp*']);
 });
 
 gulp.task('watch', function() {
