@@ -1,8 +1,12 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var jshint = require('gulp-jshint');
+var rename = require('gulp-rename');
 var babel = require('gulp-babel');
 var comments = require('gulp-strip-comments');
+var injectFile = require('gulp-inject-file');
+var htmlmin = require('gulp-htmlmin');
+var del = require('del');
 
 gulp.task('lint', function() {
 	return gulp.src('dev/*.js')
@@ -10,18 +14,39 @@ gulp.task('lint', function() {
 		.pipe(jshint.reporter('default'));
 });
 
-gulp.task('scripts', function() {
-	return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'dev/MessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
+gulp.task('_min', function() {
+	return gulp.src('dev/page.html')
+		.pipe(htmlmin({collapseWhitespace: true, conservativeCollapse: true, quoteCharacter: '"', minifyCSS: true}))
+		.pipe(rename('page.min.html'))
+		.pipe(gulp.dest('tmp'));
+});
+
+gulp.task('inject', ['_min'], function() {
+	return gulp.src('dev/MessageBot.js')
+		.pipe(injectFile({
+			pattern: '{{inject <filename>}}'
+		}))
+		.pipe(gulp.dest('tmp'));
+});
+
+gulp.task('scripts', ['inject'], function() {
+	return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'tmp/MessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
 		.pipe(concat('bot.js'))
 		.pipe(comments())
 		.pipe(babel({
-			presets: ['es2015-loose']
+			presets: ['es2015']
 		}))
 		.pipe(gulp.dest('dist'));
 });
 
-gulp.task('watch', function() {
-	gulp.watch('dev/*js', ['lint', 'scripts']);
-})
+gulp.task('clean', ['scripts'], function() {
+	return del(['tmp/*']);
+});
 
-gulp.task('default', ['lint', 'scripts', 'watch']);
+gulp.task('watch', function() {
+	gulp.watch('dev/*', ['all']);
+});
+
+gulp.task('all', ['lint', 'scripts', 'clean']);
+
+gulp.task('default', ['all', 'watch']);

@@ -7,27 +7,17 @@ if (document.querySelector('script[crossorigin="true"]') === null) {
 	location.assign('http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=309090&viewfull=1#post309090');
 }
 
-window.onerror = function () {
-	if (!bot.devMode) {
-		var report = this.core.worldName;
-		var report2 = JSON.stringify(arguments);
-		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/error.php?log=' + encodeURIComponent(report) + '&log2=' + encodeURIComponent(report2);
-		document.head.appendChild(sc);
-	}
-};
-
 window.pollChat = function () {};
 
-function MessageBotCore() {
+function MessageBotCore(varName) {
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
 	}
 
 	document.styleSheets[0].insertRule('.admin > span:first-child { color: #0007CF}', 0);
 	document.styleSheets[0].insertRule('.mod > span:first-child { color: #08C738}', 0);
-	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
-	document.getElementById('messageText').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
+	document.getElementById('messageButton').setAttribute('onclick', 'return ' + varName + '.core.userSend(bot.core);');
+	document.getElementById('messageText').setAttribute('onkeydown', varName + '.core.enterCheck(event, bot.core)');
 
 	(function () {
 		if (document.all && !window.setTimeout.isPolyfill) {
@@ -463,615 +453,634 @@ function MessageBotCore() {
 	return core;
 }
 
-function MessageBot() {
-	this.devMode = false;
+function MessageBot(varName) {
+	var bot = {
+		devMode: false,
+		core: MessageBotCore(varName),
+		uMID: 0,
+		version: '5.0',
+		extensions: [],
+		preferences: {},
+		extensionURL: '//blockheadsfans.com/messagebot/extension.php?id='
+	};
 
-	this.core = MessageBotCore();
-	this.uMID = 0;
-	this.version = '5.0';
-	this.extensions = [];
-	this.preferences = {};
-	this.extensionURL = '//blockheadsfans.com/messagebot/extension.php?id=';
-
-	this.setup();
-
-	(function () {
-		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
-		sc.crossOrigin = true;
-		document.body.appendChild(sc);
-	})();
-
-	this.loadExtensions();
-
-	(function (b) {
-		var sc = document.createElement('script');
-		sc.crossOrigin = true;
-		sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + b.extensions.join(',');
-		document.body.appendChild(sc);
-	})(this);
-	this.loadConfig();
-}
-
-MessageBot.prototype = {
-	setup: function setup() {
-		function checkPref(type, name, defval) {
-			if (_typeof(this.preferences[name]) != type) {
-				this.preferences[name] = defval;
+	{
+		bot.saveConfig = function saveConfig() {
+			function utilSaveFunc(wrapper, saveTo) {
+				var wrappers = wrapper.children;
+				var selects,
+				    joinCounts,
+				    tmpMsgObj = {};
+				for (var i = 0; i < wrappers.length; i++) {
+					tmpMsgObj.message = wrappers[i].querySelector('.m').value;
+					if (wrapper.id != 'aMsgs') {
+						selects = wrappers[i].querySelectorAll('select');
+						joinCounts = wrappers[i].querySelectorAll('input[type="number"]');
+						tmpMsgObj.group = selects[0].value;
+						tmpMsgObj.not_group = selects[1].value;
+						tmpMsgObj.joins_low = joinCounts[0].value;
+						tmpMsgObj.joins_high = joinCounts[1].value;
+					}
+					if (wrapper.id == 'tMsgs') {
+						tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
+					}
+					saveTo.push(tmpMsgObj);
+					tmpMsgObj = {};
+				}
 			}
-		}
-		var str = localStorage.getItem('mb_preferences');
-		this.preferences = str === null ? {} : JSON.parse(str);
-		checkPref.call(this, 'boolean', 'showOnLaunch', false);
-		checkPref.call(this, 'number', 'announcementDelay', 10);
-		checkPref.call(this, 'boolean', 'regexTriggers', false);
 
-		var i;
-		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
+			this.joinArr = [];
+			this.leaveArr = [];
+			this.triggerArr = [];
+			this.announcementArr = [];
+			utilSaveFunc(document.getElementById('jMsgs'), this.joinArr);
+			utilSaveFunc(document.getElementById('lMsgs'), this.leaveArr);
+			utilSaveFunc(document.getElementById('tMsgs'), this.triggerArr);
+			utilSaveFunc(document.getElementById('aMsgs'), this.announcementArr);
 
-		document.body.innerHTML += '<style>a{cursor: pointer;}#botContainer {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: #fff;}#botHead {background-color: #051465;background-image: url(http://portal.theblockheads.net/static/images/portalHeader.png);min-height: 52px;width: 100%;height: 80px;background-repeat: no-repeat;}#botHead > nav {float: right;padding-top: 52px;margin-right: 5px;}#botHead > nav > span {color: #FFF;list-style: outside none none;font-size: 1.2em;padding: 8px 5px;}#botHead > nav > span.selected {background: #FFF;color: #182B73;}#botTemplates {display: none;}#botBody {overflow: auto;margin: 5px;}.botTabs {width: calc(100% - 5px);padding-left: 5px;display: -webkit-box;display: -webkit-flex;display: flex;-webkit-flex-flow: row wrap;flex-flow: row wrap;}.botTabs > div {display: -webkit-flex;display: flex;-webkit-align-items: center;align-items: center;-webkit-justify-content: center;justify-content: center;-webkit-flex-grow: 1;flex-grow: 1;height: 40px;margin-right: 5px;margin-top: 5px;min-width: 120px;background: #182B73;color: #FFF;font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;}.botTabs > div.selected {color: #000;background: #E7E7E7;}#botTabs > div,#extTabs > div {position: relative;overflow-y: auto;background: #E7E7E7;padding: 5px;height: calc(100% - 10px);}#botTabs,#extTabs {height: calc(100vh - 140px);}.tabContainer {width: calc(100% - 10px);margin-left: 5px;}.tabContainer > div {position: relative;display: none;width: calc(100% - 10px);}.tabContainer > div.visible {display: block;overflow: auto;}span.descdet {margin-left: 1em;max-width: calc(100% - 5em);display: inline-block;}h3.descgen {margin-bottom: 5px;width: calc(100% - 50px);}span.add {position: absolute;display: -webkit-flex;display: flex;-webkit-align-items: center;align-items: center;-webkit-justify-content: center;justify-content: center;top: 12px;right: 12px;width: 30px;height: 30px;background: #182B73;border: 0;color: #FFF;}.msg,.ext {width: calc(33% - 18.3334px);min-width: 310px;margin-left: 5px;margin-top: 5px;border: 3px solid #878787;float: left;background: #B0B0B0;padding: 5px;}.msg > input {width: calc(100% - 10px);}.msg > input[type="number"] {width: 5em;}.msg:nth-child(odd) {background: #fff;}.ann {display: block;width: 100%;margin-top: 5px;}.ann > input {width: 33%;min-width: 300px;margin-right: 5px;}.ext:nth-child(odd) {background: #E6E6E6;}.ext {height: 105px;position: relative;}.ext > h4 {margin: 0;}.ext > button {position: absolute;bottom: 3px;left: 3px;margin: 1px;width: calc(50% - 2px);border: 1px solid #000;}#jMsgs,#lMsgs,#tMsgs,#aMsgs,#exts {border-top: 1px solid #000;margin-top: 10px;}#settingsTabsNav > div {background: #182B73;color: #FFF;}#settingsTabsNav > div.selected {background: #FFF;color: #000;}#settingsTabs {background: #FFF;}#settingsTabs > div {height: calc(100vh - 220px);padding: 10px;}div[tab-name] {font-size: 110%;font-weight: 700;}</style><div id="botContainer" style="display:none;"><div id="botHead"><nav tab-contents="botBody"><span id="botNav2">CONSOLE</span><span class="selected" tab-name="messages">MESSAGES</span><span tab-name="extensions">EXTENSIONS</span></nav></div><div id="botTemplates"><template id="jlTemplate"><div class="msg"><label>When the player is </label><select><option value="All">anyone</option><option value="Staff">a staff member</option><option value="Mod">a mod</option><option value="Admin">an admin</option><option value="Owner">the owner</option></select><label> who is not </label><select><option value="Nobody">nobody</option><option value="Staff">a staff member</option><option value="Mod">a mod</option><option value="Admin">an admin</option><option value="Owner">the owner</option></select><label> then say </label><input class="m"><label> in chat ifthe player has joined between </label><input type="number" value="0"><label> and </label><input type="number" value="9999"><label> times.</label><br><a>Delete</a></div></template><template id="tTemplate"><div class="msg"><label>When </label><select><option value="All">anyone</option><option value="Staff">a staff member</option><option value="Mod">a mod</option><option value="Admin">an admin</option><option value="Owner">the owner</option></select><label> who is not </label><select><option value="Nobody">nobody</option><option value="Staff">a staff member</option><option value="Mod">a mod</option><option value="Admin">an admin</option><option value="Owner">the owner</option></select><label> says </label><input class="t"><label> in chat, say </label><input class="m"><label> if the player has joined between </label><input type="number" value="0"><label> and </label><input type="number" value="9999"><label> times.</label><br><a>Delete</a></div></template><template id="aTemplate"><div class="ann"><label>Say: </label><input class="m"><a>Delete</a><label style="display:block;margin-top:5px;">Wait X minutes...</label></div></template><template id="extTemplate"><div class="ext"><h4>Title</h4><span>Description</span><br><button>Install</button></div></template></div><div class="tabContainer" id="botBody"><div class="visible" id="mb_messages"><nav class="botTabs" id="botMainNav" tab-contents="botTabs"><div class="selected" tab-name="join">Join Messages</div><div tab-name="leave">Leave Messages</div><div tab-name="trigger">Trigger Messages</div><div tab-name="announcements">Announcements</div></nav><div class="tabContainer" id="botTabs"><div class="visible" id="mb_join"><h3 class="descgen">These are checked when a player joins the server.</h3><span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span><span class="add">+</span><div id="jMsgs"></div></div><div id="mb_leave"><h3 class="descgen">These are checked when a player leaves the server.</h3><span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span><span class="add">+</span><div id="lMsgs"></div></div><div id="mb_trigger"><h3 class="descgen">These are checked whenever someone says something.</h3><span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span><span class="add">+</span><div id="tMsgs"></div></div><div id="mb_announcements"><h3 class="descgen">These are sent according to a regular schedule.</h3><span class="descdet">If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X under the general settings tab. Once the bot reaches the end of the list, it starts over at the top.</span><span class="add">+</span><div id="aMsgs"></div></div></div></div><div id="mb_extensions"><nav class="botTabs" tab-contents="extTabs"><div class="selected" tab-name="store">Store</div><div tab-name="settings">Settings</div></nav><div class="tabContainer" id="extTabs"><div class="visible" id="mb_store"><h3 class="descgen">Extensions can improve the functionality of the bot.</h3><span class="descdet">Interested in creating one? <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=306215#post306215" target="_blank">Click here.</a></span><span id="mb_load_man" style="position:absolute; top: 12px; right:12px;color:#fff;background:#182B73;padding:0.5em;">Load By ID/URL</span><div id="exts"></div></div><div id="mb_settings"><nav class="botTabs" id="settingsTabsNav" tab-contents="settingsTabs"><div class="selected" tab-name="general">General</div></nav><div class="tabContainer" id="settingsTabs"><div class="visible" id="mb_general"><h3>Settings</h3><label for="mb_auto_show">Show bot on launch:</label><input id="mb_auto_show" type="checkbox"><br><label for="mb_ann_delay">Delay between announcements (minutes): </label><input id="mb_ann_delay" type="number"><br><label for="mb_regex_triggers">Parse triggers as RegEx (read the advanced use section <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=290924#post290924" target="_blank">here</a> first): </label><input id="mb_regex_triggers" type="checkbox"><br><h3>Extensions</h3><div id="mb_ext_list"></div><h3>Backup / Restore</h3><a id="mb_backup_save">Get backup code</a><br><a id="mb_backup_load">Load previous backup</a><div id="mb_backup"></div></div></div></div></div></div><div id="mb_filler"></div></div></div>';
+			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(this.joinArr));
+			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(this.leaveArr));
+			localStorage.setItem('triggerArr' + window.worldId, JSON.stringify(this.triggerArr));
+			localStorage.setItem('announcementArr' + window.worldId, JSON.stringify(this.announcementArr));
+			localStorage.setItem('mb_extensions', JSON.stringify(this.extensions));
+			localStorage.setItem('mb_version', this.version);
+		};
 
-		this.fixTemplates();
+		bot.backup = function backup(event) {
+			if (event.target.id == 'mb_backup_save') {
+				document.getElementById('mb_backup').innerHTML = '<p>Copy the following code to a safe place.</p><p>' + this.stripHTML(JSON.stringify(localStorage)) + '</p>';
+				return;
+			}
 
-		document.getElementById('botNav').addEventListener('click', this.toggleBot, false);
-		document.getElementById('botNav2').addEventListener('click', this.toggleBot, false);
+			var code = prompt('Enter the backup code');
 
-		document.querySelector('#botHead > nav').addEventListener('click', this.changeTab, false);
-		var tabNavs = document.querySelectorAll('nav.botTabs');
-		for (i = 0; i < tabNavs.length; i++) {
-			tabNavs[i].addEventListener('click', this.changeTab, false);
-		}
-		var addMsgElems = document.querySelectorAll('span.add');
-		for (i = 0; i < addMsgElems.length; i++) {
-			addMsgElems[i].addEventListener('click', this.addEmptyMsg.bind(this), false);
-		}
-		document.getElementById('jMsgs').addEventListener('change', this.saveConfig.bind(this), false);
-		document.getElementById('lMsgs').addEventListener('change', this.saveConfig.bind(this), false);
-		document.getElementById('tMsgs').addEventListener('change', this.saveConfig.bind(this), false);
-		document.getElementById('aMsgs').addEventListener('change', this.saveConfig.bind(this), false);
+			try {
+				code = JSON.parse(code);
+			} catch (e) {
+				alert('Invalid backup. No action taken.');
+				return;
+			}
 
-		document.getElementById('exts').addEventListener('click', this.extActions.bind(this), false);
-		document.getElementById('mb_load_man').addEventListener('click', this.manuallyAddExtension.bind(this), false);
+			if (code !== null) {
+				Object.keys(code).forEach(function (key) {
+					localStorage.setItem(key, code[key]);
+				}.bind(this));
 
-		document.getElementById('mb_general').addEventListener('change', this.savePrefs.bind(this), false);
+				alert('Backup loaded. Please restart the bot.');
+				location.reload(true);
+			}
+		};
 
-		document.getElementById('mb_backup_save').addEventListener('click', this.backup.bind(this), false);
-		document.getElementById('mb_backup_load').addEventListener('click', this.backup.bind(this), false);
+		bot.savePrefs = function savePrefs() {
+			var prefs = {};
+			prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
+			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
+			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
+			this.preferences = prefs;
+			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
+		};
+	}
 
-		if (this.preferences.showOnLaunch) {
-			this.toggleBot({ stopPropagation: function stopPropagation() {} });
-			document.querySelector('#mb_auto_show').checked = 'checked';
-		}
-		document.querySelector('#mb_ann_delay').value = this.preferences.announcementDelay;
-		document.querySelector('#mb_regex_triggers').checked = this.preferences.regexTriggers ? 'checked' : '';
-	},
+	{
+		bot.start = function start() {
+			this.core.addJoinListener('mb_join', this.onJoin.bind(this));
+			this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
+			this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
+			this.announcementCheck(0);
+			this.core.startListening();
+		};
 
-	saveConfig: function saveConfig() {
-		this.joinArr = [];
-		this.leaveArr = [];
-		this.triggerArr = [];
-		this.announcementArr = [];
-		this.utilSaveFunc(document.getElementById('jMsgs'), this.joinArr);
-		this.utilSaveFunc(document.getElementById('lMsgs'), this.leaveArr);
-		this.utilSaveFunc(document.getElementById('tMsgs'), this.triggerArr);
-		this.utilSaveFunc(document.getElementById('aMsgs'), this.announcementArr);
+		bot.addTab = function addTab(navID, contentID, tabName, tabText) {
+			if (document.querySelector('#' + navID + ' > div[tab-name="' + tabName + '"]') === null) {
+				var tabNav = document.createElement('div');
+				tabNav.setAttribute('tab-name', tabName);
+				tabNav.textContent = this.stripHTML(tabText);
+				document.getElementById(navID).appendChild(tabNav);
 
-		localStorage.setItem('joinArr' + window.worldId, JSON.stringify(this.joinArr));
-		localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(this.leaveArr));
-		localStorage.setItem('triggerArr' + window.worldId, JSON.stringify(this.triggerArr));
-		localStorage.setItem('announcementArr' + window.worldId, JSON.stringify(this.announcementArr));
-		localStorage.setItem('mb_extensions', JSON.stringify(this.extensions));
-		localStorage.setItem('mb_version', this.version);
-	},
+				var tabContent = document.createElement('div');
+				tabContent.setAttribute('id', 'mb_' + tabName);
+				document.getElementById(contentID).appendChild(tabContent);
 
-	backup: function backup(event) {
-		if (event.target.id == 'mb_backup_save') {
-			document.getElementById('mb_backup').innerHTML = '<p>Copy the following code to a safe place.</p><p>' + this.stripHTML(JSON.stringify(localStorage)) + '</p>';
-			return;
-		}
+				return tabContent;
+			}
+			return document.querySelector('#mb_' + tabName);
+		};
 
-		var code = prompt('Enter the backup code');
+		bot.removeTab = function removeTab(tabName) {
+			if (document.querySelector('div[tab-name="' + tabName + '"]') !== null) {
+				document.querySelector('div[tab-name="' + tabName + '"]').outerHTML = '';
+				document.querySelector('#mb_' + tabName).outerHTML = '';
+				return true;
+			}
+			return false;
+		};
 
-		try {
-			code = JSON.parse(code);
-		} catch (e) {
-			alert('Invalid backup. No action taken.');
-			return;
-		}
+		bot.addSettingsTab = function addSettingsTab(tabName, tabText) {
+			return this.addTab('settingsTabsNav', 'settingsTabs', tabName, tabText);
+		};
 
-		if (code !== null) {
-			Object.keys(code).forEach(function (key) {
-				localStorage.setItem(key, code[key]);
-			}.bind(this));
+		bot.addMainTab = function addMainTab(tabName, tabText) {
+			return this.addTab('botMainNav', 'botTabs', tabName, tabText);
+		};
 
-			alert('Backup loaded. Please restart the bot.');
-			location.reload(true);
-		}
-	},
+		bot.toggleBot = function toggleBot(e) {
+			var el = document.getElementById('botContainer');
+			if (el.style.display !== 'none') {
+				el.style.display = 'none';
+			} else {
+				el.style.display = 'block';
+			}
+			e.stopPropagation();
+		};
 
-	savePrefs: function savePrefs() {
-		var prefs = {};
-		prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
-		prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
-		prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
-		this.preferences = prefs;
-		localStorage.setItem('mb_preferences', JSON.stringify(prefs));
-	},
+		bot.changeTab = function changeTab(e) {
+			if (e.target !== e.currentTarget) {
+				var i;
+				var tabs = e.currentTarget.children;
+				var tabContents = document.getElementById(e.currentTarget.getAttribute('tab-contents')).children;
+				for (i = 0; i < tabs.length; i++) {
+					tabs[i].removeAttribute('class');
+					tabContents[i].removeAttribute('class');
+				}
+				e.target.className = 'selected';
+				if (e.target.getAttribute('tab-name') !== null) {
+					document.getElementById('mb_' + e.target.getAttribute('tab-name')).className = 'visible';
+				}
+			}
+			e.stopPropagation();
+		};
+	}
 
-	start: function start() {
-		this.core.addJoinListener('mb_join', this.onJoin.bind(this));
-		this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
-		this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
-		this.announcementCheck(0);
-		this.core.startListening();
-	},
+	{
+		bot.addEmptyMsg = function addEmptyMsg(e) {
+			var containerElem = e.target.parentElement.querySelector('div');
+			var template;
+			if (containerElem.id == 'jMsgs' || containerElem.id == 'lMsgs') {
+				template = document.getElementById('jlTemplate');
+			} else if (containerElem.id == 'tMsgs') {
+				template = document.getElementById('tTemplate');
+			} else {
+				template = document.getElementById('aTemplate');
+			}
+			this.addMsg(containerElem, template, {});
 
-	initStore: function initStore(data) {
-		var content = document.getElementById('extTemplate').content;
+			e.stopPropagation();
+		};
 
-		if (data.status == 'ok') {
-			data.extensions.forEach(function (extension) {
-				content.querySelector('h4').textContent = extension.title;
-				content.querySelector('span').innerHTML = extension.snippet;
-				content.querySelector('.ext').setAttribute('extension-id', extension.id);
-				content.querySelector('button').textContent = this.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
+		bot.deleteMsg = function deleteMsg(e) {
+			if (confirm("Really delete this message?")) {
+				e.target.parentElement.outerHTML = '';
+				this.saveConfig();
+			}
 
-				document.getElementById('exts').appendChild(document.importNode(content, true));
-			}.bind(this));
-		} else {
-			document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
-		}
-	},
+			e.stopPropagation();
+		};
+	}
 
-	addExtension: function addExtension(extensionId) {
-		var el = document.createElement('script');
-		el.src = this.extensionURL + extensionId + '&w=' + window.worldId;
-		el.crossOrigin = true;
-		document.body.appendChild(el);
-	},
+	{
+		bot.initStore = function initStore(data) {
+			var content = document.getElementById('extTemplate').content;
 
-	setAutoLaunch: function setAutoLaunch(extensionId, autoLaunch) {
-		if (this.extensions.indexOf(extensionId) < 0 && autoLaunch) {
-			this.extensions.push(extensionId);
+			if (data.status == 'ok') {
+				data.extensions.forEach(function (extension) {
+					content.querySelector('h4').textContent = extension.title;
+					content.querySelector('span').innerHTML = extension.snippet;
+					content.querySelector('.ext').setAttribute('extension-id', extension.id);
+					content.querySelector('button').textContent = this.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
+
+					document.getElementById('exts').appendChild(document.importNode(content, true));
+				}.bind(this));
+			} else {
+				document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
+			}
+
 			var sc = document.createElement('script');
 			sc.crossOrigin = true;
 			sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
 			document.body.appendChild(sc);
-		} else if (!autoLaunch) {
+		};
+
+		bot.addExtension = function addExtension(extensionId) {
+			var el = document.createElement('script');
+			el.src = this.extensionURL + extensionId + '&w=' + window.worldId;
+			el.crossOrigin = true;
+			document.body.appendChild(el);
+		};
+
+		bot.manuallyAddExtension = function manuallyAddExtension() {
+			var extRef = prompt('Enter the ID or URL of an extension');
+			if (extRef !== null) {
+				if (extRef.indexOf('http://') === 0) {
+					var el = document.createElement('script');
+					el.src = extRef;
+					document.body.appendChild(el);
+				} else {
+					this.addExtension(extRef);
+				}
+			}
+		};
+
+		bot.removeExtension = function removeExtension(extensionId) {
+			if (typeof window[extensionId] != 'undefined') {
+				if (typeof window[extensionId].uninstall == 'function') {
+					window[extensionId].uninstall();
+				}
+
+				this.removeTab('settings_' + extensionId);
+				Object.keys(window[extensionId].mainTabs).forEach(function (key) {
+					this.removeTab('main_' + extensionId + '_' + key);
+				}.bind(this));
+				window[extensionId] = undefined;
+			}
 			var extIn = this.extensions.indexOf(extensionId);
 			if (extIn > -1) {
 				this.extensions.splice(extIn, 1);
-			}
-		}
-		this.saveConfig();
-	},
+				this.saveConfig();
+				var sc = document.createElement('script');
+				sc.crossOrigin = true;
+				sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
+				document.body.appendChild(sc);
 
-	manuallyAddExtension: function manuallyAddExtension() {
-		var extRef = prompt('Enter the ID or URL of an extension');
-		if (extRef !== null) {
-			if (extRef.indexOf('http://') === 0) {
-				var el = document.createElement('script');
-				el.src = extRef;
-				document.body.appendChild(el);
-			} else {
-				this.addExtension(extRef);
+				var button = document.querySelector('div[extension-id=' + extensionId + '] > button');
+				if (button !== null) {
+					button.textContent = 'Removed';
+					setTimeout(function () {
+						this.textContent = 'Install';
+					}.bind(button), 3000);
+				}
 			}
-		}
-	},
+		};
 
-	removeExtension: function removeExtension(extensionId) {
-		if (typeof window[extensionId] != 'undefined') {
-			if (typeof window[extensionId].uninstall == 'function') {
-				window[extensionId].uninstall();
-			}
-
-			this.removeTab('settings_' + extensionId);
-			Object.keys(window[extensionId].mainTabs).forEach(function (key) {
-				this.removeTab('main_' + extensionId + '_' + key);
+		bot.extensionList = function extensionList(extensions) {
+			var exts = JSON.parse(extensions),
+			    tempHTML = '<ul style="margin-left:1.5em;">';
+			exts.forEach(function (ext) {
+				tempHTML += '<li>' + this.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
 			}.bind(this));
-			window[extensionId] = undefined;
-		}
-		var extIn = this.extensions.indexOf(extensionId);
-		if (extIn > -1) {
-			this.extensions.splice(extIn, 1);
+			tempHTML += '</ul>';
+
+			document.getElementById('mb_ext_list').innerHTML = exts.length > 0 ? tempHTML : '<p>No extensions installed</p>';
+		};
+
+		bot.setAutoLaunch = function setAutoLaunch(extensionId, autoLaunch) {
+			if (this.extensions.indexOf(extensionId) < 0 && autoLaunch) {
+				this.extensions.push(extensionId);
+				var sc = document.createElement('script');
+				sc.crossOrigin = true;
+				sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
+				document.body.appendChild(sc);
+			} else if (!autoLaunch) {
+				var extIn = this.extensions.indexOf(extensionId);
+				if (extIn > -1) {
+					this.extensions.splice(extIn, 1);
+				}
+			}
 			this.saveConfig();
-			var sc = document.createElement('script');
-			sc.crossOrigin = true;
-			sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-			document.body.appendChild(sc);
+		};
 
-			var button = document.querySelector('div[extension-id=' + extensionId + '] > button');
-			if (button !== null) {
-				button.textContent = 'Removed';
-				setTimeout(function () {
-					this.textContent = 'Install';
-				}.bind(button), 3000);
+		bot.extActions = function extActions(e) {
+			var extId = e.target.parentElement.getAttribute('extension-id');
+			var button = document.querySelector('div[extension-id="' + extId + '"] > button');
+			extId = extId === null ? e.target.getAttribute('extension-id') : extId;
+			if (e.target.tagName == 'BUTTON') {
+				if (e.target.textContent == 'Install') {
+					this.addExtension(extId);
+					button.textContent = 'Remove';
+				} else {
+					this.removeExtension(extId);
+
+					window[extId] = undefined;
+				}
+			}
+		};
+	}
+
+	{
+		bot.onJoin = function onJoin(data) {
+			this.joinArr.forEach(function (msg) {
+				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
+					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
+					this.core.send(toSend);
+				}
+			}.bind(this));
+		};
+
+		bot.onLeave = function onLeave(data) {
+			this.leaveArr.forEach(function (msg) {
+				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
+					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
+					this.core.send(toSend);
+				}
+			}.bind(this));
+		};
+
+		bot.onTrigger = function onTrigger(data) {
+			function triggerMatch(trigger, message) {
+				if (this.preferences.regexTriggers) {
+					return new RegExp(trigger, 'i').test(message);
+				}
+				return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
+			}
+			this.triggerArr.forEach(function (msg) {
+				if (triggerMatch.call(this, msg.trigger, data.message) && this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
+
+					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = this.replaceAll(toSend, '{{ip}}', this.core.getIP(data.name));
+					this.core.send(toSend);
+				}
+			}.bind(this));
+		};
+
+		bot.announcementCheck = function announcementCheck(ind) {
+			var i = ind;
+			if (ind == this.announcementArr.length) {
+				i = 0;
+			}
+			if (_typeof(this.announcementArr[i]) == 'object') {
+				this.core.send(this.announcementArr[i].message);
+			}
+			setTimeout(this.announcementCheck.bind(this), this.preferences.announcementDelay * 60000, ++i);
+		};
+	}
+
+	{
+		bot.stripHTML = function stripHTML(html) {
+			return this.replaceAll(this.replaceAll(html, '<', '&lt;'), '>', '&gt;');
+		};
+
+		bot.replaceAll = function replaceAll(string, find, replace) {
+			return string.replace(new RegExp(find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"), 'g'), replace);
+		};
+
+		bot.fixTemplates = function fixTemplates() {
+			if (!('content' in document.createElement('template'))) {
+				var qPlates = document.getElementsByTagName('template'),
+				    plateLen = qPlates.length,
+				    elPlate,
+				    qContent,
+				    contentLen,
+				    docContent;
+
+				for (var x = 0; x < plateLen; ++x) {
+					elPlate = qPlates[x];
+					qContent = elPlate.childNodes;
+					contentLen = qContent.length;
+					docContent = document.createDocumentFragment();
+
+					while (qContent[0]) {
+						docContent.appendChild(qContent[0]);
+					}
+
+					elPlate.content = docContent;
+				}
+			}
+		};
+
+		bot.addMsg = function addMsg(container, template, saveObj) {
+			var content = template.content;
+			content.querySelector('div').id = 'm' + this.uMID;
+			content.querySelector('.m').value = typeof saveObj.message == 'string' ? saveObj.message : '';
+			if (template.id != 'aTemplate') {
+				var numInputs = content.querySelectorAll('input[type="number"]');
+				numInputs[0].value = typeof saveObj.joins_low == 'string' ? saveObj.joins_low : 0;
+				numInputs[1].value = typeof saveObj.joins_high == 'string' ? saveObj.joins_high : 9999;
+				if (template.id == 'tTemplate') {
+					content.querySelector('.t').value = typeof saveObj.trigger == 'string' ? saveObj.trigger : '';
+				}
+			}
+			container.appendChild(document.importNode(content, true));
+
+			if (template.id != 'aTemplate') {
+				var selects = document.querySelectorAll('#m' + this.uMID + ' > select');
+
+				var grp = typeof saveObj.group == 'string' ? saveObj.group : 'All';
+				selects[0].value = grp == 'Mods' ? 'Mod' : grp;
+
+				selects[1].value = typeof saveObj.not_group == 'string' ? saveObj.not_group : 'Nobody';
+			}
+			document.querySelector('#m' + this.uMID + ' > a').addEventListener('click', this.deleteMsg.bind(this), false);
+
+			this.uMID++;
+		};
+
+		bot.checkGroup = function checkGroup(group, name) {
+			if (group == 'All') {
+				return true;
+			}
+			if (group == 'Admin') {
+				return this.core.adminList.indexOf(name) !== -1;
+			}
+			if (group == 'Mod') {
+				return this.core.modList.indexOf(name) !== -1;
+			}
+			if (group == 'Staff') {
+				return this.core.staffList.indexOf(name) !== -1;
+			}
+			if (group == 'Owner') {
+				return this.core.ownerName == name;
+			}
+			return false;
+		};
+
+		bot.checkJoins = function checkJoins(low, high, actual) {
+			return low <= actual && actual <= high;
+		};
+	}
+
+	(function (bot) {
+		function checkPref(target, type, name, defval) {
+			if (_typeof(target.preferences[name]) != type) {
+				target.preferences[name] = defval;
 			}
 		}
-	},
 
-	loadExtensions: function loadExtensions() {
-		var str = localStorage.getItem('mb_extensions');
-		this.extensions = str === null ? [] : JSON.parse(str);
+		var str = localStorage.getItem('mb_preferences');
+		bot.preferences = str === null ? {} : JSON.parse(str);
+		checkPref(bot, 'boolean', 'showOnLaunch', false);
+		checkPref(bot, 'number', 'announcementDelay', 10);
+		checkPref(bot, 'boolean', 'regexTriggers', false);
 
-		this.extensions.forEach(function (ext) {
-			var el = document.createElement('script');
-			el.crossOrigin = true;
-			el.src = this.extensionURL + ext;
-			document.body.appendChild(el);
-		}.bind(this));
-	},
+		document.body.innerHTML += '<style>a{cursor:pointer}#botContainer{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff}#botHead{background-color:#051465;background-image:url(http://portal.theblockheads.net/static/images/portalHeader.png);min-height:52px;width:100%;height:80px;background-repeat:no-repeat}#botHead>nav{float:right;padding-top:52px;margin-right:5px}#botHead>nav>span{color:#FFF;list-style:outside none none;font-size:1.2em;padding:8px 5px}#botHead>nav>span.selected{background:#FFF;color:#182B73}#botTemplates{display:none}#botBody{overflow:auto;margin:5px}.botTabs{width:calc(100% - 5px);padding-left:5px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-flow:row wrap;flex-flow:row wrap}.botTabs>div{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;-webkit-flex-grow:1;flex-grow:1;height:40px;margin-right:5px;margin-top:5px;min-width:120px;background:#182B73;color:#FFF;font-family:"Lucida Grande","Lucida Sans Unicode",sans-serif}.botTabs>div.selected{color:#000;background:#E7E7E7}#botTabs>div,#extTabs>div{position:relative;overflow-y:auto;background:#E7E7E7;padding:5px;height:calc(100% - 10px)}#botTabs,#extTabs{height:calc(100vh - 140px)}.tabContainer{width:calc(100% - 10px);margin-left:5px}.tabContainer>div{position:relative;display:none;width:calc(100% - 10px)}.tabContainer>div.visible{display:block;overflow:auto}span.descdet{margin-left:1em;max-width:calc(100% - 5em);display:inline-block}h3.descgen{margin-bottom:5px;width:calc(100% - 50px)}span.add{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:12px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}.ext,.msg{width:calc(33% - 18.33px);min-width:310px;margin-left:5px;margin-top:5px;border:3px solid #878787;float:left;background:#B0B0B0;padding:5px}.msg>input{width:calc(100% - 10px)}.msg>input[type=number]{width:5em}.msg:nth-child(odd){background:#fff}.ann{display:block;width:100%;margin-top:5px}.ann>input{width:33%;min-width:300px;margin-right:5px}.ext:nth-child(odd){background:#E6E6E6}.ext{height:105px;position:relative}.ext>h4{margin:0}.ext>button{position:absolute;bottom:3px;left:3px;margin:1px;width:calc(50% - 2px);border:1px solid #000}#aMsgs,#exts,#jMsgs,#lMsgs,#tMsgs{border-top:1px solid #000;margin-top:10px}#settingsTabsNav>div{background:#182B73;color:#FFF}#settingsTabsNav>div.selected{background:#FFF;color:#000}#settingsTabs{background:#FFF}#settingsTabs>div{height:calc(100vh - 220px);padding:10px}div[tab-name]{font-size:110%;font-weight:700}</style> <div id="botContainer" style="display:none"> <div id="botHead"> <nav tab-contents="botBody"> <span id="botNav2">CONSOLE</span> <span class="selected" tab-name="messages">MESSAGES</span> <span tab-name="extensions">EXTENSIONS</span> </nav> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <input class="m"> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <input class="m"> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Say:</label> <input class="m"> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button>Install</button> </div> </template> </div> <div class="tabContainer" id="botBody"> <div class="visible" id="mb_messages"> <nav class="botTabs" id="botMainNav" tab-contents="botTabs"> <div class="selected" tab-name="join">Join Messages</div> <div tab-name="leave">Leave Messages</div> <div tab-name="trigger">Trigger Messages</div> <div tab-name="announcements">Announcements</div> </nav> <div class="tabContainer" id="botTabs"> <div class="visible" id="mb_join"> <h3 class="descgen">These are checked when a player joins the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave"> <h3 class="descgen">These are checked when a player leaves the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger"> <h3 class="descgen">These are checked whenever someone says something.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements"> <h3 class="descgen">These are sent according to a regular schedule.</h3> <span class="descdet">If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X under the general settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> </div> </div> <div id="mb_extensions"> <nav class="botTabs" tab-contents="extTabs"> <div class="selected" tab-name="store">Store</div> <div tab-name="settings">Settings</div> </nav> <div class="tabContainer" id="extTabs"> <div class="visible" id="mb_store"> <h3 class="descgen">Extensions can improve the functionality of the bot.</h3> <span class="descdet">Interested in creating one? <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=306215#post306215" target="_blank">Click here.</a></span> <span id="mb_load_man" style="position:absolute;top:12px;right:12px;color:#fff;background:#182B73;padding:.5em">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings"> <nav class="botTabs" id="settingsTabsNav" tab-contents="settingsTabs"> <div class="selected" tab-name="general">General</div> </nav> <div class="tabContainer" id="settingsTabs"> <div class="visible" id="mb_general"> <h3>Settings</h3> <label for="mb_auto_show">Show bot on launch:</label> <input id="mb_auto_show" type="checkbox"><br> <label for="mb_ann_delay">Delay between announcements (minutes):</label> <input id="mb_ann_delay" type="number"><br> <label for="mb_regex_triggers">Parse triggers as RegEx (read the advanced use section <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=290924#post290924" target="_blank">here</a> first):</label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> </div> </div> </div> <div id="mb_filler"></div> </div> </div>';
+		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
 
-	extensionList: function extensionList(extensions) {
-		var exts = JSON.parse(extensions),
-		    tempHTML = '<ul style="margin-left:1.5em;">';
-		exts.forEach(function (ext) {
-			tempHTML += '<li>' + this.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
-		}.bind(this));
-		tempHTML += '</ul>';
+		bot.fixTemplates();
 
-		document.getElementById('mb_ext_list').innerHTML = exts.length > 0 ? tempHTML : '<p>No extensions installed</p>';
-	},
+		document.getElementById('botNav').addEventListener('click', bot.toggleBot, false);
+		document.getElementById('botNav2').addEventListener('click', bot.toggleBot, false);
 
-	toggleBot: function toggleBot(e) {
-		var el = document.getElementById('botContainer');
-		if (el.style.display !== 'none') {
-			el.style.display = 'none';
-		} else {
-			el.style.display = 'block';
+		document.querySelector('#botHead > nav').addEventListener('click', bot.changeTab, false);
+		var tabNavs = document.querySelectorAll('nav.botTabs');
+
+		var i;
+		for (i = 0; i < tabNavs.length; i++) {
+			tabNavs[i].addEventListener('click', bot.changeTab, false);
 		}
-		e.stopPropagation();
-	},
-
-	changeTab: function changeTab(e) {
-		if (e.target !== e.currentTarget) {
-			var i;
-			var tabs = e.currentTarget.children;
-			var tabContents = document.getElementById(e.currentTarget.getAttribute('tab-contents')).children;
-			for (i = 0; i < tabs.length; i++) {
-				tabs[i].removeAttribute('class');
-				tabContents[i].removeAttribute('class');
-			}
-			e.target.className = 'selected';
-			if (e.target.getAttribute('tab-name') !== null) {
-				document.getElementById('mb_' + e.target.getAttribute('tab-name')).className = 'visible';
-			}
+		var addMsgElems = document.querySelectorAll('span.add');
+		for (i = 0; i < addMsgElems.length; i++) {
+			addMsgElems[i].addEventListener('click', bot.addEmptyMsg.bind(bot), false);
 		}
-		e.stopPropagation();
-	},
+		document.getElementById('jMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
+		document.getElementById('lMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
+		document.getElementById('tMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
+		document.getElementById('aMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
 
-	addEmptyMsg: function addEmptyMsg(e) {
-		var containerElem = e.target.parentElement.querySelector('div');
-		var template;
-		if (containerElem.id == 'jMsgs' || containerElem.id == 'lMsgs') {
-			template = document.getElementById('jlTemplate');
-		} else if (containerElem.id == 'tMsgs') {
-			template = document.getElementById('tTemplate');
-		} else {
-			template = document.getElementById('aTemplate');
+		document.getElementById('exts').addEventListener('click', bot.extActions.bind(bot), false);
+		document.getElementById('mb_load_man').addEventListener('click', bot.manuallyAddExtension.bind(bot), false);
+
+		document.getElementById('mb_general').addEventListener('change', bot.savePrefs.bind(bot), false);
+
+		document.getElementById('mb_backup_save').addEventListener('click', bot.backup.bind(bot), false);
+		document.getElementById('mb_backup_load').addEventListener('click', bot.backup.bind(bot), false);
+
+		if (bot.preferences.showOnLaunch) {
+			bot.toggleBot({ stopPropagation: function stopPropagation() {} });
+			document.querySelector('#mb_auto_show').checked = 'checked';
 		}
-		this.addMsg(containerElem, template, {});
+		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
+		document.querySelector('#mb_regex_triggers').checked = bot.preferences.regexTriggers ? 'checked' : '';
+	})(bot);
 
-		e.stopPropagation();
-	},
-
-	deleteMsg: function deleteMsg(e) {
-		if (confirm("Really delete this message?")) {
-			e.target.parentElement.outerHTML = '';
-			this.saveConfig();
-		}
-
-		e.stopPropagation();
-	},
-
-	extActions: function extActions(e) {
-		var extId = e.target.parentElement.getAttribute('extension-id');
-		var button = document.querySelector('div[extension-id="' + extId + '"] > button');
-		extId = extId === null ? e.target.getAttribute('extension-id') : extId;
-		if (e.target.tagName == 'BUTTON') {
-			if (e.target.textContent == 'Install') {
-				this.addExtension(extId);
-				button.textContent = 'Remove';
-			} else {
-				this.removeExtension(extId);
-
-				window[extId] = undefined;
-			}
-		}
-	},
-
-	stripHTML: function stripHTML(html) {
-		return this.replaceAll(this.replaceAll(html, '<', '&lt;'), '>', '&gt;');
-	},
-
-	replaceAll: function replaceAll(string, find, replace) {
-		return string.replace(new RegExp(find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"), 'g'), replace);
-	},
-
-	loadConfig: function loadConfig() {
+	(function (bot) {
 		var str;
 		str = localStorage.getItem('joinArr' + window.worldId);
-		this.joinArr = str === null ? [] : JSON.parse(str);
+		bot.joinArr = str === null ? [] : JSON.parse(str);
 		str = localStorage.getItem('leaveArr' + window.worldId);
-		this.leaveArr = str === null ? [] : JSON.parse(str);
+		bot.leaveArr = str === null ? [] : JSON.parse(str);
 		str = localStorage.getItem('triggerArr' + window.worldId);
-		this.triggerArr = str === null ? [] : JSON.parse(str);
+		bot.triggerArr = str === null ? [] : JSON.parse(str);
 		str = localStorage.getItem('announcementArr' + window.worldId);
-		this.announcementArr = str === null ? [] : JSON.parse(str);
+		bot.announcementArr = str === null ? [] : JSON.parse(str);
+		str = localStorage.getItem('mb_extensions');
+		bot.extensions = str === null ? [] : JSON.parse(str);
 
-		this.joinArr.forEach(function (msg) {
-			this.addMsg(document.getElementById('jMsgs'), document.getElementById('jlTemplate'), msg);
-		}.bind(this));
-		this.leaveArr.forEach(function (msg) {
-			this.addMsg(document.getElementById('lMsgs'), document.getElementById('jlTemplate'), msg);
-		}.bind(this));
+		bot.extensions.forEach(function (ext) {
+			var el = document.createElement('script');
+			el.crossOrigin = true;
+			el.src = bot.extensionURL + ext;
+			document.head.appendChild(el);
+		});
+
+		bot.joinArr.forEach(function (msg) {
+			bot.addMsg(document.getElementById('jMsgs'), document.getElementById('jlTemplate'), msg);
+		});
+		bot.leaveArr.forEach(function (msg) {
+			bot.addMsg(document.getElementById('lMsgs'), document.getElementById('jlTemplate'), msg);
+		});
 		this.triggerArr.forEach(function (msg) {
-			this.addMsg(document.getElementById('tMsgs'), document.getElementById('tTemplate'), msg);
-		}.bind(this));
+			bot.addMsg(document.getElementById('tMsgs'), document.getElementById('tTemplate'), msg);
+		});
 		this.announcementArr.forEach(function (msg) {
-			this.addMsg(document.getElementById('aMsgs'), document.getElementById('aTemplate'), msg);
-		}.bind(this));
+			bot.addMsg(document.getElementById('aMsgs'), document.getElementById('aTemplate'), msg);
+		});
 
-		this.saveConfig();
-	},
+		bot.saveConfig();
+	})(bot);
 
-	utilSaveFunc: function utilSaveFunc(wrapper, saveTo) {
-		var wrappers = wrapper.children;
-		var selects,
-		    joinCounts,
-		    tmpMsgObj = {};
-		for (var i = 0; i < wrappers.length; i++) {
-			tmpMsgObj.message = wrappers[i].querySelector('.m').value;
-			if (wrapper.id != 'aMsgs') {
-				selects = wrappers[i].querySelectorAll('select');
-				joinCounts = wrappers[i].querySelectorAll('input[type="number"]');
-				tmpMsgObj.group = selects[0].value;
-				tmpMsgObj.not_group = selects[1].value;
-				tmpMsgObj.joins_low = joinCounts[0].value;
-				tmpMsgObj.joins_high = joinCounts[1].value;
-			}
-			if (wrapper.id == 'tMsgs') {
-				tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
-			}
-			saveTo.push(tmpMsgObj);
-			tmpMsgObj = {};
-		}
-	},
+	(function () {
+		var sc = document.createElement('script');
+		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=' + varName + '.initStore';
+		sc.crossOrigin = true;
+		document.head.appendChild(sc);
+	})();
 
-	addMsg: function addMsg(container, template, saveObj) {
-		var content = template.content;
-		content.querySelector('div').id = 'm' + this.uMID;
-		content.querySelector('.m').value = typeof saveObj.message == 'string' ? saveObj.message : '';
-		if (template.id != 'aTemplate') {
-			var numInputs = content.querySelectorAll('input[type="number"]');
-			numInputs[0].value = typeof saveObj.joins_low == 'string' ? saveObj.joins_low : 0;
-			numInputs[1].value = typeof saveObj.joins_high == 'string' ? saveObj.joins_high : 9999;
-			if (template.id == 'tTemplate') {
-				content.querySelector('.t').value = typeof saveObj.trigger == 'string' ? saveObj.trigger : '';
-			}
-		}
-		container.appendChild(document.importNode(content, true));
-
-		if (template.id != 'aTemplate') {
-			var selects = document.querySelectorAll('#m' + this.uMID + ' > select');
-
-			var grp = typeof saveObj.group == 'string' ? saveObj.group : 'All';
-			selects[0].value = grp == 'Mods' ? 'Mod' : grp;
-
-			selects[1].value = typeof saveObj.not_group == 'string' ? saveObj.not_group : 'Nobody';
-		}
-		document.querySelector('#m' + this.uMID + ' > a').addEventListener('click', this.deleteMsg.bind(this), false);
-
-		this.uMID++;
-	},
-
-	checkGroup: function checkGroup(group, name) {
-		if (group == 'All') {
-			return true;
-		}
-		if (group == 'Admin') {
-			return this.core.adminList.indexOf(name) !== -1;
-		}
-		if (group == 'Mod') {
-			return this.core.modList.indexOf(name) !== -1;
-		}
-		if (group == 'Staff') {
-			return this.core.staffList.indexOf(name) !== -1;
-		}
-		if (group == 'Owner') {
-			return this.core.ownerName == name;
-		}
-		return false;
-	},
-
-	checkJoins: function checkJoins(low, high, actual) {
-		return low <= actual && actual <= high;
-	},
-
-	fixTemplates: function fixTemplates() {
-		if (!('content' in document.createElement('template'))) {
-			var qPlates = document.getElementsByTagName('template'),
-			    plateLen = qPlates.length,
-			    elPlate,
-			    qContent,
-			    contentLen,
-			    docContent;
-
-			for (var x = 0; x < plateLen; ++x) {
-				elPlate = qPlates[x];
-				qContent = elPlate.childNodes;
-				contentLen = qContent.length;
-				docContent = document.createDocumentFragment();
-
-				while (qContent[0]) {
-					docContent.appendChild(qContent[0]);
-				}
-
-				elPlate.content = docContent;
-			}
-		}
-	},
-
-	onJoin: function onJoin(data) {
-		this.joinArr.forEach(function (msg) {
-			if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-				var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-				toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-				toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-				toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-				this.core.send(toSend);
-			}
-		}.bind(this));
-	},
-
-	onLeave: function onLeave(data) {
-		this.leaveArr.forEach(function (msg) {
-			if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-				var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-				toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-				toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-				toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-				this.core.send(toSend);
-			}
-		}.bind(this));
-	},
-
-	onTrigger: function onTrigger(data) {
-		function triggerMatch(trigger, message) {
-			if (this.preferences.regexTriggers) {
-				return new RegExp(trigger, 'i').test(message);
-			}
-			return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
-		}
-		this.triggerArr.forEach(function (msg) {
-			if (triggerMatch.call(this, msg.trigger, data.message) && this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-
-				var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-				toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-				toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-				toSend = this.replaceAll(toSend, '{{ip}}', this.core.getIP(data.name));
-				this.core.send(toSend);
-			}
-		}.bind(this));
-	},
-
-	announcementCheck: function announcementCheck(ind) {
-		var i = ind;
-		if (ind == this.announcementArr.length) {
-			i = 0;
-		}
-		if (_typeof(this.announcementArr[i]) == 'object') {
-			this.core.send(this.announcementArr[i].message);
-		}
-		setTimeout(this.announcementCheck.bind(this), this.preferences.announcementDelay * 60000, ++i);
-	},
-
-	addTab: function addTab(navID, contentID, tabName, tabText) {
-		if (document.querySelector('#' + navID + ' > div[tab-name="' + tabName + '"]') === null) {
-			var tabNav = document.createElement('div');
-			tabNav.setAttribute('tab-name', tabName);
-			tabNav.textContent = this.stripHTML(tabText);
-			document.getElementById(navID).appendChild(tabNav);
-
-			var tabContent = document.createElement('div');
-			tabContent.setAttribute('id', 'mb_' + tabName);
-			document.getElementById(contentID).appendChild(tabContent);
-
-			return tabContent;
-		}
-		return document.querySelector('#mb_' + tabName);
-	},
-
-	removeTab: function removeTab(tabName) {
-		if (document.querySelector('div[tab-name="' + tabName + '"]') !== null) {
-			document.querySelector('div[tab-name="' + tabName + '"]').outerHTML = '';
-			document.querySelector('#mb_' + tabName).outerHTML = '';
-			return true;
-		}
-		return false;
-	},
-
-	addSettingsTab: function addSettingsTab(tabName, tabText) {
-		return this.addTab('settingsTabsNav', 'settingsTabs', tabName, tabText);
-	},
-
-	addMainTab: function addMainTab(tabName, tabText) {
-		return this.addTab('botMainNav', 'botTabs', tabName, tabText);
-	}
-};
-
-function MessageBotExtension(namespace) {
-	this.id = namespace;
-	this.bot = window.bot;
-	this.core = this.bot.core;
-	this.mainTabs = {};
+	return bot;
 }
 
-MessageBotExtension.prototype = {
-	addSettingsTab: function addSettingsTab(tabText) {
+function MessageBotExtension(namespace) {
+	var extension = {
+		id: namespace,
+		bot: window.bot,
+		core: window.bot.core,
+		settingsTab: null,
+		mainTabs: {}
+	};
+
+	extension.addSettingsTab = function addSettingsTab(tabText) {
 		this.settingsTab = this.bot.addSettingsTab('settings_' + this.id, tabText);
-	},
+	};
 
-	addMainTab: function addMainTab(tabId, tabText) {
+	extension.addMainTab = function addMainTab(tabId, tabText) {
 		this.mainTabs[tabId] = this.bot.addMainTab('main_' + this.id + '_' + tabId, tabText);
-	},
+	};
 
-	autoLaunch: function autoLaunch() {
+	extension.autoLaunch = function autoLaunch() {
 		return this.bot.extensions.indexOf(this.id) > -1;
-	},
+	};
 
-	setAutoLaunch: function setAutoLaunch(shouldAutoload) {
+	extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
 		this.bot.setAutoLaunch(this.id, shouldAutoload);
-	},
+	};
 
-	addJoinListener: function addJoinListener(uniqueId, listener) {
+	extension.addJoinListener = function addJoinListener(uniqueId, listener) {
 		return this.core.addJoinListener(this.id + '_' + uniqueId, listener);
-	},
+	};
 
-	removeJoinListener: function removeJoinListener(uniqueId) {
+	extension.removeJoinListener = function removeJoinListener(uniqueId) {
 		this.core.removeJoinListener(this.id + '_' + uniqueId);
-	},
+	};
 
-	addLeaveListener: function addLeaveListener(uniqueId, listener) {
+	extension.addLeaveListener = function addLeaveListener(uniqueId, listener) {
 		return this.core.addLeaveListener(this.id + '_' + uniqueId, listener);
-	},
+	};
 
-	removeLeaveListener: function removeLeaveListener(uniqueId) {
+	extension.removeLeaveListener = function removeLeaveListener(uniqueId) {
 		this.core.removeLeaveListener(this.id + '_' + uniqueId);
-	},
+	};
 
-	addTriggerListener: function addTriggerListener(uniqueId, listener) {
+	extension.addTriggerListener = function addTriggerListener(uniqueId, listener) {
 		return this.core.addTriggerListener(this.id + '_' + uniqueId, listener);
-	},
+	};
 
-	removeTriggerListener: function removeTriggerListener(uniqueId) {
+	extension.removeTriggerListener = function removeTriggerListener(uniqueId) {
 		this.core.removeTriggerListener(this.id + '_' + uniqueId);
-	},
+	};
 
-	addServerListener: function addServerListener(uniqueId, listener) {
+	extension.addServerListener = function addServerListener(uniqueId, listener) {
 		return this.core.addServerListener(this.id + '_' + uniqueId, listener);
-	},
+	};
 
-	removeServerListener: function removeServerListener(uniqueId) {
+	extension.removeServerListener = function removeServerListener(uniqueId) {
 		this.core.removeServerListener(this.id + '_' + uniqueId);
-	},
+	};
 
-	addOtherListener: function addOtherListener(uniqueId, listener) {
+	extension.addOtherListener = function addOtherListener(uniqueId, listener) {
 		return this.core.addOtherListener(this.id + '_' + uniqueId, listener);
-	},
+	};
 
-	removeOtherListener: function removeOtherListener(uniqueId) {
+	extension.removeOtherListener = function removeOtherListener(uniqueId) {
 		this.core.removeOtherListener(this.id + '_' + uniqueId);
-	},
+	};
 
-	addBeforeSendListener: function addBeforeSendListener(uniqueId, listener) {
+	extension.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
 		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, listener);
-	},
+	};
 
-	removeBeforeSendListener: function removeBeforeSendListener(uniqueId) {
+	extension.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
 		this.core.removeBeforeSendListener(this.id + '_' + uniqueId);
+	};
+
+	return extension;
+}
+
+var bot;
+
+window.onerror = function () {
+	if (!bot.devMode) {
+		var report = this.core.worldName;
+		var report2 = JSON.stringify(arguments);
+		var sc = document.createElement('script');
+		sc.src = '//blockheadsfans.com/messagebot/error.php?log=' + encodeURIComponent(report) + '&log2=' + encodeURIComponent(report2);
+		document.head.appendChild(sc);
 	}
 };
 
-var bot = new MessageBot();
+bot = MessageBot();
 bot.start();
