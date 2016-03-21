@@ -177,9 +177,7 @@ function MessageBotCore() {
 	core.addMsgToPage = function addMsgToPage(msg) {
 		var elclass = '';
 		var chatEl = document.getElementById('chatBox');
-		if (chatEl.children.length > this.chatMsgMaxCount) {
-			chatEl.removeChild(chatEl.childNodes[0]);
-		}
+
 		var contEl = document.createElement('tr');
 		var msgEl = document.createElement('td');
 		contEl.appendChild(msgEl);
@@ -199,12 +197,16 @@ function MessageBotCore() {
 		} else {
 			msgEl.textContent = msg;
 		}
-		var chat = document.getElementById('chat');
+		var chat = document.querySelector('#chat > tbody');
 		var position = chatEl.scrollHeight - chatEl.scrollTop;
 		chat.appendChild(contEl);
 
 		if (position <= 310) {
 			chatEl.scrollTop = chatEl.scrollHeight;
+		}
+
+		if (chat.children.length > this.chatMsgMaxCount) {
+			chat.removeChild(chat.childNodes[0]);
 		}
 	};
 
