@@ -14,9 +14,14 @@ gulp.task('lint', function() {
 		.pipe(jshint.reporter('default'));
 });
 
-gulp.task('_min', function() {
+gulp.task('_min', ['lint'], function() {
 	return gulp.src('dev/page.html')
-		.pipe(htmlmin({collapseWhitespace: true, conservativeCollapse: true, quoteCharacter: '"', minifyCSS: true}))
+		.pipe(htmlmin({
+			collapseWhitespace: true, 
+			conservativeCollapse: true, 
+			quoteCharacter: '"', 
+			minifyCSS: true
+		}))
 		.pipe(rename('page.min.html'))
 		.pipe(gulp.dest('tmp'));
 });
