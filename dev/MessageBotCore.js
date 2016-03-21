@@ -238,7 +238,7 @@ function MessageBotCore() {
 			chatEl.scrollTop = chatEl.scrollHeight;
 		}
 		
-		if (chat.children.length > this.chatMsgMaxCount) {
+		while (chat.children.length > this.chatMsgMaxCount) {
 			chat.removeChild(chat.childNodes[0]);    
 		}
 			
