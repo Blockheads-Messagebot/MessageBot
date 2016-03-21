@@ -6,7 +6,7 @@
 	ajaxJson
 */
 
-function MessageBotCore(varName) {
+function MessageBotCore() {
 	//Avoid trying to launch the bot on a non-console page.
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
@@ -16,8 +16,8 @@ function MessageBotCore(varName) {
 	document.styleSheets[0].insertRule('.admin > span:first-child { color: #0007CF}', 0);
 	document.styleSheets[0].insertRule('.mod > span:first-child { color: #08C738}', 0);
 	//We are replacing these with our own functions.
-	document.getElementById('messageButton').setAttribute('onclick', 'return ' + varName + '.core.userSend(bot.core);');
-	document.getElementById('messageText').setAttribute('onkeydown', varName + '.core.enterCheck(event, bot.core)');
+	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
+	document.getElementById('messageText').setAttribute('onkeydown',  'bot.core.enterCheck(event, bot.core)');
 	
 	//Only needs to be run once, thus no need to keep a reference, fixes setTimeout on IE 9
 	(function() {

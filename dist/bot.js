@@ -9,15 +9,15 @@ if (document.querySelector('script[crossorigin="true"]') === null) {
 
 window.pollChat = function () {};
 
-function MessageBotCore(varName) {
+function MessageBotCore() {
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
 	}
 
 	document.styleSheets[0].insertRule('.admin > span:first-child { color: #0007CF}', 0);
 	document.styleSheets[0].insertRule('.mod > span:first-child { color: #08C738}', 0);
-	document.getElementById('messageButton').setAttribute('onclick', 'return ' + varName + '.core.userSend(bot.core);');
-	document.getElementById('messageText').setAttribute('onkeydown', varName + '.core.enterCheck(event, bot.core)');
+	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
+	document.getElementById('messageText').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
 
 	(function () {
 		if (document.all && !window.setTimeout.isPolyfill) {
@@ -453,10 +453,10 @@ function MessageBotCore(varName) {
 	return core;
 }
 
-function MessageBot(varName) {
+function MessageBot() {
 	var bot = {
 		devMode: false,
-		core: MessageBotCore(varName),
+		core: MessageBotCore(),
 		uMID: 0,
 		version: '5.0',
 		extensions: [],
@@ -986,7 +986,7 @@ function MessageBot(varName) {
 
 	(function () {
 		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=' + varName + '.initStore';
+		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
 		sc.crossOrigin = true;
 		document.head.appendChild(sc);
 	})();
@@ -1074,7 +1074,7 @@ var bot;
 
 window.onerror = function () {
 	if (!bot.devMode) {
-		var report = this.core.worldName;
+		var report = bot.core.worldName;
 		var report2 = JSON.stringify(arguments);
 		var sc = document.createElement('script');
 		sc.src = '//blockheadsfans.com/messagebot/error.php?log=' + encodeURIComponent(report) + '&log2=' + encodeURIComponent(report2);

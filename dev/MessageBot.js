@@ -10,10 +10,10 @@
 	MessageBotCore
 */
 
-function MessageBot(varName) {
+function MessageBot() {
 	var bot = {
 		devMode: false,
-		core: MessageBotCore(varName),
+		core: MessageBotCore(),
 		uMID: 0,
 		version: '5.0',
 		extensions: [],
@@ -743,7 +743,7 @@ function MessageBot(varName) {
 	//Load the store... 
 	(function () {
 		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=' + varName + '.initStore';
+		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
 		sc.crossOrigin = true;
 		document.head.appendChild(sc);
 	})();
