@@ -236,7 +236,7 @@ function MessageBotCore() {
 		chat.appendChild(contEl);
 		
 		if (position <= 310) {
-			chatEl.scrollTop = .scrollHeight;
+			chatEl.scrollTop = chatEl.scrollHeight;
 		}
 			
 	};
