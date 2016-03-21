@@ -46,7 +46,7 @@ function MessageBotCore() {
 		serverFuncs: {},
 		otherFuncs: {},
 		sendChecks: {},
-		adminList: ['SERVER'],
+		adminList: [],
 		modList: [],
 		staffList: [],
 		toSend: [],
@@ -90,6 +90,7 @@ function MessageBotCore() {
 			var doc = new DOMParser().parseFromString(xhr.responseText, 'text/html');
 			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
 			core.adminList.push(core.ownerName);
+			core.adminList.push('SERVER');
 			core.adminList.forEach(function (admin, index) {
 				core.adminList[index] = admin.toUpperCase();
 			});
