@@ -3,6 +3,14 @@
 */
 
 function MessageBotExtension(namespace) {
+	//Handle old extensions which won't work.
+	if (this instanceof MessageBotExtension) {
+		alert('Sorry, ' + namespace + ' is using an older version of the API which is no longer supported. \n\nPlease contact the developer of the extension for support.');
+		window.bot.removeExtension(namespace);
+		throw new Error('Outdated extension, ID:' + namespace, 0, 0);
+	}
+	
+	
 	var extension = {
 		id: namespace, 
 		bot: window.bot, 

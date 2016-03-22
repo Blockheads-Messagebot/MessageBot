@@ -50,12 +50,344 @@ function MessageBotCore() {
 		modList: [],
 		staffList: [],
 		toSend: [],
-		chatMsgMaxCount: 999
+		chatMsgMaxCount: 500
 	};
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
 	core.ownerName = document.getElementById('nav_profile').textContent;
 	core.chatId = window.chatId;
+
+	{
+		core.send = function send(message) {
+			core.toSend.push(message);
+		};
+
+		core.userSend = function userSend(core) {
+			var button = document.getElementById('messageButton');
+			var message = document.getElementById('messageText');
+			var tmpMsg = message.value;
+
+			Object.keys(core.sendChecks).forEach(function (key) {
+				if (tmpMsg) {
+					tmpMsg = core.sendChecks[key](tmpMsg);
+				}
+			});
+
+			if (tmpMsg) {
+				button.setAttribute('disabled', '1');
+				message.setAttribute('disabled', '1');
+				button.textContent = 'SENDING';
+				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, function (data) {
+					if (data.status == 'ok') {
+						message.value = '';
+						button.textContent = 'SEND';
+					} else {
+						button.textContent = 'RETRY';
+					}
+
+					button.removeAttribute('disabled');
+					message.removeAttribute('disabled');
+					message.focus();
+				}, window.apiURL);
+				if (tmpMsg.indexOf('/') === 0) {
+					core.addMsgToPage({ name: 'SERVER', message: tmpMsg });
+				}
+			} else {
+				button.textContent = 'CANCELED';
+			}
+		};
+
+		core.enterCheck = function enterCheck(e, t) {
+			if (e.keyCode == 13) {
+				if (e.preventDefault) {
+					e.preventDefault();
+				} else {
+					e.returnValue = false;
+				}
+				t.userSend(t);
+			}
+		};
+	}
+
+	{
+		core.pollChat = function pollChat(core) {
+			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
+				if (data.status == 'ok' && data.nextId != core.chatId) {
+					data.log.forEach(function (m) {
+						core.parseMessage(m);
+					});
+				} else if (data.status == 'error') {
+					core._shouldListen = false;
+					setTimeout(core.checkOnline, core.checkOnlineWait, core);
+				}
+				if (core._shouldListen) {
+					setTimeout(core.pollChat, 5000, core);
+				} else {
+					core.listening = false;
+				}
+				core.chatId = data.nextId;
+			}, window.apiURL);
+		};
+
+		core.checkOnline = function checkOnline(core) {
+			ajaxJson({ command: 'status', worldId: window.worldId }, function (data) {
+				if (data.worldStatus == 'online') {
+					core.startListening();
+				} else {
+					setTimeout(core.checkOnline, core.checkOnlineWait, core);
+				}
+			}, window.apiURL);
+		};
+
+		core.parseMessage = function parseMessage(message) {
+			function getUserName(message, core) {
+				for (var i = 18; i > 4; i--) {
+					var possibleName = message.substring(0, message.lastIndexOf(': ', i));
+					if (core.online.indexOf(possibleName) >= 0) {
+						return { name: possibleName, safe: true };
+					}
+				}
+				return { name: message.substring(0, message.lastIndexOf(': ', 18)), safe: false };
+			}
+			function rebuildStaffList(core) {
+				core.staffList = core.adminList.concat(core.modList);
+			}
+
+			var name, ip;
+			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
+				this.addMsgToPage(message);
+
+				name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
+				ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
+
+				if (this.players.hasOwnProperty(name)) {
+					this.players[name].joins++;
+				} else {
+					this.players[name] = {};
+					this.players[name].joins = 1;
+					this.players[name].ips = [];
+				}
+				this.players[name].ip = ip;
+				this.online.push(name);
+
+				Object.keys(this.joinFuncs).forEach(function (key) {
+					this.joinFuncs[key]({ name: name, ip: ip });
+				}.bind(this));
+			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
+				this.addMsgToPage(message);
+
+				name = message.substring(this.worldName.length + 23);
+				ip = this.getIP(name);
+				var playerIn = this.online.indexOf(name);
+				if (playerIn > -1) {
+					this.online.splice(name, 1);
+				}
+
+				Object.keys(this.leaveFuncs).forEach(function (key) {
+					this.leaveFuncs[key]({ name: name, ip: ip });
+				}.bind(this));
+			} else if (message.indexOf(': ') >= 0) {
+				var messageData = getUserName(message, this);
+				messageData.message = message.substring(messageData.name.length + 2);
+				this.addMsgToPage(messageData);
+
+				if (this.adminList.indexOf(messageData.name) != -1) {
+					var targetName;
+					switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
+						case '/ADMIN':
+							targetName = messageData.message.toLocaleUpperCase().substring(7);
+							if (this.adminList.indexOf(targetName) < 0) {
+								this.adminList.push(targetName);
+								rebuildStaffList(this);
+							}
+							break;
+						case '/UNADMIN':
+							targetName = messageData.message.toLocaleUpperCase().substring(10);
+							if (this.adminList.indexOf(targetName) != -1) {
+								this.modList.splice(this.adminList.indexOf(targetName), 1);
+								rebuildStaffList(this);
+							}
+							break;
+						case '/MOD':
+							targetName = messageData.message.toLocaleUpperCase().substring(5);
+							if (this.modList.indexOf(targetName) < 0) {
+								this.modList.push(targetName);
+								rebuildStaffList(this);
+							}
+							break;
+						case '/UNMOD':
+							targetName = messageData.message.toLocaleUpperCase().substring(7);
+							if (this.modList.indexOf(targetName) != -1) {
+								this.modList.splice(this.modList.indexOf(targetName), 1);
+								rebuildStaffList(this);
+							}
+					}
+				}
+
+				if (messageData.name == 'SERVER') {
+					Object.keys(this.serverFuncs).forEach(function (key) {
+						this.serverFuncs[key](messageData);
+					}.bind(this));
+				} else {
+					Object.keys(this.triggerFuncs).forEach(function (key) {
+						this.triggerFuncs[key](messageData);
+					}.bind(this));
+				}
+			} else {
+				this.addMsgToPage(message);
+				Object.keys(this.otherFuncs).forEach(function (key) {
+					this.otherFuncs[key](message);
+				}.bind(this));
+			}
+		};
+	}
+
+	{
+		core.addMsgToPage = function addMsgToPage(msg) {
+			var elclass = '';
+			var chatEl = document.getElementById('chatBox');
+
+			var contEl = document.createElement('tr');
+			var msgEl = document.createElement('td');
+			contEl.appendChild(msgEl);
+
+			if ((typeof msg === 'undefined' ? 'undefined' : _typeof(msg)) == 'object') {
+				if (this.staffList.indexOf(msg.name) > -1) {
+					elclass = this.adminList.indexOf(msg.name) > -1 ? 'admin' : 'mod';
+					msgEl.setAttribute('class', elclass);
+				}
+				var nameEl = document.createElement('span');
+				nameEl.textContent = msg.name;
+				msgEl.appendChild(nameEl);
+
+				var msgElIn = document.createElement('span');
+				msgElIn.textContent = ': ' + msg.message;
+				msgEl.appendChild(msgElIn);
+			} else {
+				msgEl.textContent = msg;
+			}
+			var chat = document.querySelector('#chat > tbody');
+			var position = chatEl.scrollHeight - chatEl.scrollTop;
+			chat.appendChild(contEl);
+
+			if (position <= 310) {
+				chatEl.scrollTop = chatEl.scrollHeight;
+			}
+
+			while (chat.children.length > this.chatMsgMaxCount) {
+				chat.removeChild(chat.childNodes[0]);
+			}
+		};
+	}
+
+	{
+		core.getIP = function getIP(name) {
+			if (this.players.hasOwnProperty(name)) {
+				return this.players[name].ip;
+			}
+			return false;
+		};
+
+		core.getJoins = function getJoins(name) {
+			if (this.players.hasOwnProperty(name)) {
+				return this.players[name].joins;
+			}
+			return false;
+		};
+	}
+
+	{
+		core.startListening = function startListening() {
+			this.chatId = window.chatId;
+			this.pollChat(this);
+			this.listening = true;
+			this._shouldListen = true;
+		};
+
+		core.stopListening = function stopListening() {
+			this._shouldListen = false;
+		};
+	}
+
+	{
+		core.addJoinListener = function addJoinListener(uniqueId, listener) {
+			if (!this.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				this.joinFuncs[uniqueId] = listener;
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		core.removeJoinListener = function removeJoinListener(uniqueId) {
+			delete this.joinFuncs[uniqueId];
+		};
+
+		core.addLeaveListener = function addLeaveListener(uniqueId, listener) {
+			if (!this.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				this.leaveFuncs[uniqueId] = listener;
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		core.removeLeaveListener = function removeLeaveListener(uniqueId) {
+			delete this.leaveFuncs[uniqueId];
+		};
+
+		core.addTriggerListener = function addTriggerListener(uniqueId, listener) {
+			if (!this.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				this.triggerFuncs[uniqueId] = listener;
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		core.removeTriggerListener = function removeTriggerListener(uniqueId) {
+			delete this.joinFuncs[uniqueId];
+		};
+
+		core.addServerListener = function addServerListener(uniqueId, listener) {
+			if (!this.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				this.serverFuncs[uniqueId] = listener;
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		core.removeServerListener = function removeServerListener(uniqueId) {
+			delete this.serverFuncs[uniqueId];
+		};
+
+		core.addOtherListener = function addOtherListener(uniqueId, listener) {
+			if (!this.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				this.otherFuncs[uniqueId] = listener;
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		core.removeOtherListener = function removeOtherListener(uniqueId) {
+			delete this.otherFuncs[uniqueId];
+		};
+
+		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
+			if (!this.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				this.sendChecks[uniqueId] = listener;
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		core.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
+			delete this.sendChecks[uniqueId];
+		};
+	}
 
 	(function (core) {
 		var xhr = new XMLHttpRequest();
@@ -123,326 +455,6 @@ function MessageBotCore() {
 		xhr.open('GET', 'http://portal.theblockheads.net/worlds/' + window.worldId, true);
 		xhr.send();
 	})(core);
-
-	core.send = function send(message) {
-		core.toSend.push(message);
-	};
-
-	core.userSend = function userSend(core) {
-		var button = document.getElementById('messageButton');
-		var message = document.getElementById('messageText');
-		var tmpMsg = message.value;
-
-		Object.keys(core.sendChecks).forEach(function (key) {
-			if (tmpMsg) {
-				tmpMsg = core.sendChecks[key](tmpMsg);
-			}
-		});
-
-		if (tmpMsg) {
-			button.setAttribute('disabled', '1');
-			message.setAttribute('disabled', '1');
-			button.textContent = 'SENDING';
-			ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, function (data) {
-				if (data.status == 'ok') {
-					message.value = '';
-					button.textContent = 'SEND';
-				} else {
-					button.textContent = 'RETRY';
-				}
-
-				button.removeAttribute('disabled');
-				message.removeAttribute('disabled');
-				message.focus();
-			}, window.apiURL);
-			if (tmpMsg.indexOf('/') === 0) {
-				core.addMsgToPage({ name: 'SERVER', message: tmpMsg });
-			}
-		} else {
-			button.textContent = 'CANCELED';
-		}
-	};
-
-	core.enterCheck = function enterCheck(e, t) {
-		if (e.keyCode == 13) {
-			if (e.preventDefault) {
-				e.preventDefault();
-			} else {
-				e.returnValue = false;
-			}
-			t.userSend(t);
-		}
-	};
-
-	core.addMsgToPage = function addMsgToPage(msg) {
-		var elclass = '';
-		var chatEl = document.getElementById('chatBox');
-
-		var contEl = document.createElement('tr');
-		var msgEl = document.createElement('td');
-		contEl.appendChild(msgEl);
-
-		if ((typeof msg === 'undefined' ? 'undefined' : _typeof(msg)) == 'object') {
-			if (this.staffList.indexOf(msg.name) > -1) {
-				elclass = this.adminList.indexOf(msg.name) > -1 ? 'admin' : 'mod';
-				msgEl.setAttribute('class', elclass);
-			}
-			var nameEl = document.createElement('span');
-			nameEl.textContent = msg.name;
-			msgEl.appendChild(nameEl);
-
-			var msgElIn = document.createElement('span');
-			msgElIn.textContent = ': ' + msg.message;
-			msgEl.appendChild(msgElIn);
-		} else {
-			msgEl.textContent = msg;
-		}
-		var chat = document.querySelector('#chat > tbody');
-		var position = chatEl.scrollHeight - chatEl.scrollTop;
-		chat.appendChild(contEl);
-
-		if (position <= 310) {
-			chatEl.scrollTop = chatEl.scrollHeight;
-		}
-
-		while (chat.children.length > this.chatMsgMaxCount) {
-			chat.removeChild(chat.childNodes[0]);
-		}
-	};
-
-	core.getIP = function getIP(name) {
-		if (this.players.hasOwnProperty(name)) {
-			return this.players[name].ip;
-		}
-		return false;
-	};
-
-	core.getJoins = function getJoins(name) {
-		if (this.players.hasOwnProperty(name)) {
-			return this.players[name].joins;
-		}
-		return false;
-	};
-
-	core.startListening = function startListening() {
-		this.chatId = window.chatId;
-		this.pollChat(this);
-		this.listening = true;
-		this._shouldListen = true;
-	};
-
-	core.stopListening = function stopListening() {
-		this._shouldListen = false;
-	};
-
-	core.addJoinListener = function addJoinListener(uniqueId, listener) {
-		if (!this.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-			this.joinFuncs[uniqueId] = listener;
-			return true;
-		} else {
-			return false;
-		}
-	};
-
-	core.removeJoinListener = function removeJoinListener(uniqueId) {
-		delete this.joinFuncs[uniqueId];
-	};
-
-	core.addLeaveListener = function addLeaveListener(uniqueId, listener) {
-		if (!this.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-			this.leaveFuncs[uniqueId] = listener;
-			return true;
-		} else {
-			return false;
-		}
-	};
-
-	core.removeLeaveListener = function removeLeaveListener(uniqueId) {
-		delete this.leaveFuncs[uniqueId];
-	};
-
-	core.addTriggerListener = function addTriggerListener(uniqueId, listener) {
-		if (!this.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-			this.triggerFuncs[uniqueId] = listener;
-			return true;
-		} else {
-			return false;
-		}
-	};
-
-	core.removeTriggerListener = function removeTriggerListener(uniqueId) {
-		delete this.joinFuncs[uniqueId];
-	};
-
-	core.addServerListener = function addServerListener(uniqueId, listener) {
-		if (!this.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-			this.serverFuncs[uniqueId] = listener;
-			return true;
-		} else {
-			return false;
-		}
-	};
-
-	core.removeServerListener = function removeServerListener(uniqueId) {
-		delete this.serverFuncs[uniqueId];
-	};
-
-	core.addOtherListener = function addOtherListener(uniqueId, listener) {
-		if (!this.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-			this.otherFuncs[uniqueId] = listener;
-			return true;
-		} else {
-			return false;
-		}
-	};
-
-	core.removeOtherListener = function removeOtherListener(uniqueId) {
-		delete this.otherFuncs[uniqueId];
-	};
-
-	core.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
-		if (!this.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
-			this.sendChecks[uniqueId] = listener;
-			return true;
-		} else {
-			return false;
-		}
-	};
-
-	core.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
-		delete this.sendChecks[uniqueId];
-	};
-
-	core.pollChat = function pollChat(core) {
-		ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
-			if (data.status == 'ok' && data.nextId != core.chatId) {
-				data.log.forEach(function (m) {
-					core.parseMessage(m);
-				});
-			} else if (data.status == 'error') {
-				core._shouldListen = false;
-				setTimeout(core.checkOnline, core.checkOnlineWait, core);
-			}
-			if (core._shouldListen) {
-				setTimeout(core.pollChat, 5000, core);
-			} else {
-				core.listening = false;
-			}
-			core.chatId = data.nextId;
-		}, window.apiURL);
-	};
-
-	core.checkOnline = function checkOnline(core) {
-		ajaxJson({ command: 'status', worldId: window.worldId }, function (data) {
-			if (data.worldStatus == 'online') {
-				core.startListening();
-			} else {
-				setTimeout(core.checkOnline, core.checkOnlineWait, core);
-			}
-		}, window.apiURL);
-	};
-
-	core.parseMessage = function parseMessage(message) {
-		function getUserName(message, core) {
-			for (var i = 18; i > 4; i--) {
-				var possibleName = message.substring(0, message.lastIndexOf(': ', i));
-				if (core.online.indexOf(possibleName) >= 0) {
-					return { name: possibleName, safe: true };
-				}
-			}
-			return { name: message.substring(0, message.lastIndexOf(': ', 18)), safe: false };
-		}
-		function rebuildStaffList(core) {
-			core.staffList = core.adminList.concat(core.modList);
-		}
-
-		var name, ip;
-		if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
-			this.addMsgToPage(message);
-
-			name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
-			ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
-
-			if (this.players.hasOwnProperty(name)) {
-				this.players[name].joins++;
-			} else {
-				this.players[name] = {};
-				this.players[name].joins = 1;
-				this.players[name].ips = [];
-			}
-			this.players[name].ip = ip;
-			this.online.push(name);
-
-			Object.keys(this.joinFuncs).forEach(function (key) {
-				this.joinFuncs[key]({ name: name, ip: ip });
-			}.bind(this));
-		} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
-			this.addMsgToPage(message);
-
-			name = message.substring(this.worldName.length + 23);
-			ip = this.getIP(name);
-			var playerIn = this.online.indexOf(name);
-			if (playerIn > -1) {
-				this.online.splice(name, 1);
-			}
-
-			Object.keys(this.leaveFuncs).forEach(function (key) {
-				this.leaveFuncs[key]({ name: name, ip: ip });
-			}.bind(this));
-		} else if (message.indexOf(': ') >= 0) {
-			var messageData = getUserName(message, this);
-			messageData.message = message.substring(messageData.name.length + 2);
-			this.addMsgToPage(messageData);
-
-			if (this.adminList.indexOf(messageData.name) != -1) {
-				var targetName;
-				switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
-					case '/ADMIN':
-						targetName = messageData.message.toLocaleUpperCase().substring(7);
-						if (this.adminList.indexOf(targetName) < 0) {
-							this.adminList.push(targetName);
-							rebuildStaffList(this);
-						}
-						break;
-					case '/UNADMIN':
-						targetName = messageData.message.toLocaleUpperCase().substring(10);
-						if (this.adminList.indexOf(targetName) != -1) {
-							this.modList.splice(this.adminList.indexOf(targetName), 1);
-							rebuildStaffList(this);
-						}
-						break;
-					case '/MOD':
-						targetName = messageData.message.toLocaleUpperCase().substring(5);
-						if (this.modList.indexOf(targetName) < 0) {
-							this.modList.push(targetName);
-							rebuildStaffList(this);
-						}
-						break;
-					case '/UNMOD':
-						targetName = messageData.message.toLocaleUpperCase().substring(7);
-						if (this.modList.indexOf(targetName) != -1) {
-							this.modList.splice(this.modList.indexOf(targetName), 1);
-							rebuildStaffList(this);
-						}
-				}
-			}
-
-			if (messageData.name == 'SERVER') {
-				Object.keys(this.serverFuncs).forEach(function (key) {
-					this.serverFuncs[key](messageData);
-				}.bind(this));
-			} else {
-				Object.keys(this.triggerFuncs).forEach(function (key) {
-					this.triggerFuncs[key](messageData);
-				}.bind(this));
-			}
-		} else {
-			this.addMsgToPage(message);
-			Object.keys(this.otherFuncs).forEach(function (key) {
-				this.otherFuncs[key](message);
-			}.bind(this));
-		}
-	};
 
 	core.postMessageReference = setInterval(function postMessage() {
 		if (this.toSend.length > 0) {
@@ -1003,6 +1015,12 @@ function MessageBot() {
 }
 
 function MessageBotExtension(namespace) {
+	if (this instanceof MessageBotExtension) {
+		alert('Sorry, ' + namespace + ' is using an older version of the API which is no longer supported. \n\nPlease contact the developer of the extension for support.');
+		window.bot.removeExtension(namespace);
+		throw new Error('Outdated extension, ID:' + namespace, 0, 0);
+	}
+
 	var extension = {
 		id: namespace,
 		bot: window.bot,
