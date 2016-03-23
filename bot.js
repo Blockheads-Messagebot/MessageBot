@@ -811,6 +811,7 @@ MessageBot.prototype = {
 		}
 		
 		if (code !== null) {
+			localStorage.clear();
 			Object.keys(code).forEach((function (key) {
 				localStorage.setItem(key, code[key]);
 			}).bind(this));
