@@ -15,7 +15,7 @@ function MessageBot() {
 		devMode: false,
 		core: MessageBotCore(),
 		uMID: 0,
-		version: '5.0',
+		version: '5.1.0',
 		extensions: [],
 		preferences: {},
 		extensionURL: '//blockheadsfans.com/messagebot/extension.php?id='
@@ -641,6 +641,38 @@ function MessageBot() {
 		 */
 		bot.checkJoins = function checkJoins(low, high, actual) {
 			return low <= actual && actual <= high;
+		};
+		
+		/**
+		 * Can be used to check if an extension is compatable as API changes are only made on minor versions
+		 * Accepts a version string like 5.1.* or >5.1.0 or <5.1.0
+		 *
+		 * @param string target the target version pattern
+		 * @return bool
+		 */
+		bot.versionCheck = function versionCheck(target) {
+			var vArr = this.version.split('.');
+			var tArr = target.replace(/[^0-9.*]/g, '').split('.');
+			if (/^[0-9.*]+$/.test(target)) {
+				return tArr.every(function(el, i) {
+					return (el == vArr[i] || el == '*');
+				});
+			} else if (/^>[0-9.]+$/.test(target)) {
+				for (let i = 0; i < tArr.length; i++) {
+					if (Number(vArr[i]) > Number(tArr[i])) {
+						return true;
+					}
+				}
+				return false;
+			} else if (/^<[0-9.]+$/.test(target)) {
+				for (let i = 0; i < tArr.length; i++) {
+					if (Number(vArr[i]) > Number(tArr[i])) {
+						return true;
+					}
+				}
+				return false;
+			}
+			return false;
 		};
 	}
 	

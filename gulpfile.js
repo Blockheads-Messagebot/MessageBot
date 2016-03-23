@@ -55,4 +55,6 @@ gulp.task('watch', function() {
 
 gulp.task('all', ['lint', 'scripts', 'clean']);
 
-gulp.task('default', ['all', 'watch']);
+gulp.task('default', ['all', 'watch'], function() {
+	console.log('Done!');
+});

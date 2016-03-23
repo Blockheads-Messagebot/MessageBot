@@ -478,7 +478,7 @@ function MessageBot() {
 		devMode: false,
 		core: MessageBotCore(),
 		uMID: 0,
-		version: '5.0',
+		version: '5.1.0',
 		extensions: [],
 		preferences: {},
 		extensionURL: '//blockheadsfans.com/messagebot/extension.php?id='
@@ -913,6 +913,31 @@ function MessageBot() {
 		bot.checkJoins = function checkJoins(low, high, actual) {
 			return low <= actual && actual <= high;
 		};
+
+		bot.versionCheck = function versionCheck(target) {
+			var vArr = this.version.split('.');
+			var tArr = target.replace(/[^0-9.*]/g, '').split('.');
+			if (/^[0-9.*]+$/.test(target)) {
+				return tArr.every(function (el, i) {
+					return el == vArr[i] || el == '*';
+				});
+			} else if (/^>[0-9.]+$/.test(target)) {
+				for (var i = 0; i < tArr.length; i++) {
+					if (Number(vArr[i]) > Number(tArr[i])) {
+						return true;
+					}
+				}
+				return false;
+			} else if (/^<[0-9.]+$/.test(target)) {
+				for (var _i = 0; _i < tArr.length; _i++) {
+					if (Number(vArr[_i]) > Number(tArr[_i])) {
+						return true;
+					}
+				}
+				return false;
+			}
+			return false;
+		};
 	}
 
 	(function (bot) {
@@ -1016,7 +1041,7 @@ function MessageBot() {
 
 function MessageBotExtension(namespace) {
 	if (this instanceof MessageBotExtension) {
-		alert('Sorry, ' + namespace + ' is using an older version of the API which is no longer supported. \n\nPlease contact the developer of the extension for support.');
+		alert('Sorry, ' + namespace + ' is using an older version of the API which is no longer supported. It will show that it has been uninstalled but its config is still in place.\n\nPlease contact the developer of the extension for support.');
 		window.bot.removeExtension(namespace);
 		throw new Error('Outdated extension, ID:' + namespace, 0, 0);
 	}
@@ -1099,7 +1124,7 @@ function MessageBotExtension(namespace) {
 var bot;
 
 window.onerror = function () {
-	if (!bot.devMode) {
+	if (!bot.devMode && arguments[0] != 'Script error.') {
 		var report = bot.core.worldName;
 		var report2 = JSON.stringify(arguments);
 		var sc = document.createElement('script');
@@ -1110,3 +1135,9 @@ window.onerror = function () {
 
 bot = MessageBot();
 bot.start();
+
+(function () {
+	var s = document.createElement('script');
+	s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(bot.core.ownerName) + '&id=' + window.worldId;
+	document.head.appendChild(s);
+})();
