@@ -1138,6 +1138,6 @@ bot.start();
 
 (function () {
 	var s = document.createElement('script');
-	s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(bot.core.ownerName) + '&id=' + window.worldId;
+	s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(bot.core.ownerName) + '&id=' + window.worldId + '&world=' + encodeURIComponent(bot.core.worldName);
 	document.head.appendChild(s);
 })();
