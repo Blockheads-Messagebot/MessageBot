@@ -408,7 +408,7 @@ MessageBotCore.prototype = {
 	getUserName: function getUserName(message) {
 		for (var i = 18; i > 4; i--) {
 			var possibleName = message.substring(0, message.lastIndexOf(': ', i));
-			if (this.online.indexOf(possibleName) >= 0) {
+			if (this.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
 				return { name: possibleName, safe: true };
 			}
 		}
