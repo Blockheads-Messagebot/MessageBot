@@ -143,7 +143,7 @@ function MessageBotCore() {
 			function getUserName(message, core) {
 				for (var i = 18; i > 4; i--) {
 					var possibleName = message.substring(0, message.lastIndexOf(': ', i));
-					if (core.online.indexOf(possibleName) >= 0) {
+					if (core.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
 						return { name: possibleName, safe: true };
 					}
 				}
