@@ -692,7 +692,8 @@ function MessageBot() {
 		checkPref(bot, 'boolean', 'regexTriggers', false);
 		
 		//Write the page...
-		document.body.innerHTML += '{{inject ./tmppage.html}}';
+		document.head.innerHTML += '<style>{{inject ./tmpbot.css}}<style>';
+		document.body.innerHTML += '{{inject ./tmpbot.html}}';
 		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
 		
 		//Fix templates

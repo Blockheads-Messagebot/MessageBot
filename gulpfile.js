@@ -14,19 +14,31 @@ gulp.task('lint', function() {
 		.pipe(jshint.reporter('default'));
 });
 
-gulp.task('_min', ['lint'], function() {
-	return gulp.src('dev/page.html')
+gulp.task('_minhtml', function() {
+	return gulp.src('dev/bot.html')
 		.pipe(htmlmin({
 			collapseWhitespace: true, 
 			conservativeCollapse: true, 
 			quoteCharacter: '"', 
 			minifyCSS: true
 		}))
-		.pipe(rename('tmppage.html'))
+		.pipe(rename('tmpbot.html'))
 		.pipe(gulp.dest('dev'));
 });
 
-gulp.task('inject', ['_min'], function() {
+gulp.task('_mincss', function() {
+	return gulp.src('dev/bot.css')
+		.pipe(htmlmin({
+			collapseWhitespace: true,
+			conservativeCollapse: true,
+			quoteCharacter: '"',
+			minifyCSS: true
+		}))
+		.pipe(rename('tmpbot.css'))
+		.pipe(gulp.dest('dev'));
+})
+
+gulp.task('inject', ['_minhtml', '_mincss'], function() {
 	return gulp.src('dev/MessageBot.js')
 		.pipe(injectFile({
 			pattern: '{{inject <filename>}}'

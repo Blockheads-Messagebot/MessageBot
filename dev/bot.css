@@ -1,0 +1,230 @@
+a {
+	cursor: pointer;
+}
+
+#botContainer {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #fff;
+}
+
+#botHead {
+	background-color: #051465;
+	background-image: url(http://portal.theblockheads.net/static/images/portalHeader.png);
+	min-height: 52px;
+	width: 100%;
+	height: 80px;
+	background-repeat: no-repeat;
+}
+
+#botHead > nav {
+	float: right;
+	padding-top: 52px;
+	margin-right: 5px;
+}
+
+#botHead > nav > span {
+	color: #FFF;
+	list-style: outside none none;
+	font-size: 1.2em;
+	padding: 8px 5px;
+}
+
+#botHead > nav > span.selected {
+	background: #FFF;
+	color: #182B73;
+}
+
+#botTemplates {
+	display: none;
+}
+
+#botBody {
+	overflow: auto;
+	margin: 5px;
+}
+
+.botTabs {
+	width: calc(100% - 5px);
+	padding-left: 5px;
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+}
+
+.botTabs > div {
+	display: -webkit-flex;
+	display: flex;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+	-webkit-flex-grow: 1;
+	flex-grow: 1;
+	height: 40px;
+	margin-right: 5px;
+	margin-top: 5px;
+	min-width: 120px;
+	background: #182B73;
+	color: #FFF;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+}
+
+.botTabs > div.selected {
+	color: #000;
+	background: #E7E7E7;
+}
+
+#botTabs > div,
+#extTabs > div {
+	position: relative;
+	overflow-y: auto;
+	background: #E7E7E7;
+	padding: 5px;
+	height: calc(100% - 10px);
+}
+
+#botTabs,
+#extTabs {
+	height: calc(100vh - 140px);
+}
+
+.tabContainer {
+	width: calc(100% - 10px);
+	margin-left: 5px;
+}
+
+.tabContainer > div {
+	position: relative;
+	display: none;
+	width: calc(100% - 10px);
+}
+
+.tabContainer > div.visible {
+	display: block;
+	overflow: auto;
+}
+
+span.descdet {
+	margin-left: 1em;
+	max-width: calc(100% - 5em);
+	display: inline-block;
+}
+
+h3.descgen {
+	margin-bottom: 5px;
+	width: calc(100% - 50px);
+}
+
+span.add {
+	position: absolute;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+	top: 12px;
+	right: 12px;
+	width: 30px;
+	height: 30px;
+	background: #182B73;
+	border: 0;
+	color: #FFF;
+}
+
+.msg,
+.ext {
+	width: calc(33% - 18.3334px);
+	min-width: 310px;
+	margin-left: 5px;
+	margin-top: 5px;
+	border: 3px solid #878787;
+	float: left;
+	background: #B0B0B0;
+	padding: 5px;
+}
+
+.msg > input {
+	width: calc(100% - 10px);
+}
+
+.msg > input[type="number"] {
+	width: 5em;
+}
+
+.msg:nth-child(odd) {
+	background: #fff;
+}
+
+.ann {
+	display: block;
+	width: 100%;
+	margin-top: 5px;
+}
+
+.ann > input {
+	width: 33%;
+	min-width: 300px;
+	margin-right: 5px;
+}
+
+.ext:nth-child(odd) {
+	background: #E6E6E6;
+}
+
+.ext {
+	height: 105px;
+	position: relative;
+}
+
+.ext > h4 {
+	margin: 0;
+}
+
+.ext > button {
+	position: absolute;
+	bottom: 3px;
+	left: 3px;
+	margin: 1px;
+	width: calc(50% - 2px);
+	border: 1px solid #000;
+}
+
+#jMsgs,
+#lMsgs,
+#tMsgs,
+#aMsgs,
+#exts {
+	border-top: 1px solid #000;
+	margin-top: 10px;
+}
+
+#settingsTabsNav > div {
+	background: #182B73;
+	color: #FFF;
+}
+
+#settingsTabsNav > div.selected {
+	background: #FFF;
+	color: #000;
+}
+
+#settingsTabs {
+	background: #FFF;
+}
+
+#settingsTabs > div {
+	height: calc(100vh - 220px);
+	padding: 10px;
+}
+
+div[tab-name] {
+	font-size: 110%;
+	font-weight: 700;
+}
