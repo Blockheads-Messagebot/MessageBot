@@ -532,7 +532,7 @@ function MessageBot() {
 				return;
 			}
 
-			var code = prompt('Enter the backup code');
+			var code = prompt('Enter the backup code:');
 
 			try {
 				code = JSON.parse(code);
@@ -542,6 +542,7 @@ function MessageBot() {
 			}
 
 			if (code !== null) {
+				localStorage.clear();
 				Object.keys(code).forEach(function (key) {
 					localStorage.setItem(key, code[key]);
 				}.bind(this));
