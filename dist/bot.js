@@ -14,8 +14,7 @@ function MessageBotCore() {
 		alert('Please start a server and navigate to the console page before starting the bot.');
 	}
 
-	document.styleSheets[0].insertRule('.admin > span:first-child { color: #0007CF}', 0);
-	document.styleSheets[0].insertRule('.mod > span:first-child { color: #08C738}', 0);
+	document.head.innerHTML += '<style>.admin > span:first-child { color: #0007CF} .mod > span:first-child { color: #08C738}</style>';
 	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
 	document.getElementById('messageText').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
 
