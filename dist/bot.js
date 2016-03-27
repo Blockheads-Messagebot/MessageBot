@@ -1127,7 +1127,7 @@ var bot = {};
 window.onerror = function (text, file, line, column) {
 	if (!bot.devMode && text != 'Script error.') {
 		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version + '&wId=' + encodeURIComponent(window.worldId) + '&wName' + encodeURIComponent(bot.core.worldName) + '&text=' + encodeURIComponent(text) + '&file=' + encodeURIComponent(file) + '&line=' + line + '&col=' + (column || 0);
+		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version + '&wId=' + encodeURIComponent(window.worldId) + '&wName=' + encodeURIComponent(bot.core.worldName) + '&text=' + encodeURIComponent(text) + '&file=' + encodeURIComponent(file) + '&line=' + line + '&col=' + (column || 0);
 		document.head.appendChild(sc);
 	}
 };

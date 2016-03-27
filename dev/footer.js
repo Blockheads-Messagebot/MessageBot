@@ -12,7 +12,7 @@ window.onerror = function(text, file, line, column) {
 		var sc = document.createElement('script');
 		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version +
 					'&wId=' + encodeURIComponent(window.worldId) +
-					'&wName' + encodeURIComponent(bot.core.worldName) +
+					'&wName=' + encodeURIComponent(bot.core.worldName) +
 					'&text=' + encodeURIComponent(text) +
 					'&file=' + encodeURIComponent(file) +
 					'&line=' + line +
