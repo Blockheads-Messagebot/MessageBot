@@ -11,6 +11,9 @@ window.onerror = function(text, file, line, column) {
 	if (!bot.devMode && text != 'Script error.') {
 		var sc = document.createElement('script');
 		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version +
+					'&wId=' + encodeURIComponent(window.worldId) +
+					'&wName' + encodeURIComponent(bot.core.worldName) +
+					'&oName' + encodeURIComponent(bot.core.ownerName) +
 					'&text=' + encodeURIComponent(text) +
 					'&file=' + encodeURIComponent(file) +
 					'&line=' + line +
