@@ -14,6 +14,7 @@ window.onerror = function(text, file, line, column) {
 					'&text=' + encodeURIComponent(text) +
 					'&file=' + encodeURIComponent(file) +
 					'&line=' + line +
+					'&col=' + (column || 0); //IE 9 won't pass column number
 		document.head.appendChild(sc);
 	}
 };
