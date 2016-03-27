@@ -10,15 +10,15 @@ function MessageBotExtension(namespace) {
 		window.bot.removeExtension(namespace);
 		throw new Error('Outdated extension, ID:' + namespace, 0, 0);
 	}
-	
+
 	var extension = {
-		id: namespace, 
-		bot: window.bot, 
-		core: window.bot.core, 
+		id: namespace,
+		bot: window.bot,
+		core: window.bot.core,
 		settingsTab: null,
 		mainTabs: {}
 	};
-	
+
 	/**
 	 * Used to add a settings tab for this extension. After creation, use extension.settingsTab
 	 * to refer to the div which is owned by the extension.
@@ -29,7 +29,7 @@ function MessageBotExtension(namespace) {
 	extension.addSettingsTab = function addSettingsTab(tabText) {
 		this.settingsTab = this.bot.addSettingsTab('settings_' + this.id, tabText);
 	};
-	
+
 	/**
 	 * Used to add a tab next under the Messages tab.
 	 * Adds the tab to the extension.mainTabs object.
@@ -41,7 +41,7 @@ function MessageBotExtension(namespace) {
 	extension.addMainTab = function addMainTab(tabId, tabText) {
 		this.mainTabs[tabId] = this.bot.addMainTab('main_' + this.id + '_' + tabId, tabText);
 	};
-	
+
 	/**
 	 * Used to check if the this extension is set to automatically launch, can be used to create 'run once by default' extensions.
 	 *
@@ -52,10 +52,10 @@ function MessageBotExtension(namespace) {
 	};
 
 	/**
-	 * Used to change whether or not the extension will be 
+	 * Used to change whether or not the extension will be
 	 * Automatically loaded the next time the bot is launched.
-	 * 
-	 * @param boolean shouldAutoload 
+	 *
+	 * @param boolean shouldAutoload
 	 * @return void
 	 */
 	extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
@@ -64,7 +64,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to add a listener to for join messages
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @param function the function called whenever a join message arrives
 	 * @return boolean true on success, false otherwise
@@ -75,7 +75,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to remove listeners on join messages.
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener to remove
 	 * @return void
 	 */
@@ -85,7 +85,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to add a listener to for leave messages
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @param function the function called whenever a leave message arrives
 	 * @return boolean true on success, false otherwise
@@ -96,7 +96,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to remove listeners on leave messages.
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener to remove
 	 * @return void
 	 */
@@ -106,7 +106,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to add a listener to for trigger messages
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @param function the function called whenever a trigger message arrives
 	 * @return boolean true on success, false otherwise
@@ -117,7 +117,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to remove listeners on trigger messages.
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener to remove
 	 * @return void
 	 */
@@ -127,7 +127,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to add a listener to for server messages
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @param function the function called whenever a server message arrives
 	 * @return boolean true on success, false otherwise
@@ -138,7 +138,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to remove listeners on server messages.
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener to remove
 	 * @return void
 	 */
@@ -148,7 +148,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to add a listener to for other messages
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @param function the function called whenever an other message arrives
 	 * @return boolean true on success, false otherwise
@@ -159,7 +159,7 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to remove listeners on other messages.
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener to remove
 	 * @return void
 	 */
@@ -170,7 +170,7 @@ function MessageBotExtension(namespace) {
 	/**
 	 * Used to add a listener to the send function
 	 * which is called by every message before being sent.
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener
 	 * @param function the function called whenever a message is sent
 	 * @return boolean true on success, false otherwise
@@ -181,13 +181,13 @@ function MessageBotExtension(namespace) {
 
 	/**
 	 * Used to remove listeners on the send function
-	 * 
+	 *
 	 * @param string uniqueId the id of the listener to remove
 	 * @return void
 	 */
 	extension.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
 		this.core.removeBeforeSendListener(this.id + '_' + uniqueId);
 	};
-	
+
 	return extension;
 }

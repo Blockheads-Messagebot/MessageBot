@@ -8,4 +8,4 @@ if (document.querySelector('script[crossorigin="true"]') === null) {
 }
 
 //Overwrite the pollChat function to kill the default chat function
-window.pollChat = function() {}; 
+window.pollChat = function() {};

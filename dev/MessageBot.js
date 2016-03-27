@@ -1,16 +1,15 @@
-/*jshint 
-	esnext:		true, 
-	browser:	true, 
+/*jshint
+	esnext:		true,
+	browser:	true,
 	devel:		true,
-	unused:		true,
-	undef:		true,
-	-W098
+	unused:		strict,
+	undef:		true
 */
 /*global
 	MessageBotCore
 */
 
-function MessageBot() {
+function MessageBot() { //jshint ignore:line
 	var bot = {
 		devMode: false,
 		core: MessageBotCore(),
@@ -20,11 +19,11 @@ function MessageBot() {
 		preferences: {},
 		extensionURL: '//blockheadsfans.com/messagebot/extension.php?id='
 	};
-	
+
 	//Save functions
 	{
 		/**
-		 * Method used to save the bot's current config. 
+		 * Method used to save the bot's current config.
 		 * Automatically called whenever the config changes
 		 *
 		 * @return void
@@ -52,7 +51,7 @@ function MessageBot() {
 					tmpMsgObj = {};
 				}
 			}
-			
+
 			this.joinArr = [];
 			this.leaveArr = [];
 			this.triggerArr = [];
@@ -70,7 +69,7 @@ function MessageBot() {
 			localStorage.setItem('mb_version', this.version);
 		};
 
-		/** 
+		/**
 		 * Method used to back up and load backups
 		 */
 		bot.backup = function backup(event) {
@@ -103,30 +102,30 @@ function MessageBot() {
 		 * Function used to save the bot preferences to the browser.
 		 */
 		bot.savePrefs = function savePrefs() {
-		var prefs = {};
-		prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
-		prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
-		prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
-		this.preferences = prefs;
-		localStorage.setItem('mb_preferences', JSON.stringify(prefs));
-	};
+			var prefs = {};
+			prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
+			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
+			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
+			this.preferences = prefs;
+			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
+		};
 	}
-	
+
 	//Bot & UI control functions
 	{
-		/** 
+		/**
 		 * Method used to start the bot and add event listeners
 		 *
 		 * @return void
 		 */
 		bot.start = function start() {
-		this.core.addJoinListener('mb_join', this.onJoin.bind(this));
-		this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
-		this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
-		this.announcementCheck(0);
-		this.core.startListening();
-	};
-		
+			this.core.addJoinListener('mb_join', this.onJoin.bind(this));
+			this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
+			this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
+			this.announcementCheck(0);
+			this.core.startListening();
+		};
+
 		/**
 		 * Function to add a tab anywhere on the page
 		 *
@@ -167,9 +166,9 @@ function MessageBot() {
 			return false;
 		};
 
-		/** 
-		 * Adds a tab to the settings page, should not be directly called by extensions. 
-		 * 
+		/**
+		 * Adds a tab to the settings page, should not be directly called by extensions.
+		 *
 		 * @param string tabName the name of the tab.
 		 * @param string tabText the text to display on the tab.
 		 * @return mixed the node which holds the tab content or false on failure.
@@ -180,7 +179,7 @@ function MessageBot() {
 
 		/**
 		 * Adds a tab to the navigation, should not be directly called by extensions.
-		 * 
+		 *
 		 * @param string tabName the name of the tab.
 		 * @param string tabText the text to display on the tab.
 		 * @return mixed the node which holds the tab content or false on failure.
@@ -188,8 +187,8 @@ function MessageBot() {
 		bot.addMainTab = function addMainTab(tabName, tabText) {
 			return this.addTab('botMainNav', 'botTabs', tabName, tabText);
 		};
-		
-		/** 
+
+		/**
 		 * Function used to show/hide the bot
 		 * Should only be called by the user tapping
 		 * on a registered handler
@@ -206,9 +205,9 @@ function MessageBot() {
 			}
 			e.stopPropagation();
 		};
-		
+
 		/**
-		 * Event handler that should be attatched to the div 
+		 * Event handler that should be attatched to the div
 		 * holding the navigation for a tab set.
 		 *
 		 * @param eventArgs e
@@ -231,13 +230,13 @@ function MessageBot() {
 			e.stopPropagation();
 		};
 	}
-	
+
 	//Interaction functions
 	{
-		/** 
+		/**
 		 * Function used to add an empty message
 		 * Should only be called by the user tapping a + to add messages
-		 * 
+		 *
 		 * @param eventArgs e
 		 * @return void
 		 */
@@ -271,13 +270,13 @@ function MessageBot() {
 			e.stopPropagation();
 		};
 	}
-	
+
 	//Store & extension control functions
 	{
 		/**
 		 * Method used to add store items. Auto called by a request to the store.
-		 * 
-		 * @param object data 
+		 *
+		 * @param object data
 		 * @return void
 		 */
 		bot.initStore = function initStore(data) {
@@ -295,7 +294,7 @@ function MessageBot() {
 			} else {
 				document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
 			}
-			
+
 			var sc = document.createElement('script');
 			sc.crossOrigin = true;
 			sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
@@ -304,7 +303,7 @@ function MessageBot() {
 
 		/**
 		 * Method used to add an extension to the bot.
-		 * 
+		 *
 		 * @param string extensionId the ID of the extension to load
 		 * @return void
 		 */
@@ -314,9 +313,9 @@ function MessageBot() {
 			el.crossOrigin = true;
 			document.body.appendChild(el);
 		};
-		
-		/** 
-		 * Method used to add an extension manually, by ID or url. 
+
+		/**
+		 * Method used to add an extension manually, by ID or url.
 		 *
 		 * @return void
 		 */
@@ -332,7 +331,7 @@ function MessageBot() {
 				}
 			}
 		};
-		
+
 		/**
 		 * Tries to remove all traces of an extension
 		 * Calls the uninstall function of the extension if it exists
@@ -373,7 +372,7 @@ function MessageBot() {
 				}
 			}
 		};
-		
+
 		/**
 		 * Used to create and display a list of installed extensions that may not appear in the store.
 		 */
@@ -387,7 +386,7 @@ function MessageBot() {
 
 			document.getElementById('mb_ext_list').innerHTML = exts.length > 0 ? tempHTML : '<p>No extensions installed</p>';
 		};
-		
+
 		/**
 		 * Used to choose whether or not an extension will automatically launch the next time the bot loads.
 		 *
@@ -410,7 +409,7 @@ function MessageBot() {
 			}
 			this.saveConfig();
 		};
-		
+
 		/**
 		 * Function that handles installation / removal requests by the user
 		 *
@@ -434,13 +433,13 @@ function MessageBot() {
 			}
 		};
 	}
-	
+
 	//Core listeners
 	{
 		/**
 		 * Function called whenever someone joins the server.
 		 * Should only be called by the core.
-		 * 
+		 *
 		 * @param object data an object containing the name and ip of the player
 		 */
 		bot.onJoin = function onJoin(data) {
@@ -458,7 +457,7 @@ function MessageBot() {
 		/**
 		 * Function called whenever someone leaves the server.
 		 * Should only be called by the core.
-		 * 
+		 *
 		 * @param object data an object containing the name and ip of the player
 		 */
 		bot.onLeave = function onLeave(data) {
@@ -514,12 +513,12 @@ function MessageBot() {
 			setTimeout(this.announcementCheck.bind(this), this.preferences.announcementDelay * 60000, ++i);
 		};
 	}
-	
+
 	//Utility functions
 	{
 		/**
-		 * Utility function used to strip HTML tags. 
-		 * 
+		 * Utility function used to strip HTML tags.
+		 *
 		 * @param string html the string with html to strip
 		 * @return string
 		 */
@@ -527,7 +526,7 @@ function MessageBot() {
 			return this.replaceAll(this.replaceAll(html, '<', '&lt;'), '>', '&gt;');
 		};
 
-		/** 
+		/**
 		 * Utility function used to easily replace all occurances
 		 * of a string with a string in a string. Case sensitive.
 		 *
@@ -539,10 +538,10 @@ function MessageBot() {
 		bot.replaceAll = function replaceAll(string, find, replace) {
 			return string.replace(new RegExp(find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"), 'g'), replace);
 		};
-		
-		/** 
+
+		/**
 		 * Should be called every time a new <template> element is added to the page
-		 * 
+		 *
 		 * @return void
 		 */
 		bot.fixTemplates = function fixTemplates() {
@@ -568,10 +567,10 @@ function MessageBot() {
 				}
 			}
 		};
-		
-		/** 
-		 * Used to add messages, can be called by extensions. 
-		 * 
+
+		/**
+		 * Used to add messages, can be called by extensions.
+		 *
 		 * @param object container the div to add the message to - also determines the type
 		 * @param object template the template to use
 		 * @param object saveObj any values which should not be default.
@@ -605,11 +604,11 @@ function MessageBot() {
 
 			this.uMID++;
 		};
-		
+
 		/**
-		 * Function used to see if users are in defined groups. 
+		 * Function used to see if users are in defined groups.
 		 *
-		 * @param string group the group to check 
+		 * @param string group the group to check
 		 * @param string name the name of the user to check
 		 * @return boolean
 		 */
@@ -631,10 +630,10 @@ function MessageBot() {
 			}
 			return false;
 		};
-		
-		/** 
+
+		/**
 		 * Compares the numbers given, used internally for joins.
-		 * 
+		 *
 		 * @param number low the lowest number allowed
 		 * @param number high the highest number allowed
 		 * @param number actual the number to check
@@ -643,7 +642,7 @@ function MessageBot() {
 		bot.checkJoins = function checkJoins(low, high, actual) {
 			return low <= actual && actual <= high;
 		};
-		
+
 		/**
 		 * Can be used to check if an extension is compatable as API changes are only made on minor versions
 		 * Accepts a version string like 5.1.* or >5.1.0 or <5.1.0
@@ -676,7 +675,7 @@ function MessageBot() {
 			return false;
 		};
 	}
-	
+
 	//Setup function, used to write the config page and attatch event listeners.
 	(function(bot) {
 		function checkPref(target, type, name, defval) {
@@ -684,28 +683,28 @@ function MessageBot() {
 				target.preferences[name] = defval;
 			}
 		}
-		
+
 		var str = localStorage.getItem('mb_preferences');
 		bot.preferences = str === null ? {} : JSON.parse(str);
 		checkPref(bot, 'boolean', 'showOnLaunch', false);
 		checkPref(bot, 'number', 'announcementDelay', 10);
 		checkPref(bot, 'boolean', 'regexTriggers', false);
-		
+
 		//Write the page...
-		document.head.innerHTML += '<style>{{inject ./tmpbot.css}}<style>';
-		document.body.innerHTML += '{{inject ./tmpbot.html}}';
+		document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
+		document.body.innerHTML += '{{inject ../dist/tmpbot.html}}';
 		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
-		
+
 		//Fix templates
 		bot.fixTemplates();
-		
+
 		//Attatch event listeners...
 		document.getElementById('botNav').addEventListener('click', bot.toggleBot, false);
 		document.getElementById('botNav2').addEventListener('click', bot.toggleBot, false);
 
 		document.querySelector('#botHead > nav').addEventListener('click', bot.changeTab, false);
 		var tabNavs = document.querySelectorAll('nav.botTabs');
-		
+
 		var i;
 		for (i = 0; i < tabNavs.length; i++) {
 			tabNavs[i].addEventListener('click', bot.changeTab, false);
@@ -736,7 +735,7 @@ function MessageBot() {
 		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
 		document.querySelector('#mb_regex_triggers').checked = ((bot.preferences.regexTriggers) ? 'checked' : '');
 	}(bot));
-	
+
 	//Load the saved config, including extensions
 	(function(bot) {
 		var str;
@@ -773,14 +772,14 @@ function MessageBot() {
 
 		bot.saveConfig();
 	}(bot));
-	
-	//Load the store... 
+
+	//Load the store...
 	(function () {
 		var sc = document.createElement('script');
 		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
 		sc.crossOrigin = true;
 		document.head.appendChild(sc);
 	})();
-	
+
 	return bot;
 }

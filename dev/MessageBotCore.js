@@ -11,13 +11,13 @@ function MessageBotCore() {
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
 	}
-	
+
 	//For colored chat
 	document.head.innerHTML += '<style>.admin > span:first-child { color: #0007CF} .mod > span:first-child { color: #08C738}</style>';
 	//We are replacing these with our own functions.
 	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
 	document.getElementById('messageText').setAttribute('onkeydown',  'bot.core.enterCheck(event, bot.core)');
-	
+
 	//fix setTimeout on IE 9
 	(function() {
 		if (document.all && !window.setTimeout.isPolyfill) {
@@ -31,28 +31,28 @@ function MessageBotCore() {
 			window.setTimeout.isPolyfill = true;
 		}
 	}());
-	
+
 	//Defaults
 	var core = {
-				version: '5.1.0', 
-				online: ['SERVER'], 
-				players: {},
-				logs: [],
-				listening: false,
-				_shouldListen: false,
-				checkOnlineWait: 60000 * 5,
-				joinFuncs: {},
-				leaveFuncs: {},
-				triggerFuncs: {},
-				serverFuncs: {},
-				otherFuncs: {},
-				sendChecks: {},
-				adminList: [],
-				modList: [],
-				staffList: [],
-				toSend: [],
-				chatMsgMaxCount: 500
-			   };
+			version: '5.1.0',
+			online: ['SERVER'],
+			players: {},
+			logs: [],
+			listening: false,
+			_shouldListen: false,
+			checkOnlineWait: 60000 * 5,
+			joinFuncs: {},
+			leaveFuncs: {},
+			triggerFuncs: {},
+			serverFuncs: {},
+			otherFuncs: {},
+			sendChecks: {},
+			adminList: [],
+			modList: [],
+			staffList: [],
+			toSend: [],
+			chatMsgMaxCount: 500
+			};
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
 	core.ownerName = document.getElementById('nav_profile').textContent;
@@ -62,14 +62,14 @@ function MessageBotCore() {
 	{
 		/**
 		 * Adds a message to the queue to send when possible.
-		 * 
+		 *
 		 * @param string message the message to be checked and then sent.
 		 * @return void
 		 */
 		core.send = function send(message) {
 			core.toSend.push(message);
 		};
-		
+
 		/**
 		 * Lets users send messages from the console, also ensures that commands are displayed and not eaten
 		 *
@@ -110,28 +110,28 @@ function MessageBotCore() {
 				button.textContent = 'CANCELED';
 			}
 		};
-	
+
 		/**
 		 * Preserves the enter = send functionality
-		 * 
+		 *
 		 * @param EventArgs e
 		 * @param MessageBotCore t
 		 */
 		core.enterCheck = function enterCheck(e, t) {
-		if (e.keyCode == 13) {
-			if (e.preventDefault) {
-				e.preventDefault();
-			} else {
-				e.returnValue = false;
+			if (e.keyCode == 13) {
+				if (e.preventDefault) {
+					e.preventDefault();
+				} else {
+					e.returnValue = false;
+				}
+				t.userSend(t);
 			}
-			t.userSend(t);
-		}
-	};
+		};
 	}
-	
-	//Dealing with recieving chat 
+
+	//Dealing with recieving chat
 	{
-		/* 
+		/*
 		 * Internal method. Use startListening and stopListening to control this function.
 		 *
 		 * @param MessageBotCore core a reference to the core.
@@ -155,10 +155,10 @@ function MessageBotCore() {
 				core.chatId = data.nextId;
 			}, window.apiURL);
 		};
-		
+
 		/**
-		 * Internal method. Used to check if the server has come back online 
-		 * after going offline due to no players. If the server is online the 
+		 * Internal method. Used to check if the server has come back online
+		 * after going offline due to no players. If the server is online the
 		 * bot will start polling chat again. If not, it checks again later.
 		 */
 		core.checkOnline = function checkOnline(core) {
@@ -170,9 +170,9 @@ function MessageBotCore() {
 				}
 			}, window.apiURL);
 		};
-		
-		/** 
-		 * Used to parse messages recieved from the server into objects which can be used. Also calls appropriate listeners. 
+
+		/**
+		 * Used to parse messages recieved from the server into objects which can be used. Also calls appropriate listeners.
 		 */
 		core.parseMessage = function parseMessage(message) {
 			function getUserName(message, core) {
@@ -287,12 +287,12 @@ function MessageBotCore() {
 			}
 		};
 	}
-	
+
 	//Dealing with the UI
 	{
 		/*
 		 * Adds a message to the console, expects this to be assigned to the core
-		 * 
+		 *
 		 * @param string|object Either an object with properties name and message, or a string
 		 * @return void
 		 */
@@ -328,17 +328,17 @@ function MessageBotCore() {
 			}
 
 			while (chat.children.length > this.chatMsgMaxCount) {
-				chat.removeChild(chat.childNodes[0]);    
+				chat.removeChild(chat.childNodes[0]);
 			}
 
 		};
 	}
-	
+
 	//Dealing with player data
 	{
 		/**
 		 * Gets the most recently used IP for a player by name and returns it
-		 * @param string name the name of the player 
+		 * @param string name the name of the player
 		 * @return string|bool the most recently used IP or false on failure
 		 */
 		core.getIP = function getIP(name) {
@@ -350,7 +350,7 @@ function MessageBotCore() {
 
 		/**
 		 * Gets the number of times a player has joined the server
-		 * 
+		 *
 		 * @param string name the name of the player
 		 * @return int|bool the number of joins, or false if the player has not joined the server
 		 */
@@ -361,7 +361,7 @@ function MessageBotCore() {
 			return false;
 		};
 	}
-	
+
 	//Controlling the core
 	{
 		/**
@@ -383,10 +383,10 @@ function MessageBotCore() {
 			this._shouldListen = false;
 		};
 	}
-	
-	//Chat litening control
+
+	//Chat listening control
 	{
-		/** 
+		/**
 		 * Method used to add a listener
 		 *
 		 * @param string uniqueId the unique id of the listener
@@ -412,7 +412,7 @@ function MessageBotCore() {
 			delete this.joinFuncs[uniqueId];
 		};
 
-		/** 
+		/**
 		 * Method used to add a listener
 		 *
 		 * @param string uniqueId the unique id of the listener
@@ -438,7 +438,7 @@ function MessageBotCore() {
 			delete this.leaveFuncs[uniqueId];
 		};
 
-		/** 
+		/**
 		 * Method used to add a listener
 		 *
 		 * @param string uniqueId the unique id of the listener
@@ -464,7 +464,7 @@ function MessageBotCore() {
 			delete this.joinFuncs[uniqueId];
 		};
 
-		/** 
+		/**
 		 * Method used to add a listener
 		 *
 		 * @param string uniqueId the unique id of the listener
@@ -490,7 +490,7 @@ function MessageBotCore() {
 			delete this.serverFuncs[uniqueId];
 		};
 
-		/** 
+		/**
 		 * Method used to add a listener
 		 *
 		 * @param string uniqueId the unique id of the listener
@@ -516,7 +516,7 @@ function MessageBotCore() {
 			delete this.otherFuncs[uniqueId];
 		};
 
-		/** 
+		/**
 		 * Method used to add a listener
 		 *
 		 * @param string uniqueId the unique id of the listener
@@ -542,7 +542,7 @@ function MessageBotCore() {
 			delete this.sendChecks[uniqueId];
 		};
 	}
-	
+
 	//Get the player list
 	(function(core) {
 		var xhr = new XMLHttpRequest();
@@ -574,7 +574,7 @@ function MessageBotCore() {
 	//Get staff lists
 	(function(core) {
 		var xhr = new XMLHttpRequest();
-		xhr.onload = function() {			
+		xhr.onload = function() {
 			var doc = (new DOMParser()).parseFromString(xhr.responseText, 'text/html');
 			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
 			core.adminList.push(core.ownerName);
@@ -589,13 +589,13 @@ function MessageBotCore() {
 			core.modList = mList.filter(function (mod) {
 				return core.adminList.indexOf(mod) < 0;
 			});
-			
+
 			core.staffList = core.adminList.concat(core.modList);
 		};
 		xhr.open('GET', 'http://portal.theblockheads.net/worlds/lists/' + window.worldId, true);
 		xhr.send();
 	}(core));
-	
+
 	//Get online players
 	(function(core) {
 		var xhr = new XMLHttpRequest();
@@ -611,8 +611,8 @@ function MessageBotCore() {
 		};
 		xhr.open('GET', 'http://portal.theblockheads.net/worlds/' + window.worldId, true);
 		xhr.send();
-	}(core));	
-	
+	}(core));
+
 	//Start listening for messages to send
 	core.postMessageReference = setInterval(function postMessage() {
 		if (this.toSend.length > 0) {
@@ -627,6 +627,6 @@ function MessageBotCore() {
 			}
 		}
 	}.bind(core), 1000);
-	
+
 	return core;
 }

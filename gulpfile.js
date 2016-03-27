@@ -17,13 +17,13 @@ gulp.task('lint', function() {
 gulp.task('_minhtml', function() {
 	return gulp.src('dev/bot.html')
 		.pipe(htmlmin({
-			collapseWhitespace: true, 
-			conservativeCollapse: true, 
-			quoteCharacter: '"', 
+			collapseWhitespace: true,
+			conservativeCollapse: true,
+			quoteCharacter: '"',
 			minifyCSS: true
 		}))
 		.pipe(rename('tmpbot.html'))
-		.pipe(gulp.dest('dev'));
+		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('_mincss', function() {
@@ -35,8 +35,8 @@ gulp.task('_mincss', function() {
 			minifyCSS: true
 		}))
 		.pipe(rename('tmpbot.css'))
-		.pipe(gulp.dest('dev'));
-})
+		.pipe(gulp.dest('dist'));
+});
 
 gulp.task('inject', ['_minhtml', '_mincss'], function() {
 	return gulp.src('dev/MessageBot.js')
@@ -44,11 +44,11 @@ gulp.task('inject', ['_minhtml', '_mincss'], function() {
 			pattern: '{{inject <filename>}}'
 		}))
 		.pipe(rename('tmpMessageBot.js'))
-		.pipe(gulp.dest('dev'));
+		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('scripts', ['inject'], function() {
-	return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'dev/tmpMessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
+	return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'dist/tmpMessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
 		.pipe(concat('bot.js'))
 		.pipe(comments())
 		.pipe(babel({
@@ -58,15 +58,15 @@ gulp.task('scripts', ['inject'], function() {
 });
 
 gulp.task('clean', ['scripts'], function() {
-	return del(['dev/tmp*']);
+	return del(['dist/tmp*']);
 });
 
-gulp.task('watch', function() {
+gulp.task('watch', ['all'], function() {
 	gulp.watch('dev/*', ['all']);
 });
 
 gulp.task('all', ['lint', 'scripts', 'clean']);
 
-gulp.task('default', ['all', 'watch'], function() {
+gulp.task('default', ['watch'], function() {
 	console.log('Done!');
 });

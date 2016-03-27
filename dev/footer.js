@@ -4,14 +4,12 @@
 /*global
 	MessageBot
 */
-var bot;
+var bot = {};
 
-window.onerror = function() {
-	if (!bot.devMode && arguments[0] != 'Script error.') {
-		var report = bot.core.worldName;
-		var report2 = JSON.stringify(arguments);
+window.onerror = function(text, file, line, column) {
+	if (!bot.devMode && text != 'Script error.') {
 		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/error.php?log=' + encodeURIComponent(report) + '&log2=' + encodeURIComponent(report2);
+		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version + 'text=' + encodeURIComponent(report) + '&log2=' + encodeURIComponent(report2);
 		document.head.appendChild(sc);
 	}
 };
