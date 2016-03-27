@@ -15,4 +15,4 @@
 
 # Development
 ##### Guides / Documentation
-See the (wiki)[https://github.com/Bibliofile/Blockheads-MessageBot/wiki].
+See the [wiki](https://github.com/Bibliofile/Blockheads-MessageBot/wiki).
