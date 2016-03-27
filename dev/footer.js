@@ -1,5 +1,6 @@
 /*jshint
-	browser: true
+	browser: true,
+	undef: true
 */
 /*global
 	MessageBot
@@ -9,7 +10,10 @@ var bot = {};
 window.onerror = function(text, file, line, column) {
 	if (!bot.devMode && text != 'Script error.') {
 		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version + 'text=' + encodeURIComponent(report) + '&log2=' + encodeURIComponent(report2);
+		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version +
+					'&text=' + encodeURIComponent(text) +
+					'&file=' + encodeURIComponent(file) +
+					'&line=' + line +
 		document.head.appendChild(sc);
 	}
 };
