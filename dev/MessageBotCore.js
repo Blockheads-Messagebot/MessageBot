@@ -114,17 +114,17 @@ function MessageBotCore() {
 		/**
 		 * Preserves the enter = send functionality
 		 *
-		 * @param EventArgs e
-		 * @param MessageBotCore t
+		 * @param EventArgs EventArgs
+		 * @param MessageBotCore core
 		 */
-		core.enterCheck = function enterCheck(e, t) {
-			if (e.keyCode == 13) {
-				if (e.preventDefault) {
-					e.preventDefault();
+		core.enterCheck = function enterCheck(event, core) {
+			if (event.keyCode == 13) {
+				if (event.preventDefault) {
+					event.preventDefault();
 				} else {
-					e.returnValue = false;
+					event.returnValue = false;
 				}
-				t.userSend(t);
+				core.userSend();
 			}
 		};
 	}
