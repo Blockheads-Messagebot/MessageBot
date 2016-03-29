@@ -96,14 +96,14 @@ function MessageBotCore() {
 			}
 		};
 
-		core.enterCheck = function enterCheck(e, t) {
-			if (e.keyCode == 13) {
-				if (e.preventDefault) {
-					e.preventDefault();
+		core.enterCheck = function enterCheck(event, core) {
+			if (event.keyCode == 13) {
+				if (event.preventDefault) {
+					event.preventDefault();
 				} else {
-					e.returnValue = false;
+					event.returnValue = false;
 				}
-				t.userSend(t);
+				core.userSend();
 			}
 		};
 	}
