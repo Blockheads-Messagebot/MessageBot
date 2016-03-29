@@ -33,6 +33,7 @@ function MessageBotCore() {
 
 	var core = {
 		version: '5.1.0',
+		ownerName: '',
 		online: ['SERVER'],
 		players: {},
 		logs: [],
@@ -53,7 +54,6 @@ function MessageBotCore() {
 	};
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
-	core.ownerName = document.getElementById('nav_profile').textContent;
 	core.chatId = window.chatId;
 
 	{
@@ -443,6 +443,7 @@ function MessageBotCore() {
 		var xhr = new XMLHttpRequest();
 		xhr.onload = function () {
 			var doc = new DOMParser().parseFromString(xhr.responseText, 'text/html');
+			core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
 			var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
 			var playerElemsCount = playerElems.length;
 			for (var i = 0; i < playerElemsCount; i++) {
