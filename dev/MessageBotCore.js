@@ -124,7 +124,7 @@ function MessageBotCore() {
 				} else {
 					event.returnValue = false;
 				}
-				core.userSend();
+				core.userSend(core);
 			}
 		};
 	}
