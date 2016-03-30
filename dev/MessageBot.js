@@ -29,7 +29,7 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.saveConfig = function saveConfig() {
-			function utilSaveFunc(wrapper, saveTo) {
+			function utilSaveFunc(bot, wrapper, saveTo) {
 				var wrappers = wrapper.children;
 				var selects,
 					joinCounts,
@@ -45,7 +45,11 @@ function MessageBot() { //jshint ignore:line
 						tmpMsgObj.joins_high = joinCounts[1].value;
 					}
 					if (wrapper.id == 'tMsgs') {
-						tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
+						if (bot.preferences.disableTrim) {
+							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
+						} else {
+							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value.trim();
+						}
 					}
 					saveTo.push(tmpMsgObj);
 					tmpMsgObj = {};
@@ -56,10 +60,10 @@ function MessageBot() { //jshint ignore:line
 			this.leaveArr = [];
 			this.triggerArr = [];
 			this.announcementArr = [];
-			utilSaveFunc(document.getElementById('jMsgs'), this.joinArr);
-			utilSaveFunc(document.getElementById('lMsgs'), this.leaveArr);
-			utilSaveFunc(document.getElementById('tMsgs'), this.triggerArr);
-			utilSaveFunc(document.getElementById('aMsgs'), this.announcementArr);
+			utilSaveFunc(this, document.getElementById('jMsgs'), this.joinArr);
+			utilSaveFunc(this, document.getElementById('lMsgs'), this.leaveArr);
+			utilSaveFunc(this, document.getElementById('tMsgs'), this.triggerArr);
+			utilSaveFunc(this, document.getElementById('aMsgs'), this.announcementArr);
 
 			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(this.joinArr));
 			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(this.leaveArr));
@@ -106,6 +110,7 @@ function MessageBot() { //jshint ignore:line
 			prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
 			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
 			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
+			prefs.disableTrim = document.querySelector('#mb_disable_trim').checked;
 			this.preferences = prefs;
 			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
 		};
@@ -384,7 +389,7 @@ function MessageBot() { //jshint ignore:line
 			}).bind(this));
 			tempHTML += '</ul>';
 
-			document.getElementById('mb_ext_list').innerHTML = exts.length > 0 ? tempHTML : '<p>No extensions installed</p>';
+			document.getElementById('mb_ext_list').innerHTML = exts.length ? tempHTML : '<p>No extensions installed</p>';
 		};
 
 		/**
@@ -420,7 +425,7 @@ function MessageBot() { //jshint ignore:line
 			var extId = e.target.parentElement.getAttribute('extension-id');
 			var button = document.querySelector('div[extension-id="' + extId + '"] > button');
 			//Handle clicks on the div itself, not a child elem
-			extId = extId === null ? e.target.getAttribute('extension-id') : extId;
+			extId = extId  || e.target.getAttribute('extension-id');
 			if (e.target.tagName == 'BUTTON') {
 				if (e.target.textContent == 'Install') {
 					this.addExtension(extId);
@@ -579,13 +584,16 @@ function MessageBot() { //jshint ignore:line
 		bot.addMsg = function addMsg(container, template, saveObj) {
 			var content = template.content;
 			content.querySelector('div').id = 'm' + this.uMID;
-			content.querySelector('.m').value = typeof saveObj.message == 'string' ? saveObj.message : '';
+			content.querySelector('.m').value = saveObj.message || '';
 			if (template.id != 'aTemplate') {
 				var numInputs = content.querySelectorAll('input[type="number"]');
-				numInputs[0].value = typeof saveObj.joins_low == 'string' ? saveObj.joins_low : 0;
-				numInputs[1].value = typeof saveObj.joins_high == 'string' ? saveObj.joins_high : 9999;
+				numInputs[0].value = saveObj.joins_low || 0;
+				numInputs[1].value = saveObj.joins_high || 9999;
 				if (template.id == 'tTemplate') {
-					content.querySelector('.t').value = typeof saveObj.trigger == 'string' ? saveObj.trigger : '';
+					if (saveObj.trigger) {
+						saveObj.trigger = (this.preferences.disableTrim) ? saveObj.trigger : saveObj.trigger.trim();
+					}
+					content.querySelector('.t').value = saveObj.trigger || '';
 				}
 			}
 			//Groups done after appending or it doesn't work.
@@ -594,11 +602,9 @@ function MessageBot() { //jshint ignore:line
 			if (template.id != 'aTemplate') {
 				var selects = document.querySelectorAll('#m' + this.uMID + ' > select');
 
-				//Remove March 19th.
-				var grp = typeof saveObj.group == 'string' ? saveObj.group : 'All';
-				selects[0].value = (grp == 'Mods') ? 'Mod' : grp;
+				selects[0].value = saveObj.group || 'All';
 
-				selects[1].value = typeof saveObj.not_group == 'string' ? saveObj.not_group : 'Nobody';
+				selects[1].value = saveObj.not_group || 'Nobody';
 			}
 			document.querySelector('#m' + this.uMID + ' > a').addEventListener('click', this.deleteMsg.bind(this), false);
 
@@ -689,6 +695,7 @@ function MessageBot() { //jshint ignore:line
 		checkPref(bot, 'boolean', 'showOnLaunch', false);
 		checkPref(bot, 'number', 'announcementDelay', 10);
 		checkPref(bot, 'boolean', 'regexTriggers', false);
+		checkPref(bot, 'boolean', 'disableTrim', false);
 
 		//Write the page...
 		document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
@@ -734,6 +741,7 @@ function MessageBot() { //jshint ignore:line
 		}
 		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
 		document.querySelector('#mb_regex_triggers').checked = ((bot.preferences.regexTriggers) ? 'checked' : '');
+		document.querySelector('#mb_disable_trim').checked = ((bot.preferences.disableTrim) ? 'checked' : '');
 	}(bot));
 
 	//Load the saved config, including extensions
