@@ -1,6 +1,7 @@
 /*jshint
 	browser:	true,
-	devel:		true
+	devel:		true,
+	esversion: 6
 */
 /*global
 	ajaxJson
@@ -42,6 +43,7 @@ function MessageBotCore() {
 			listening: false,
 			_shouldListen: false,
 			checkOnlineWait: 60000 * 5,
+			sendDelay: 1000,
 			joinFuncs: {},
 			leaveFuncs: {},
 			triggerFuncs: {},
@@ -81,7 +83,7 @@ function MessageBotCore() {
 			var message = document.getElementById('messageText');
 			var tmpMsg = message.value;
 
-			Object.keys(core.sendChecks).forEach(function (key) {
+			Object.keys(core.sendChecks).forEach((key) => {
 				if (tmpMsg) {
 					tmpMsg = core.sendChecks[key](tmpMsg);
 				}
@@ -140,11 +142,12 @@ function MessageBotCore() {
 		core.pollChat = function pollChat(core) {
 			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
-					data.log.forEach(function (m) {
+					data.log.forEach((m) => {
 						core.parseMessage(m);
 					});
 				} else if (data.status == 'error') {
 					core._shouldListen = false;
+					window.worldId = core.chatId;
 					setTimeout(core.checkOnline, core.checkOnlineWait, core);
 				}
 				if (core._shouldListen) {
@@ -209,9 +212,9 @@ function MessageBotCore() {
 				this.players[name].ip = ip;
 				this.online.push(name);
 
-				Object.keys(this.joinFuncs).forEach((function (key) {
+				Object.keys(this.joinFuncs).forEach((key) => {
 					this.joinFuncs[key]({ name: name, ip: ip });
-				}).bind(this));
+				});
 			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
 				this.addMsgToPage(message);
 
@@ -223,9 +226,9 @@ function MessageBotCore() {
 					this.online.splice(name, 1);
 				}
 
-				Object.keys(this.leaveFuncs).forEach((function (key) {
+				Object.keys(this.leaveFuncs).forEach((key) => {
 					this.leaveFuncs[key]({ name: name, ip: ip });
-				}).bind(this));
+				});
 			} else if (message.indexOf(': ') >= 0) {
 				//A chat message - server or player?
 				var messageData = getUserName(message, this);
@@ -234,56 +237,22 @@ function MessageBotCore() {
 				//messageData resembles this:
 				//	{name:"ABC123", message:"Hello there!", safe:true}
 
-				//Handle people being added or removed from staff
-				if (this.adminList.indexOf(messageData.name) != -1) {
-					var targetName;
-					switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
-						case '/ADMIN':
-							targetName = messageData.message.toLocaleUpperCase().substring(7);
-							if (this.adminList.indexOf(targetName) < 0) {
-								this.adminList.push(targetName);
-								rebuildStaffList(this);
-							}
-							break;
-						case '/UNADMIN':
-							targetName = messageData.message.toLocaleUpperCase().substring(10);
-							if (this.adminList.indexOf(targetName) != -1) {
-								this.modList.splice(this.adminList.indexOf(targetName), 1);
-								rebuildStaffList(this);
-							}
-							break;
-						case '/MOD':
-							targetName = messageData.message.toLocaleUpperCase().substring(5);
-							if (this.modList.indexOf(targetName) < 0) {
-								this.modList.push(targetName);
-								rebuildStaffList(this);
-							}
-							break;
-						case '/UNMOD':
-							targetName = messageData.message.toLocaleUpperCase().substring(7);
-							if (this.modList.indexOf(targetName) != -1) {
-								this.modList.splice(this.modList.indexOf(targetName), 1);
-								rebuildStaffList(this);
-							}
-					}
-				}
-
 				if (messageData.name == 'SERVER') {
 					//Server message
-					Object.keys(this.serverFuncs).forEach((function (key) {
+					Object.keys(this.serverFuncs).forEach((key) => {
 						this.serverFuncs[key](messageData);
-					}).bind(this));
+					});
 				} else {
 					//Regular player message
-					Object.keys(this.triggerFuncs).forEach((function (key) {
+					Object.keys(this.triggerFuncs).forEach((key) => {
 						this.triggerFuncs[key](messageData);
-					}).bind(this));
+					});
 				}
 			} else {
 				this.addMsgToPage(message);
-				Object.keys(this.otherFuncs).forEach((function (key) {
+				Object.keys(this.otherFuncs).forEach((key) => {
 					this.otherFuncs[key](message);
-				}).bind(this));
+				});
 			}
 		};
 	}
@@ -360,6 +329,7 @@ function MessageBotCore() {
 			}
 			return false;
 		};
+
 	}
 
 	//Controlling the core
@@ -548,7 +518,7 @@ function MessageBotCore() {
 		var xhr = new XMLHttpRequest();
 		xhr.onload = (function() {
 			core.logs = xhr.responseText.split('\n');
-			xhr.responseText.split('\n').forEach(function (line) {
+			xhr.responseText.split('\n').forEach((line) => {
 				if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
 					var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
 					var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
@@ -579,11 +549,11 @@ function MessageBotCore() {
 			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
 			core.adminList.push(core.ownerName);
 			core.adminList.push('SERVER');
-			core.adminList.forEach(function (admin, index) {
+			core.adminList.forEach((admin, index) => {
 				core.adminList[index] = admin.toUpperCase();
 			});
 			var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
-			mList.forEach(function (mod, index) {
+			mList.forEach((mod, index) => {
 				mList[index] = mod.toUpperCase();
 			});
 			core.modList = mList.filter(function (mod) {
@@ -615,19 +585,61 @@ function MessageBotCore() {
 	}(core));
 
 	//Start listening for messages to send
-	core.postMessageReference = setInterval(function postMessage() {
+	core.postMessage = function postMessage() {
 		if (this.toSend.length > 0) {
 			var tmpMsg = this.toSend.shift();
-			Object.keys(this.sendChecks).forEach((function (key) {
+			Object.keys(this.sendChecks).forEach((key) => {
 				if (tmpMsg) {
 					tmpMsg = this.sendChecks[key](tmpMsg);
 				}
-			}).bind(this));
+			});
 			if (tmpMsg) {
 				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, undefined, window.apiURL);
 			}
 		}
-	}.bind(core), 1000);
+		setTimeout(this.postMessage.bind(this), this.sendDelay);
+	};
+	core.postMessage();
+
+	//Start listening for admin / mod changes
+	core.staffChangeCheck = function staffChangeCheck(data) {
+		let messageData = (typeof data == 'string') ? {name: 'SERVER', message: data} : data;
+		if (this.adminList.indexOf(messageData.name) != -1) {
+			var targetName;
+			switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
+				case '/ADMIN':
+					targetName = messageData.message.toLocaleUpperCase().substring(7);
+					if (this.adminList.indexOf(targetName) < 0) {
+						this.adminList.push(targetName);
+						rebuildStaffList(this);
+					}
+					break;
+				case '/UNADMIN':
+					targetName = messageData.message.toLocaleUpperCase().substring(10);
+					if (this.adminList.indexOf(targetName) != -1) {
+						this.modList.splice(this.adminList.indexOf(targetName), 1);
+						rebuildStaffList(this);
+					}
+					break;
+				case '/MOD':
+					targetName = messageData.message.toLocaleUpperCase().substring(5);
+					if (this.modList.indexOf(targetName) < 0) {
+						this.modList.push(targetName);
+						rebuildStaffList(this);
+					}
+					break;
+				case '/UNMOD':
+					targetName = messageData.message.toLocaleUpperCase().substring(7);
+					if (this.modList.indexOf(targetName) != -1) {
+						this.modList.splice(this.modList.indexOf(targetName), 1);
+						rebuildStaffList(this);
+					}
+			}
+		}
+		return data;
+	};
+	core.addServerListener('core_staffChanges', core.staffChangeCheck.bind(core));
+	core.addTriggerListener('core_staffChanges', core.staffChangeCheck.bind(core));
 
 	return core;
 }

@@ -40,6 +40,7 @@ function MessageBotCore() {
 		listening: false,
 		_shouldListen: false,
 		checkOnlineWait: 60000 * 5,
+		sendDelay: 1000,
 		joinFuncs: {},
 		leaveFuncs: {},
 		triggerFuncs: {},
@@ -117,6 +118,7 @@ function MessageBotCore() {
 					});
 				} else if (data.status == 'error') {
 					core._shouldListen = false;
+					window.worldId = core.chatId;
 					setTimeout(core.checkOnline, core.checkOnlineWait, core);
 				}
 				if (core._shouldListen) {
@@ -139,6 +141,8 @@ function MessageBotCore() {
 		};
 
 		core.parseMessage = function parseMessage(message) {
+			var _this = this;
+
 			function getUserName(message, core) {
 				for (var i = 18; i > 4; i--) {
 					var possibleName = message.substring(0, message.lastIndexOf(': ', i));
@@ -170,8 +174,8 @@ function MessageBotCore() {
 				this.online.push(name);
 
 				Object.keys(this.joinFuncs).forEach(function (key) {
-					this.joinFuncs[key]({ name: name, ip: ip });
-				}.bind(this));
+					_this.joinFuncs[key]({ name: name, ip: ip });
+				});
 			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
 				this.addMsgToPage(message);
 
@@ -183,60 +187,27 @@ function MessageBotCore() {
 				}
 
 				Object.keys(this.leaveFuncs).forEach(function (key) {
-					this.leaveFuncs[key]({ name: name, ip: ip });
-				}.bind(this));
+					_this.leaveFuncs[key]({ name: name, ip: ip });
+				});
 			} else if (message.indexOf(': ') >= 0) {
 				var messageData = getUserName(message, this);
 				messageData.message = message.substring(messageData.name.length + 2);
 				this.addMsgToPage(messageData);
 
-				if (this.adminList.indexOf(messageData.name) != -1) {
-					var targetName;
-					switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
-						case '/ADMIN':
-							targetName = messageData.message.toLocaleUpperCase().substring(7);
-							if (this.adminList.indexOf(targetName) < 0) {
-								this.adminList.push(targetName);
-								rebuildStaffList(this);
-							}
-							break;
-						case '/UNADMIN':
-							targetName = messageData.message.toLocaleUpperCase().substring(10);
-							if (this.adminList.indexOf(targetName) != -1) {
-								this.modList.splice(this.adminList.indexOf(targetName), 1);
-								rebuildStaffList(this);
-							}
-							break;
-						case '/MOD':
-							targetName = messageData.message.toLocaleUpperCase().substring(5);
-							if (this.modList.indexOf(targetName) < 0) {
-								this.modList.push(targetName);
-								rebuildStaffList(this);
-							}
-							break;
-						case '/UNMOD':
-							targetName = messageData.message.toLocaleUpperCase().substring(7);
-							if (this.modList.indexOf(targetName) != -1) {
-								this.modList.splice(this.modList.indexOf(targetName), 1);
-								rebuildStaffList(this);
-							}
-					}
-				}
-
 				if (messageData.name == 'SERVER') {
 					Object.keys(this.serverFuncs).forEach(function (key) {
-						this.serverFuncs[key](messageData);
-					}.bind(this));
+						_this.serverFuncs[key](messageData);
+					});
 				} else {
 					Object.keys(this.triggerFuncs).forEach(function (key) {
-						this.triggerFuncs[key](messageData);
-					}.bind(this));
+						_this.triggerFuncs[key](messageData);
+					});
 				}
 			} else {
 				this.addMsgToPage(message);
 				Object.keys(this.otherFuncs).forEach(function (key) {
-					this.otherFuncs[key](message);
-				}.bind(this));
+					_this.otherFuncs[key](message);
+				});
 			}
 		};
 	}
@@ -456,19 +427,62 @@ function MessageBotCore() {
 		xhr.send();
 	})(core);
 
-	core.postMessageReference = setInterval(function postMessage() {
+	core.postMessage = function postMessage() {
+		var _this2 = this;
+
 		if (this.toSend.length > 0) {
 			var tmpMsg = this.toSend.shift();
 			Object.keys(this.sendChecks).forEach(function (key) {
 				if (tmpMsg) {
-					tmpMsg = this.sendChecks[key](tmpMsg);
+					tmpMsg = _this2.sendChecks[key](tmpMsg);
 				}
-			}.bind(this));
+			});
 			if (tmpMsg) {
 				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, undefined, window.apiURL);
 			}
 		}
-	}.bind(core), 1000);
+		setTimeout(this.postMessage.bind(this), this.sendDelay);
+	};
+	core.postMessage();
+
+	core.staffChangeCheck = function staffChangeCheck(data) {
+		var messageData = typeof data == 'string' ? { name: 'SERVER', message: data } : data;
+		if (this.adminList.indexOf(messageData.name) != -1) {
+			var targetName;
+			switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
+				case '/ADMIN':
+					targetName = messageData.message.toLocaleUpperCase().substring(7);
+					if (this.adminList.indexOf(targetName) < 0) {
+						this.adminList.push(targetName);
+						rebuildStaffList(this);
+					}
+					break;
+				case '/UNADMIN':
+					targetName = messageData.message.toLocaleUpperCase().substring(10);
+					if (this.adminList.indexOf(targetName) != -1) {
+						this.modList.splice(this.adminList.indexOf(targetName), 1);
+						rebuildStaffList(this);
+					}
+					break;
+				case '/MOD':
+					targetName = messageData.message.toLocaleUpperCase().substring(5);
+					if (this.modList.indexOf(targetName) < 0) {
+						this.modList.push(targetName);
+						rebuildStaffList(this);
+					}
+					break;
+				case '/UNMOD':
+					targetName = messageData.message.toLocaleUpperCase().substring(7);
+					if (this.modList.indexOf(targetName) != -1) {
+						this.modList.splice(this.modList.indexOf(targetName), 1);
+						rebuildStaffList(this);
+					}
+			}
+		}
+		return data;
+	};
+	core.addServerListener('core_staffChanges', core.staffChangeCheck.bind(core));
+	core.addTriggerListener('core_staffChanges', core.staffChangeCheck.bind(core));
 
 	return core;
 }
@@ -486,7 +500,9 @@ function MessageBot() {
 
 	{
 		bot.saveConfig = function saveConfig() {
-			function utilSaveFunc(bot, wrapper, saveTo) {
+			var _this3 = this;
+
+			var utilSaveFunc = function utilSaveFunc(wrapper, saveTo) {
 				var wrappers = wrapper.children;
 				var selects,
 				    joinCounts,
@@ -502,24 +518,25 @@ function MessageBot() {
 						tmpMsgObj.joins_high = joinCounts[1].value;
 					}
 					if (wrapper.id == 'tMsgs') {
-						if (bot.preferences.trimTriggers) {
+						if (_this3.preferences.disableTrim) {
+							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
+						} else {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value.trim();
 						}
-						tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
 					}
 					saveTo.push(tmpMsgObj);
 					tmpMsgObj = {};
 				}
-			}
+			};
 
 			this.joinArr = [];
 			this.leaveArr = [];
 			this.triggerArr = [];
 			this.announcementArr = [];
-			utilSaveFunc(this, document.getElementById('jMsgs'), this.joinArr);
-			utilSaveFunc(this, document.getElementById('lMsgs'), this.leaveArr);
-			utilSaveFunc(this, document.getElementById('tMsgs'), this.triggerArr);
-			utilSaveFunc(this, document.getElementById('aMsgs'), this.announcementArr);
+			utilSaveFunc(document.getElementById('lMsgs'), this.leaveArr);
+			utilSaveFunc(document.getElementById('jMsgs'), this.joinArr);
+			utilSaveFunc(document.getElementById('tMsgs'), this.triggerArr);
+			utilSaveFunc(document.getElementById('aMsgs'), this.announcementArr);
 
 			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(this.joinArr));
 			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(this.leaveArr));
@@ -548,7 +565,7 @@ function MessageBot() {
 				localStorage.clear();
 				Object.keys(code).forEach(function (key) {
 					localStorage.setItem(key, code[key]);
-				}.bind(this));
+				});
 
 				alert('Backup loaded. Please restart the bot.');
 				location.reload(true);
@@ -560,7 +577,7 @@ function MessageBot() {
 			prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
 			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
 			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
-			prefs.trimTriggers = document.querySelector('#mb_trim_triggers').checked;
+			prefs.disableTrim = document.querySelector('#mb_disable_trim').checked;
 			this.preferences = prefs;
 			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
 		};
@@ -664,6 +681,8 @@ function MessageBot() {
 
 	{
 		bot.initStore = function initStore(data) {
+			var _this4 = this;
+
 			var content = document.getElementById('extTemplate').content;
 
 			if (data.status == 'ok') {
@@ -671,10 +690,10 @@ function MessageBot() {
 					content.querySelector('h4').textContent = extension.title;
 					content.querySelector('span').innerHTML = extension.snippet;
 					content.querySelector('.ext').setAttribute('extension-id', extension.id);
-					content.querySelector('button').textContent = this.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
+					content.querySelector('button').textContent = _this4.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
 
 					document.getElementById('exts').appendChild(document.importNode(content, true));
-				}.bind(this));
+				});
 			} else {
 				document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
 			}
@@ -706,6 +725,8 @@ function MessageBot() {
 		};
 
 		bot.removeExtension = function removeExtension(extensionId) {
+			var _this5 = this;
+
 			if (typeof window[extensionId] != 'undefined') {
 				if (typeof window[extensionId].uninstall == 'function') {
 					window[extensionId].uninstall();
@@ -713,8 +734,8 @@ function MessageBot() {
 
 				this.removeTab('settings_' + extensionId);
 				Object.keys(window[extensionId].mainTabs).forEach(function (key) {
-					this.removeTab('main_' + extensionId + '_' + key);
-				}.bind(this));
+					_this5.removeTab('main_' + extensionId + '_' + key);
+				});
 				window[extensionId] = undefined;
 			}
 			var extIn = this.extensions.indexOf(extensionId);
@@ -737,14 +758,16 @@ function MessageBot() {
 		};
 
 		bot.extensionList = function extensionList(extensions) {
+			var _this6 = this;
+
 			var exts = JSON.parse(extensions),
 			    tempHTML = '<ul style="margin-left:1.5em;">';
 			exts.forEach(function (ext) {
-				tempHTML += '<li>' + this.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
-			}.bind(this));
+				tempHTML += '<li>' + _this6.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
+			});
 			tempHTML += '</ul>';
 
-			document.getElementById('mb_ext_list').innerHTML = exts.length > 0 ? tempHTML : '<p>No extensions installed</p>';
+			document.getElementById('mb_ext_list').innerHTML = exts.length ? tempHTML : '<p>No extensions installed</p>';
 		};
 
 		bot.setAutoLaunch = function setAutoLaunch(extensionId, autoLaunch) {
@@ -766,7 +789,7 @@ function MessageBot() {
 		bot.extActions = function extActions(e) {
 			var extId = e.target.parentElement.getAttribute('extension-id');
 			var button = document.querySelector('div[extension-id="' + extId + '"] > button');
-			extId = extId === null ? e.target.getAttribute('extension-id') : extId;
+			extId = extId || e.target.getAttribute('extension-id');
 			if (e.target.tagName == 'BUTTON') {
 				if (e.target.textContent == 'Install') {
 					this.addExtension(extId);
@@ -782,46 +805,52 @@ function MessageBot() {
 
 	{
 		bot.onJoin = function onJoin(data) {
+			var _this7 = this;
+
 			this.joinArr.forEach(function (msg) {
-				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-					this.core.send(toSend);
+				if (_this7.checkGroup(msg.group, data.name) && !_this7.checkGroup(msg.not_group, data.name) && _this7.checkJoins(msg.joins_low, msg.joins_high, _this7.core.getJoins(data.name))) {
+					var toSend = _this7.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = _this7.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = _this7.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = _this7.replaceAll(toSend, '{{ip}}', data.ip);
+					_this7.core.send(toSend);
 				}
-			}.bind(this));
+			});
 		};
 
 		bot.onLeave = function onLeave(data) {
+			var _this8 = this;
+
 			this.leaveArr.forEach(function (msg) {
-				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-					this.core.send(toSend);
+				if (_this8.checkGroup(msg.group, data.name) && !_this8.checkGroup(msg.not_group, data.name) && _this8.checkJoins(msg.joins_low, msg.joins_high, _this8.core.getJoins(data.name))) {
+					var toSend = _this8.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = _this8.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = _this8.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = _this8.replaceAll(toSend, '{{ip}}', data.ip);
+					_this8.core.send(toSend);
 				}
-			}.bind(this));
+			});
 		};
 
 		bot.onTrigger = function onTrigger(data) {
-			function triggerMatch(trigger, message) {
-				if (this.preferences.regexTriggers) {
+			var _this9 = this;
+
+			var triggerMatch = function triggerMatch(trigger, message) {
+				if (_this9.preferences.regexTriggers) {
 					return new RegExp(trigger, 'i').test(message);
 				}
 				return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
-			}
+			};
 			this.triggerArr.forEach(function (msg) {
-				if (triggerMatch.call(this, msg.trigger, data.message) && this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
+				if (triggerMatch(msg.trigger, data.message) && _this9.checkGroup(msg.group, data.name) && !_this9.checkGroup(msg.not_group, data.name) && _this9.checkJoins(msg.joins_low, msg.joins_high, _this9.core.getJoins(data.name))) {
 
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', this.core.getIP(data.name));
-					this.core.send(toSend);
+					var toSend = _this9.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = _this9.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = _this9.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = _this9.replaceAll(toSend, '{{ip}}', _this9.core.getIP(data.name));
+					_this9.core.send(toSend);
 				}
-			}.bind(this));
+			});
 		};
 
 		bot.announcementCheck = function announcementCheck(ind) {
@@ -872,13 +901,16 @@ function MessageBot() {
 		bot.addMsg = function addMsg(container, template, saveObj) {
 			var content = template.content;
 			content.querySelector('div').id = 'm' + this.uMID;
-			content.querySelector('.m').value = typeof saveObj.message == 'string' ? saveObj.message : '';
+			content.querySelector('.m').value = saveObj.message || '';
 			if (template.id != 'aTemplate') {
 				var numInputs = content.querySelectorAll('input[type="number"]');
-				numInputs[0].value = typeof saveObj.joins_low == 'string' ? saveObj.joins_low : 0;
-				numInputs[1].value = typeof saveObj.joins_high == 'string' ? saveObj.joins_high : 9999;
+				numInputs[0].value = saveObj.joins_low || 0;
+				numInputs[1].value = saveObj.joins_high || 9999;
 				if (template.id == 'tTemplate') {
-					content.querySelector('.t').value = typeof saveObj.trigger == 'string' ? saveObj.trigger : '';
+					if (saveObj.trigger) {
+						saveObj.trigger = this.preferences.disableTrim ? saveObj.trigger : saveObj.trigger.trim();
+					}
+					content.querySelector('.t').value = saveObj.trigger || '';
 				}
 			}
 			container.appendChild(document.importNode(content, true));
@@ -886,10 +918,9 @@ function MessageBot() {
 			if (template.id != 'aTemplate') {
 				var selects = document.querySelectorAll('#m' + this.uMID + ' > select');
 
-				var grp = typeof saveObj.group == 'string' ? saveObj.group : 'All';
-				selects[0].value = grp == 'Mods' ? 'Mod' : grp;
+				selects[0].value = saveObj.group || 'All';
 
-				selects[1].value = typeof saveObj.not_group == 'string' ? saveObj.not_group : 'Nobody';
+				selects[1].value = saveObj.not_group || 'Nobody';
 			}
 			document.querySelector('#m' + this.uMID + ' > a').addEventListener('click', this.deleteMsg.bind(this), false);
 
@@ -957,10 +988,10 @@ function MessageBot() {
 		checkPref(bot, 'boolean', 'showOnLaunch', false);
 		checkPref(bot, 'number', 'announcementDelay', 10);
 		checkPref(bot, 'boolean', 'regexTriggers', false);
-		checkPref(bot, 'boolean', 'trimTriggers', true);
+		checkPref(bot, 'boolean', 'disableTrim', false);
 
 		document.head.innerHTML += '<style>a { cursor: pointer; } #botContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; } #botHead { background-color: #051465; background-image: url(http://portal.theblockheads.net/static/images/portalHeader.png); min-height: 52px; width: 100%; height: 80px; background-repeat: no-repeat; } #botHead > nav { float: right; padding-top: 52px; margin-right: 5px; } #botHead > nav > span { color: #FFF; list-style: outside none none; font-size: 1.2em; padding: 8px 5px; } #botHead > nav > span.selected { background: #FFF; color: #182B73; } #botTemplates { display: none; } #botBody { overflow: auto; margin: 5px; } .botTabs { width: calc(100% - 5px); padding-left: 5px; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-flex-flow: row wrap; flex-flow: row wrap; } .botTabs > div { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; -webkit-flex-grow: 1; flex-grow: 1; height: 40px; margin-right: 5px; margin-top: 5px; min-width: 120px; background: #182B73; color: #FFF; font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif; } .botTabs > div.selected { color: #000; background: #E7E7E7; } #botTabs > div, #extTabs > div { position: relative; overflow-y: auto; background: #E7E7E7; padding: 5px; height: calc(100% - 10px); } #botTabs, #extTabs { height: calc(100vh - 140px); } .tabContainer { width: calc(100% - 10px); margin-left: 5px; } .tabContainer > div { position: relative; display: none; width: calc(100% - 10px); } .tabContainer > div.visible { display: block; overflow: auto; } span.descdet { margin-left: 1em; max-width: calc(100% - 5em); display: inline-block; } h3.descgen { margin-bottom: 5px; width: calc(100% - 50px); } span.add { position: absolute; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; top: 12px; right: 12px; width: 30px; height: 30px; background: #182B73; border: 0; color: #FFF; } .msg, .ext { width: calc(33% - 18.3334px); min-width: 310px; margin-left: 5px; margin-top: 5px; border: 3px solid #878787; float: left; background: #B0B0B0; padding: 5px; } .msg > input { width: calc(100% - 10px); } .msg > input[type="number"] { width: 5em; } .msg:nth-child(odd) { background: #fff; } .ann { display: block; width: 100%; margin-top: 5px; } .ann > input { width: 33%; min-width: 300px; margin-right: 5px; } .ext:nth-child(odd) { background: #E6E6E6; } .ext { height: 105px; position: relative; } .ext > h4 { margin: 0; } .ext > button { position: absolute; bottom: 3px; left: 3px; margin: 1px; width: calc(50% - 2px); border: 1px solid #000; } #jMsgs, #lMsgs, #tMsgs, #aMsgs, #exts { border-top: 1px solid #000; margin-top: 10px; } #settingsTabsNav > div { background: #182B73; color: #FFF; } #settingsTabsNav > div.selected { background: #FFF; color: #000; } #settingsTabs { background: #FFF; } #settingsTabs > div { height: calc(100vh - 220px); padding: 10px; } div[tab-name] { font-size: 110%; font-weight: 700; }<style>';
-		document.body.innerHTML += '<div id="botContainer" style="display:none"> <div id="botHead"> <nav tab-contents="botBody"> <span id="botNav2">CONSOLE</span> <span class="selected" tab-name="messages">MESSAGES</span> <span tab-name="extensions">EXTENSIONS</span> </nav> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <input class="m"> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <input class="m"> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Say:</label> <input class="m"> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button>Install</button> </div> </template> </div> <div class="tabContainer" id="botBody"> <div class="visible" id="mb_messages"> <nav class="botTabs" id="botMainNav" tab-contents="botTabs"> <div class="selected" tab-name="join">Join Messages</div> <div tab-name="leave">Leave Messages</div> <div tab-name="trigger">Trigger Messages</div> <div tab-name="announcements">Announcements</div> </nav> <div class="tabContainer" id="botTabs"> <div class="visible" id="mb_join"> <h3 class="descgen">These are checked when a player joins the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave"> <h3 class="descgen">These are checked when a player leaves the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger"> <h3 class="descgen">These are checked whenever someone says something.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements"> <h3 class="descgen">These are sent according to a regular schedule.</h3> <span class="descdet">If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X under the general settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> </div> </div> <div id="mb_extensions"> <nav class="botTabs" tab-contents="extTabs"> <div class="selected" tab-name="store">Store</div> <div tab-name="settings">Settings</div> </nav> <div class="tabContainer" id="extTabs"> <div class="visible" id="mb_store"> <h3 class="descgen">Extensions can improve the functionality of the bot.</h3> <span class="descdet">Interested in creating one? <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=306215#post306215" target="_blank">Click here.</a></span> <span id="mb_load_man" style="position:absolute;top:12px;right:12px;color:#fff;background:#182B73;padding:.5em">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings"> <nav class="botTabs" id="settingsTabsNav" tab-contents="settingsTabs"> <div class="selected" tab-name="general">General</div> </nav> <div class="tabContainer" id="settingsTabs"> <div class="visible" id="mb_general"> <h3>Settings</h3> <label for="mb_auto_show">Show bot on launch:</label> <input id="mb_auto_show" type="checkbox"><br> <label for="mb_ann_delay">Delay between announcements (minutes):</label> <input id="mb_ann_delay" type="number"><br> <label for="mb_regex_triggers">Parse triggers as RegEx (read the advanced use section <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=290924#post290924" target="_blank">here</a> first):</label> <input id="mb_regex_triggers" type="checkbox"><br> <label for="mb_trim_triggers">Trim whitespace: </label> <input id="mb_trim_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> </div> </div> </div> <div id="mb_filler"></div> </div> </div>';
+		document.body.innerHTML += '<div id="botContainer" style="display:none"> <div id="botHead"> <nav tab-contents="botBody"> <span id="botNav2">CONSOLE</span> <span class="selected" tab-name="messages">MESSAGES</span> <span tab-name="extensions">EXTENSIONS</span> </nav> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <input class="m"> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <input class="m"> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Say:</label> <input class="m"> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button>Install</button> </div> </template> </div> <div class="tabContainer" id="botBody"> <div class="visible" id="mb_messages"> <nav class="botTabs" id="botMainNav" tab-contents="botTabs"> <div class="selected" tab-name="join">Join Messages</div> <div tab-name="leave">Leave Messages</div> <div tab-name="trigger">Trigger Messages</div> <div tab-name="announcements">Announcements</div> </nav> <div class="tabContainer" id="botTabs"> <div class="visible" id="mb_join"> <h3 class="descgen">These are checked when a player joins the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave"> <h3 class="descgen">These are checked when a player leaves the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger"> <h3 class="descgen">These are checked whenever someone says something.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements"> <h3 class="descgen">These are sent according to a regular schedule.</h3> <span class="descdet">If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X under the general settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> </div> </div> <div id="mb_extensions"> <nav class="botTabs" tab-contents="extTabs"> <div class="selected" tab-name="store">Store</div> <div tab-name="settings">Settings</div> </nav> <div class="tabContainer" id="extTabs"> <div class="visible" id="mb_store"> <h3 class="descgen">Extensions can improve the functionality of the bot.</h3> <span class="descdet">Interested in creating one? <a href="http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=306215#post306215" target="_blank">Click here.</a></span> <span id="mb_load_man" style="position:absolute;top:12px;right:12px;color:#fff;background:#182B73;padding:.5em">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings"> <nav class="botTabs" id="settingsTabsNav" tab-contents="settingsTabs"> <div class="selected" tab-name="general">General</div> </nav> <div class="tabContainer" id="settingsTabs"> <div class="visible" id="mb_general"> <h3>Settings</h3> <label for="mb_auto_show">Show bot on launch: </label> <input id="mb_auto_show" type="checkbox"><br> <label for="mb_ann_delay">Delay between announcements (minutes): </label> <input id="mb_ann_delay" type="number"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> </div> </div> </div> <div id="mb_filler"></div> </div> </div>';
 		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
 
 		bot.fixTemplates();
@@ -998,7 +1029,7 @@ function MessageBot() {
 		}
 		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
 		document.querySelector('#mb_regex_triggers').checked = bot.preferences.regexTriggers ? 'checked' : '';
-		document.querySelector('#mb_trim_triggers').checked = bot.preferences.trimTriggers ? 'checked' : '';
+		document.querySelector('#mb_disable_trim').checked = bot.preferences.disableTrim ? 'checked' : '';
 	})(bot);
 
 	(function (bot) {
