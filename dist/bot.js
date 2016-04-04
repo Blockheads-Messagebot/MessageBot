@@ -111,6 +111,8 @@ function MessageBotCore() {
 
 	{
 		core.pollChat = function pollChat(core) {
+			var auto = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
 			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
 					data.log.forEach(function (m) {
@@ -122,7 +124,9 @@ function MessageBotCore() {
 					setTimeout(core.checkOnline, core.checkOnlineWait, core);
 				}
 				if (core._shouldListen) {
-					setTimeout(core.pollChat, 5000, core);
+					if (auto) {
+						setTimeout(core.pollChat, 5000, core);
+					}
 				} else {
 					core.listening = false;
 				}

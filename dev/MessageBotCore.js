@@ -97,6 +97,7 @@ function MessageBotCore() {
 					if (data.status == 'ok') {
 						message.value = '';
 						button.textContent = 'SEND';
+						core.pollChat(core, false);
 					} else {
 						button.textContent = 'RETRY';
 					}
@@ -139,7 +140,7 @@ function MessageBotCore() {
 		 * @param MessageBotCore core a reference to the core.
 		 * @return void
 		 */
-		core.pollChat = function pollChat(core) {
+		core.pollChat = function pollChat(core, auto = true) {
 			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
 					data.log.forEach((m) => {
@@ -151,7 +152,9 @@ function MessageBotCore() {
 					setTimeout(core.checkOnline, core.checkOnlineWait, core);
 				}
 				if (core._shouldListen) {
-					setTimeout(core.pollChat, 5000, core);
+					if (auto) {
+						setTimeout(core.pollChat, 5000, core);
+					}
 				} else {
 					core.listening = false;
 				}
