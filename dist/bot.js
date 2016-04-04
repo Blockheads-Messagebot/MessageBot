@@ -12,6 +12,7 @@ window.pollChat = function () {};
 function MessageBotCore() {
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
+		throw new Error("Not a console page. Opened at:" + document.location.href);
 	}
 
 	document.head.innerHTML += '<style>.admin > span:first-child { color: #0007CF} .mod > span:first-child { color: #08C738}</style>';
@@ -38,8 +39,7 @@ function MessageBotCore() {
 		players: {},
 		logs: [],
 		listening: false,
-		_shouldListen: false,
-		checkOnlineWait: 60000 * 5,
+		checkOnlineWait: 300000,
 		sendDelay: 1000,
 		joinFuncs: {},
 		leaveFuncs: {},
@@ -81,6 +81,7 @@ function MessageBotCore() {
 					if (data.status == 'ok') {
 						message.value = '';
 						button.textContent = 'SEND';
+						core.pollChat(core, false);
 					} else {
 						button.textContent = 'RETRY';
 					}
@@ -118,49 +119,33 @@ function MessageBotCore() {
 					data.log.forEach(function (m) {
 						core.parseMessage(m);
 					});
-				} else if (data.status == 'error') {
-					core._shouldListen = false;
-					window.worldId = core.chatId;
-					setTimeout(core.checkOnline, core.checkOnlineWait, core);
-				}
-				if (core._shouldListen) {
 					if (auto) {
 						setTimeout(core.pollChat, 5000, core);
 					}
-				} else {
-					core.listening = false;
+				} else if (data.status == 'error') {
+					if (auto) {
+						setTimeout(core.pollChat, core.checkOnlineWait, core);
+					}
 				}
 				core.chatId = data.nextId;
-			}, window.apiURL);
-		};
-
-		core.checkOnline = function checkOnline(core) {
-			ajaxJson({ command: 'status', worldId: window.worldId }, function (data) {
-				if (data.worldStatus == 'online') {
-					core.startListening();
-				} else {
-					setTimeout(core.checkOnline, core.checkOnlineWait, core);
-				}
 			}, window.apiURL);
 		};
 
 		core.parseMessage = function parseMessage(message) {
 			var _this = this;
 
-			function getUserName(message, core) {
+			var getUserName = function getUserName(message) {
 				for (var i = 18; i > 4; i--) {
 					var possibleName = message.substring(0, message.lastIndexOf(': ', i));
-					if (core.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
+					if (_this.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
 						return { name: possibleName, safe: true };
 					}
 				}
 				return { name: message.substring(0, message.lastIndexOf(': ', 18)), safe: false };
-			}
-			function rebuildStaffList(core) {
-				core.staffList = core.adminList.concat(core.modList);
-			}
+			};
 
 			var name, ip;
+
 			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
 				this.addMsgToPage(message);
 
@@ -194,7 +179,7 @@ function MessageBotCore() {
 					_this.leaveFuncs[key]({ name: name, ip: ip });
 				});
 			} else if (message.indexOf(': ') >= 0) {
-				var messageData = getUserName(message, this);
+				var messageData = getUserName(message);
 				messageData.message = message.substring(messageData.name.length + 2);
 				this.addMsgToPage(messageData);
 
@@ -218,6 +203,8 @@ function MessageBotCore() {
 
 	{
 		core.addMsgToPage = function addMsgToPage(msg) {
+			var html = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
 			var elclass = '';
 			var chatEl = document.getElementById('chatBox');
 
@@ -238,7 +225,11 @@ function MessageBotCore() {
 				msgElIn.textContent = ': ' + msg.message;
 				msgEl.appendChild(msgElIn);
 			} else {
-				msgEl.textContent = msg;
+				if (html) {
+					msgEl.innerHTML = msg;
+				} else {
+					msgEl.textContent = msg;
+				}
 			}
 			var chat = document.querySelector('#chat > tbody');
 			var position = chatEl.scrollHeight - chatEl.scrollTop;
@@ -275,11 +266,6 @@ function MessageBotCore() {
 			this.chatId = window.chatId;
 			this.pollChat(this);
 			this.listening = true;
-			this._shouldListen = true;
-		};
-
-		core.stopListening = function stopListening() {
-			this._shouldListen = false;
 		};
 	}
 
@@ -450,6 +436,11 @@ function MessageBotCore() {
 	core.postMessage();
 
 	core.staffChangeCheck = function staffChangeCheck(data) {
+		var _this3 = this;
+
+		var rebuildStaffList = function rebuildStaffList() {
+			_this3.staffList = _this3.adminList.concat(_this3.modList);
+		};
 		var messageData = typeof data == 'string' ? { name: 'SERVER', message: data } : data;
 		if (this.adminList.indexOf(messageData.name) != -1) {
 			var targetName;
@@ -458,28 +449,28 @@ function MessageBotCore() {
 					targetName = messageData.message.toLocaleUpperCase().substring(7);
 					if (this.adminList.indexOf(targetName) < 0) {
 						this.adminList.push(targetName);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 					break;
 				case '/UNADMIN':
 					targetName = messageData.message.toLocaleUpperCase().substring(10);
 					if (this.adminList.indexOf(targetName) != -1) {
 						this.modList.splice(this.adminList.indexOf(targetName), 1);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 					break;
 				case '/MOD':
 					targetName = messageData.message.toLocaleUpperCase().substring(5);
 					if (this.modList.indexOf(targetName) < 0) {
 						this.modList.push(targetName);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 					break;
 				case '/UNMOD':
 					targetName = messageData.message.toLocaleUpperCase().substring(7);
 					if (this.modList.indexOf(targetName) != -1) {
 						this.modList.splice(this.modList.indexOf(targetName), 1);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 			}
 		}
@@ -504,7 +495,7 @@ function MessageBot() {
 
 	{
 		bot.saveConfig = function saveConfig() {
-			var _this3 = this;
+			var _this4 = this;
 
 			var utilSaveFunc = function utilSaveFunc(wrapper, saveTo) {
 				var wrappers = wrapper.children;
@@ -522,7 +513,7 @@ function MessageBot() {
 						tmpMsgObj.joins_high = joinCounts[1].value;
 					}
 					if (wrapper.id == 'tMsgs') {
-						if (_this3.preferences.disableTrim) {
+						if (_this4.preferences.disableTrim) {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
 						} else {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value.trim();
@@ -685,7 +676,7 @@ function MessageBot() {
 
 	{
 		bot.initStore = function initStore(data) {
-			var _this4 = this;
+			var _this5 = this;
 
 			var content = document.getElementById('extTemplate').content;
 
@@ -694,7 +685,7 @@ function MessageBot() {
 					content.querySelector('h4').textContent = extension.title;
 					content.querySelector('span').innerHTML = extension.snippet;
 					content.querySelector('.ext').setAttribute('extension-id', extension.id);
-					content.querySelector('button').textContent = _this4.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
+					content.querySelector('button').textContent = _this5.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
 
 					document.getElementById('exts').appendChild(document.importNode(content, true));
 				});
@@ -729,7 +720,7 @@ function MessageBot() {
 		};
 
 		bot.removeExtension = function removeExtension(extensionId) {
-			var _this5 = this;
+			var _this6 = this;
 
 			if (typeof window[extensionId] != 'undefined') {
 				if (typeof window[extensionId].uninstall == 'function') {
@@ -738,7 +729,7 @@ function MessageBot() {
 
 				this.removeTab('settings_' + extensionId);
 				Object.keys(window[extensionId].mainTabs).forEach(function (key) {
-					_this5.removeTab('main_' + extensionId + '_' + key);
+					_this6.removeTab('main_' + extensionId + '_' + key);
 				});
 				window[extensionId] = undefined;
 			}
@@ -762,12 +753,12 @@ function MessageBot() {
 		};
 
 		bot.extensionList = function extensionList(extensions) {
-			var _this6 = this;
+			var _this7 = this;
 
 			var exts = JSON.parse(extensions),
 			    tempHTML = '<ul style="margin-left:1.5em;">';
 			exts.forEach(function (ext) {
-				tempHTML += '<li>' + _this6.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
+				tempHTML += '<li>' + _this7.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
 			});
 			tempHTML += '</ul>';
 
@@ -809,23 +800,9 @@ function MessageBot() {
 
 	{
 		bot.onJoin = function onJoin(data) {
-			var _this7 = this;
-
-			this.joinArr.forEach(function (msg) {
-				if (_this7.checkGroup(msg.group, data.name) && !_this7.checkGroup(msg.not_group, data.name) && _this7.checkJoins(msg.joins_low, msg.joins_high, _this7.core.getJoins(data.name))) {
-					var toSend = _this7.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = _this7.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = _this7.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = _this7.replaceAll(toSend, '{{ip}}', data.ip);
-					_this7.core.send(toSend);
-				}
-			});
-		};
-
-		bot.onLeave = function onLeave(data) {
 			var _this8 = this;
 
-			this.leaveArr.forEach(function (msg) {
+			this.joinArr.forEach(function (msg) {
 				if (_this8.checkGroup(msg.group, data.name) && !_this8.checkGroup(msg.not_group, data.name) && _this8.checkJoins(msg.joins_low, msg.joins_high, _this8.core.getJoins(data.name))) {
 					var toSend = _this8.replaceAll(msg.message, '{{NAME}}', data.name);
 					toSend = _this8.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
@@ -836,23 +813,37 @@ function MessageBot() {
 			});
 		};
 
-		bot.onTrigger = function onTrigger(data) {
+		bot.onLeave = function onLeave(data) {
 			var _this9 = this;
 
+			this.leaveArr.forEach(function (msg) {
+				if (_this9.checkGroup(msg.group, data.name) && !_this9.checkGroup(msg.not_group, data.name) && _this9.checkJoins(msg.joins_low, msg.joins_high, _this9.core.getJoins(data.name))) {
+					var toSend = _this9.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = _this9.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = _this9.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = _this9.replaceAll(toSend, '{{ip}}', data.ip);
+					_this9.core.send(toSend);
+				}
+			});
+		};
+
+		bot.onTrigger = function onTrigger(data) {
+			var _this10 = this;
+
 			var triggerMatch = function triggerMatch(trigger, message) {
-				if (_this9.preferences.regexTriggers) {
+				if (_this10.preferences.regexTriggers) {
 					return new RegExp(trigger, 'i').test(message);
 				}
 				return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
 			};
 			this.triggerArr.forEach(function (msg) {
-				if (triggerMatch(msg.trigger, data.message) && _this9.checkGroup(msg.group, data.name) && !_this9.checkGroup(msg.not_group, data.name) && _this9.checkJoins(msg.joins_low, msg.joins_high, _this9.core.getJoins(data.name))) {
+				if (triggerMatch(msg.trigger, data.message) && _this10.checkGroup(msg.group, data.name) && !_this10.checkGroup(msg.not_group, data.name) && _this10.checkJoins(msg.joins_low, msg.joins_high, _this10.core.getJoins(data.name))) {
 
-					var toSend = _this9.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = _this9.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = _this9.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = _this9.replaceAll(toSend, '{{ip}}', _this9.core.getIP(data.name));
-					_this9.core.send(toSend);
+					var toSend = _this10.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = _this10.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = _this10.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = _this10.replaceAll(toSend, '{{ip}}', _this10.core.getIP(data.name));
+					_this10.core.send(toSend);
 				}
 			});
 		};

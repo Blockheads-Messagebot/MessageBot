@@ -1,16 +1,19 @@
 /*jshint
 	browser:	true,
 	devel:		true,
+	undef:		true,
+	unused:		true,
 	esversion: 6
 */
 /*global
 	ajaxJson
 */
 
-function MessageBotCore() {
+function MessageBotCore() { //jshint ignore:line
 	//Avoid trying to launch the bot on a non-console page.
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
+		throw new Error("Not a console page. Opened at:" + document.location.href);
 	}
 
 	//For colored chat
@@ -41,8 +44,7 @@ function MessageBotCore() {
 			players: {},
 			logs: [],
 			listening: false,
-			_shouldListen: false,
-			checkOnlineWait: 60000 * 5,
+			checkOnlineWait: 300000,
 			sendDelay: 1000,
 			joinFuncs: {},
 			leaveFuncs: {},
@@ -146,34 +148,15 @@ function MessageBotCore() {
 					data.log.forEach((m) => {
 						core.parseMessage(m);
 					});
-				} else if (data.status == 'error') {
-					core._shouldListen = false;
-					window.worldId = core.chatId;
-					setTimeout(core.checkOnline, core.checkOnlineWait, core);
-				}
-				if (core._shouldListen) {
 					if (auto) {
 						setTimeout(core.pollChat, 5000, core);
 					}
-				} else {
-					core.listening = false;
+				} else if (data.status == 'error') {
+					if (auto) {
+						setTimeout(core.pollChat, core.checkOnlineWait, core);
+					}
 				}
 				core.chatId = data.nextId;
-			}, window.apiURL);
-		};
-
-		/**
-		 * Internal method. Used to check if the server has come back online
-		 * after going offline due to no players. If the server is online the
-		 * bot will start polling chat again. If not, it checks again later.
-		 */
-		core.checkOnline = function checkOnline(core) {
-			ajaxJson({ command: 'status', worldId: window.worldId }, function (data) {
-				if (data.worldStatus == 'online') {
-					core.startListening();
-				} else {
-					setTimeout(core.checkOnline, core.checkOnlineWait, core);
-				}
 			}, window.apiURL);
 		};
 
@@ -181,21 +164,19 @@ function MessageBotCore() {
 		 * Used to parse messages recieved from the server into objects which can be used. Also calls appropriate listeners.
 		 */
 		core.parseMessage = function parseMessage(message) {
-			function getUserName(message, core) {
-				for (var i = 18; i > 4; i--) {
-					var possibleName = message.substring(0, message.lastIndexOf(': ', i));
-					if (core.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
+			let getUserName = (message) => {
+				for (let i = 18; i > 4; i--) {
+					let possibleName = message.substring(0, message.lastIndexOf(': ', i));
+					if (this.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
 						return { name: possibleName, safe: true };
 					}
 				}
 				//The user is not in our online list. Use the old substring method without checking that the user is online
 				return { name: message.substring(0, message.lastIndexOf(': ', 18)), safe: false };
-			}
-			function rebuildStaffList(core) {
-				core.staffList = core.adminList.concat(core.modList);
-			}
+			};
 
 			var name, ip;
+
 			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
 				this.addMsgToPage(message);
 
@@ -234,7 +215,7 @@ function MessageBotCore() {
 				});
 			} else if (message.indexOf(': ') >= 0) {
 				//A chat message - server or player?
-				var messageData = getUserName(message, this);
+				var messageData = getUserName(message);
 				messageData.message = message.substring(messageData.name.length + 2);
 				this.addMsgToPage(messageData);
 				//messageData resembles this:
@@ -268,7 +249,7 @@ function MessageBotCore() {
 		 * @param string|object Either an object with properties name and message, or a string
 		 * @return void
 		 */
-		core.addMsgToPage = function addMsgToPage(msg) {
+		core.addMsgToPage = function addMsgToPage(msg, html = false) {
 			var elclass = '';
 			var chatEl = document.getElementById('chatBox');
 
@@ -289,7 +270,11 @@ function MessageBotCore() {
 				msgElIn.textContent = ': ' + msg.message;
 				msgEl.appendChild(msgElIn);
 			} else {
-				msgEl.textContent = msg;
+				if (html) {
+					msgEl.innerHTML = msg;
+				} else {
+					msgEl.textContent = msg;
+				}
 			}
 			var chat = document.querySelector('#chat > tbody');
 			var position = chatEl.scrollHeight - chatEl.scrollTop;
@@ -346,14 +331,6 @@ function MessageBotCore() {
 			this.chatId = window.chatId;
 			this.pollChat(this);
 			this.listening = true;
-			this._shouldListen = true;
-		};
-
-		/**
-		 * Method used to tell the bot to stop listening to chat
-		 */
-		core.stopListening = function stopListening() {
-			this._shouldListen = false;
 		};
 	}
 
@@ -606,6 +583,9 @@ function MessageBotCore() {
 
 	//Start listening for admin / mod changes
 	core.staffChangeCheck = function staffChangeCheck(data) {
+		let rebuildStaffList = () => {
+			this.staffList = this.adminList.concat(this.modList);
+		};
 		let messageData = (typeof data == 'string') ? {name: 'SERVER', message: data} : data;
 		if (this.adminList.indexOf(messageData.name) != -1) {
 			var targetName;
@@ -614,28 +594,28 @@ function MessageBotCore() {
 					targetName = messageData.message.toLocaleUpperCase().substring(7);
 					if (this.adminList.indexOf(targetName) < 0) {
 						this.adminList.push(targetName);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 					break;
 				case '/UNADMIN':
 					targetName = messageData.message.toLocaleUpperCase().substring(10);
 					if (this.adminList.indexOf(targetName) != -1) {
 						this.modList.splice(this.adminList.indexOf(targetName), 1);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 					break;
 				case '/MOD':
 					targetName = messageData.message.toLocaleUpperCase().substring(5);
 					if (this.modList.indexOf(targetName) < 0) {
 						this.modList.push(targetName);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 					break;
 				case '/UNMOD':
 					targetName = messageData.message.toLocaleUpperCase().substring(7);
 					if (this.modList.indexOf(targetName) != -1) {
 						this.modList.splice(this.modList.indexOf(targetName), 1);
-						rebuildStaffList(this);
+						rebuildStaffList();
 					}
 			}
 		}
