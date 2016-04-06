@@ -9,6 +9,16 @@ if (document.querySelector('script[crossorigin="true"]') === null) {
 
 window.pollChat = function () {};
 
+var bot = {};
+
+window.onerror = function (text, file, line, column) {
+	if (!bot.devMode && text != 'Script error.') {
+		var sc = document.createElement('script');
+		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version + '&wId=' + encodeURIComponent(window.worldId) + '&wName=' + encodeURIComponent(bot.core.worldName) + '&text=' + encodeURIComponent(text) + '&file=' + encodeURIComponent(file) + '&line=' + line + '&col=' + (column || 0);
+		document.head.appendChild(sc);
+	}
+};
+
 function MessageBotCore() {
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
@@ -77,7 +87,7 @@ function MessageBotCore() {
 				button.setAttribute('disabled', '1');
 				message.setAttribute('disabled', '1');
 				button.textContent = 'SENDING';
-				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, function (data) {
+				core.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg }).then(function (data) {
 					if (data.status == 'ok') {
 						message.value = '';
 						button.textContent = 'SEND';
@@ -89,9 +99,11 @@ function MessageBotCore() {
 					button.removeAttribute('disabled');
 					message.removeAttribute('disabled');
 					message.focus();
-				}, window.apiURL);
+				}).catch(function (error) {
+					core.addMessageToPage('<span style="color:#f00;">Error: ' + error + '</span>', true);
+				});
 				if (tmpMsg.indexOf('/') === 0) {
-					core.addMsgToPage({ name: 'SERVER', message: tmpMsg });
+					core.addMessageToPage({ name: 'SERVER', message: tmpMsg });
 				}
 			} else {
 				button.textContent = 'CANCELED';
@@ -114,7 +126,7 @@ function MessageBotCore() {
 		core.pollChat = function pollChat(core) {
 			var auto = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
+			core.ajax.postJSON(window.apiURL, { command: 'getchat', worldId: window.worldId, firstId: core.chatId }).then(function (data) {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
 					data.log.forEach(function (m) {
 						core.parseMessage(m);
@@ -128,7 +140,9 @@ function MessageBotCore() {
 					}
 				}
 				core.chatId = data.nextId;
-			}, window.apiURL);
+			}).catch(function (error) {
+				core.addMessageToPage('<span style="color:#f00;">Error: ' + error + '.</span>', true);
+			});
 		};
 
 		core.parseMessage = function parseMessage(message) {
@@ -147,7 +161,7 @@ function MessageBotCore() {
 			var name, ip;
 
 			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
-				this.addMsgToPage(message);
+				this.addMessageToPage(message);
 
 				name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
 				ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
@@ -166,7 +180,7 @@ function MessageBotCore() {
 					_this.joinFuncs[key]({ name: name, ip: ip });
 				});
 			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
-				this.addMsgToPage(message);
+				this.addMessageToPage(message);
 
 				name = message.substring(this.worldName.length + 23);
 				ip = this.getIP(name);
@@ -181,7 +195,7 @@ function MessageBotCore() {
 			} else if (message.indexOf(': ') >= 0) {
 				var messageData = getUserName(message);
 				messageData.message = message.substring(messageData.name.length + 2);
-				this.addMsgToPage(messageData);
+				this.addMessageToPage(messageData);
 
 				if (messageData.name == 'SERVER') {
 					Object.keys(this.serverFuncs).forEach(function (key) {
@@ -193,7 +207,7 @@ function MessageBotCore() {
 					});
 				}
 			} else {
-				this.addMsgToPage(message);
+				this.addMessageToPage(message);
 				Object.keys(this.otherFuncs).forEach(function (key) {
 					_this.otherFuncs[key](message);
 				});
@@ -202,7 +216,7 @@ function MessageBotCore() {
 	}
 
 	{
-		core.addMsgToPage = function addMsgToPage(msg) {
+		core.addMessageToPage = function addMessageToPage(msg) {
 			var html = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
 			var elclass = '';
@@ -349,73 +363,127 @@ function MessageBotCore() {
 		};
 	}
 
-	(function (core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function () {
-			core.logs = xhr.responseText.split('\n');
-			xhr.responseText.split('\n').forEach(function (line) {
-				if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
-					var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
-					var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+	core.ajax = function () {
+		function xhr(protocol) {
+			var url = arguments.length <= 1 || arguments[1] === undefined ? '/' : arguments[1];
+			var paramObj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-					if (core.players.hasOwnProperty(player)) {
-						core.players[player].joins++;
+			var paramStr = Object.keys(paramObj).map(function (k) {
+				return encodeURIComponent(k) + '=' + encodeURIComponent(paramObj[k]);
+			}).join('&');
+			return new Promise(function (resolve, reject) {
+				var req = new XMLHttpRequest();
+				req.open(protocol, url);
+				req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+				if (protocol == 'POST') {
+					req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				}
+
+				req.onload = function () {
+					if (req.status == 200) {
+						resolve(req.response);
 					} else {
-						core.players[player] = {};
-						core.players[player].ips = [];
-						core.players[player].joins = 1;
+						reject(Error(req.statusText));
 					}
-					core.players[player].ip = ip;
-					if (core.players[player].ips.indexOf(ip) < 0) {
-						core.players[player].ips.push(ip);
-					}
+				};
+				req.onerror = function () {
+					reject(Error("Network Error"));
+				};
+				if (paramStr) {
+					req.send(paramStr);
+				} else {
+					req.send();
 				}
 			});
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/logs/' + window.worldId, true);
-		xhr.send();
-	})(core);
+		}
 
-	(function (core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function () {
-			var doc = new DOMParser().parseFromString(xhr.responseText, 'text/html');
-			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
-			core.adminList.push(core.ownerName);
-			core.adminList.push('SERVER');
-			core.adminList.forEach(function (admin, index) {
-				core.adminList[index] = admin.toUpperCase();
-			});
-			var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
-			mList.forEach(function (mod, index) {
-				mList[index] = mod.toUpperCase();
-			});
-			core.modList = mList.filter(function (mod) {
-				return core.adminList.indexOf(mod) < 0;
-			});
+		function get() {
+			var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
+			var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-			core.staffList = core.adminList.concat(core.modList);
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/lists/' + window.worldId, true);
-		xhr.send();
-	})(core);
+			return xhr('GET', url, paramObj);
+		}
 
-	(function (core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function () {
-			var doc = new DOMParser().parseFromString(xhr.responseText, 'text/html');
-			core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
-			var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
-			var playerElemsCount = playerElems.length;
-			for (var i = 0; i < playerElemsCount; i++) {
-				if (core.online.indexOf(playerElems[i].textContent) < 0) {
-					core.online.push(playerElems[i].textContent);
+		function getJSON() {
+			var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
+			var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+			return get(url, paramObj).then(JSON.parse);
+		}
+
+		function post() {
+			var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
+			var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+			return xhr('POST', url, paramObj);
+		}
+
+		function postJSON() {
+			var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
+			var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+			return post(url, paramObj).then(JSON.parse);
+		}
+
+		return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
+	}();
+
+	core.ajax.get('/logs/$(window.worldId)').then(function (response) {
+		core.logs = response.split('\n');
+		core.logs.forEach(function (line) {
+			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
+				var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
+				var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+
+				if (core.players.hasOwnProperty(player)) {
+					core.players[player].joins++;
+				} else {
+					core.players[player] = {};
+					core.players[player].ips = [];
+					core.players[player].joins = 1;
+				}
+				core.players[player].ip = ip;
+				if (core.players[player].ips.indexOf(ip) < 0) {
+					core.players[player].ips.push(ip);
 				}
 			}
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/' + window.worldId, true);
-		xhr.send();
-	})(core);
+		});
+	});
+
+	core.ajax.get('/worlds/lists/$(window.worldId)').then(function (response) {
+		var doc = new DOMParser().parseFromString(response, 'text/html');
+		core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
+		core.adminList.push(core.ownerName);
+		core.adminList.push('SERVER');
+		core.adminList.forEach(function (admin, index) {
+			core.adminList[index] = admin.toUpperCase();
+		});
+		var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
+		mList.forEach(function (mod, index) {
+			mList[index] = mod.toUpperCase();
+		});
+		core.modList = mList.filter(function (mod) {
+			return core.adminList.indexOf(mod) < 0;
+		});
+
+		core.staffList = core.adminList.concat(core.modList);
+	});
+
+	core.ajax.get('/worlds/$(window.worldId)').then(function (response) {
+		var doc = new DOMParser().parseFromString(response, 'text/html');
+		core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
+		var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
+		var playerElemsCount = playerElems.length;
+		for (var i = 0; i < playerElemsCount; i++) {
+			if (core.online.indexOf(playerElems[i].textContent) < 0) {
+				core.online.push(playerElems[i].textContent);
+			}
+		}
+
+		var s = document.createElement('script');
+		s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(core.ownerName) + '&id=' + window.worldId + '&world=' + encodeURIComponent(core.worldName);
+		document.head.appendChild(s);
+	});
 
 	core.postMessage = function postMessage() {
 		var _this2 = this;
@@ -428,7 +496,7 @@ function MessageBotCore() {
 				}
 			});
 			if (tmpMsg) {
-				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, undefined, window.apiURL);
+				this.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg });
 			}
 		}
 		setTimeout(this.postMessage.bind(this), this.sendDelay);
@@ -1155,21 +1223,5 @@ function MessageBotExtension(namespace) {
 	return extension;
 }
 
-var bot = {};
-
-window.onerror = function (text, file, line, column) {
-	if (!bot.devMode && text != 'Script error.') {
-		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version + '&wId=' + encodeURIComponent(window.worldId) + '&wName=' + encodeURIComponent(bot.core.worldName) + '&text=' + encodeURIComponent(text) + '&file=' + encodeURIComponent(file) + '&line=' + line + '&col=' + (column || 0);
-		document.head.appendChild(sc);
-	}
-};
-
 bot = MessageBot();
 bot.start();
-
-(function () {
-	var s = document.createElement('script');
-	s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(bot.core.ownerName) + '&id=' + window.worldId + '&world=' + encodeURIComponent(bot.core.worldName);
-	document.head.appendChild(s);
-})();

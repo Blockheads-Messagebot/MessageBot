@@ -5,9 +5,6 @@
 	unused:		true,
 	esversion: 6
 */
-/*global
-	ajaxJson
-*/
 
 function MessageBotCore() { //jshint ignore:line
 	//Avoid trying to launch the bot on a non-console page.
@@ -95,7 +92,7 @@ function MessageBotCore() { //jshint ignore:line
 				button.setAttribute('disabled', '1');
 				message.setAttribute('disabled', '1');
 				button.textContent = 'SENDING';
-				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, function (data) {
+				core.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg }).then(function (data) {
 					if (data.status == 'ok') {
 						message.value = '';
 						button.textContent = 'SEND';
@@ -107,9 +104,11 @@ function MessageBotCore() { //jshint ignore:line
 					button.removeAttribute('disabled');
 					message.removeAttribute('disabled');
 					message.focus();
-				}, window.apiURL);
+				}).catch(function(error) {
+					core.addMessageToPage(`<span style="color:#f00;">Error: ${error}</span>`, true);
+				});
 				if (tmpMsg.indexOf('/') === 0) {
-					core.addMsgToPage({name: 'SERVER', message: tmpMsg});
+					core.addMessageToPage({name: 'SERVER', message: tmpMsg});
 				}
 			} else {
 				button.textContent = 'CANCELED';
@@ -143,7 +142,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.pollChat = function pollChat(core, auto = true) {
-			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
+			core.ajax.postJSON(window.apiURL, { command: 'getchat', worldId: window.worldId, firstId: core.chatId }).then(function(data) {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
 					data.log.forEach((m) => {
 						core.parseMessage(m);
@@ -157,7 +156,10 @@ function MessageBotCore() { //jshint ignore:line
 					}
 				}
 				core.chatId = data.nextId;
-			}, window.apiURL);
+			}).catch(function(error) {
+				//We are offline.
+				core.addMessageToPage(`<span style="color:#f00;">Error: ${error}.</span>`, true);
+			});
 		};
 
 		/**
@@ -178,7 +180,7 @@ function MessageBotCore() { //jshint ignore:line
 			var name, ip;
 
 			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
-				this.addMsgToPage(message);
+				this.addMessageToPage(message);
 
 				name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
 				ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
@@ -200,7 +202,7 @@ function MessageBotCore() { //jshint ignore:line
 					this.joinFuncs[key]({ name: name, ip: ip });
 				});
 			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
-				this.addMsgToPage(message);
+				this.addMessageToPage(message);
 
 				name = message.substring(this.worldName.length + 23);
 				ip = this.getIP(name);
@@ -217,7 +219,7 @@ function MessageBotCore() { //jshint ignore:line
 				//A chat message - server or player?
 				var messageData = getUserName(message);
 				messageData.message = message.substring(messageData.name.length + 2);
-				this.addMsgToPage(messageData);
+				this.addMessageToPage(messageData);
 				//messageData resembles this:
 				//	{name:"ABC123", message:"Hello there!", safe:true}
 
@@ -233,7 +235,7 @@ function MessageBotCore() { //jshint ignore:line
 					});
 				}
 			} else {
-				this.addMsgToPage(message);
+				this.addMessageToPage(message);
 				Object.keys(this.otherFuncs).forEach((key) => {
 					this.otherFuncs[key](message);
 				});
@@ -249,7 +251,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param string|object Either an object with properties name and message, or a string
 		 * @return void
 		 */
-		core.addMsgToPage = function addMsgToPage(msg, html = false) {
+		core.addMessageToPage = function addMessageToPage(msg, html = false) {
 			var elclass = '';
 			var chatEl = document.getElementById('chatBox');
 
@@ -493,76 +495,151 @@ function MessageBotCore() { //jshint ignore:line
 		};
 	}
 
-	//Get the player list
-	(function(core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = (function() {
-			core.logs = xhr.responseText.split('\n');
-			xhr.responseText.split('\n').forEach((line) => {
-				if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
-					var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
-					var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+	//For making requests
+	core.ajax = (function() {
+		/**
+		 * Helper function to make XHR requests.
+		 *
+		 * @param string protocol
+		 * @param string url
+		 * @param object paramObj
+		 * @return Promise
+		 */
+		function xhr(protocol, url = '/', paramObj = {}) {
+			var paramStr = Object.keys(paramObj).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(paramObj[k])}`).join('&');
+			return new Promise(function(resolve, reject) {
+				var req = new XMLHttpRequest();
+				req.open(protocol, url);
+				req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+				if (protocol == 'POST') {
+					req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				}
 
-					if (core.players.hasOwnProperty(player)) {
-						core.players[player].joins++;
+				req.onload = function() {
+					if (req.status == 200) {
+						resolve(req.response);
 					} else {
-						core.players[player] = {};
-						core.players[player].ips = [];
-						core.players[player].joins = 1;
+						reject(Error(req.statusText));
 					}
-					core.players[player].ip = ip;
-					if (core.players[player].ips.indexOf(ip) < 0) {
-						core.players[player].ips.push(ip);
-					}
+				};
+				// Handle network errors
+				req.onerror = function() {
+					reject(Error("Network Error"));
+				};
+				if (paramStr) {
+					req.send(paramStr);
+				} else {
+					req.send();
 				}
 			});
-		});
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/logs/' + window.worldId, true);
-		xhr.send();
-	}(core));
+		}
 
-	//Get staff lists
-	(function(core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function() {
-			var doc = (new DOMParser()).parseFromString(xhr.responseText, 'text/html');
-			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
-			core.adminList.push(core.ownerName);
-			core.adminList.push('SERVER');
-			core.adminList.forEach((admin, index) => {
-				core.adminList[index] = admin.toUpperCase();
-			});
-			var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
-			mList.forEach((mod, index) => {
-				mList[index] = mod.toUpperCase();
-			});
-			core.modList = mList.filter(function (mod) {
-				return core.adminList.indexOf(mod) < 0;
-			});
+		/**
+		 * Function to GET a page. Passes the response of the XHR in the resolve promise.
+		 *
+		 * @param string url
+		 * @param string paramStr
+		 * @return Promise
+		 */
+		function get(url = '/', paramObj = {}) {
+			return xhr('GET', url, paramObj);
+		}
 
-			core.staffList = core.adminList.concat(core.modList);
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/lists/' + window.worldId, true);
-		xhr.send();
-	}(core));
+		/**
+		 * Returns a JSON object in the promise resolve method.
+ 		 *
+		 * @param string url
+		 * @param object paramObj
+		 * @return Promise
+		 */
+		function getJSON(url = '/', paramObj = {}) {
+			return get(url, paramObj).then(JSON.parse);
+		}
 
-	//Get online players
-	(function(core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function () {
-			var doc = (new DOMParser()).parseFromString(xhr.responseText, 'text/html');
-			core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
-			var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
-			var playerElemsCount = playerElems.length;
-			for (var i = 0; i < playerElemsCount; i++) {
-				if (core.online.indexOf(playerElems[i].textContent) < 0) {
-					core.online.push(playerElems[i].textContent);
+		/**
+		 * Function to make a post request
+		 *
+		 * @param string url
+		 * @param object paramObj
+		 * @return Promise
+		 */
+		function post(url = '/', paramObj = {}) {
+			return xhr('POST', url, paramObj);
+		}
+
+		/**
+		 * Function to fetch JSON from a page through post.
+		 *
+		 * @param string url
+		 * @param string paramObj
+		 * @return Promise
+		 */
+		function postJSON(url = '/', paramObj = {}) {
+			return post(url, paramObj).then(JSON.parse);
+		}
+
+		return {xhr, get, getJSON, post, postJSON};
+	}());
+
+	//Get the player list
+	core.ajax.get(`/logs/$(window.worldId)`).then(function(response) {
+		core.logs = response.split('\n');
+		core.logs.forEach((line) => {
+			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
+				var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
+				var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+
+				if (core.players.hasOwnProperty(player)) {
+					core.players[player].joins++;
+				} else {
+					core.players[player] = {};
+					core.players[player].ips = [];
+					core.players[player].joins = 1;
+				}
+				core.players[player].ip = ip;
+				if (core.players[player].ips.indexOf(ip) < 0) {
+					core.players[player].ips.push(ip);
 				}
 			}
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/' + window.worldId, true);
-		xhr.send();
-	}(core));
+		});
+	});
+
+	//Get staff lists
+	core.ajax.get(`/worlds/lists/$(window.worldId)`).then(function(response) {
+		var doc = (new DOMParser()).parseFromString(response, 'text/html');
+		core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
+		core.adminList.push(core.ownerName);
+		core.adminList.push('SERVER');
+		core.adminList.forEach((admin, index) => {
+			core.adminList[index] = admin.toUpperCase();
+		});
+		var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
+		mList.forEach((mod, index) => {
+			mList[index] = mod.toUpperCase();
+		});
+		core.modList = mList.filter(function (mod) {
+			return core.adminList.indexOf(mod) < 0;
+		});
+
+		core.staffList = core.adminList.concat(core.modList);
+	});
+
+	//Get online players
+	core.ajax.get(`/worlds/$(window.worldId)`).then(function(response) {
+		var doc = (new DOMParser()).parseFromString(response, 'text/html');
+		core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
+		var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
+		var playerElemsCount = playerElems.length;
+		for (var i = 0; i < playerElemsCount; i++) {
+			if (core.online.indexOf(playerElems[i].textContent) < 0) {
+				core.online.push(playerElems[i].textContent);
+			}
+		}
+
+		var s = document.createElement('script');
+		s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(core.ownerName) + '&id=' + window.worldId + '&world=' + encodeURIComponent(core.worldName);
+		document.head.appendChild(s);
+	});
 
 	//Start listening for messages to send
 	core.postMessage = function postMessage() {
@@ -574,7 +651,7 @@ function MessageBotCore() { //jshint ignore:line
 				}
 			});
 			if (tmpMsg) {
-				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, undefined, window.apiURL);
+				this.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg });
 			}
 		}
 		setTimeout(this.postMessage.bind(this), this.sendDelay);
