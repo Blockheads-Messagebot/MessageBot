@@ -428,7 +428,7 @@ function MessageBotCore() {
 		return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
 	}();
 
-	core.ajax.get('/logs/$(window.worldId)').then(function (response) {
+	core.ajax.get('/logs/' + window.worldId).then(function (response) {
 		core.logs = response.split('\n');
 		core.logs.forEach(function (line) {
 			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
@@ -450,7 +450,7 @@ function MessageBotCore() {
 		});
 	});
 
-	core.ajax.get('/worlds/lists/$(window.worldId)').then(function (response) {
+	core.ajax.get('/worlds/lists/' + window.worldId).then(function (response) {
 		var doc = new DOMParser().parseFromString(response, 'text/html');
 		core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
 		core.adminList.push(core.ownerName);
@@ -469,7 +469,7 @@ function MessageBotCore() {
 		core.staffList = core.adminList.concat(core.modList);
 	});
 
-	core.ajax.get('/worlds/$(window.worldId)').then(function (response) {
+	core.ajax.get('/worlds/' + window.worldId).then(function (response) {
 		var doc = new DOMParser().parseFromString(response, 'text/html');
 		core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
 		var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');

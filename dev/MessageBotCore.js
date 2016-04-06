@@ -582,7 +582,7 @@ function MessageBotCore() { //jshint ignore:line
 	}());
 
 	//Get the player list
-	core.ajax.get(`/logs/$(window.worldId)`).then(function(response) {
+	core.ajax.get(`/logs/${window.worldId}`).then(function(response) {
 		core.logs = response.split('\n');
 		core.logs.forEach((line) => {
 			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
@@ -605,7 +605,7 @@ function MessageBotCore() { //jshint ignore:line
 	});
 
 	//Get staff lists
-	core.ajax.get(`/worlds/lists/$(window.worldId)`).then(function(response) {
+	core.ajax.get(`/worlds/lists/${window.worldId}`).then(function(response) {
 		var doc = (new DOMParser()).parseFromString(response, 'text/html');
 		core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
 		core.adminList.push(core.ownerName);
@@ -625,7 +625,7 @@ function MessageBotCore() { //jshint ignore:line
 	});
 
 	//Get online players
-	core.ajax.get(`/worlds/$(window.worldId)`).then(function(response) {
+	core.ajax.get(`/worlds/${window.worldId}`).then(function(response) {
 		var doc = (new DOMParser()).parseFromString(response, 'text/html');
 		core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
 		var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
