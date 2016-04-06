@@ -582,7 +582,7 @@ function MessageBotCore() { //jshint ignore:line
 	}());
 
 	//Get the player list
-	core.ajax.get(`/logs/${window.worldId}`).then(function(response) {
+	core.ajax.get(`/worlds/logs/${window.worldId}`).then(function(response) {
 		core.logs = response.split('\n');
 		core.logs.forEach((line) => {
 			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
