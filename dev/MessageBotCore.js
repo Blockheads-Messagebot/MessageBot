@@ -1,11 +1,3 @@
-/*jshint
-	browser:	true,
-	devel:		true,
-	undef:		true,
-	unused:		true,
-	esversion: 6
-*/
-
 function MessageBotCore() { //jshint ignore:line
 	//Avoid trying to launch the bot on a non-console page.
 	if (!document.getElementById('messageText')) {
@@ -18,20 +10,6 @@ function MessageBotCore() { //jshint ignore:line
 	//We are replacing these with our own functions.
 	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
 	document.getElementById('messageText').setAttribute('onkeydown',  'bot.core.enterCheck(event, bot.core)');
-
-	//fix setTimeout on IE 9
-	(function() {
-		if (document.all && !window.setTimeout.isPolyfill) {
-			var __nativeST__ = window.setTimeout;
-			window.setTimeout = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
-				var aArgs = Array.prototype.slice.call(arguments, 2);
-				return __nativeST__(vCallback instanceof Function ? function () {
-					vCallback.apply(null, aArgs);
-				} : vCallback, nDelay);
-			};
-			window.setTimeout.isPolyfill = true;
-		}
-	}());
 
 	//Defaults
 	var core = {
@@ -57,7 +35,7 @@ function MessageBotCore() { //jshint ignore:line
 			};
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
-	core.chatId = window.chatId;
+	core.chatId = window.chatId || 0;
 
 	//In regards to sending chat
 	{
@@ -72,14 +50,34 @@ function MessageBotCore() { //jshint ignore:line
 		};
 
 		/**
+		 * Passes the oldest queued message through checks and sends it if it passes all checks.
+		 *
+		 * @return void
+		 */
+		core.postMessage = function postMessage() {
+			if (this.toSend.length > 0) {
+				var tmpMsg = this.toSend.shift();
+				Object.keys(this.sendChecks).forEach((key) => {
+					if (tmpMsg) {
+						tmpMsg = this.sendChecks[key](tmpMsg);
+					}
+				});
+				if (tmpMsg) {
+					this.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg });
+				}
+			}
+			setTimeout(this.postMessage.bind(this), this.sendDelay);
+		};
+
+		/**
 		 * Lets users send messages from the console, also ensures that commands are displayed and not eaten
 		 *
 		 * @param MessageBotCore core a reference to the core
 		 * @return void
 		 */
 		core.userSend = function userSend(core) {
-			var button = document.getElementById('messageButton');
-			var message = document.getElementById('messageText');
+			var button = document.querySelector('#mb_console > div:nth-child(2) > button');
+			var message = document.querySelector('#mb_console > div:nth-child(2) > input');
 			var tmpMsg = message.value;
 
 			Object.keys(core.sendChecks).forEach((key) => {
@@ -91,7 +89,6 @@ function MessageBotCore() { //jshint ignore:line
 			if (tmpMsg) {
 				button.setAttribute('disabled', '1');
 				message.setAttribute('disabled', '1');
-				button.textContent = 'SENDING';
 				core.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg }).then(function (data) {
 					if (data.status == 'ok') {
 						message.value = '';
@@ -104,12 +101,15 @@ function MessageBotCore() { //jshint ignore:line
 					button.removeAttribute('disabled');
 					message.removeAttribute('disabled');
 					message.focus();
+				}).then(function() {
+					if (tmpMsg.indexOf('/') === 0) {
+						core.addMessageToPage({name: 'SERVER', message: tmpMsg});
+					}
 				}).catch(function(error) {
-					core.addMessageToPage(`<span style="color:#f00;">Error: ${error}</span>`, true);
+					core.addMessageToPage(`<span style="color:#f00;">Sending error: ${error}</span>`, true);
+				}).then(function() {
+					core.scrollToBottom();
 				});
-				if (tmpMsg.indexOf('/') === 0) {
-					core.addMessageToPage({name: 'SERVER', message: tmpMsg});
-				}
 			} else {
 				button.textContent = 'CANCELED';
 			}
@@ -135,10 +135,11 @@ function MessageBotCore() { //jshint ignore:line
 
 	//Dealing with recieving chat
 	{
-		/*
+		/**
 		 * Internal method. Use startListening and stopListening to control this function.
 		 *
 		 * @param MessageBotCore core a reference to the core.
+		 * @param boolean auto whether or not to keep polling.
 		 * @return void
 		 */
 		core.pollChat = function pollChat(core, auto = true) {
@@ -147,19 +148,29 @@ function MessageBotCore() { //jshint ignore:line
 					data.log.forEach((m) => {
 						core.parseMessage(m);
 					});
-					if (auto) {
-						setTimeout(core.pollChat, 5000, core);
-					}
+					core.chatId = data.nextId;
 				} else if (data.status == 'error') {
-					if (auto) {
-						setTimeout(core.pollChat, core.checkOnlineWait, core);
-					}
+					setTimeout(core.pollChat, core.checkOnlineWait, core);
+					throw new Error(data.message);
 				}
-				core.chatId = data.nextId;
+			}).then(function() {
+				if (auto) {
+					setTimeout(core.pollChat, 5000, core);
+				}
 			}).catch(function(error) {
 				//We are offline.
 				core.addMessageToPage(`<span style="color:#f00;">Error: ${error}.</span>`, true);
 			});
+		};
+
+		/**
+		 * Function used to scroll chat to show new messages.
+		 *
+		 * @return void
+		 */
+		core.scrollToBottom = function scrollToBottom() {
+			let el = document.querySelector('#mb_console > div > ul');
+			el.scrollTop = el.scrollHeight - el.scrollTop;
 		};
 
 		/**
@@ -177,13 +188,11 @@ function MessageBotCore() { //jshint ignore:line
 				return { name: message.substring(0, message.lastIndexOf(': ', 18)), safe: false };
 			};
 
-			var name, ip;
-
 			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
 				this.addMessageToPage(message);
 
-				name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
-				ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
+				let name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
+				let ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
 
 				//Update player values
 				if (this.players.hasOwnProperty(name)) {
@@ -199,13 +208,13 @@ function MessageBotCore() { //jshint ignore:line
 				this.online.push(name);
 
 				Object.keys(this.joinFuncs).forEach((key) => {
-					this.joinFuncs[key]({ name: name, ip: ip });
+					this.joinFuncs[key]({name, ip});
 				});
 			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
 				this.addMessageToPage(message);
 
-				name = message.substring(this.worldName.length + 23);
-				ip = this.getIP(name);
+				let name = message.substring(this.worldName.length + 23);
+				let ip = this.getIP(name);
 				//Remove the user from the online list.
 				var playerIn = this.online.indexOf(name);
 				if (playerIn > -1) {
@@ -213,7 +222,7 @@ function MessageBotCore() { //jshint ignore:line
 				}
 
 				Object.keys(this.leaveFuncs).forEach((key) => {
-					this.leaveFuncs[key]({ name: name, ip: ip });
+					this.leaveFuncs[key]({name, ip});
 				});
 			} else if (message.indexOf(': ') >= 0) {
 				//A chat message - server or player?
@@ -245,32 +254,24 @@ function MessageBotCore() { //jshint ignore:line
 
 	//Dealing with the UI
 	{
-		/*
+		/**
 		 * Adds a message to the console, expects this to be assigned to the core
 		 *
 		 * @param string|object Either an object with properties name and message, or a string
 		 * @return void
 		 */
 		core.addMessageToPage = function addMessageToPage(msg, html = false) {
-			var elclass = '';
-			var chatEl = document.getElementById('chatBox');
-
-			var contEl = document.createElement('tr');
-			var msgEl = document.createElement('td');
-			contEl.appendChild(msgEl);
+			var msgEl = document.createElement('li');
 
 			if (typeof msg == 'object') {
 				if (this.staffList.indexOf(msg.name) > -1) {
-					elclass = (this.adminList.indexOf(msg.name) > -1) ? 'admin' : 'mod';
-					msgEl.setAttribute('class', elclass);
+					msgEl.setAttribute('class', (this.adminList.indexOf(msg.name) > -1) ? 'admin' : 'mod');
 				}
-				var nameEl = document.createElement('span');
-				nameEl.textContent = msg.name;
-				msgEl.appendChild(nameEl);
+				msgEl.appendChild(document.createElement('span'));
+				msgEl.querySelector('span').textContent = msg.name;
 
-				var msgElIn = document.createElement('span');
-				msgElIn.textContent = ': ' + msg.message;
-				msgEl.appendChild(msgElIn);
+				msgEl.appendChild(document.createElement('span'));
+				msgEl.querySelector('span:nth-child(2)').textContent = ': ' + msg.message;
 			} else {
 				if (html) {
 					msgEl.innerHTML = msg;
@@ -278,13 +279,11 @@ function MessageBotCore() { //jshint ignore:line
 					msgEl.textContent = msg;
 				}
 			}
-			var chat = document.querySelector('#chat > tbody');
-			var position = chatEl.scrollHeight - chatEl.scrollTop;
-			chat.appendChild(contEl);
 
-			if (position <= 310) {
-				chatEl.scrollTop = chatEl.scrollHeight;
-			}
+			var chat = document.querySelector('#mb_console ul');
+			chat.appendChild(msgEl);
+
+			core.scrollToBottom();
 
 			while (chat.children.length > this.chatMsgMaxCount) {
 				chat.removeChild(chat.childNodes[0]);
@@ -330,7 +329,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.startListening = function startListening() {
-			this.chatId = window.chatId;
+			this.chatId = (window.chatId < 20) ? 0 : window.chatId - 20;
 			this.pollChat(this);
 			this.listening = true;
 		};
@@ -502,11 +501,13 @@ function MessageBotCore() { //jshint ignore:line
 		 *
 		 * @param string protocol
 		 * @param string url
-		 * @param object paramObj
+		 * @param object paramObj -- WARNING. Only accepts shallow objects.
 		 * @return Promise
 		 */
 		function xhr(protocol, url = '/', paramObj = {}) {
-			var paramStr = Object.keys(paramObj).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(paramObj[k])}`).join('&');
+			var paramStr = Object.keys(paramObj)
+								.map(k => `${encodeURIComponent(k)}=${encodeURIComponent(paramObj[k])}`)
+								.join('&');
 			return new Promise(function(resolve, reject) {
 				var req = new XMLHttpRequest();
 				req.open(protocol, url);
@@ -635,27 +636,13 @@ function MessageBotCore() { //jshint ignore:line
 				core.online.push(playerElems[i].textContent);
 			}
 		}
-
+		//Track launches
 		var s = document.createElement('script');
 		s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(core.ownerName) + '&id=' + window.worldId + '&world=' + encodeURIComponent(core.worldName);
 		document.head.appendChild(s);
 	});
 
 	//Start listening for messages to send
-	core.postMessage = function postMessage() {
-		if (this.toSend.length > 0) {
-			var tmpMsg = this.toSend.shift();
-			Object.keys(this.sendChecks).forEach((key) => {
-				if (tmpMsg) {
-					tmpMsg = this.sendChecks[key](tmpMsg);
-				}
-			});
-			if (tmpMsg) {
-				this.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg });
-			}
-		}
-		setTimeout(this.postMessage.bind(this), this.sendDelay);
-	};
 	core.postMessage();
 
 	//Start listening for admin / mod changes

@@ -1,23 +1,18 @@
-/*jshint
-	esnext:		true,
-	browser:	true,
-	devel:		true,
-	unused:		strict,
-	undef:		true
-*/
 /*global
-	MessageBotCore
+	MessageBotCore,
+	MessageBotUI
 */
 
 function MessageBot() { //jshint ignore:line
 	var bot = {
-		devMode: false,
+		devMode: true,
 		core: MessageBotCore(),
+		ui: MessageBotUI(),
 		uMID: 0,
 		version: '5.1.0',
 		extensions: [],
 		preferences: {},
-		extensionURL: '//blockheadsfans.com/messagebot/extension.php?id='
+		extensionURL: '//localhost/messagebot/extension/{id}/code/raw'
 	};
 
 	//Save functions
@@ -74,32 +69,40 @@ function MessageBot() { //jshint ignore:line
 		};
 
 		/**
-		 * Method used to back up and load backups
+		 * Method used to create a backup for the user.
 		 */
-		bot.backup = function backup(event) {
-			if (event.target.id == 'mb_backup_save') {
-				document.getElementById('mb_backup').innerHTML = '<p>Copy the following code to a safe place.</p><p>' + this.stripHTML(JSON.stringify(localStorage)) + '</p>';
-				return;
-			}
+		bot.generateBackup = function generateBackup() {
+			bot.ui.alert('<p>Copy the following code to a safe place.<br>Size: ' + Object.keys(localStorage).reduce((c, l) => c + l).length + ' bytes</p><p>' + bot.stripHTML(JSON.stringify(localStorage)) + '</p>');
+		};
 
-			var code = prompt('Enter the backup code:');
+		/**
+		 * Method used to load a user's backup if possible.
+		 */
+		bot.loadBackup = function loadBackup() {
+			bot.ui.alert('Enter the backup code:<textarea style="width:99%;height:10em;"></textarea>',
+						[
+							{text:'Load backup & restart bot', style:'success', action: function() {
+								let code = document.querySelector('#alert textarea').value;
+								try {
+									code = JSON.parse(code);
+									if (code === null) {
+										throw new Error('Invalid backup');
+									}
+								} catch (e) {
+									bot.ui.notify('Invalid backup code. No action taken.');
+									return;
+								}
 
-			try {
-				code = JSON.parse(code);
-			} catch (e) {
-				alert('Invalid backup. No action taken.');
-				return;
-			}
+								localStorage.clear();
 
-			if (code !== null) {
-				localStorage.clear();
-				Object.keys(code).forEach((key) => {
-					localStorage.setItem(key, code[key]);
-				});
+								Object.keys(code).forEach((key) => {
+									localStorage.setItem(key, code[key]);
+								});
 
-				alert('Backup loaded. Please restart the bot.');
-				location.reload(true);
-			}
+								location.reload();
+							}},
+							{text:'Cancel'}
+						]);
 		};
 
 		/**
@@ -107,10 +110,10 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.savePrefs = function savePrefs() {
 			var prefs = {};
-			prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
 			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
 			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
 			prefs.disableTrim = document.querySelector('#mb_disable_trim').checked;
+			prefs.notify = document.querySelector('#mb_notify_message').checked;
 			this.preferences = prefs;
 			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
 		};
@@ -127,6 +130,11 @@ function MessageBot() { //jshint ignore:line
 			this.core.addJoinListener('mb_join', this.onJoin.bind(this));
 			this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
 			this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
+			this.core.addTriggerListener('mb_notify', (message) => {
+				if (this.preferences.notify) {
+					this.ui.notify(message.name + ': ' + message.message);
+				}
+			});
 			this.announcementCheck(0);
 			this.core.startListening();
 		};
@@ -141,19 +149,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return mixed false on failure, the content div on success.
 		 */
 		bot.addTab = function addTab(navID, contentID, tabName, tabText) {
-			if (document.querySelector('#' + navID + ' > div[tab-name="' + tabName + '"]') === null) {
-				var tabNav = document.createElement('div');
-				tabNav.setAttribute('tab-name', tabName);
-				tabNav.textContent = this.stripHTML(tabText);
-				document.getElementById(navID).appendChild(tabNav);
-
-				var tabContent = document.createElement('div');
-				tabContent.setAttribute('id', 'mb_' + tabName);
-				document.getElementById(contentID).appendChild(tabContent);
-
-				return tabContent;
-			}
-			return document.querySelector('#mb_' + tabName);
+			console.warn('bot.addTab has been depricated and will be removed in the next minor release. Use extension.ui.addInnerTab instead.');
+			bot.ui.addInnerTab(navID, contentID, tabName, tabText);
 		};
 
 		/**
@@ -163,52 +160,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return bool true on success, false on failure.
 		 */
 		bot.removeTab = function removeTab(tabName) {
-			if (document.querySelector('div[tab-name="' + tabName + '"]') !== null) {
-				document.querySelector('div[tab-name="' + tabName + '"]').outerHTML = '';
-				document.querySelector('#mb_' + tabName).outerHTML = '';
-				return true;
-			}
-			return false;
-		};
-
-		/**
-		 * Adds a tab to the settings page, should not be directly called by extensions.
-		 *
-		 * @param string tabName the name of the tab.
-		 * @param string tabText the text to display on the tab.
-		 * @return mixed the node which holds the tab content or false on failure.
-		 */
-		bot.addSettingsTab = function addSettingsTab(tabName, tabText) {
-			return this.addTab('settingsTabsNav', 'settingsTabs', tabName, tabText);
-		};
-
-		/**
-		 * Adds a tab to the navigation, should not be directly called by extensions.
-		 *
-		 * @param string tabName the name of the tab.
-		 * @param string tabText the text to display on the tab.
-		 * @return mixed the node which holds the tab content or false on failure.
-		 */
-		bot.addMainTab = function addMainTab(tabName, tabText) {
-			return this.addTab('botMainNav', 'botTabs', tabName, tabText);
-		};
-
-		/**
-		 * Function used to show/hide the bot
-		 * Should only be called by the user tapping
-		 * on a registered handler
-		 *
-		 * @param eventArgs e
-		 * @return void
-		 */
-		bot.toggleBot = function toggleBot(e) {
-			var el = document.getElementById('botContainer');
-			if (el.style.display !== 'none') {
-				el.style.display = 'none';
-			} else {
-				el.style.display = 'block';
-			}
-			e.stopPropagation();
+			console.warn('bot.removeTab has been depricated and will be removed in the next minor release. Use extension.ui.removeInnerTab instead.');
+			bot.ui.removeInnerTab(tabName);
 		};
 
 		/**
@@ -219,20 +172,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.changeTab = function changeTab(e) {
-			if (e.target !== e.currentTarget) {
-				var i;
-				var tabs = e.currentTarget.children;
-				var tabContents = document.getElementById(e.currentTarget.getAttribute('tab-contents')).children;
-				for (i = 0; i < tabs.length; i++) {
-					tabs[i].removeAttribute('class');
-					tabContents[i].removeAttribute('class');
-				}
-				e.target.className = 'selected';
-				if (e.target.getAttribute('tab-name') !== null) {
-					document.getElementById('mb_' + e.target.getAttribute('tab-name')).className = 'visible';
-				}
-			}
-			e.stopPropagation();
+			console.warn('bot.changeTab has been depricated and will be removed in the next minor release. Use extension.ui.changeTab instead.');
+			bot.ui.changeTab(e);
 		};
 	}
 
@@ -267,11 +208,14 @@ function MessageBot() { //jshint ignore:line
 		 * @return void;
 		 */
 		bot.deleteMsg = function deleteMsg(e) {
-			if (confirm("Really delete this message?")) {
-				e.target.parentElement.outerHTML = '';
-				this.saveConfig();
-			}
-
+			bot.ui.alert('Really delete this message?',
+						[
+							{text: 'Delete', style: 'danger', thisArg: e.target.parentElement, action: function() {
+								this.remove();
+								bot.saveConfig();
+							}},
+							{text: 'Cancel'}
+						]);
 			e.stopPropagation();
 		};
 	}
@@ -300,10 +244,7 @@ function MessageBot() { //jshint ignore:line
 				document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
 			}
 
-			var sc = document.createElement('script');
-			sc.crossOrigin = true;
-			sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-			document.body.appendChild(sc);
+			this.listExtensions();
 		};
 
 		/**
@@ -314,8 +255,8 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.addExtension = function addExtension(extensionId) {
 			var el = document.createElement('script');
-			el.src = this.extensionURL + extensionId + '&w=' + window.worldId;
-			el.crossOrigin = true;
+			el.src = this.extensionURL.replace('{id}', extensionId);
+			el.crossOrigin = 'anonymous';
 			document.body.appendChild(el);
 		};
 
@@ -325,16 +266,22 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.manuallyAddExtension = function manuallyAddExtension() {
-			var extRef = prompt('Enter the ID or URL of an extension');
-			if (extRef !== null) {
-				if (extRef.indexOf('http://') === 0) {
-					var el = document.createElement('script');
-					el.src = extRef;
-					document.body.appendChild(el);
-				} else {
-					this.addExtension(extRef);
-				}
-			}
+			bot.ui.alert('Enter the ID or URL of an extension:<br><input style="width:calc(100% - 7px);"/>',
+						[
+							{text: 'Add', style: 'success', action: function() {
+								let extRef = document.querySelector('#alert input').value;
+								if (extRef.length) {
+									if (extRef.indexOf('http') === 0) {
+										let el = document.createElement('script');
+										el.src = extRef;
+										document.head.appendChild(el);
+									} else {
+										bot.addExtension(extRef);
+									}
+								}
+							}},
+							{text: 'Cancel'}
+						]);
 		};
 
 		/**
@@ -352,7 +299,7 @@ function MessageBot() { //jshint ignore:line
 					window[extensionId].uninstall();
 				}
 
-				this.removeTab('settings_' + extensionId);
+				this.ui.removeTab('settings_' + extensionId);
 				Object.keys(window[extensionId].mainTabs).forEach((key) => {
 					this.removeTab('main_' + extensionId + '_' + key);
 				});
@@ -363,10 +310,8 @@ function MessageBot() { //jshint ignore:line
 			if (extIn > -1) {
 				this.extensions.splice(extIn, 1);
 				this.saveConfig();
-				var sc = document.createElement('script');
-				sc.crossOrigin = true;
-				sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-				document.body.appendChild(sc);
+
+				this.listExtensions();
 
 				var button = document.querySelector('div[extension-id=' + extensionId + '] > button');
 				if (button !== null) {
@@ -381,15 +326,23 @@ function MessageBot() { //jshint ignore:line
 		/**
 		 * Used to create and display a list of installed extensions that may not appear in the store.
 		 */
-		bot.extensionList = function extensionList(extensions) {
-			var exts = JSON.parse(extensions),
-				tempHTML = '<ul style="margin-left:1.5em;">';
-			exts.forEach((ext) => {
-				tempHTML += '<li>' + this.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
-			});
-			tempHTML += '</ul>';
+		bot.listExtensions = function listExtensions() {
+			let el = document.getElementById('mb_ext_list');
+			if (!this.extensions.length) {
+				el.innerHTML = '<p>No extensions installed</p>';
+				return;
+			}
 
-			document.getElementById('mb_ext_list').innerHTML = exts.length ? tempHTML : '<p>No extensions installed</p>';
+			this.core.ajax.postJSON('http://blockheadsfans.com/messagebot/extension/name', {extensions: JSON.stringify(this.extensions)})
+				.then((extensions) => {
+					el.innerHTML = extensions.reduce((ext) => {
+						return `<li>${this.stripHTML(ext.name)} (${ext.id}) <a onclick="bot.removeExtension(\'${ext.id}\')">Remove</a></li>`;
+						}, '<ul style="margin-left:1.5em;">') + '</ul>';
+				}).catch((err) => {
+					console.log(err);
+					this.core.addMessageToPage(`<span style="color:#f00;">Fetching extension names failed with error: ${this.stripHTML(err.message)}</span>`, true);
+					el.innerHTML = 'Error fetching extension names';
+				});
 		};
 
 		/**
@@ -402,10 +355,7 @@ function MessageBot() { //jshint ignore:line
 		bot.setAutoLaunch = function setAutoLaunch(extensionId, autoLaunch) {
 			if (this.extensions.indexOf(extensionId) < 0 && autoLaunch) {
 				this.extensions.push(extensionId);
-				var sc = document.createElement('script');
-				sc.crossOrigin = true;
-				sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-				document.body.appendChild(sc);
+				bot.listExtensions();
 			} else if (!autoLaunch) {
 				var extIn = this.extensions.indexOf(extensionId);
 				if (extIn > -1) {
@@ -684,64 +634,48 @@ function MessageBot() { //jshint ignore:line
 
 	//Setup function, used to write the config page and attatch event listeners.
 	(function(bot) {
-		function checkPref(target, type, name, defval) {
-			if (typeof target.preferences[name] != type) {
-				target.preferences[name] = defval;
+		let checkPref = (type, name, defval) => {
+			if (typeof bot.preferences[name] != type) {
+				bot.preferences[name] = defval;
 			}
-		}
+		};
+		let addListener = (selector, type, func, thisVal = undefined) => {
+			document.querySelector(selector).addEventListener(type, func.bind(thisVal));
+		};
 
 		var str = localStorage.getItem('mb_preferences');
 		bot.preferences = str === null ? {} : JSON.parse(str);
-		checkPref(bot, 'boolean', 'showOnLaunch', false);
-		checkPref(bot, 'number', 'announcementDelay', 10);
-		checkPref(bot, 'boolean', 'regexTriggers', false);
-		checkPref(bot, 'boolean', 'disableTrim', false);
+		checkPref('number', 'announcementDelay', 10);
+		checkPref('boolean', 'regexTriggers', false);
+		checkPref('boolean', 'disableTrim', false);
+		checkPref('boolean', 'notify', true);
 
-		//Write the page...
-		document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
-		document.body.innerHTML += '{{inject ../dist/tmpbot.html}}';
-		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
-
-		//Fix templates
 		bot.fixTemplates();
 
-		//Attatch event listeners...
-		document.getElementById('botNav').addEventListener('click', bot.toggleBot, false);
-		document.getElementById('botNav2').addEventListener('click', bot.toggleBot, false);
-
-		document.querySelector('#botHead > nav').addEventListener('click', bot.changeTab, false);
-		var tabNavs = document.querySelectorAll('nav.botTabs');
-
-		var i;
-		for (i = 0; i < tabNavs.length; i++) {
-			tabNavs[i].addEventListener('click', bot.changeTab, false);
-		}
 		var addMsgElems = document.querySelectorAll('span.add');
-		for (i = 0; i < addMsgElems.length; i++) {
+		for (let i = 0; i < addMsgElems.length; i++) {
 			addMsgElems[i].addEventListener('click', bot.addEmptyMsg.bind(bot), false);
 		}
-		document.getElementById('jMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
-		document.getElementById('lMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
-		document.getElementById('tMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
-		document.getElementById('aMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
 
-		document.getElementById('exts').addEventListener('click', bot.extActions.bind(bot), false);
-		document.getElementById('mb_load_man').addEventListener('click', bot.manuallyAddExtension.bind(bot), false);
+		document.querySelector('#mb_console input').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
 
-		document.getElementById('mb_general').addEventListener('change', bot.savePrefs.bind(bot), false);
+		addListener('#jMsgs', 'change', bot.saveConfig, bot);
+		addListener('#lMsgs', 'change', bot.saveConfig, bot);
+		addListener('#tMsgs', 'change', bot.saveConfig, bot);
+		addListener('#aMsgs', 'change', bot.saveConfig, bot);
 
-		//Backup / Load config
-		document.getElementById('mb_backup_save').addEventListener('click', bot.backup.bind(bot), false);
-		document.getElementById('mb_backup_load').addEventListener('click', bot.backup.bind(bot), false);
+		addListener('#mb_settings', 'change', bot.savePrefs, bot);
+
+		addListener('#mb_backup_save', 'click', bot.generateBackup, bot);
+		addListener('#mb_backup_load', 'click', bot.loadBackup, bot);
+		addListener('#exts', 'click', bot.extActions, bot);
+		addListener('#mb_load_man', 'click', bot.manuallyAddExtension, bot);
 
 		//Handle preferences
-		if (bot.preferences.showOnLaunch) {
-			bot.toggleBot({ stopPropagation: function stopPropagation() {} });
-			document.querySelector('#mb_auto_show').checked = 'checked';
-		}
 		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
 		document.querySelector('#mb_regex_triggers').checked = ((bot.preferences.regexTriggers) ? 'checked' : '');
 		document.querySelector('#mb_disable_trim').checked = ((bot.preferences.disableTrim) ? 'checked' : '');
+		document.querySelector('#mb_notify_message').checked = ((bot.preferences.notify) ? 'checked' : '');
 	}(bot));
 
 	//Load the saved config, including extensions
@@ -759,10 +693,7 @@ function MessageBot() { //jshint ignore:line
 		bot.extensions = str === null ? [] : JSON.parse(str);
 
 		bot.extensions.forEach((ext) => {
-			var el = document.createElement('script');
-			el.crossOrigin = true;
-			el.src = bot.extensionURL + ext;
-			document.head.appendChild(el);
+			bot.addExtension(ext);
 		});
 
 		bot.joinArr.forEach((msg) => {
@@ -785,7 +716,7 @@ function MessageBot() { //jshint ignore:line
 	(function () {
 		var sc = document.createElement('script');
 		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
-		sc.crossOrigin = true;
+		sc.crossOrigin = 'anonymous';
 		document.head.appendChild(sc);
 	})();
 

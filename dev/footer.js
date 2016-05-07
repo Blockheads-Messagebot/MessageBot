@@ -1,10 +1,6 @@
-/*jshint
-	browser: true
-*/
-/*global
-	MessageBot,
-*/
 
-//Note: Defined in header.js
+//Note: Defined in header.js.
+//jshint ignore:start
 bot = MessageBot();
 bot.start();
+//jshint ignore:end
