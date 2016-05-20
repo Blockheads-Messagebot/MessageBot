@@ -232,7 +232,8 @@ a {
 	left: 5px;
 }
 
-#alert > .buttons > span, .button {
+.button {
+	color: #000;
 	display: inline-block;
 	padding: 6px 12px;
 	margin: 0 5px;
@@ -244,13 +245,17 @@ a {
 	cursor: pointer;
 	border: 1px solid rgba(0, 0, 0, 0.15);
 	border-radius: 4px;
-}
-
-.button {
 	background: #fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%);
 }
 
-.success, .info, .danger, .warning, #alert > .buttons > span:not([class=""]) {
+.button-sm {
+	padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.success, .info, .danger, .warning {
 	color: #fff;
 }
 
@@ -309,6 +314,10 @@ a {
 	border-radius: 10px;
 	float: left;
 	padding: 5px;
+}
+
+.ext p {
+	margin: 0;
 }
 
 .msg:nth-child(odd), .ext:nth-child(odd) {

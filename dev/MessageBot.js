@@ -5,14 +5,14 @@
 
 function MessageBot() { //jshint ignore:line
 	var bot = {
-		devMode: true,
+		devMode: false,
 		core: MessageBotCore(),
 		ui: MessageBotUI(),
 		uMID: 0,
 		version: '5.1.0',
 		extensions: [],
 		preferences: {},
-		extensionURL: '//localhost/messagebot/extension/{id}/code/raw'
+		extensionURL: '//blockheadsfans.com/messagebot/extension/{id}/code/raw'
 	};
 
 	//Save functions
@@ -40,7 +40,7 @@ function MessageBot() { //jshint ignore:line
 						tmpMsgObj.joins_high = joinCounts[1].value;
 					}
 					if (wrapper.id == 'tMsgs') {
-						if (this.preferences.disableTrim) {
+						if (bot.preferences.disableTrim) {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
 						} else {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value.trim();
@@ -51,21 +51,21 @@ function MessageBot() { //jshint ignore:line
 				}
 			};
 
-			this.joinArr = [];
-			this.leaveArr = [];
-			this.triggerArr = [];
-			this.announcementArr = [];
-			utilSaveFunc(document.getElementById('lMsgs'), this.leaveArr);
-			utilSaveFunc(document.getElementById('jMsgs'), this.joinArr);
-			utilSaveFunc(document.getElementById('tMsgs'), this.triggerArr);
-			utilSaveFunc(document.getElementById('aMsgs'), this.announcementArr);
+			bot.joinArr = [];
+			bot.leaveArr = [];
+			bot.triggerArr = [];
+			bot.announcementArr = [];
+			utilSaveFunc(document.getElementById('lMsgs'), bot.leaveArr);
+			utilSaveFunc(document.getElementById('jMsgs'), bot.joinArr);
+			utilSaveFunc(document.getElementById('tMsgs'), bot.triggerArr);
+			utilSaveFunc(document.getElementById('aMsgs'), bot.announcementArr);
 
-			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(this.joinArr));
-			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(this.leaveArr));
-			localStorage.setItem('triggerArr' + window.worldId, JSON.stringify(this.triggerArr));
-			localStorage.setItem('announcementArr' + window.worldId, JSON.stringify(this.announcementArr));
-			localStorage.setItem('mb_extensions', JSON.stringify(this.extensions));
-			localStorage.setItem('mb_version', this.version);
+			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(bot.joinArr));
+			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(bot.leaveArr));
+			localStorage.setItem('triggerArr' + window.worldId, JSON.stringify(bot.triggerArr));
+			localStorage.setItem('announcementArr' + window.worldId, JSON.stringify(bot.announcementArr));
+			localStorage.setItem('mb_extensions', JSON.stringify(bot.extensions));
+			localStorage.setItem('mb_version', bot.version);
 		};
 
 		/**
@@ -86,7 +86,7 @@ function MessageBot() { //jshint ignore:line
 								try {
 									code = JSON.parse(code);
 									if (code === null) {
-										throw new Error('Invalid backup');
+										throw 'Invalid backup';
 									}
 								} catch (e) {
 									bot.ui.notify('Invalid backup code. No action taken.');
@@ -114,7 +114,7 @@ function MessageBot() { //jshint ignore:line
 			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
 			prefs.disableTrim = document.querySelector('#mb_disable_trim').checked;
 			prefs.notify = document.querySelector('#mb_notify_message').checked;
-			this.preferences = prefs;
+			bot.preferences = prefs;
 			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
 		};
 	}
@@ -127,16 +127,16 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.start = function start() {
-			this.core.addJoinListener('mb_join', this.onJoin.bind(this));
-			this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
-			this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
-			this.core.addTriggerListener('mb_notify', (message) => {
-				if (this.preferences.notify) {
-					this.ui.notify(message.name + ': ' + message.message);
+			bot.core.addJoinListener('mb_join', bot.onJoin.bind(bot));
+			bot.core.addLeaveListener('mb_leave', bot.onLeave.bind(bot));
+			bot.core.addTriggerListener('mb_trigger', bot.onTrigger.bind(bot));
+			bot.core.addTriggerListener('mb_notify', (message) => {
+				if (bot.preferences.notify) {
+					bot.ui.notify(message.name + ': ' + message.message);
 				}
 			});
-			this.announcementCheck(0);
-			this.core.startListening();
+			bot.announcementCheck(0);
+			bot.core.startListening();
 		};
 
 		/**
@@ -196,7 +196,7 @@ function MessageBot() { //jshint ignore:line
 			} else {
 				template = document.getElementById('aTemplate');
 			}
-			this.addMsg(containerElem, template, {});
+			bot.addMsg(containerElem, template, {});
 
 			e.stopPropagation();
 		};
@@ -211,7 +211,7 @@ function MessageBot() { //jshint ignore:line
 			bot.ui.alert('Really delete this message?',
 						[
 							{text: 'Delete', style: 'danger', thisArg: e.target.parentElement, action: function() {
-								this.remove();
+								bot.remove();
 								bot.saveConfig();
 							}},
 							{text: 'Cancel'}
@@ -223,31 +223,6 @@ function MessageBot() { //jshint ignore:line
 	//Store & extension control functions
 	{
 		/**
-		 * Method used to add store items. Auto called by a request to the store.
-		 *
-		 * @param object data
-		 * @return void
-		 */
-		bot.initStore = function initStore(data) {
-			var content = document.getElementById('extTemplate').content;
-
-			if (data.status == 'ok') {
-				data.extensions.forEach((extension) => {
-					content.querySelector('h4').textContent = extension.title;
-					content.querySelector('span').innerHTML = extension.snippet;
-					content.querySelector('.ext').setAttribute('extension-id', extension.id);
-					content.querySelector('button').textContent = this.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
-
-					document.getElementById('exts').appendChild(document.importNode(content, true));
-				});
-			} else {
-				document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
-			}
-
-			this.listExtensions();
-		};
-
-		/**
 		 * Method used to add an extension to the bot.
 		 *
 		 * @param string extensionId the ID of the extension to load
@@ -255,9 +230,9 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.addExtension = function addExtension(extensionId) {
 			var el = document.createElement('script');
-			el.src = this.extensionURL.replace('{id}', extensionId);
+			el.src = bot.extensionURL.replace('{id}', extensionId);
 			el.crossOrigin = 'anonymous';
-			document.body.appendChild(el);
+			document.head.appendChild(el);
 		};
 
 		/**
@@ -299,25 +274,26 @@ function MessageBot() { //jshint ignore:line
 					window[extensionId].uninstall();
 				}
 
-				this.ui.removeTab('settings_' + extensionId);
+				//To be removed next minor version, extensions should now remove their tabs in an uninstall function.
+				bot.ui.removeTab('settings_' + extensionId);
 				Object.keys(window[extensionId].mainTabs).forEach((key) => {
-					this.removeTab('main_' + extensionId + '_' + key);
+					bot.removeTab('main_' + extensionId + '_' + key);
 				});
 				//To make it simpler for devs to allow their extension to be added and removed without a page launch.
 				window[extensionId] = undefined;
 			}
-			var extIn = this.extensions.indexOf(extensionId);
+			var extIn = bot.extensions.indexOf(extensionId);
 			if (extIn > -1) {
-				this.extensions.splice(extIn, 1);
-				this.saveConfig();
+				bot.extensions.splice(extIn, 1);
+				bot.saveConfig();
 
-				this.listExtensions();
+				bot.listExtensions();
 
 				var button = document.querySelector('div[extension-id=' + extensionId + '] > button');
 				if (button !== null) {
 					button.textContent = 'Removed';
 					setTimeout((function () {
-						this.textContent = 'Install';
+						bot.textContent = 'Install';
 					}).bind(button), 3000);
 				}
 			}
@@ -328,19 +304,25 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.listExtensions = function listExtensions() {
 			let el = document.getElementById('mb_ext_list');
-			if (!this.extensions.length) {
+			if (!bot.extensions.length) {
 				el.innerHTML = '<p>No extensions installed</p>';
 				return;
 			}
 
-			this.core.ajax.postJSON('http://blockheadsfans.com/messagebot/extension/name', {extensions: JSON.stringify(this.extensions)})
-				.then((extensions) => {
-					el.innerHTML = extensions.reduce((ext) => {
-						return `<li>${this.stripHTML(ext.name)} (${ext.id}) <a onclick="bot.removeExtension(\'${ext.id}\')">Remove</a></li>`;
-						}, '<ul style="margin-left:1.5em;">') + '</ul>';
+			bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/extension/name',
+				{extensions: JSON.stringify(bot.extensions)})
+				.then((resp) => {
+					console.log('List Extensions: ', resp);
+					if (resp.status == 'ok') {
+						el.innerHTML = resp.extensions.reduce((html, ext) => {
+							return `${html}<li>${bot.stripHTML(ext.name)} (${ext.id}) <a onclick="bot.removeExtension(\'${ext.id}\');" class="button button-sm">Remove</a></li>`;
+							}, '<ul style="margin-left:1.5em;">') + '</ul>';
+					} else {
+						throw resp.message;
+					}
 				}).catch((err) => {
-					console.log(err);
-					this.core.addMessageToPage(`<span style="color:#f00;">Fetching extension names failed with error: ${this.stripHTML(err.message)}</span>`, true);
+					console.error(err);
+					bot.core.addMessageToPage(`<span style="color:#f00;">Fetching extension names failed with error: ${bot.stripHTML(err.message)}</span>`, true);
 					el.innerHTML = 'Error fetching extension names';
 				});
 		};
@@ -353,16 +335,16 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.setAutoLaunch = function setAutoLaunch(extensionId, autoLaunch) {
-			if (this.extensions.indexOf(extensionId) < 0 && autoLaunch) {
-				this.extensions.push(extensionId);
+			if (bot.extensions.indexOf(extensionId) < 0 && autoLaunch) {
+				bot.extensions.push(extensionId);
 				bot.listExtensions();
 			} else if (!autoLaunch) {
-				var extIn = this.extensions.indexOf(extensionId);
+				var extIn = bot.extensions.indexOf(extensionId);
 				if (extIn > -1) {
-					this.extensions.splice(extIn, 1);
+					bot.extensions.splice(extIn, 1);
 				}
 			}
-			this.saveConfig();
+			bot.saveConfig();
 		};
 
 		/**
@@ -378,10 +360,10 @@ function MessageBot() { //jshint ignore:line
 			extId = extId  || e.target.getAttribute('extension-id');
 			if (e.target.tagName == 'BUTTON') {
 				if (e.target.textContent == 'Install') {
-					this.addExtension(extId);
+					bot.addExtension(extId);
 					button.textContent = 'Remove';
 				} else {
-					this.removeExtension(extId);
+					bot.removeExtension(extId);
 
 					window[extId] = undefined;
 				}
@@ -398,13 +380,13 @@ function MessageBot() { //jshint ignore:line
 		 * @param object data an object containing the name and ip of the player
 		 */
 		bot.onJoin = function onJoin(data) {
-			this.joinArr.forEach((msg) => {
-				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-					this.core.send(toSend);
+			bot.joinArr.forEach((msg) => {
+				if (bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
+					var toSend = bot.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{ip}}', data.ip);
+					bot.core.send(toSend);
 				}
 			});
 		};
@@ -416,13 +398,13 @@ function MessageBot() { //jshint ignore:line
 		 * @param object data an object containing the name and ip of the player
 		 */
 		bot.onLeave = function onLeave(data) {
-			this.leaveArr.forEach((msg) => {
-				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-					this.core.send(toSend);
+			bot.leaveArr.forEach((msg) => {
+				if (bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
+					var toSend = bot.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{ip}}', data.ip);
+					bot.core.send(toSend);
 				}
 			});
 		};
@@ -435,19 +417,19 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.onTrigger = function onTrigger(data) {
 			var triggerMatch = (trigger, message) => {
-				if (this.preferences.regexTriggers) {
+				if (bot.preferences.regexTriggers) {
 					return new RegExp(trigger, 'i').test(message);
 				}
 				return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
 			};
-			this.triggerArr.forEach((msg) => {
-				if (triggerMatch(msg.trigger, data.message) && this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
+			bot.triggerArr.forEach((msg) => {
+				if (triggerMatch(msg.trigger, data.message) && bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
 
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', this.core.getIP(data.name));
-					this.core.send(toSend);
+					var toSend = bot.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{ip}}', bot.core.getIP(data.name));
+					bot.core.send(toSend);
 				}
 			});
 		};
@@ -459,13 +441,13 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.announcementCheck = function announcementCheck(ind) {
 			var i = ind;
-			if (ind == this.announcementArr.length) {
+			if (ind == bot.announcementArr.length) {
 				i = 0;
 			}
-			if (typeof this.announcementArr[i] == 'object') {
-				this.core.send(this.announcementArr[i].message);
+			if (typeof bot.announcementArr[i] == 'object') {
+				bot.core.send(bot.announcementArr[i].message);
 			}
-			setTimeout(this.announcementCheck.bind(this), this.preferences.announcementDelay * 60000, ++i);
+			setTimeout(bot.announcementCheck.bind(bot), bot.preferences.announcementDelay * 60000, ++i);
 		};
 	}
 
@@ -478,7 +460,7 @@ function MessageBot() { //jshint ignore:line
 		 * @return string
 		 */
 		bot.stripHTML = function stripHTML(html) {
-			return this.replaceAll(this.replaceAll(html, '<', '&lt;'), '>', '&gt;');
+			return bot.replaceAll(bot.replaceAll(html, '<', '&lt;'), '>', '&gt;');
 		};
 
 		/**
@@ -533,7 +515,7 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.addMsg = function addMsg(container, template, saveObj) {
 			var content = template.content;
-			content.querySelector('div').id = 'm' + this.uMID;
+			content.querySelector('div').id = 'm' + bot.uMID;
 			content.querySelector('.m').value = saveObj.message || '';
 			if (template.id != 'aTemplate') {
 				var numInputs = content.querySelectorAll('input[type="number"]');
@@ -541,7 +523,7 @@ function MessageBot() { //jshint ignore:line
 				numInputs[1].value = saveObj.joins_high || 9999;
 				if (template.id == 'tTemplate') {
 					if (saveObj.trigger) {
-						saveObj.trigger = (this.preferences.disableTrim) ? saveObj.trigger : saveObj.trigger.trim();
+						saveObj.trigger = (bot.preferences.disableTrim) ? saveObj.trigger : saveObj.trigger.trim();
 					}
 					content.querySelector('.t').value = saveObj.trigger || '';
 				}
@@ -550,15 +532,15 @@ function MessageBot() { //jshint ignore:line
 			container.appendChild(document.importNode(content, true));
 
 			if (template.id != 'aTemplate') {
-				var selects = document.querySelectorAll('#m' + this.uMID + ' > select');
+				var selects = document.querySelectorAll('#m' + bot.uMID + ' > select');
 
 				selects[0].value = saveObj.group || 'All';
 
 				selects[1].value = saveObj.not_group || 'Nobody';
 			}
-			document.querySelector('#m' + this.uMID + ' > a').addEventListener('click', this.deleteMsg.bind(this), false);
+			document.querySelector('#m' + bot.uMID + ' > a').addEventListener('click', bot.deleteMsg.bind(bot), false);
 
-			this.uMID++;
+			bot.uMID++;
 		};
 
 		/**
@@ -573,16 +555,16 @@ function MessageBot() { //jshint ignore:line
 				return true;
 			}
 			if (group == 'Admin') {
-				return this.core.adminList.indexOf(name) !== -1;
+				return bot.core.adminList.indexOf(name) !== -1;
 			}
 			if (group == 'Mod') {
-				return this.core.modList.indexOf(name) !== -1;
+				return bot.core.modList.indexOf(name) !== -1;
 			}
 			if (group == 'Staff') {
-				return this.core.staffList.indexOf(name) !== -1;
+				return bot.core.staffList.indexOf(name) !== -1;
 			}
 			if (group == 'Owner') {
-				return this.core.ownerName == name;
+				return bot.core.ownerName == name;
 			}
 			return false;
 		};
@@ -607,7 +589,7 @@ function MessageBot() { //jshint ignore:line
 		 * @return bool
 		 */
 		bot.versionCheck = function versionCheck(target) {
-			var vArr = this.version.split('.');
+			var vArr = bot.version.split('.');
 			var tArr = target.replace(/[^0-9.*]/g, '').split('.');
 			if (/^[0-9.*]+$/.test(target)) {
 				return tArr.every(function(el, i) {
@@ -712,13 +694,28 @@ function MessageBot() { //jshint ignore:line
 		bot.saveConfig();
 	}(bot));
 
-	//Load the store...
-	(function () {
-		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
-		sc.crossOrigin = 'anonymous';
-		document.head.appendChild(sc);
-	})();
+	//Initialize the store page
+	bot.core.ajax.getJSON('//blockheadsfans.com/messagebot/extension/store')
+		.then((data) => {
+			console.log(data);
+			let content = document.getElementById('extTemplate').content;
+
+			if (data.status == 'ok') {
+				data.extensions.forEach((extension) => {
+					content.querySelector('h4').textContent = extension.title;
+					content.querySelector('span').innerHTML = extension.snippet;
+					content.querySelector('.ext').setAttribute('extension-id', extension.id);
+					content.querySelector('button').textContent = bot.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
+
+					document.getElementById('exts').appendChild(document.importNode(content, true));
+				});
+			} else {
+				document.getElementById('exts').innerHTML += data.message;
+			}
+
+			bot.listExtensions();
+		})
+		.catch((err) => { console.error(err); });
 
 	return bot;
 }

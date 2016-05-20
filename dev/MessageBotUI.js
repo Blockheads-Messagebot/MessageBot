@@ -27,7 +27,10 @@ function MessageBotUI() { //jshint ignore:line
 		function buildButton(ui, button) {
 			var el = document.createElement('span');
 			el.innerHTML = button.text;
-			el.setAttribute('class', button.style || '');
+			el.classList.add('button');
+			if (button.style) {
+				el.classList.add(button.style);
+			}
 			el.id = button.id;
 			el.addEventListener('click', ui.buttonHandler.bind(ui));
 			document.querySelector('#alert > .buttons').appendChild(el);
