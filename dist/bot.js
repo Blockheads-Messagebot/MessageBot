@@ -216,7 +216,7 @@ function MessageBotCore() {
 						try {
 							core.triggerFuncs[key].listener(messageData);
 						} catch (e) {
-							void 0;window.e = e;
+							void 0;
 							core.reportError(e, core.triggerFuncs[key].owner);
 						}
 					});

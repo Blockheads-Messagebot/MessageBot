@@ -220,7 +220,7 @@ function MessageBotCore() {
 						try {
 							core.joinFuncs[key].listener({ name: name, ip: ip });
 						} catch (e) {
-							console.error(e);
+							console.log('Error', e);
 							core.reportError(e, core.joinFuncs[key].owner);
 						}
 					});
@@ -244,7 +244,7 @@ function MessageBotCore() {
 						try {
 							core.leaveFuncs[key].listener({ name: name, ip: ip });
 						} catch (e) {
-							console.error(e);
+							console.log('Error', e);
 							core.reportError(e, core.leaveFuncs[key].owner);
 						}
 					});
@@ -263,7 +263,7 @@ function MessageBotCore() {
 						try {
 							core.serverFuncs[key].listener(messageData);
 						} catch (e) {
-							console.error(e);
+							console.log('Error', e);
 							core.reportError(e, core.serverFuncs[key].owner);
 						}
 					});
@@ -273,7 +273,7 @@ function MessageBotCore() {
 						try {
 							core.triggerFuncs[key].listener(messageData);
 						} catch (e) {
-							console.log(e);window.e = e;
+							console.log('Error', e);
 							core.reportError(e, core.triggerFuncs[key].owner);
 						}
 					});
@@ -284,7 +284,7 @@ function MessageBotCore() {
 					try {
 						core.otherFuncs[key].listener(message);
 					} catch (e) {
-						console.log(e);
+						console.log('Error', e);
 						core.reportError(e, core.otherFuncs[key].owner);
 					}
 				});

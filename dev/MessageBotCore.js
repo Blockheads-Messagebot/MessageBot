@@ -211,7 +211,7 @@ function MessageBotCore() { //jshint ignore:line
 					try {
 						core.joinFuncs[key].listener({name, ip});
 					} catch(e) {
-						console.error(e);
+						console.log('Error', e);
 						core.reportError(e, core.joinFuncs[key].owner);
 					}
 				});
@@ -230,7 +230,7 @@ function MessageBotCore() { //jshint ignore:line
 					try {
 						core.leaveFuncs[key].listener({name, ip});
 					} catch (e) {
-						console.error(e);
+						console.log('Error', e);
 						core.reportError(e, core.leaveFuncs[key].owner);
 					}
 				});
@@ -248,7 +248,7 @@ function MessageBotCore() { //jshint ignore:line
 						try {
 							core.serverFuncs[key].listener(messageData);
 						} catch (e) {
-							 console.error(e);
+							console.log('Error', e);
 							core.reportError(e, core.serverFuncs[key].owner);
 						}
 					});
@@ -258,7 +258,7 @@ function MessageBotCore() { //jshint ignore:line
 						try {
 							core.triggerFuncs[key].listener(messageData);
 						} catch (e) {
-							console.log(e); window.e = e;
+							console.log('Error', e);
 							core.reportError(e, core.triggerFuncs[key].owner);
 						}
 					});
@@ -269,7 +269,7 @@ function MessageBotCore() { //jshint ignore:line
 					try {
 						core.otherFuncs[key].listener(message);
 					} catch (e) {
-						console.log(e);
+						console.log('Error', e);
 						core.reportError(e, core.otherFuncs[key].owner);
 					}
 				});
