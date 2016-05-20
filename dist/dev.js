@@ -170,6 +170,7 @@ function MessageBotCore() {
 			}).catch(function (error) {
 				//We are offline.
 				core.addMessageToPage('<span style="color:#f00;">Error: ' + error + '.</span>', true);
+				throw error; //Otherwise it just shows in the console.
 			});
 		};
 

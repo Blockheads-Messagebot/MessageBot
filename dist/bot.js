@@ -131,6 +131,7 @@ function MessageBotCore() {
 				}
 			}).catch(function (error) {
 				core.addMessageToPage('<span style="color:#f00;">Error: ' + error + '.</span>', true);
+				throw error; 
 			});
 		};
 
