@@ -3,6 +3,7 @@ html, body {
 	position: relative;
 	width: 100%;
 	margin: 0;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif
 }
 
 a {
