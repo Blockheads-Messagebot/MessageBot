@@ -29,7 +29,7 @@ window.addEventListener('error', (err) => {
                     if (resp.status == 'ok') {
                         bot.ui.notify('Something went wrong, it has been reported.');
                     } else {
-                        throw resp.message;
+                        throw new Error(resp.message);
                     }
                 })
                 .catch((err) => {

@@ -86,7 +86,7 @@ function MessageBot() { //jshint ignore:line
 								try {
 									code = JSON.parse(code);
 									if (code === null) {
-										throw 'Invalid backup';
+										throw new Error('Invalid backup');
 									}
 								} catch (e) {
 									bot.ui.notify('Invalid backup code. No action taken.');
@@ -318,7 +318,7 @@ function MessageBot() { //jshint ignore:line
 							return `${html}<li>${bot.stripHTML(ext.name)} (${ext.id}) <a onclick="bot.removeExtension(\'${ext.id}\');" class="button button-sm">Remove</a></li>`;
 							}, '<ul style="margin-left:1.5em;">') + '</ul>';
 					} else {
-						throw resp.message;
+						throw new Error(resp.message);
 					}
 				}).catch((err) => {
 					console.error(err);

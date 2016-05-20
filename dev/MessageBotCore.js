@@ -2,7 +2,7 @@ function MessageBotCore() { //jshint ignore:line
 	//Avoid trying to launch the bot on a non-console page.
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
-		throw "Not a console page. Opened at:" + document.location.href;
+		throw new Error("Not a console page. Opened at:" + document.location.href);
 	}
 
 	//For colored chat
@@ -153,7 +153,7 @@ function MessageBotCore() { //jshint ignore:line
 					core.chatId = data.nextId;
 				} else if (data.status == 'error') {
 					setTimeout(core.pollChat, core.checkOnlineWait, core);
-					throw data.message;
+					throw new Error(data.message);
 				}
 			})
 			.then(() => {
@@ -625,7 +625,7 @@ function MessageBotCore() { //jshint ignore:line
 				if (resp.status == 'ok') {
 					window.bot.ui.notify('Something went wrong, it has been reported.');
 				} else {
-					throw resp.message;
+					throw new Error(resp.message);
 				}
 			})
 			.catch((err) => {

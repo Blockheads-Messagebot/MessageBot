@@ -10,7 +10,7 @@ function MessageBotCore() {
 	//Avoid trying to launch the bot on a non-console page.
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
-		throw "Not a console page. Opened at:" + document.location.href;
+		throw new Error("Not a console page. Opened at:" + document.location.href);
 	}
 
 	//For colored chat
@@ -162,7 +162,7 @@ function MessageBotCore() {
 					core.chatId = data.nextId;
 				} else if (data.status == 'error') {
 					setTimeout(core.pollChat, core.checkOnlineWait, core);
-					throw data.message;
+					throw new Error(data.message);
 				}
 			}).then(function () {
 				if (auto) {
@@ -653,7 +653,7 @@ function MessageBotCore() {
 			if (resp.status == 'ok') {
 				window.bot.ui.notify('Something went wrong, it has been reported.');
 			} else {
-				throw resp.message;
+				throw new Error(resp.message);
 			}
 		}).catch(function (err) {
 			console.error(err);
@@ -1134,7 +1134,7 @@ function MessageBot() {
 					try {
 						code = JSON.parse(code);
 						if (code === null) {
-							throw 'Invalid backup';
+							throw new Error('Invalid backup');
 						}
 					} catch (e) {
 						bot.ui.notify('Invalid backup code. No action taken.');
@@ -1354,7 +1354,7 @@ function MessageBot() {
 						return html + '<li>' + bot.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\');" class="button button-sm">Remove</a></li>';
 					}, '<ul style="margin-left:1.5em;">') + '</ul>';
 				} else {
-					throw resp.message;
+					throw new Error(resp.message);
 				}
 			}).catch(function (err) {
 				console.error(err);
@@ -1998,7 +1998,7 @@ window.addEventListener('error', function (err) {
 				if (resp.status == 'ok') {
 					bot.ui.notify('Something went wrong, it has been reported.');
 				} else {
-					throw resp.message;
+					throw new Error(resp.message);
 				}
 			}).catch(function (err) {
 				console.error(err);
