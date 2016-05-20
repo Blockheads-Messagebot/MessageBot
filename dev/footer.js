@@ -1,32 +1,39 @@
-/*jshint
-	browser: true,
-	undef: true
-*/
 /*global
-	MessageBot
+    MessageBot
 */
-var bot = {};
 
-window.onerror = function(text, file, line, column) {
-	if (!bot.devMode && text != 'Script error.') {
-		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/error.php?version= ' + bot.version +
-					'&wId=' + encodeURIComponent(window.worldId) +
-					'&wName=' + encodeURIComponent(bot.core.worldName) +
-					'&text=' + encodeURIComponent(text) +
-					'&file=' + encodeURIComponent(file) +
-					'&line=' + line +
-					'&col=' + (column || 0); //IE 9 won't pass column number
-		document.head.appendChild(sc);
-	}
-};
-
-bot = MessageBot();
+let bot = MessageBot();
 bot.start();
 
-//Tracking launches.
-(function() {
-	var s = document.createElement('script');
-	s.src = '//blockheadsfans.com/messagebot/launch.php?name=' + encodeURIComponent(bot.core.ownerName) + '&id=' + window.worldId + '&world=' + encodeURIComponent(bot.core.worldName);
-	document.head.appendChild(s);
-}());
+window.addEventListener('error', (err) => {
+    //Wrap everything here in a try catch so that errors with our error reporting don't generate more errors to be reported... infinite loop.
+    try {
+        if (!bot.devMode && err.message != 'Script error.') {
+            console.info('Reporting error:', err);
+    		bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+                {
+                    world_name: bot.core.worldName,
+                    world_id: window.worldId,
+                    owner_name: bot.core.ownerName,
+                    bot_version: bot.version,
+                    error_text: err.message,
+                    error_file: err.filename,
+                    error_row: err.lineno,
+                    error_column: err.colno,
+                })
+                .then((resp) => {
+                    if (resp.status == 'ok') {
+                        bot.ui.notify('Something went wrong, it has been reported.');
+                    } else {
+                        throw resp.status;
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                    bot.ui.notify(`Error reporting exception: ${err}`);
+                });
+    	}
+    } catch (e) {
+        console.error(e);
+    }
+});

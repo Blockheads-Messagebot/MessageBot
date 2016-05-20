@@ -1,19 +1,8 @@
-/*jshint
-	browser:	true,
-	devel:		true,
-	undef:		true,
-	unused:		true,
-	esversion: 6
-*/
-/*global
-	ajaxJson
-*/
-
 function MessageBotCore() { //jshint ignore:line
 	//Avoid trying to launch the bot on a non-console page.
 	if (!document.getElementById('messageText')) {
 		alert('Please start a server and navigate to the console page before starting the bot.');
-		throw new Error("Not a console page. Opened at:" + document.location.href);
+		throw "Not a console page. Opened at:" + document.location.href;
 	}
 
 	//For colored chat
@@ -21,20 +10,6 @@ function MessageBotCore() { //jshint ignore:line
 	//We are replacing these with our own functions.
 	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
 	document.getElementById('messageText').setAttribute('onkeydown',  'bot.core.enterCheck(event, bot.core)');
-
-	//fix setTimeout on IE 9
-	(function() {
-		if (document.all && !window.setTimeout.isPolyfill) {
-			var __nativeST__ = window.setTimeout;
-			window.setTimeout = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
-				var aArgs = Array.prototype.slice.call(arguments, 2);
-				return __nativeST__(vCallback instanceof Function ? function () {
-					vCallback.apply(null, aArgs);
-				} : vCallback, nDelay);
-			};
-			window.setTimeout.isPolyfill = true;
-		}
-	}());
 
 	//Defaults
 	var core = {
@@ -60,7 +35,7 @@ function MessageBotCore() { //jshint ignore:line
 			};
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
-	core.chatId = window.chatId;
+	core.chatId = window.chatId || 0;
 
 	//In regards to sending chat
 	{
@@ -75,14 +50,34 @@ function MessageBotCore() { //jshint ignore:line
 		};
 
 		/**
+		 * Passes the oldest queued message through checks and sends it if it passes all checks.
+		 *
+		 * @return void
+		 */
+		core.postMessage = function postMessage() {
+			if (core.toSend.length > 0) {
+				var tmpMsg = core.toSend.shift();
+				Object.keys(core.sendChecks).forEach((key) => {
+					if (tmpMsg) {
+						tmpMsg = core.sendChecks[key](tmpMsg);
+					}
+				});
+				if (tmpMsg) {
+					core.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg });
+				}
+			}
+			setTimeout(core.postMessage.bind(core), core.sendDelay);
+		};
+
+		/**
 		 * Lets users send messages from the console, also ensures that commands are displayed and not eaten
 		 *
 		 * @param MessageBotCore core a reference to the core
 		 * @return void
 		 */
 		core.userSend = function userSend(core) {
-			var button = document.getElementById('messageButton');
-			var message = document.getElementById('messageText');
+			var button = document.querySelector('#mb_console > div:nth-child(2) > button');
+			var message = document.querySelector('#mb_console > div:nth-child(2) > input');
 			var tmpMsg = message.value;
 
 			Object.keys(core.sendChecks).forEach((key) => {
@@ -94,8 +89,7 @@ function MessageBotCore() { //jshint ignore:line
 			if (tmpMsg) {
 				button.setAttribute('disabled', '1');
 				message.setAttribute('disabled', '1');
-				button.textContent = 'SENDING';
-				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, function (data) {
+				core.ajax.postJSON(window.apiURL, { command: 'send', worldId: window.worldId, message: tmpMsg }).then(function (data) {
 					if (data.status == 'ok') {
 						message.value = '';
 						button.textContent = 'SEND';
@@ -107,10 +101,15 @@ function MessageBotCore() { //jshint ignore:line
 					button.removeAttribute('disabled');
 					message.removeAttribute('disabled');
 					message.focus();
-				}, window.apiURL);
-				if (tmpMsg.indexOf('/') === 0) {
-					core.addMsgToPage({name: 'SERVER', message: tmpMsg});
-				}
+				}).then(function() {
+					if (tmpMsg.indexOf('/') === 0) {
+						core.addMessageToPage({name: 'SERVER', message: tmpMsg});
+					}
+				}).catch(function(error) {
+					core.addMessageToPage(`<span style="color:#f00;">Sending error: ${error}</span>`, true);
+				}).then(function() {
+					core.scrollToBottom();
+				});
 			} else {
 				button.textContent = 'CANCELED';
 			}
@@ -136,28 +135,42 @@ function MessageBotCore() { //jshint ignore:line
 
 	//Dealing with recieving chat
 	{
-		/*
+		/**
 		 * Internal method. Use startListening and stopListening to control this function.
 		 *
 		 * @param MessageBotCore core a reference to the core.
+		 * @param boolean auto whether or not to keep polling.
 		 * @return void
 		 */
 		core.pollChat = function pollChat(core, auto = true) {
-			ajaxJson({ command: 'getchat', worldId: window.worldId, firstId: core.chatId }, function (data) {
+			core.ajax.postJSON(window.apiURL, { command: 'getchat', worldId: window.worldId, firstId: core.chatId }).then(function(data) {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
 					data.log.forEach((m) => {
 						core.parseMessage(m);
 					});
-					if (auto) {
-						setTimeout(core.pollChat, 5000, core);
-					}
+					core.chatId = data.nextId;
 				} else if (data.status == 'error') {
-					if (auto) {
-						setTimeout(core.pollChat, core.checkOnlineWait, core);
-					}
+					setTimeout(core.pollChat, core.checkOnlineWait, core);
+					throw data.message;
 				}
-				core.chatId = data.nextId;
-			}, window.apiURL);
+			}).then(function() {
+				if (auto) {
+					setTimeout(core.pollChat, 5000, core);
+				}
+			}).catch(function(error) {
+				//We are offline.
+				core.addMessageToPage(`<span style="color:#f00;">Error: ${error}.</span>`, true);
+			});
+		};
+
+		/**
+		 * Function used to scroll chat to show new messages.
+		 *
+		 * @return void
+		 */
+		core.scrollToBottom = function scrollToBottom() {
+			let el = document.querySelector('#mb_console > div > ul');
+			el.scrollTop = el.scrollHeight - el.scrollTop;
 		};
 
 		/**
@@ -167,7 +180,7 @@ function MessageBotCore() { //jshint ignore:line
 			let getUserName = (message) => {
 				for (let i = 18; i > 4; i--) {
 					let possibleName = message.substring(0, message.lastIndexOf(': ', i));
-					if (this.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
+					if (core.online.indexOf(possibleName) >= 0 || possibleName == 'SERVER') {
 						return { name: possibleName, safe: true };
 					}
 				}
@@ -175,67 +188,65 @@ function MessageBotCore() { //jshint ignore:line
 				return { name: message.substring(0, message.lastIndexOf(': ', 18)), safe: false };
 			};
 
-			var name, ip;
+			if (message.indexOf(core.worldName + ' - Player Connected ') === 0) {
+				core.addMessageToPage(message);
 
-			if (message.indexOf(this.worldName + ' - Player Connected ') === 0) {
-				this.addMsgToPage(message);
-
-				name = message.substring(this.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
-				ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
+				let name = message.substring(core.worldName.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
+				let ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
 
 				//Update player values
-				if (this.players.hasOwnProperty(name)) {
+				if (core.players.hasOwnProperty(name)) {
 					//Returning player
-					this.players[name].joins++;
+					core.players[name].joins++;
 				} else {
 					//New player
-					this.players[name] = {};
-					this.players[name].joins = 1;
-					this.players[name].ips = [];
+					core.players[name] = {};
+					core.players[name].joins = 1;
+					core.players[name].ips = [];
 				}
-				this.players[name].ip = ip;
-				this.online.push(name);
+				core.players[name].ip = ip;
+				core.online.push(name);
 
-				Object.keys(this.joinFuncs).forEach((key) => {
-					this.joinFuncs[key]({ name: name, ip: ip });
+				Object.keys(core.joinFuncs).forEach((key) => {
+					core.joinFuncs[key]({name, ip});
 				});
-			} else if (message.indexOf(this.worldName + ' - Player Disconnected ') === 0) {
-				this.addMsgToPage(message);
+			} else if (message.indexOf(core.worldName + ' - Player Disconnected ') === 0) {
+				core.addMessageToPage(message);
 
-				name = message.substring(this.worldName.length + 23);
-				ip = this.getIP(name);
+				let name = message.substring(core.worldName.length + 23);
+				let ip = core.getIP(name);
 				//Remove the user from the online list.
-				var playerIn = this.online.indexOf(name);
+				var playerIn = core.online.indexOf(name);
 				if (playerIn > -1) {
-					this.online.splice(name, 1);
+					core.online.splice(name, 1);
 				}
 
-				Object.keys(this.leaveFuncs).forEach((key) => {
-					this.leaveFuncs[key]({ name: name, ip: ip });
+				Object.keys(core.leaveFuncs).forEach((key) => {
+					core.leaveFuncs[key]({name, ip});
 				});
 			} else if (message.indexOf(': ') >= 0) {
 				//A chat message - server or player?
 				var messageData = getUserName(message);
 				messageData.message = message.substring(messageData.name.length + 2);
-				this.addMsgToPage(messageData);
+				core.addMessageToPage(messageData);
 				//messageData resembles this:
 				//	{name:"ABC123", message:"Hello there!", safe:true}
 
 				if (messageData.name == 'SERVER') {
 					//Server message
-					Object.keys(this.serverFuncs).forEach((key) => {
-						this.serverFuncs[key](messageData);
+					Object.keys(core.serverFuncs).forEach((key) => {
+						core.serverFuncs[key](messageData);
 					});
 				} else {
 					//Regular player message
-					Object.keys(this.triggerFuncs).forEach((key) => {
-						this.triggerFuncs[key](messageData);
+					Object.keys(core.triggerFuncs).forEach((key) => {
+						core.triggerFuncs[key](messageData);
 					});
 				}
 			} else {
-				this.addMsgToPage(message);
-				Object.keys(this.otherFuncs).forEach((key) => {
-					this.otherFuncs[key](message);
+				core.addMessageToPage(message);
+				Object.keys(core.otherFuncs).forEach((key) => {
+					core.otherFuncs[key](message);
 				});
 			}
 		};
@@ -243,32 +254,24 @@ function MessageBotCore() { //jshint ignore:line
 
 	//Dealing with the UI
 	{
-		/*
+		/**
 		 * Adds a message to the console, expects this to be assigned to the core
 		 *
 		 * @param string|object Either an object with properties name and message, or a string
 		 * @return void
 		 */
-		core.addMsgToPage = function addMsgToPage(msg, html = false) {
-			var elclass = '';
-			var chatEl = document.getElementById('chatBox');
-
-			var contEl = document.createElement('tr');
-			var msgEl = document.createElement('td');
-			contEl.appendChild(msgEl);
+		core.addMessageToPage = function addMessageToPage(msg, html = false) {
+			var msgEl = document.createElement('li');
 
 			if (typeof msg == 'object') {
-				if (this.staffList.indexOf(msg.name) > -1) {
-					elclass = (this.adminList.indexOf(msg.name) > -1) ? 'admin' : 'mod';
-					msgEl.setAttribute('class', elclass);
+				if (core.staffList.indexOf(msg.name) > -1) {
+					msgEl.setAttribute('class', (core.adminList.indexOf(msg.name) > -1) ? 'admin' : 'mod');
 				}
-				var nameEl = document.createElement('span');
-				nameEl.textContent = msg.name;
-				msgEl.appendChild(nameEl);
+				msgEl.appendChild(document.createElement('span'));
+				msgEl.querySelector('span').textContent = msg.name;
 
-				var msgElIn = document.createElement('span');
-				msgElIn.textContent = ': ' + msg.message;
-				msgEl.appendChild(msgElIn);
+				msgEl.appendChild(document.createElement('span'));
+				msgEl.querySelector('span:nth-child(2)').textContent = ': ' + msg.message;
 			} else {
 				if (html) {
 					msgEl.innerHTML = msg;
@@ -276,15 +279,13 @@ function MessageBotCore() { //jshint ignore:line
 					msgEl.textContent = msg;
 				}
 			}
-			var chat = document.querySelector('#chat > tbody');
-			var position = chatEl.scrollHeight - chatEl.scrollTop;
-			chat.appendChild(contEl);
 
-			if (position <= 310) {
-				chatEl.scrollTop = chatEl.scrollHeight;
-			}
+			var chat = document.querySelector('#mb_console ul');
+			chat.appendChild(msgEl);
 
-			while (chat.children.length > this.chatMsgMaxCount) {
+			core.scrollToBottom();
+
+			while (chat.children.length > core.chatMsgMaxCount) {
 				chat.removeChild(chat.childNodes[0]);
 			}
 
@@ -299,8 +300,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return string|bool the most recently used IP or false on failure
 		 */
 		core.getIP = function getIP(name) {
-			if (this.players.hasOwnProperty(name)) {
-				return this.players[name].ip;
+			if (core.players.hasOwnProperty(name)) {
+				return core.players[name].ip;
 			}
 			return false;
 		};
@@ -312,8 +313,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return int|bool the number of joins, or false if the player has not joined the server
 		 */
 		core.getJoins = function getJoins(name) {
-			if (this.players.hasOwnProperty(name)) {
-				return this.players[name].joins;
+			if (core.players.hasOwnProperty(name)) {
+				return core.players[name].joins;
 			}
 			return false;
 		};
@@ -328,9 +329,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.startListening = function startListening() {
-			this.chatId = window.chatId;
-			this.pollChat(this);
-			this.listening = true;
+			core.chatId = (window.chatId < 20) ? 0 : window.chatId - 20;
+			core.pollChat(core);
+			core.listening = true;
 		};
 	}
 
@@ -344,8 +345,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
 		core.addJoinListener = function addJoinListener(uniqueId, listener) {
-			if (!this.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				this.joinFuncs[uniqueId] = listener;
+			if (!core.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				core.joinFuncs[uniqueId] = listener;
 				return true;
 			} else {
 				return false;
@@ -359,7 +360,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.removeJoinListener = function removeJoinListener(uniqueId) {
-			delete this.joinFuncs[uniqueId];
+			delete core.joinFuncs[uniqueId];
 		};
 
 		/**
@@ -370,8 +371,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return bool true on success, false if the unique ID has already been used
 		 */
 		core.addLeaveListener = function addLeaveListener(uniqueId, listener) {
-			if (!this.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				this.leaveFuncs[uniqueId] = listener;
+			if (!core.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				core.leaveFuncs[uniqueId] = listener;
 				return true;
 			} else {
 				return false;
@@ -385,7 +386,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.removeLeaveListener = function removeLeaveListener(uniqueId) {
-			delete this.leaveFuncs[uniqueId];
+			delete core.leaveFuncs[uniqueId];
 		};
 
 		/**
@@ -396,8 +397,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
 		core.addTriggerListener = function addTriggerListener(uniqueId, listener) {
-			if (!this.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				this.triggerFuncs[uniqueId] = listener;
+			if (!core.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				core.triggerFuncs[uniqueId] = listener;
 				return true;
 			} else {
 				return false;
@@ -411,7 +412,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.removeTriggerListener = function removeTriggerListener(uniqueId) {
-			delete this.joinFuncs[uniqueId];
+			delete core.joinFuncs[uniqueId];
 		};
 
 		/**
@@ -422,8 +423,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
 		core.addServerListener = function addServerListener(uniqueId, listener) {
-			if (!this.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				this.serverFuncs[uniqueId] = listener;
+			if (!core.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				core.serverFuncs[uniqueId] = listener;
 				return true;
 			} else {
 				return false;
@@ -437,7 +438,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.removeServerListener = function removeServerListener(uniqueId) {
-			delete this.serverFuncs[uniqueId];
+			delete core.serverFuncs[uniqueId];
 		};
 
 		/**
@@ -448,8 +449,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
 		core.addOtherListener = function addOtherListener(uniqueId, listener) {
-			if (!this.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				this.otherFuncs[uniqueId] = listener;
+			if (!core.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				core.otherFuncs[uniqueId] = listener;
 				return true;
 			} else {
 				return false;
@@ -463,7 +464,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.removeOtherListener = function removeOtherListener(uniqueId) {
-			delete this.otherFuncs[uniqueId];
+			delete core.otherFuncs[uniqueId];
 		};
 
 		/**
@@ -474,8 +475,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
 		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
-			if (!this.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				this.sendChecks[uniqueId] = listener;
+			if (!core.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
+				core.sendChecks[uniqueId] = listener;
 				return true;
 			} else {
 				return false;
@@ -489,132 +490,191 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
-			delete this.sendChecks[uniqueId];
+			delete core.sendChecks[uniqueId];
 		};
 	}
 
-	//Get the player list
-	(function(core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = (function() {
-			core.logs = xhr.responseText.split('\n');
-			xhr.responseText.split('\n').forEach((line) => {
-				if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
-					var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
-					var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+	//For making requests
+	core.ajax = (function() {
+		/**
+		 * Helper function to make XHR requests.
+		 *
+		 * @param string protocol
+		 * @param string url
+		 * @param object paramObj -- WARNING. Only accepts shallow objects.
+		 * @return Promise
+		 */
+		function xhr(protocol, url = '/', paramObj = {}) {
+			var paramStr = Object.keys(paramObj)
+								.map(k => `${encodeURIComponent(k)}=${encodeURIComponent(paramObj[k])}`)
+								.join('&');
+			return new Promise(function(resolve, reject) {
+				var req = new XMLHttpRequest();
+				req.open(protocol, url);
+				req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+				if (protocol == 'POST') {
+					req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				}
 
-					if (core.players.hasOwnProperty(player)) {
-						core.players[player].joins++;
+				req.onload = function() {
+					if (req.status == 200) {
+						resolve(req.response);
 					} else {
-						core.players[player] = {};
-						core.players[player].ips = [];
-						core.players[player].joins = 1;
+						reject(Error(req.statusText));
 					}
-					core.players[player].ip = ip;
-					if (core.players[player].ips.indexOf(ip) < 0) {
-						core.players[player].ips.push(ip);
-					}
+				};
+				// Handle network errors
+				req.onerror = function() {
+					reject(Error("Network Error"));
+				};
+				if (paramStr) {
+					req.send(paramStr);
+				} else {
+					req.send();
 				}
 			});
+		}
+
+		/**
+		 * Function to GET a page. Passes the response of the XHR in the resolve promise.
+		 *
+		 * @param string url
+		 * @param string paramStr
+		 * @return Promise
+		 */
+		function get(url = '/', paramObj = {}) {
+			return xhr('GET', url, paramObj);
+		}
+
+		/**
+		 * Returns a JSON object in the promise resolve method.
+ 		 *
+		 * @param string url
+		 * @param object paramObj
+		 * @return Promise
+		 */
+		function getJSON(url = '/', paramObj = {}) {
+			return get(url, paramObj).then(JSON.parse);
+		}
+
+		/**
+		 * Function to make a post request
+		 *
+		 * @param string url
+		 * @param object paramObj
+		 * @return Promise
+		 */
+		function post(url = '/', paramObj = {}) {
+			return xhr('POST', url, paramObj);
+		}
+
+		/**
+		 * Function to fetch JSON from a page through post.
+		 *
+		 * @param string url
+		 * @param string paramObj
+		 * @return Promise
+		 */
+		function postJSON(url = '/', paramObj = {}) {
+			return post(url, paramObj).then(JSON.parse);
+		}
+
+		return {xhr, get, getJSON, post, postJSON};
+	}());
+
+	//Get the player list
+	core.ajax.get(`/worlds/logs/${window.worldId}`).then(function(response) {
+		core.logs = response.split('\n');
+		core.logs.forEach((line) => {
+			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
+				var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
+				var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+
+				if (core.players.hasOwnProperty(player)) {
+					core.players[player].joins++;
+				} else {
+					core.players[player] = {};
+					core.players[player].ips = [];
+					core.players[player].joins = 1;
+				}
+				core.players[player].ip = ip;
+				if (core.players[player].ips.indexOf(ip) < 0) {
+					core.players[player].ips.push(ip);
+				}
+			}
 		});
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/logs/' + window.worldId, true);
-		xhr.send();
-	}(core));
+	});
 
 	//Get staff lists
-	(function(core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function() {
-			var doc = (new DOMParser()).parseFromString(xhr.responseText, 'text/html');
-			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
-			core.adminList.push(core.ownerName);
-			core.adminList.push('SERVER');
-			core.adminList.forEach((admin, index) => {
-				core.adminList[index] = admin.toUpperCase();
-			});
-			var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
-			mList.forEach((mod, index) => {
-				mList[index] = mod.toUpperCase();
-			});
-			core.modList = mList.filter(function (mod) {
-				return core.adminList.indexOf(mod) < 0;
-			});
+	core.ajax.get(`/worlds/lists/${window.worldId}`).then(function(response) {
+		var doc = (new DOMParser()).parseFromString(response, 'text/html');
+		core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
+		core.adminList.push(core.ownerName);
+		core.adminList.push('SERVER');
+		core.adminList.forEach((admin, index) => {
+			core.adminList[index] = admin.toUpperCase();
+		});
+		var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
+		mList.forEach((mod, index) => {
+			mList[index] = mod.toUpperCase();
+		});
+		core.modList = mList.filter(function (mod) {
+			return core.adminList.indexOf(mod) < 0;
+		});
 
-			core.staffList = core.adminList.concat(core.modList);
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/lists/' + window.worldId, true);
-		xhr.send();
-	}(core));
+		core.staffList = core.adminList.concat(core.modList);
+	});
 
 	//Get online players
-	(function(core) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function () {
-			var doc = (new DOMParser()).parseFromString(xhr.responseText, 'text/html');
-			core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
-			var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
-			var playerElemsCount = playerElems.length;
-			for (var i = 0; i < playerElemsCount; i++) {
-				if (core.online.indexOf(playerElems[i].textContent) < 0) {
-					core.online.push(playerElems[i].textContent);
-				}
-			}
-		};
-		xhr.open('GET', 'http://portal.theblockheads.net/worlds/' + window.worldId, true);
-		xhr.send();
-	}(core));
-
-	//Start listening for messages to send
-	core.postMessage = function postMessage() {
-		if (this.toSend.length > 0) {
-			var tmpMsg = this.toSend.shift();
-			Object.keys(this.sendChecks).forEach((key) => {
-				if (tmpMsg) {
-					tmpMsg = this.sendChecks[key](tmpMsg);
-				}
-			});
-			if (tmpMsg) {
-				ajaxJson({ command: 'send', worldId: window.worldId, message: tmpMsg }, undefined, window.apiURL);
+	core.ajax.get(`/worlds/${window.worldId}`).then(function(response) {
+		var doc = (new DOMParser()).parseFromString(response, 'text/html');
+		core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
+		var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
+		var playerElemsCount = playerElems.length;
+		for (var i = 0; i < playerElemsCount; i++) {
+			if (core.online.indexOf(playerElems[i].textContent) < 0) {
+				core.online.push(playerElems[i].textContent);
 			}
 		}
-		setTimeout(this.postMessage.bind(this), this.sendDelay);
-	};
+	});
+
+	//Start listening for messages to send
 	core.postMessage();
 
 	//Start listening for admin / mod changes
 	core.staffChangeCheck = function staffChangeCheck(data) {
 		let rebuildStaffList = () => {
-			this.staffList = this.adminList.concat(this.modList);
+			core.staffList = core.adminList.concat(core.modList);
 		};
 		let messageData = (typeof data == 'string') ? {name: 'SERVER', message: data} : data;
-		if (this.adminList.indexOf(messageData.name) != -1) {
+		if (core.adminList.indexOf(messageData.name) != -1) {
 			var targetName;
 			switch (messageData.message.toLocaleUpperCase().substring(0, messageData.message.indexOf(' '))) {
 				case '/ADMIN':
 					targetName = messageData.message.toLocaleUpperCase().substring(7);
-					if (this.adminList.indexOf(targetName) < 0) {
-						this.adminList.push(targetName);
+					if (core.adminList.indexOf(targetName) < 0) {
+						core.adminList.push(targetName);
 						rebuildStaffList();
 					}
 					break;
 				case '/UNADMIN':
 					targetName = messageData.message.toLocaleUpperCase().substring(10);
-					if (this.adminList.indexOf(targetName) != -1) {
-						this.modList.splice(this.adminList.indexOf(targetName), 1);
+					if (core.adminList.indexOf(targetName) != -1) {
+						core.modList.splice(core.adminList.indexOf(targetName), 1);
 						rebuildStaffList();
 					}
 					break;
 				case '/MOD':
 					targetName = messageData.message.toLocaleUpperCase().substring(5);
-					if (this.modList.indexOf(targetName) < 0) {
-						this.modList.push(targetName);
+					if (core.modList.indexOf(targetName) < 0) {
+						core.modList.push(targetName);
 						rebuildStaffList();
 					}
 					break;
 				case '/UNMOD':
 					targetName = messageData.message.toLocaleUpperCase().substring(7);
-					if (this.modList.indexOf(targetName) != -1) {
-						this.modList.splice(this.modList.indexOf(targetName), 1);
+					if (core.modList.indexOf(targetName) != -1) {
+						core.modList.splice(core.modList.indexOf(targetName), 1);
 						rebuildStaffList();
 					}
 			}
