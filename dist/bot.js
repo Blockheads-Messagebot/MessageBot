@@ -2,11 +2,6 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-if (document.querySelector('script[crossorigin="true"]') === null) {
-	alert('Your bookmark to launch the bot needs an update, redirecting you to the update page.');
-	location.assign('http://theblockheads.net/forum/showthread.php?20353-The-Message-Bot&p=309090&viewfull=1#post309090');
-}
-
 window.pollChat = function () {};
 
 function MessageBotCore() {
