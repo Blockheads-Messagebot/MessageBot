@@ -90,7 +90,7 @@ function MessageBotCore() {
 						core.addMessageToPage({ name: 'SERVER', message: tmpMsg });
 					}
 				}).catch(function (error) {
-					core.addMessageToPage('<span style="color:#f00;">Sending error: ' + error + '</span>', true);
+					core.addMessageToPage('<span style="color:#f00;">Error sending: ' + error + '</span>', true);
 				}).then(function () {
 					core.scrollToBottom();
 				});
@@ -129,9 +129,6 @@ function MessageBotCore() {
 				if (auto) {
 					setTimeout(core.pollChat, 5000, core);
 				}
-			}).catch(function (error) {
-				core.addMessageToPage('<span style="color:#f00;">Error: ' + error + '.</span>', true);
-				throw error; 
 			});
 		};
 
