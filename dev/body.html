@@ -1,0 +1,163 @@
+<input type="checkbox" name="menu" id="toggle">
+<label for="toggle" id="mainToggle">&#9776; Menu</label>
+<nav id="mainNav">
+	<div id="mainNavContents">
+		<span class="tab selected" g-tab-name="console">CONSOLE</span>
+		<div class="tab-group">
+			<input type="checkbox" name="group_msgs" id="group_msgs" class="tab-header-toggle">
+			<label class="tab-header" for="group_msgs">MESSAGES</label>
+			<div class="tab-body" id="msgs_tabs">
+				<span class="tab" g-tab-name="join">JOIN</span>
+				<span class="tab" g-tab-name="leave">LEAVE</span>
+				<span class="tab" g-tab-name="trigger">TRIGGER</span>
+				<span class="tab" g-tab-name="announcements">ANNOUNCEMENTS</span>
+			</div>
+		</div>
+		<span class="tab" g-tab-name="extensions">EXTENSIONS</span>
+		<span class="tab" g-tab-name="settings">SETTINGS</span>
+	</div>
+	<div class="clearfix"></div>
+</nav>
+<div id="botTemplates">
+	<template id="jlTemplate">
+		<div class="msg">
+			<label>When the player is </label>
+			<select>
+				<option value="All">anyone</option>
+				<option value="Staff">a staff member</option>
+				<option value="Mod">a mod</option>
+				<option value="Admin">an admin</option>
+				<option value="Owner">the owner</option>
+			</select>
+			<label> who is not </label>
+			<select>
+				<option value="Nobody">nobody</option>
+				<option value="Staff">a staff member</option>
+				<option value="Mod">a mod</option>
+				<option value="Admin">an admin</option>
+				<option value="Owner">the owner</option>
+			</select>
+			<label> then say </label>
+			<input class="m">
+			<label> in chat if the player has joined between </label>
+			<input type="number" value="0">
+			<label> and </label>
+			<input type="number" value="9999">
+			<label> times.</label><br>
+			<a>Delete</a>
+		</div>
+	</template>
+	<template id="tTemplate">
+		<div class="msg">
+			<label>When </label>
+			<select>
+				<option value="All">anyone</option>
+				<option value="Staff">a staff member</option>
+				<option value="Mod">a mod</option>
+				<option value="Admin">an admin</option>
+				<option value="Owner">the owner</option>
+			</select>
+			<label> who is not </label>
+			<select>
+				<option value="Nobody">nobody</option>
+				<option value="Staff">a staff member</option>
+				<option value="Mod">a mod</option>
+				<option value="Admin">an admin</option>
+				<option value="Owner">the owner</option>
+			</select>
+			<label> says </label>
+			<input class="t">
+			<label> in chat, say </label>
+			<input class="m">
+			<label> if the player has joined between </label>
+			<input type="number" value="0">
+			<label> and </label>
+			<input type="number" value="9999">
+			<label>times. </label><br>
+			<a>Delete</a>
+		</div>
+	</template>
+	<template id="aTemplate">
+		<div class="ann">
+			<label>Say:</label>
+			<input class="m">
+			<a>Delete</a>
+			<label style="display:block;margin-top:5px;">Wait X minutes...</label>
+		</div>
+	</template>
+	<template id="extTemplate">
+		<div class="ext">
+			<h4>Title</h4>
+			<span>Description</span><br>
+			<button class="button">Install</button>
+		</div>
+	</template>
+</div>
+
+<div id="navOverlay" class="overlay"></div>
+
+<div id="container">
+	<div id="header" class="visible"></div>
+	<div id="mb_console" class="visible">
+		<div><ul></ul></div>
+		<div><input type="text"/><button>SEND</button></div>
+	</div>
+
+	<div id="mb_join">
+		<h3 class="descgen">These are checked when a player joins the server.</h3>
+		<span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>
+		<span class="add">+</span>
+		<div id="jMsgs"></div>
+	</div>
+	<div id="mb_leave">
+		<h3 class="descgen">These are checked when a player leaves the server.</h3>
+		<span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>
+		<span class="add">+</span>
+		<div id="lMsgs"></div>
+	</div>
+	<div id="mb_trigger">
+		<h3 class="descgen">These are checked whenever someone says something.</h3>
+		<span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span>
+		<span class="add">+</span>
+		<div id="tMsgs"></div>
+	</div>
+	<div id="mb_announcements">
+		<h3 class="descgen">These are sent according to a regular schedule.</h3>
+		<span class="descdet">If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span>
+		<span class="add">+</span>
+		<div id="aMsgs"></div>
+	</div>
+	<div id="mb_extensions">
+		<h3 class="descgen">Extensions can increase the functionality of the bot.</h3>
+		<span class="descdet">Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span>
+		<span id="mb_load_man">Load By ID/URL</span>
+		<div id="exts"></div>
+	</div>
+	<div id="mb_settings">
+		<h3>Settings</h3>
+		<label for="mb_ann_delay">Delay between announcements (minutes): </label>
+		<input id="mb_ann_delay" type="number"><br>
+		<label for="mb_notify_message">Notification on new chat when not on console page: </label>
+		<input id="mb_notify_message" type="checkbox"><br>
+		<h3>Advanced Settings</h3>
+		<a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a>
+		<label for="mb_regex_triggers">Parse triggers as RegEx: </label>
+		<input id="mb_regex_triggers" type="checkbox"><br>
+		<label for="mb_disable_trim">Disable whitespace trimming: </label>
+		<input id="mb_disable_trim" type="checkbox"><br>
+		<h3>Extensions</h3>
+		<div id="mb_ext_list"></div>
+		<h3>Backup / Restore</h3>
+		<a id="mb_backup_save">Get backup code</a><br>
+		<a id="mb_backup_load">Load previous backup</a>
+		<div id="mb_backup"></div>
+	</div>
+</div>
+
+<div id="alert">
+	<div></div>
+	<div class="buttons">
+
+	</div>
+</div>
+<div id="alertOverlay" class="overlay">

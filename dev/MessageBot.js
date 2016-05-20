@@ -1,23 +1,18 @@
-/*jshint
-	esnext:		true,
-	browser:	true,
-	devel:		true,
-	unused:		strict,
-	undef:		true
-*/
 /*global
-	MessageBotCore
+	MessageBotCore,
+	MessageBotUI
 */
 
 function MessageBot() { //jshint ignore:line
 	var bot = {
 		devMode: false,
 		core: MessageBotCore(),
+		ui: MessageBotUI(),
 		uMID: 0,
 		version: '5.1.0',
 		extensions: [],
 		preferences: {},
-		extensionURL: '//blockheadsfans.com/messagebot/extension.php?id='
+		extensionURL: '//blockheadsfans.com/messagebot/extension/{id}/code/raw'
 	};
 
 	//Save functions
@@ -45,7 +40,7 @@ function MessageBot() { //jshint ignore:line
 						tmpMsgObj.joins_high = joinCounts[1].value;
 					}
 					if (wrapper.id == 'tMsgs') {
-						if (this.preferences.disableTrim) {
+						if (bot.preferences.disableTrim) {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value;
 						} else {
 							tmpMsgObj.trigger = wrappers[i].querySelector('.t').value.trim();
@@ -56,50 +51,58 @@ function MessageBot() { //jshint ignore:line
 				}
 			};
 
-			this.joinArr = [];
-			this.leaveArr = [];
-			this.triggerArr = [];
-			this.announcementArr = [];
-			utilSaveFunc(document.getElementById('lMsgs'), this.leaveArr);
-			utilSaveFunc(document.getElementById('jMsgs'), this.joinArr);
-			utilSaveFunc(document.getElementById('tMsgs'), this.triggerArr);
-			utilSaveFunc(document.getElementById('aMsgs'), this.announcementArr);
+			bot.joinArr = [];
+			bot.leaveArr = [];
+			bot.triggerArr = [];
+			bot.announcementArr = [];
+			utilSaveFunc(document.getElementById('lMsgs'), bot.leaveArr);
+			utilSaveFunc(document.getElementById('jMsgs'), bot.joinArr);
+			utilSaveFunc(document.getElementById('tMsgs'), bot.triggerArr);
+			utilSaveFunc(document.getElementById('aMsgs'), bot.announcementArr);
 
-			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(this.joinArr));
-			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(this.leaveArr));
-			localStorage.setItem('triggerArr' + window.worldId, JSON.stringify(this.triggerArr));
-			localStorage.setItem('announcementArr' + window.worldId, JSON.stringify(this.announcementArr));
-			localStorage.setItem('mb_extensions', JSON.stringify(this.extensions));
-			localStorage.setItem('mb_version', this.version);
+			localStorage.setItem('joinArr' + window.worldId, JSON.stringify(bot.joinArr));
+			localStorage.setItem('leaveArr' + window.worldId, JSON.stringify(bot.leaveArr));
+			localStorage.setItem('triggerArr' + window.worldId, JSON.stringify(bot.triggerArr));
+			localStorage.setItem('announcementArr' + window.worldId, JSON.stringify(bot.announcementArr));
+			localStorage.setItem('mb_extensions', JSON.stringify(bot.extensions));
+			localStorage.setItem('mb_version', bot.version);
 		};
 
 		/**
-		 * Method used to back up and load backups
+		 * Method used to create a backup for the user.
 		 */
-		bot.backup = function backup(event) {
-			if (event.target.id == 'mb_backup_save') {
-				document.getElementById('mb_backup').innerHTML = '<p>Copy the following code to a safe place.</p><p>' + this.stripHTML(JSON.stringify(localStorage)) + '</p>';
-				return;
-			}
+		bot.generateBackup = function generateBackup() {
+			bot.ui.alert('<p>Copy the following code to a safe place.<br>Size: ' + Object.keys(localStorage).reduce((c, l) => c + l).length + ' bytes</p><p>' + bot.stripHTML(JSON.stringify(localStorage)) + '</p>');
+		};
 
-			var code = prompt('Enter the backup code:');
+		/**
+		 * Method used to load a user's backup if possible.
+		 */
+		bot.loadBackup = function loadBackup() {
+			bot.ui.alert('Enter the backup code:<textarea style="width:99%;height:10em;"></textarea>',
+						[
+							{text:'Load backup & restart bot', style:'success', action: function() {
+								let code = document.querySelector('#alert textarea').value;
+								try {
+									code = JSON.parse(code);
+									if (code === null) {
+										throw 'Invalid backup';
+									}
+								} catch (e) {
+									bot.ui.notify('Invalid backup code. No action taken.');
+									return;
+								}
 
-			try {
-				code = JSON.parse(code);
-			} catch (e) {
-				alert('Invalid backup. No action taken.');
-				return;
-			}
+								localStorage.clear();
 
-			if (code !== null) {
-				localStorage.clear();
-				Object.keys(code).forEach((key) => {
-					localStorage.setItem(key, code[key]);
-				});
+								Object.keys(code).forEach((key) => {
+									localStorage.setItem(key, code[key]);
+								});
 
-				alert('Backup loaded. Please restart the bot.');
-				location.reload(true);
-			}
+								location.reload();
+							}},
+							{text:'Cancel'}
+						]);
 		};
 
 		/**
@@ -107,11 +110,11 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.savePrefs = function savePrefs() {
 			var prefs = {};
-			prefs.showOnLaunch = document.querySelector('#mb_auto_show').checked;
 			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
 			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
 			prefs.disableTrim = document.querySelector('#mb_disable_trim').checked;
-			this.preferences = prefs;
+			prefs.notify = document.querySelector('#mb_notify_message').checked;
+			bot.preferences = prefs;
 			localStorage.setItem('mb_preferences', JSON.stringify(prefs));
 		};
 	}
@@ -124,11 +127,16 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.start = function start() {
-			this.core.addJoinListener('mb_join', this.onJoin.bind(this));
-			this.core.addLeaveListener('mb_leave', this.onLeave.bind(this));
-			this.core.addTriggerListener('mb_trigger', this.onTrigger.bind(this));
-			this.announcementCheck(0);
-			this.core.startListening();
+			bot.core.addJoinListener('mb_join', bot.onJoin.bind(bot));
+			bot.core.addLeaveListener('mb_leave', bot.onLeave.bind(bot));
+			bot.core.addTriggerListener('mb_trigger', bot.onTrigger.bind(bot));
+			bot.core.addTriggerListener('mb_notify', (message) => {
+				if (bot.preferences.notify) {
+					bot.ui.notify(message.name + ': ' + message.message);
+				}
+			});
+			bot.announcementCheck(0);
+			bot.core.startListening();
 		};
 
 		/**
@@ -141,19 +149,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return mixed false on failure, the content div on success.
 		 */
 		bot.addTab = function addTab(navID, contentID, tabName, tabText) {
-			if (document.querySelector('#' + navID + ' > div[tab-name="' + tabName + '"]') === null) {
-				var tabNav = document.createElement('div');
-				tabNav.setAttribute('tab-name', tabName);
-				tabNav.textContent = this.stripHTML(tabText);
-				document.getElementById(navID).appendChild(tabNav);
-
-				var tabContent = document.createElement('div');
-				tabContent.setAttribute('id', 'mb_' + tabName);
-				document.getElementById(contentID).appendChild(tabContent);
-
-				return tabContent;
-			}
-			return document.querySelector('#mb_' + tabName);
+			console.warn('bot.addTab has been depricated and will be removed in the next minor release. Use extension.ui.addInnerTab instead.');
+			bot.ui.addInnerTab(navID, contentID, tabName, tabText);
 		};
 
 		/**
@@ -163,52 +160,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return bool true on success, false on failure.
 		 */
 		bot.removeTab = function removeTab(tabName) {
-			if (document.querySelector('div[tab-name="' + tabName + '"]') !== null) {
-				document.querySelector('div[tab-name="' + tabName + '"]').outerHTML = '';
-				document.querySelector('#mb_' + tabName).outerHTML = '';
-				return true;
-			}
-			return false;
-		};
-
-		/**
-		 * Adds a tab to the settings page, should not be directly called by extensions.
-		 *
-		 * @param string tabName the name of the tab.
-		 * @param string tabText the text to display on the tab.
-		 * @return mixed the node which holds the tab content or false on failure.
-		 */
-		bot.addSettingsTab = function addSettingsTab(tabName, tabText) {
-			return this.addTab('settingsTabsNav', 'settingsTabs', tabName, tabText);
-		};
-
-		/**
-		 * Adds a tab to the navigation, should not be directly called by extensions.
-		 *
-		 * @param string tabName the name of the tab.
-		 * @param string tabText the text to display on the tab.
-		 * @return mixed the node which holds the tab content or false on failure.
-		 */
-		bot.addMainTab = function addMainTab(tabName, tabText) {
-			return this.addTab('botMainNav', 'botTabs', tabName, tabText);
-		};
-
-		/**
-		 * Function used to show/hide the bot
-		 * Should only be called by the user tapping
-		 * on a registered handler
-		 *
-		 * @param eventArgs e
-		 * @return void
-		 */
-		bot.toggleBot = function toggleBot(e) {
-			var el = document.getElementById('botContainer');
-			if (el.style.display !== 'none') {
-				el.style.display = 'none';
-			} else {
-				el.style.display = 'block';
-			}
-			e.stopPropagation();
+			console.warn('bot.removeTab has been depricated and will be removed in the next minor release. Use extension.ui.removeInnerTab instead.');
+			bot.ui.removeInnerTab(tabName);
 		};
 
 		/**
@@ -219,20 +172,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.changeTab = function changeTab(e) {
-			if (e.target !== e.currentTarget) {
-				var i;
-				var tabs = e.currentTarget.children;
-				var tabContents = document.getElementById(e.currentTarget.getAttribute('tab-contents')).children;
-				for (i = 0; i < tabs.length; i++) {
-					tabs[i].removeAttribute('class');
-					tabContents[i].removeAttribute('class');
-				}
-				e.target.className = 'selected';
-				if (e.target.getAttribute('tab-name') !== null) {
-					document.getElementById('mb_' + e.target.getAttribute('tab-name')).className = 'visible';
-				}
-			}
-			e.stopPropagation();
+			console.warn('bot.changeTab has been depricated and will be removed in the next minor release. Use extension.ui.changeTab instead.');
+			bot.ui.changeTab(e);
 		};
 	}
 
@@ -255,7 +196,7 @@ function MessageBot() { //jshint ignore:line
 			} else {
 				template = document.getElementById('aTemplate');
 			}
-			this.addMsg(containerElem, template, {});
+			bot.addMsg(containerElem, template, {});
 
 			e.stopPropagation();
 		};
@@ -267,45 +208,20 @@ function MessageBot() { //jshint ignore:line
 		 * @return void;
 		 */
 		bot.deleteMsg = function deleteMsg(e) {
-			if (confirm("Really delete this message?")) {
-				e.target.parentElement.outerHTML = '';
-				this.saveConfig();
-			}
-
+			bot.ui.alert('Really delete this message?',
+						[
+							{text: 'Delete', style: 'danger', thisArg: e.target.parentElement, action: function() {
+								bot.remove();
+								bot.saveConfig();
+							}},
+							{text: 'Cancel'}
+						]);
 			e.stopPropagation();
 		};
 	}
 
 	//Store & extension control functions
 	{
-		/**
-		 * Method used to add store items. Auto called by a request to the store.
-		 *
-		 * @param object data
-		 * @return void
-		 */
-		bot.initStore = function initStore(data) {
-			var content = document.getElementById('extTemplate').content;
-
-			if (data.status == 'ok') {
-				data.extensions.forEach((extension) => {
-					content.querySelector('h4').textContent = extension.title;
-					content.querySelector('span').innerHTML = extension.snippet;
-					content.querySelector('.ext').setAttribute('extension-id', extension.id);
-					content.querySelector('button').textContent = this.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
-
-					document.getElementById('exts').appendChild(document.importNode(content, true));
-				});
-			} else {
-				document.getElementById('exts').innerHTML += 'Error: Unable to fetch data from the extension server.';
-			}
-
-			var sc = document.createElement('script');
-			sc.crossOrigin = true;
-			sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-			document.body.appendChild(sc);
-		};
-
 		/**
 		 * Method used to add an extension to the bot.
 		 *
@@ -314,9 +230,9 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.addExtension = function addExtension(extensionId) {
 			var el = document.createElement('script');
-			el.src = this.extensionURL + extensionId + '&w=' + window.worldId;
-			el.crossOrigin = true;
-			document.body.appendChild(el);
+			el.src = bot.extensionURL.replace('{id}', extensionId);
+			el.crossOrigin = 'anonymous';
+			document.head.appendChild(el);
 		};
 
 		/**
@@ -325,16 +241,22 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.manuallyAddExtension = function manuallyAddExtension() {
-			var extRef = prompt('Enter the ID or URL of an extension');
-			if (extRef !== null) {
-				if (extRef.indexOf('http://') === 0) {
-					var el = document.createElement('script');
-					el.src = extRef;
-					document.body.appendChild(el);
-				} else {
-					this.addExtension(extRef);
-				}
-			}
+			bot.ui.alert('Enter the ID or URL of an extension:<br><input style="width:calc(100% - 7px);"/>',
+						[
+							{text: 'Add', style: 'success', action: function() {
+								let extRef = document.querySelector('#alert input').value;
+								if (extRef.length) {
+									if (extRef.indexOf('http') === 0) {
+										let el = document.createElement('script');
+										el.src = extRef;
+										document.head.appendChild(el);
+									} else {
+										bot.addExtension(extRef);
+									}
+								}
+							}},
+							{text: 'Cancel'}
+						]);
 		};
 
 		/**
@@ -352,27 +274,26 @@ function MessageBot() { //jshint ignore:line
 					window[extensionId].uninstall();
 				}
 
-				this.removeTab('settings_' + extensionId);
+				//To be removed next minor version, extensions should now remove their tabs in an uninstall function.
+				bot.ui.removeTab('settings_' + extensionId);
 				Object.keys(window[extensionId].mainTabs).forEach((key) => {
-					this.removeTab('main_' + extensionId + '_' + key);
+					bot.removeTab('main_' + extensionId + '_' + key);
 				});
 				//To make it simpler for devs to allow their extension to be added and removed without a page launch.
 				window[extensionId] = undefined;
 			}
-			var extIn = this.extensions.indexOf(extensionId);
+			var extIn = bot.extensions.indexOf(extensionId);
 			if (extIn > -1) {
-				this.extensions.splice(extIn, 1);
-				this.saveConfig();
-				var sc = document.createElement('script');
-				sc.crossOrigin = true;
-				sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-				document.body.appendChild(sc);
+				bot.extensions.splice(extIn, 1);
+				bot.saveConfig();
+
+				bot.listExtensions();
 
 				var button = document.querySelector('div[extension-id=' + extensionId + '] > button');
 				if (button !== null) {
 					button.textContent = 'Removed';
 					setTimeout((function () {
-						this.textContent = 'Install';
+						bot.textContent = 'Install';
 					}).bind(button), 3000);
 				}
 			}
@@ -381,15 +302,29 @@ function MessageBot() { //jshint ignore:line
 		/**
 		 * Used to create and display a list of installed extensions that may not appear in the store.
 		 */
-		bot.extensionList = function extensionList(extensions) {
-			var exts = JSON.parse(extensions),
-				tempHTML = '<ul style="margin-left:1.5em;">';
-			exts.forEach((ext) => {
-				tempHTML += '<li>' + this.stripHTML(ext.name) + ' (' + ext.id + ') <a onclick="bot.removeExtension(\'' + ext.id + '\')">Remove</a></li>';
-			});
-			tempHTML += '</ul>';
+		bot.listExtensions = function listExtensions() {
+			let el = document.getElementById('mb_ext_list');
+			if (!bot.extensions.length) {
+				el.innerHTML = '<p>No extensions installed</p>';
+				return;
+			}
 
-			document.getElementById('mb_ext_list').innerHTML = exts.length ? tempHTML : '<p>No extensions installed</p>';
+			bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/extension/name',
+				{extensions: JSON.stringify(bot.extensions)})
+				.then((resp) => {
+					console.log('List Extensions: ', resp);
+					if (resp.status == 'ok') {
+						el.innerHTML = resp.extensions.reduce((html, ext) => {
+							return `${html}<li>${bot.stripHTML(ext.name)} (${ext.id}) <a onclick="bot.removeExtension(\'${ext.id}\');" class="button button-sm">Remove</a></li>`;
+							}, '<ul style="margin-left:1.5em;">') + '</ul>';
+					} else {
+						throw resp.message;
+					}
+				}).catch((err) => {
+					console.error(err);
+					bot.core.addMessageToPage(`<span style="color:#f00;">Fetching extension names failed with error: ${bot.stripHTML(err.message)}</span>`, true);
+					el.innerHTML = 'Error fetching extension names';
+				});
 		};
 
 		/**
@@ -400,19 +335,16 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.setAutoLaunch = function setAutoLaunch(extensionId, autoLaunch) {
-			if (this.extensions.indexOf(extensionId) < 0 && autoLaunch) {
-				this.extensions.push(extensionId);
-				var sc = document.createElement('script');
-				sc.crossOrigin = true;
-				sc.src = '//blockheadsfans.com/messagebot/extensionnames.php?ids=' + this.extensions.join(',');
-				document.body.appendChild(sc);
+			if (bot.extensions.indexOf(extensionId) < 0 && autoLaunch) {
+				bot.extensions.push(extensionId);
+				bot.listExtensions();
 			} else if (!autoLaunch) {
-				var extIn = this.extensions.indexOf(extensionId);
+				var extIn = bot.extensions.indexOf(extensionId);
 				if (extIn > -1) {
-					this.extensions.splice(extIn, 1);
+					bot.extensions.splice(extIn, 1);
 				}
 			}
-			this.saveConfig();
+			bot.saveConfig();
 		};
 
 		/**
@@ -428,10 +360,10 @@ function MessageBot() { //jshint ignore:line
 			extId = extId  || e.target.getAttribute('extension-id');
 			if (e.target.tagName == 'BUTTON') {
 				if (e.target.textContent == 'Install') {
-					this.addExtension(extId);
+					bot.addExtension(extId);
 					button.textContent = 'Remove';
 				} else {
-					this.removeExtension(extId);
+					bot.removeExtension(extId);
 
 					window[extId] = undefined;
 				}
@@ -448,13 +380,13 @@ function MessageBot() { //jshint ignore:line
 		 * @param object data an object containing the name and ip of the player
 		 */
 		bot.onJoin = function onJoin(data) {
-			this.joinArr.forEach((msg) => {
-				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-					this.core.send(toSend);
+			bot.joinArr.forEach((msg) => {
+				if (bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
+					var toSend = bot.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{ip}}', data.ip);
+					bot.core.send(toSend);
 				}
 			});
 		};
@@ -466,13 +398,13 @@ function MessageBot() { //jshint ignore:line
 		 * @param object data an object containing the name and ip of the player
 		 */
 		bot.onLeave = function onLeave(data) {
-			this.leaveArr.forEach((msg) => {
-				if (this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', data.ip);
-					this.core.send(toSend);
+			bot.leaveArr.forEach((msg) => {
+				if (bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
+					var toSend = bot.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{ip}}', data.ip);
+					bot.core.send(toSend);
 				}
 			});
 		};
@@ -485,19 +417,19 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.onTrigger = function onTrigger(data) {
 			var triggerMatch = (trigger, message) => {
-				if (this.preferences.regexTriggers) {
+				if (bot.preferences.regexTriggers) {
 					return new RegExp(trigger, 'i').test(message);
 				}
 				return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
 			};
-			this.triggerArr.forEach((msg) => {
-				if (triggerMatch(msg.trigger, data.message) && this.checkGroup(msg.group, data.name) && !this.checkGroup(msg.not_group, data.name) && this.checkJoins(msg.joins_low, msg.joins_high, this.core.getJoins(data.name))) {
+			bot.triggerArr.forEach((msg) => {
+				if (triggerMatch(msg.trigger, data.message) && bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
 
-					var toSend = this.replaceAll(msg.message, '{{NAME}}', data.name);
-					toSend = this.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
-					toSend = this.replaceAll(toSend, '{{ip}}', this.core.getIP(data.name));
-					this.core.send(toSend);
+					var toSend = bot.replaceAll(msg.message, '{{NAME}}', data.name);
+					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
+					toSend = bot.replaceAll(toSend, '{{ip}}', bot.core.getIP(data.name));
+					bot.core.send(toSend);
 				}
 			});
 		};
@@ -509,13 +441,13 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.announcementCheck = function announcementCheck(ind) {
 			var i = ind;
-			if (ind == this.announcementArr.length) {
+			if (ind == bot.announcementArr.length) {
 				i = 0;
 			}
-			if (typeof this.announcementArr[i] == 'object') {
-				this.core.send(this.announcementArr[i].message);
+			if (typeof bot.announcementArr[i] == 'object') {
+				bot.core.send(bot.announcementArr[i].message);
 			}
-			setTimeout(this.announcementCheck.bind(this), this.preferences.announcementDelay * 60000, ++i);
+			setTimeout(bot.announcementCheck.bind(bot), bot.preferences.announcementDelay * 60000, ++i);
 		};
 	}
 
@@ -528,7 +460,7 @@ function MessageBot() { //jshint ignore:line
 		 * @return string
 		 */
 		bot.stripHTML = function stripHTML(html) {
-			return this.replaceAll(this.replaceAll(html, '<', '&lt;'), '>', '&gt;');
+			return bot.replaceAll(bot.replaceAll(html, '<', '&lt;'), '>', '&gt;');
 		};
 
 		/**
@@ -583,7 +515,7 @@ function MessageBot() { //jshint ignore:line
 		 */
 		bot.addMsg = function addMsg(container, template, saveObj) {
 			var content = template.content;
-			content.querySelector('div').id = 'm' + this.uMID;
+			content.querySelector('div').id = 'm' + bot.uMID;
 			content.querySelector('.m').value = saveObj.message || '';
 			if (template.id != 'aTemplate') {
 				var numInputs = content.querySelectorAll('input[type="number"]');
@@ -591,7 +523,7 @@ function MessageBot() { //jshint ignore:line
 				numInputs[1].value = saveObj.joins_high || 9999;
 				if (template.id == 'tTemplate') {
 					if (saveObj.trigger) {
-						saveObj.trigger = (this.preferences.disableTrim) ? saveObj.trigger : saveObj.trigger.trim();
+						saveObj.trigger = (bot.preferences.disableTrim) ? saveObj.trigger : saveObj.trigger.trim();
 					}
 					content.querySelector('.t').value = saveObj.trigger || '';
 				}
@@ -600,15 +532,15 @@ function MessageBot() { //jshint ignore:line
 			container.appendChild(document.importNode(content, true));
 
 			if (template.id != 'aTemplate') {
-				var selects = document.querySelectorAll('#m' + this.uMID + ' > select');
+				var selects = document.querySelectorAll('#m' + bot.uMID + ' > select');
 
 				selects[0].value = saveObj.group || 'All';
 
 				selects[1].value = saveObj.not_group || 'Nobody';
 			}
-			document.querySelector('#m' + this.uMID + ' > a').addEventListener('click', this.deleteMsg.bind(this), false);
+			document.querySelector('#m' + bot.uMID + ' > a').addEventListener('click', bot.deleteMsg.bind(bot), false);
 
-			this.uMID++;
+			bot.uMID++;
 		};
 
 		/**
@@ -623,16 +555,16 @@ function MessageBot() { //jshint ignore:line
 				return true;
 			}
 			if (group == 'Admin') {
-				return this.core.adminList.indexOf(name) !== -1;
+				return bot.core.adminList.indexOf(name) !== -1;
 			}
 			if (group == 'Mod') {
-				return this.core.modList.indexOf(name) !== -1;
+				return bot.core.modList.indexOf(name) !== -1;
 			}
 			if (group == 'Staff') {
-				return this.core.staffList.indexOf(name) !== -1;
+				return bot.core.staffList.indexOf(name) !== -1;
 			}
 			if (group == 'Owner') {
-				return this.core.ownerName == name;
+				return bot.core.ownerName == name;
 			}
 			return false;
 		};
@@ -657,7 +589,7 @@ function MessageBot() { //jshint ignore:line
 		 * @return bool
 		 */
 		bot.versionCheck = function versionCheck(target) {
-			var vArr = this.version.split('.');
+			var vArr = bot.version.split('.');
 			var tArr = target.replace(/[^0-9.*]/g, '').split('.');
 			if (/^[0-9.*]+$/.test(target)) {
 				return tArr.every(function(el, i) {
@@ -684,64 +616,48 @@ function MessageBot() { //jshint ignore:line
 
 	//Setup function, used to write the config page and attatch event listeners.
 	(function(bot) {
-		function checkPref(target, type, name, defval) {
-			if (typeof target.preferences[name] != type) {
-				target.preferences[name] = defval;
+		let checkPref = (type, name, defval) => {
+			if (typeof bot.preferences[name] != type) {
+				bot.preferences[name] = defval;
 			}
-		}
+		};
+		let addListener = (selector, type, func, thisVal = undefined) => {
+			document.querySelector(selector).addEventListener(type, func.bind(thisVal));
+		};
 
 		var str = localStorage.getItem('mb_preferences');
 		bot.preferences = str === null ? {} : JSON.parse(str);
-		checkPref(bot, 'boolean', 'showOnLaunch', false);
-		checkPref(bot, 'number', 'announcementDelay', 10);
-		checkPref(bot, 'boolean', 'regexTriggers', false);
-		checkPref(bot, 'boolean', 'disableTrim', false);
+		checkPref('number', 'announcementDelay', 10);
+		checkPref('boolean', 'regexTriggers', false);
+		checkPref('boolean', 'disableTrim', false);
+		checkPref('boolean', 'notify', true);
 
-		//Write the page...
-		document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
-		document.body.innerHTML += '{{inject ../dist/tmpbot.html}}';
-		document.getElementById('nav_worlds').outerHTML += '<li id="botNav"><a>Message Bot</a></li>';
-
-		//Fix templates
 		bot.fixTemplates();
 
-		//Attatch event listeners...
-		document.getElementById('botNav').addEventListener('click', bot.toggleBot, false);
-		document.getElementById('botNav2').addEventListener('click', bot.toggleBot, false);
-
-		document.querySelector('#botHead > nav').addEventListener('click', bot.changeTab, false);
-		var tabNavs = document.querySelectorAll('nav.botTabs');
-
-		var i;
-		for (i = 0; i < tabNavs.length; i++) {
-			tabNavs[i].addEventListener('click', bot.changeTab, false);
-		}
 		var addMsgElems = document.querySelectorAll('span.add');
-		for (i = 0; i < addMsgElems.length; i++) {
+		for (let i = 0; i < addMsgElems.length; i++) {
 			addMsgElems[i].addEventListener('click', bot.addEmptyMsg.bind(bot), false);
 		}
-		document.getElementById('jMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
-		document.getElementById('lMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
-		document.getElementById('tMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
-		document.getElementById('aMsgs').addEventListener('change', bot.saveConfig.bind(bot), false);
 
-		document.getElementById('exts').addEventListener('click', bot.extActions.bind(bot), false);
-		document.getElementById('mb_load_man').addEventListener('click', bot.manuallyAddExtension.bind(bot), false);
+		document.querySelector('#mb_console input').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
 
-		document.getElementById('mb_general').addEventListener('change', bot.savePrefs.bind(bot), false);
+		addListener('#jMsgs', 'change', bot.saveConfig, bot);
+		addListener('#lMsgs', 'change', bot.saveConfig, bot);
+		addListener('#tMsgs', 'change', bot.saveConfig, bot);
+		addListener('#aMsgs', 'change', bot.saveConfig, bot);
 
-		//Backup / Load config
-		document.getElementById('mb_backup_save').addEventListener('click', bot.backup.bind(bot), false);
-		document.getElementById('mb_backup_load').addEventListener('click', bot.backup.bind(bot), false);
+		addListener('#mb_settings', 'change', bot.savePrefs, bot);
+
+		addListener('#mb_backup_save', 'click', bot.generateBackup, bot);
+		addListener('#mb_backup_load', 'click', bot.loadBackup, bot);
+		addListener('#exts', 'click', bot.extActions, bot);
+		addListener('#mb_load_man', 'click', bot.manuallyAddExtension, bot);
 
 		//Handle preferences
-		if (bot.preferences.showOnLaunch) {
-			bot.toggleBot({ stopPropagation: function stopPropagation() {} });
-			document.querySelector('#mb_auto_show').checked = 'checked';
-		}
 		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
 		document.querySelector('#mb_regex_triggers').checked = ((bot.preferences.regexTriggers) ? 'checked' : '');
 		document.querySelector('#mb_disable_trim').checked = ((bot.preferences.disableTrim) ? 'checked' : '');
+		document.querySelector('#mb_notify_message').checked = ((bot.preferences.notify) ? 'checked' : '');
 	}(bot));
 
 	//Load the saved config, including extensions
@@ -759,10 +675,7 @@ function MessageBot() { //jshint ignore:line
 		bot.extensions = str === null ? [] : JSON.parse(str);
 
 		bot.extensions.forEach((ext) => {
-			var el = document.createElement('script');
-			el.crossOrigin = true;
-			el.src = bot.extensionURL + ext;
-			document.head.appendChild(el);
+			bot.addExtension(ext);
 		});
 
 		bot.joinArr.forEach((msg) => {
@@ -781,13 +694,28 @@ function MessageBot() { //jshint ignore:line
 		bot.saveConfig();
 	}(bot));
 
-	//Load the store...
-	(function () {
-		var sc = document.createElement('script');
-		sc.src = '//blockheadsfans.com/messagebot/store.php?callback=bot.initStore';
-		sc.crossOrigin = true;
-		document.head.appendChild(sc);
-	})();
+	//Initialize the store page
+	bot.core.ajax.getJSON('//blockheadsfans.com/messagebot/extension/store')
+		.then((data) => {
+			console.log(data);
+			let content = document.getElementById('extTemplate').content;
+
+			if (data.status == 'ok') {
+				data.extensions.forEach((extension) => {
+					content.querySelector('h4').textContent = extension.title;
+					content.querySelector('span').innerHTML = extension.snippet;
+					content.querySelector('.ext').setAttribute('extension-id', extension.id);
+					content.querySelector('button').textContent = bot.extensions.indexOf(extension.id) < 0 ? 'Install' : 'Remove';
+
+					document.getElementById('exts').appendChild(document.importNode(content, true));
+				});
+			} else {
+				document.getElementById('exts').innerHTML += data.message;
+			}
+
+			bot.listExtensions();
+		})
+		.catch((err) => { console.error(err); });
 
 	return bot;
 }

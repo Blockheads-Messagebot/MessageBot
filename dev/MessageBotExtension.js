@@ -1,45 +1,59 @@
-/*jshint
-	browser:	true,
-	devel: 		true
-*/
-
-function MessageBotExtension(namespace) {
-	//Handle old extensions which won't work.
-	if (this instanceof MessageBotExtension) {
-		alert('Sorry, ' + namespace + ' is using an older version of the API which is no longer supported. It will show that it has been uninstalled but its config is still in place.\n\nPlease contact the developer of the extension for support.');
-		window.bot.removeExtension(namespace);
-		throw new Error('Outdated extension, ID:' + namespace, 0, 0);
-	}
-
+function MessageBotExtension(namespace) { //jshint ignore:line
 	var extension = {
 		id: namespace,
 		bot: window.bot,
 		core: window.bot.core,
+		ui: window.bot.ui,
 		settingsTab: null,
 		mainTabs: {}
 	};
 
 	/**
-	 * Used to add a settings tab for this extension. After creation, use extension.settingsTab
-	 * to refer to the div which is owned by the extension.
+	 * DEPRICATED. Will be removed next minor version. Use addTab instead.
 	 *
 	 * @param string tabText the text to display on the tab
 	 * @return void
 	 */
 	extension.addSettingsTab = function addSettingsTab(tabText) {
-		this.settingsTab = this.bot.addSettingsTab('settings_' + this.id, tabText);
+		console.warn('addSettingsTab has been depricated. Use addTab(tabText, tabId) instead.');
+		this.ui.addTab(tabText, 'settings_' + this.id);
+		this.settingsTab = document.querySelector('#mb_settings_' + this.id);
 	};
 
 	/**
-	 * Used to add a tab next under the Messages tab.
-	 * Adds the tab to the extension.mainTabs object.
+	 * DEPRICATED. Will be removed next minor version. Use addTab instead.
 	 *
 	 * @param string tabId the ID of the tab to add
 	 * @param string tabText the text which to place on the tab
 	 * @return void
 	 */
 	extension.addMainTab = function addMainTab(tabId, tabText) {
-		this.mainTabs[tabId] = this.bot.addMainTab('main_' + this.id + '_' + tabId, tabText);
+		console.warn('addMainTab has been depricated. Use addTab(tabText, tabId, "msgs_tabs") instead.');
+		this.ui.addTab(tabText, 'main_' + this.id + '_' + tabId, 'msgs');
+		this.mainTabs[tabId] = document.querySelector('#mb_main_' + this.id + '_' + tabId);
+	};
+
+	/**
+	 * Used to add a tab to the bot's navigation.
+	 *
+	 * @param string tabText
+	 * @param string tabId
+	 * @param string tabGroup optional CSS selector that the tab should be added to.
+	 * @return void
+	 */
+	extension.addTab = function addTab(tabText, tabId, tabGroup = '#mainNavContents') {
+		this.ui.addTab(tabText, this.id + '_' + tabId, tabGroup);
+	};
+
+	/**
+	 * Used to add a tab group to the bot's navigation.
+	 *
+	 * @param string text
+	 * @param string groupId - Auto prefixed with the extension ID to avoid conflicts
+	 * @return void
+	 */
+	extension.addTabGroup = function addTabGroup(tabText, tabId) {
+		this.ui.addTabGroup(tabText, this.id + '_' + tabId);
 	};
 
 	/**
