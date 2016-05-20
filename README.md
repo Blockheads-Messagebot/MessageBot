@@ -2,7 +2,7 @@
 ##### Installation
 1. Bookmark this page
 2. Copy this code:
-`javascript:(function(){if (typeof MessageBot === "undefined"){var s=document.createElement('script');s.src='//blockheadsfans.com/messagebot/bot.php';s.crossOrigin='anonymous';document.head.appendChild(s);}})()`
+`javascript:(function(){if (typeof MessageBot === "undefined"){var s=document.createElement('script');s.src='//blockheadsfans.com/messagebot/bot';s.crossOrigin='anonymous';document.head.appendChild(s);}})()`
 3. Edit the bookmark, look for the URL of this page and change it to the code you copied. Be sure to remove all the previous text!
 4. Install complete!
 
