@@ -166,7 +166,11 @@ function MessageBotCore() {
 					core.online.push(name);
 
 					Object.keys(core.joinFuncs).forEach(function (key) {
-						core.joinFuncs[key]({ name: name, ip: ip });
+						try {
+							core.joinFuncs[key].listener({ name: name, ip: ip });
+						} catch (e) {
+							void 0;window.e = e;
+						}
 					});
 				})();
 			} else if (message.indexOf(core.worldName + ' - Player Disconnected ') === 0) {
@@ -184,7 +188,11 @@ function MessageBotCore() {
 					}
 
 					Object.keys(core.leaveFuncs).forEach(function (key) {
-						core.leaveFuncs[key]({ name: name, ip: ip });
+						try {
+							core.leaveFuncs[key].listener({ name: name, ip: ip });
+						} catch (e) {
+							void 0;window.e = e;
+						}
 					});
 				})();
 			} else if (message.indexOf(': ') >= 0) {
@@ -194,17 +202,29 @@ function MessageBotCore() {
 
 				if (messageData.name == 'SERVER') {
 					Object.keys(core.serverFuncs).forEach(function (key) {
-						core.serverFuncs[key](messageData);
+						try {
+							core.serverFuncs[key].listener(messageData);
+						} catch (e) {
+							void 0;window.e = e;
+						}
 					});
 				} else {
 					Object.keys(core.triggerFuncs).forEach(function (key) {
-						core.triggerFuncs[key](messageData);
+						try {
+							core.triggerFuncs[key].listener(messageData);
+						} catch (e) {
+							void 0;window.e = e;
+						}
 					});
 				}
 			} else {
 				core.addMessageToPage(message);
 				Object.keys(core.otherFuncs).forEach(function (key) {
-					core.otherFuncs[key](message);
+					try {
+						core.otherFuncs[key].listener(message);
+					} catch (e) {
+						void 0;window.e = e;
+					}
 				});
 			}
 		};
@@ -269,9 +289,9 @@ function MessageBotCore() {
 	}
 
 	{
-		core.addJoinListener = function addJoinListener(uniqueId, listener) {
+		core.addJoinListener = function addJoinListener(uniqueId, owner, listener) {
 			if (!core.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.joinFuncs[uniqueId] = listener;
+				core.joinFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -282,9 +302,9 @@ function MessageBotCore() {
 			delete core.joinFuncs[uniqueId];
 		};
 
-		core.addLeaveListener = function addLeaveListener(uniqueId, listener) {
+		core.addLeaveListener = function addLeaveListener(uniqueId, owner, listener) {
 			if (!core.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.leaveFuncs[uniqueId] = listener;
+				core.leaveFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -295,9 +315,9 @@ function MessageBotCore() {
 			delete core.leaveFuncs[uniqueId];
 		};
 
-		core.addTriggerListener = function addTriggerListener(uniqueId, listener) {
+		core.addTriggerListener = function addTriggerListener(uniqueId, owner, listener) {
 			if (!core.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.triggerFuncs[uniqueId] = listener;
+				core.triggerFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -308,9 +328,9 @@ function MessageBotCore() {
 			delete core.joinFuncs[uniqueId];
 		};
 
-		core.addServerListener = function addServerListener(uniqueId, listener) {
+		core.addServerListener = function addServerListener(uniqueId, owner, listener) {
 			if (!core.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.serverFuncs[uniqueId] = listener;
+				core.serverFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -321,9 +341,9 @@ function MessageBotCore() {
 			delete core.serverFuncs[uniqueId];
 		};
 
-		core.addOtherListener = function addOtherListener(uniqueId, listener) {
+		core.addOtherListener = function addOtherListener(uniqueId, owner, listener) {
 			if (!core.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.otherFuncs[uniqueId] = listener;
+				core.otherFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -334,9 +354,9 @@ function MessageBotCore() {
 			delete core.otherFuncs[uniqueId];
 		};
 
-		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
+		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, owner, listener) {
 			if (!core.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.sendChecks[uniqueId] = listener;
+				core.sendChecks[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -814,11 +834,11 @@ function MessageBot() {
 
 	{
 		bot.start = function start() {
-			bot.core.addJoinListener('mb_join', bot.onJoin.bind(bot));
-			bot.core.addLeaveListener('mb_leave', bot.onLeave.bind(bot));
-			bot.core.addTriggerListener('mb_trigger', bot.onTrigger.bind(bot));
-			bot.core.addTriggerListener('mb_notify', function (message) {
-				if (bot.preferences.notify) {
+			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin.bind(bot));
+			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave.bind(bot));
+			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger.bind(bot));
+			bot.core.addTriggerListener('mb_notify', 'bot', function (message) {
+				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
 					bot.ui.notify(message.name + ': ' + message.message);
 				}
 			});
@@ -1284,7 +1304,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addJoinListener = function addJoinListener(uniqueId, listener) {
-		return this.core.addJoinListener(this.id + '_' + uniqueId, listener);
+		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, this.id, listener);
 	};
 
 	extension.removeJoinListener = function removeJoinListener(uniqueId) {
@@ -1292,7 +1312,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addLeaveListener = function addLeaveListener(uniqueId, listener) {
-		return this.core.addLeaveListener(this.id + '_' + uniqueId, listener);
+		return this.core.addLeaveListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	extension.removeLeaveListener = function removeLeaveListener(uniqueId) {
@@ -1300,7 +1320,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addTriggerListener = function addTriggerListener(uniqueId, listener) {
-		return this.core.addTriggerListener(this.id + '_' + uniqueId, listener);
+		return this.core.addTriggerListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	extension.removeTriggerListener = function removeTriggerListener(uniqueId) {
@@ -1308,7 +1328,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addServerListener = function addServerListener(uniqueId, listener) {
-		return this.core.addServerListener(this.id + '_' + uniqueId, listener);
+		return this.core.addServerListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	extension.removeServerListener = function removeServerListener(uniqueId) {
@@ -1316,7 +1336,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addOtherListener = function addOtherListener(uniqueId, listener) {
-		return this.core.addOtherListener(this.id + '_' + uniqueId, listener);
+		return this.core.addOtherListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	extension.removeOtherListener = function removeOtherListener(uniqueId) {
@@ -1324,7 +1344,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
-		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, listener);
+		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	extension.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
@@ -1340,7 +1360,11 @@ bot.start();
 
 window.addEventListener('error', function (err) {
 	try {
-		if (!bot.devMode && err.message != 'Script error.') {
+		if (!bot.devMode) {
+			if (err.message == 'Script error') {
+				bot.ui.notify('Your bookmark is likely outdated, unable to report error.');
+				return;
+			}
 			void 0;
 			bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
 				world_name: bot.core.worldName,
@@ -1355,7 +1379,7 @@ window.addEventListener('error', function (err) {
 				if (resp.status == 'ok') {
 					bot.ui.notify('Something went wrong, it has been reported.');
 				} else {
-					throw resp.status;
+					throw resp.message;
 				}
 			}).catch(function (err) {
 				void 0;

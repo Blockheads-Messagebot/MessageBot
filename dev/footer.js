@@ -8,7 +8,11 @@ bot.start();
 window.addEventListener('error', (err) => {
     //Wrap everything here in a try catch so that errors with our error reporting don't generate more errors to be reported... infinite loop.
     try {
-        if (!bot.devMode && err.message != 'Script error.') {
+        if (!bot.devMode) {
+            if (err.message == 'Script error') {
+                bot.ui.notify('Your bookmark is likely outdated, unable to report error.');
+                return;
+            }
             console.info('Reporting error:', err);
     		bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
                 {
@@ -25,7 +29,7 @@ window.addEventListener('error', (err) => {
                     if (resp.status == 'ok') {
                         bot.ui.notify('Something went wrong, it has been reported.');
                     } else {
-                        throw resp.status;
+                        throw resp.message;
                     }
                 })
                 .catch((err) => {

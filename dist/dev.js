@@ -115,6 +115,7 @@ function MessageBotCore() {
 					}
 				}).catch(function (error) {
 					core.addMessageToPage('<span style="color:#f00;">Error sending: ' + error + '</span>', true);
+					//core.reportError(error);
 				}).then(function () {
 					core.scrollToBottom();
 				});
@@ -216,7 +217,11 @@ function MessageBotCore() {
 					core.online.push(name);
 
 					Object.keys(core.joinFuncs).forEach(function (key) {
-						core.joinFuncs[key]({ name: name, ip: ip });
+						try {
+							core.joinFuncs[key].listener({ name: name, ip: ip });
+						} catch (e) {
+							console.log(e);window.e = e;
+						}
 					});
 				})();
 			} else if (message.indexOf(core.worldName + ' - Player Disconnected ') === 0) {
@@ -235,7 +240,11 @@ function MessageBotCore() {
 					}
 
 					Object.keys(core.leaveFuncs).forEach(function (key) {
-						core.leaveFuncs[key]({ name: name, ip: ip });
+						try {
+							core.leaveFuncs[key].listener({ name: name, ip: ip });
+						} catch (e) {
+							console.log(e);window.e = e;
+						}
 					});
 				})();
 			} else if (message.indexOf(': ') >= 0) {
@@ -249,18 +258,30 @@ function MessageBotCore() {
 				if (messageData.name == 'SERVER') {
 					//Server message
 					Object.keys(core.serverFuncs).forEach(function (key) {
-						core.serverFuncs[key](messageData);
+						try {
+							core.serverFuncs[key].listener(messageData);
+						} catch (e) {
+							console.log(e);window.e = e;
+						}
 					});
 				} else {
 					//Regular player message
 					Object.keys(core.triggerFuncs).forEach(function (key) {
-						core.triggerFuncs[key](messageData);
+						try {
+							core.triggerFuncs[key].listener(messageData);
+						} catch (e) {
+							console.log(e);window.e = e;
+						}
 					});
 				}
 			} else {
 				core.addMessageToPage(message);
 				Object.keys(core.otherFuncs).forEach(function (key) {
-					core.otherFuncs[key](message);
+					try {
+						core.otherFuncs[key].listener(message);
+					} catch (e) {
+						console.log(e);window.e = e;
+					}
 				});
 			}
 		};
@@ -358,9 +379,9 @@ function MessageBotCore() {
    * @param function listener the function which will be attatched to join messages
    * @return bool true on success, false if the unique ID has already been used or the listener is not a function
    */
-		core.addJoinListener = function addJoinListener(uniqueId, listener) {
+		core.addJoinListener = function addJoinListener(uniqueId, owner, listener) {
 			if (!core.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.joinFuncs[uniqueId] = listener;
+				core.joinFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -384,9 +405,9 @@ function MessageBotCore() {
    * @param function listener the function which will be attatched to join messages
    * @return bool true on success, false if the unique ID has already been used
    */
-		core.addLeaveListener = function addLeaveListener(uniqueId, listener) {
+		core.addLeaveListener = function addLeaveListener(uniqueId, owner, listener) {
 			if (!core.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.leaveFuncs[uniqueId] = listener;
+				core.leaveFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -410,9 +431,9 @@ function MessageBotCore() {
    * @param function listener the function which will be attatched to join messages
    * @return bool true on success, false if the unique ID has already been used or the listener is not a function
    */
-		core.addTriggerListener = function addTriggerListener(uniqueId, listener) {
+		core.addTriggerListener = function addTriggerListener(uniqueId, owner, listener) {
 			if (!core.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.triggerFuncs[uniqueId] = listener;
+				core.triggerFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -436,9 +457,9 @@ function MessageBotCore() {
    * @param function listener the function which will be attatched to join messages
    * @return bool true on success, false if the unique ID has already been used or the listener is not a function
    */
-		core.addServerListener = function addServerListener(uniqueId, listener) {
+		core.addServerListener = function addServerListener(uniqueId, owner, listener) {
 			if (!core.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.serverFuncs[uniqueId] = listener;
+				core.serverFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -462,9 +483,9 @@ function MessageBotCore() {
    * @param function listener the function which will be attatched to join messages
    * @return bool true on success, false if the unique ID has already been used or the listener is not a function
    */
-		core.addOtherListener = function addOtherListener(uniqueId, listener) {
+		core.addOtherListener = function addOtherListener(uniqueId, owner, listener) {
 			if (!core.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.otherFuncs[uniqueId] = listener;
+				core.otherFuncs[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -488,9 +509,9 @@ function MessageBotCore() {
    * @param function listener the function which will be attatched to join messages
    * @return bool true on success, false if the unique ID has already been used or the listener is not a function
    */
-		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
+		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, owner, listener) {
 			if (!core.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.sendChecks[uniqueId] = listener;
+				core.sendChecks[uniqueId] = { owner: owner, listener: listener };
 				return true;
 			} else {
 				return false;
@@ -1123,11 +1144,11 @@ function MessageBot() {
    * @return void
    */
 		bot.start = function start() {
-			bot.core.addJoinListener('mb_join', bot.onJoin.bind(bot));
-			bot.core.addLeaveListener('mb_leave', bot.onLeave.bind(bot));
-			bot.core.addTriggerListener('mb_trigger', bot.onTrigger.bind(bot));
-			bot.core.addTriggerListener('mb_notify', function (message) {
-				if (bot.preferences.notify) {
+			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin.bind(bot));
+			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave.bind(bot));
+			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger.bind(bot));
+			bot.core.addTriggerListener('mb_notify', 'bot', function (message) {
+				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
 					bot.ui.notify(message.name + ': ' + message.message);
 				}
 			});
@@ -1797,7 +1818,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addJoinListener = function addJoinListener(uniqueId, listener) {
-		return this.core.addJoinListener(this.id + '_' + uniqueId, listener);
+		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, this.id, listener);
 	};
 
 	/**
@@ -1818,7 +1839,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addLeaveListener = function addLeaveListener(uniqueId, listener) {
-		return this.core.addLeaveListener(this.id + '_' + uniqueId, listener);
+		return this.core.addLeaveListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -1839,7 +1860,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addTriggerListener = function addTriggerListener(uniqueId, listener) {
-		return this.core.addTriggerListener(this.id + '_' + uniqueId, listener);
+		return this.core.addTriggerListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -1860,7 +1881,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addServerListener = function addServerListener(uniqueId, listener) {
-		return this.core.addServerListener(this.id + '_' + uniqueId, listener);
+		return this.core.addServerListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -1881,7 +1902,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addOtherListener = function addOtherListener(uniqueId, listener) {
-		return this.core.addOtherListener(this.id + '_' + uniqueId, listener);
+		return this.core.addOtherListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -1903,7 +1924,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
-		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, listener);
+		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -1929,7 +1950,11 @@ bot.start();
 window.addEventListener('error', function (err) {
 	//Wrap everything here in a try catch so that errors with our error reporting don't generate more errors to be reported... infinite loop.
 	try {
-		if (!bot.devMode && err.message != 'Script error.') {
+		if (!bot.devMode) {
+			if (err.message == 'Script error') {
+				bot.ui.notify('Your bookmark is likely outdated, unable to report error.');
+				return;
+			}
 			console.info('Reporting error:', err);
 			bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
 				world_name: bot.core.worldName,
@@ -1944,7 +1969,7 @@ window.addEventListener('error', function (err) {
 				if (resp.status == 'ok') {
 					bot.ui.notify('Something went wrong, it has been reported.');
 				} else {
-					throw resp.status;
+					throw resp.message;
 				}
 			}).catch(function (err) {
 				console.error(err);

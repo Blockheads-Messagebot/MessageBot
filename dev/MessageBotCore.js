@@ -107,6 +107,7 @@ function MessageBotCore() { //jshint ignore:line
 					}
 				}).catch(function(error) {
 					core.addMessageToPage(`<span style="color:#f00;">Error sending: ${error}</span>`, true);
+					//core.reportError(error);
 				}).then(function() {
 					core.scrollToBottom();
 				});
@@ -143,7 +144,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.pollChat = function pollChat(core, auto = true) {
-			core.ajax.postJSON(window.apiURL, { command: 'getchat', worldId: window.worldId, firstId: core.chatId }).then(function(data) {
+			core.ajax.postJSON(window.apiURL, { command: 'getchat', worldId: window.worldId, firstId: core.chatId })
+			.then((data) => {
 				if (data.status == 'ok' && data.nextId != core.chatId) {
 					data.log.forEach((m) => {
 						core.parseMessage(m);
@@ -153,7 +155,8 @@ function MessageBotCore() { //jshint ignore:line
 					setTimeout(core.pollChat, core.checkOnlineWait, core);
 					throw data.message;
 				}
-			}).then(function() {
+			})
+			.then(() => {
 				if (auto) {
 					setTimeout(core.pollChat, 5000, core);
 				}
@@ -205,7 +208,11 @@ function MessageBotCore() { //jshint ignore:line
 				core.online.push(name);
 
 				Object.keys(core.joinFuncs).forEach((key) => {
-					core.joinFuncs[key]({name, ip});
+					try {
+						core.joinFuncs[key].listener({name, ip});
+					} catch(e) {
+						console.log(e); window.e = e;
+					}
 				});
 			} else if (message.indexOf(core.worldName + ' - Player Disconnected ') === 0) {
 				core.addMessageToPage(message);
@@ -219,7 +226,11 @@ function MessageBotCore() { //jshint ignore:line
 				}
 
 				Object.keys(core.leaveFuncs).forEach((key) => {
-					core.leaveFuncs[key]({name, ip});
+					try {
+						core.leaveFuncs[key].listener({name, ip});
+					} catch (e) {
+						console.log(e); window.e = e;
+					}
 				});
 			} else if (message.indexOf(': ') >= 0) {
 				//A chat message - server or player?
@@ -232,18 +243,30 @@ function MessageBotCore() { //jshint ignore:line
 				if (messageData.name == 'SERVER') {
 					//Server message
 					Object.keys(core.serverFuncs).forEach((key) => {
-						core.serverFuncs[key](messageData);
+						try {
+							core.serverFuncs[key].listener(messageData);
+						} catch (e) {
+							 console.log(e); window.e = e;
+						}
 					});
 				} else {
 					//Regular player message
 					Object.keys(core.triggerFuncs).forEach((key) => {
-						core.triggerFuncs[key](messageData);
+						try {
+							core.triggerFuncs[key].listener(messageData);
+						} catch (e) {
+							console.log(e); window.e = e;
+						}
 					});
 				}
 			} else {
 				core.addMessageToPage(message);
 				Object.keys(core.otherFuncs).forEach((key) => {
-					core.otherFuncs[key](message);
+					try {
+						core.otherFuncs[key].listener(message);
+					} catch (e) {
+						console.log(e); window.e = e;
+					}
 				});
 			}
 		};
@@ -341,9 +364,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param function listener the function which will be attatched to join messages
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
-		core.addJoinListener = function addJoinListener(uniqueId, listener) {
+		core.addJoinListener = function addJoinListener(uniqueId, owner, listener) {
 			if (!core.joinFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.joinFuncs[uniqueId] = listener;
+				core.joinFuncs[uniqueId] = {owner, listener};
 				return true;
 			} else {
 				return false;
@@ -367,9 +390,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param function listener the function which will be attatched to join messages
 		 * @return bool true on success, false if the unique ID has already been used
 		 */
-		core.addLeaveListener = function addLeaveListener(uniqueId, listener) {
+		core.addLeaveListener = function addLeaveListener(uniqueId, owner, listener) {
 			if (!core.leaveFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.leaveFuncs[uniqueId] = listener;
+				core.leaveFuncs[uniqueId] = {owner, listener};
 				return true;
 			} else {
 				return false;
@@ -393,9 +416,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param function listener the function which will be attatched to join messages
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
-		core.addTriggerListener = function addTriggerListener(uniqueId, listener) {
+		core.addTriggerListener = function addTriggerListener(uniqueId, owner, listener) {
 			if (!core.triggerFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.triggerFuncs[uniqueId] = listener;
+				core.triggerFuncs[uniqueId] = {owner, listener};
 				return true;
 			} else {
 				return false;
@@ -419,9 +442,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param function listener the function which will be attatched to join messages
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
-		core.addServerListener = function addServerListener(uniqueId, listener) {
+		core.addServerListener = function addServerListener(uniqueId, owner, listener) {
 			if (!core.serverFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.serverFuncs[uniqueId] = listener;
+				core.serverFuncs[uniqueId] = {owner, listener};
 				return true;
 			} else {
 				return false;
@@ -445,9 +468,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param function listener the function which will be attatched to join messages
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
-		core.addOtherListener = function addOtherListener(uniqueId, listener) {
+		core.addOtherListener = function addOtherListener(uniqueId, owner, listener) {
 			if (!core.otherFuncs.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.otherFuncs[uniqueId] = listener;
+				core.otherFuncs[uniqueId] = {owner, listener};
 				return true;
 			} else {
 				return false;
@@ -471,9 +494,9 @@ function MessageBotCore() { //jshint ignore:line
 		 * @param function listener the function which will be attatched to join messages
 		 * @return bool true on success, false if the unique ID has already been used or the listener is not a function
 		 */
-		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
+		core.addBeforeSendListener = function addBeforeSendListener(uniqueId, owner, listener) {
 			if (!core.sendChecks.hasOwnProperty(uniqueId) && typeof listener == "function") {
-				core.sendChecks[uniqueId] = listener;
+				core.sendChecks[uniqueId] = {owner, listener};
 				return true;
 			} else {
 				return false;

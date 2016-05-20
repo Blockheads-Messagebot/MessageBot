@@ -127,11 +127,11 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.start = function start() {
-			bot.core.addJoinListener('mb_join', bot.onJoin.bind(bot));
-			bot.core.addLeaveListener('mb_leave', bot.onLeave.bind(bot));
-			bot.core.addTriggerListener('mb_trigger', bot.onTrigger.bind(bot));
-			bot.core.addTriggerListener('mb_notify', (message) => {
-				if (bot.preferences.notify) {
+			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin.bind(bot));
+			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave.bind(bot));
+			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger.bind(bot));
+			bot.core.addTriggerListener('mb_notify', 'bot', (message) => {
+				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
 					bot.ui.notify(message.name + ': ' + message.message);
 				}
 			});

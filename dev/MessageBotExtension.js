@@ -84,7 +84,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 	 * @return boolean true on success, false otherwise
 	 */
 	extension.addJoinListener = function addJoinListener(uniqueId, listener) {
-		return this.core.addJoinListener(this.id + '_' + uniqueId, listener);
+		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, this.id, listener);
 	};
 
 	/**
@@ -105,7 +105,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 	 * @return boolean true on success, false otherwise
 	 */
 	extension.addLeaveListener = function addLeaveListener(uniqueId, listener) {
-		return this.core.addLeaveListener(this.id + '_' + uniqueId, listener);
+		return this.core.addLeaveListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -126,7 +126,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 	 * @return boolean true on success, false otherwise
 	 */
 	extension.addTriggerListener = function addTriggerListener(uniqueId, listener) {
-		return this.core.addTriggerListener(this.id + '_' + uniqueId, listener);
+		return this.core.addTriggerListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -147,7 +147,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 	 * @return boolean true on success, false otherwise
 	 */
 	extension.addServerListener = function addServerListener(uniqueId, listener) {
-		return this.core.addServerListener(this.id + '_' + uniqueId, listener);
+		return this.core.addServerListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -168,7 +168,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 	 * @return boolean true on success, false otherwise
 	 */
 	extension.addOtherListener = function addOtherListener(uniqueId, listener) {
-		return this.core.addOtherListener(this.id + '_' + uniqueId, listener);
+		return this.core.addOtherListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
@@ -190,7 +190,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 	 * @return boolean true on success, false otherwise
 	 */
 	extension.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
-		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, listener);
+		return this.core.addBeforeSendListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**
