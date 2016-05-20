@@ -169,7 +169,8 @@ function MessageBotCore() {
 						try {
 							core.joinFuncs[key].listener({ name: name, ip: ip });
 						} catch (e) {
-							void 0;window.e = e;
+							void 0;
+							core.reportError(e, core.joinFuncs[key].owner);
 						}
 					});
 				})();
@@ -191,7 +192,8 @@ function MessageBotCore() {
 						try {
 							core.leaveFuncs[key].listener({ name: name, ip: ip });
 						} catch (e) {
-							void 0;window.e = e;
+							void 0;
+							core.reportError(e, core.leaveFuncs[key].owner);
 						}
 					});
 				})();
@@ -205,7 +207,8 @@ function MessageBotCore() {
 						try {
 							core.serverFuncs[key].listener(messageData);
 						} catch (e) {
-							void 0;window.e = e;
+							void 0;
+							core.reportError(e, core.serverFuncs[key].owner);
 						}
 					});
 				} else {
@@ -214,6 +217,7 @@ function MessageBotCore() {
 							core.triggerFuncs[key].listener(messageData);
 						} catch (e) {
 							void 0;window.e = e;
+							core.reportError(e, core.triggerFuncs[key].owner);
 						}
 					});
 				}
@@ -223,7 +227,8 @@ function MessageBotCore() {
 					try {
 						core.otherFuncs[key].listener(message);
 					} catch (e) {
-						void 0;window.e = e;
+						void 0;
+						core.reportError(e, core.otherFuncs[key].owner);
 					}
 				});
 			}
@@ -433,6 +438,29 @@ function MessageBotCore() {
 		return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
 	}();
 
+	core.reportError = function (err, owner) {
+		void 0;
+		window.bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
+			world_name: window.bot.core.worldName,
+			world_id: window.worldId,
+			owner_name: window.bot.core.ownerName,
+			bot_version: window.bot.version,
+			error_text: err.message,
+			error_file: 'http://blockheadsfans.com/messagebot/extension/' + owner + '/code/raw/',
+			error_row: err.lineno || 0,
+			error_column: err.colno || 0
+		}).then(function (resp) {
+			if (resp.status == 'ok') {
+				window.bot.ui.notify('Something went wrong, it has been reported.');
+			} else {
+				throw resp.message;
+			}
+		}).catch(function (err) {
+			void 0;
+			window.bot.ui.notify('Error reporting exception: ' + err);
+		});
+	};
+
 	core.ajax.get('/worlds/logs/' + window.worldId).then(function (response) {
 		core.logs = response.split('\n');
 		core.logs.forEach(function (line) {
@@ -527,8 +555,8 @@ function MessageBotCore() {
 		}
 		return data;
 	};
-	core.addServerListener('core_staffChanges', core.staffChangeCheck.bind(core));
-	core.addTriggerListener('core_staffChanges', core.staffChangeCheck.bind(core));
+	core.addServerListener('core_staffChanges', 'bot', core.staffChangeCheck.bind(core));
+	core.addTriggerListener('core_staffChanges', 'bot', core.staffChangeCheck.bind(core));
 
 	return core;
 }

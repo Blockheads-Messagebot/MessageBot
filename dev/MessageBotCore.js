@@ -211,7 +211,8 @@ function MessageBotCore() { //jshint ignore:line
 					try {
 						core.joinFuncs[key].listener({name, ip});
 					} catch(e) {
-						console.log(e); window.e = e;
+						console.error(e);
+						core.reportError(e, core.joinFuncs[key].owner);
 					}
 				});
 			} else if (message.indexOf(core.worldName + ' - Player Disconnected ') === 0) {
@@ -229,7 +230,8 @@ function MessageBotCore() { //jshint ignore:line
 					try {
 						core.leaveFuncs[key].listener({name, ip});
 					} catch (e) {
-						console.log(e); window.e = e;
+						console.error(e);
+						core.reportError(e, core.leaveFuncs[key].owner);
 					}
 				});
 			} else if (message.indexOf(': ') >= 0) {
@@ -246,7 +248,8 @@ function MessageBotCore() { //jshint ignore:line
 						try {
 							core.serverFuncs[key].listener(messageData);
 						} catch (e) {
-							 console.log(e); window.e = e;
+							 console.error(e);
+							core.reportError(e, core.serverFuncs[key].owner);
 						}
 					});
 				} else {
@@ -256,6 +259,7 @@ function MessageBotCore() { //jshint ignore:line
 							core.triggerFuncs[key].listener(messageData);
 						} catch (e) {
 							console.log(e); window.e = e;
+							core.reportError(e, core.triggerFuncs[key].owner);
 						}
 					});
 				}
@@ -265,7 +269,8 @@ function MessageBotCore() { //jshint ignore:line
 					try {
 						core.otherFuncs[key].listener(message);
 					} catch (e) {
-						console.log(e); window.e = e;
+						console.log(e);
+						core.reportError(e, core.otherFuncs[key].owner);
 					}
 				});
 			}
@@ -602,6 +607,33 @@ function MessageBotCore() { //jshint ignore:line
 		return {xhr, get, getJSON, post, postJSON};
 	}());
 
+	//For handling errors nicely
+	core.reportError = (err, owner) => {
+		console.info('Reporting error (core):', err, owner);
+		window.bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+			{
+				world_name: window.bot.core.worldName,
+				world_id: window.worldId,
+				owner_name: window.bot.core.ownerName,
+				bot_version: window.bot.version,
+				error_text: err.message,
+				error_file: `http://blockheadsfans.com/messagebot/extension/${owner}/code/raw/`,
+				error_row: err.lineno || 0,
+				error_column: err.colno || 0,
+			})
+			.then((resp) => {
+				if (resp.status == 'ok') {
+					window.bot.ui.notify('Something went wrong, it has been reported.');
+				} else {
+					throw resp.message;
+				}
+			})
+			.catch((err) => {
+				console.error(err);
+				window.bot.ui.notify(`Error reporting exception: ${err}`);
+			});
+	};
+
 	//Get the player list
 	core.ajax.get(`/worlds/logs/${window.worldId}`).then(function(response) {
 		core.logs = response.split('\n');
@@ -701,8 +733,8 @@ function MessageBotCore() { //jshint ignore:line
 		}
 		return data;
 	};
-	core.addServerListener('core_staffChanges', core.staffChangeCheck.bind(core));
-	core.addTriggerListener('core_staffChanges', core.staffChangeCheck.bind(core));
+	core.addServerListener('core_staffChanges', 'bot', core.staffChangeCheck.bind(core));
+	core.addTriggerListener('core_staffChanges', 'bot', core.staffChangeCheck.bind(core));
 
 	return core;
 }
