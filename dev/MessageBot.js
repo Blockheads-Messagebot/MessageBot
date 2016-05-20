@@ -211,7 +211,7 @@ function MessageBot() { //jshint ignore:line
 			bot.ui.alert('Really delete this message?',
 						[
 							{text: 'Delete', style: 'danger', thisArg: e.target.parentElement, action: function() {
-								bot.remove();
+								this.remove();
 								bot.saveConfig();
 							}},
 							{text: 'Cancel'}

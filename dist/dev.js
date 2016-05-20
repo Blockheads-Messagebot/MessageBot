@@ -1208,7 +1208,7 @@ function MessageBot() {
    */
 		bot.deleteMsg = function deleteMsg(e) {
 			bot.ui.alert('Really delete this message?', [{ text: 'Delete', style: 'danger', thisArg: e.target.parentElement, action: function action() {
-					bot.remove();
+					this.remove();
 					bot.saveConfig();
 				} }, { text: 'Cancel' }]);
 			e.stopPropagation();
