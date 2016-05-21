@@ -859,8 +859,8 @@ function MessageBot() {
 
 	{
 		bot.start = function start() {
-			var ipBanCheck = function ipBanCheck(data) {
-				data = typeof data == 'string' ? { name: 'SERVER', message: data } : data;
+			var ipBanCheck = function ipBanCheck(message) {
+				var data = typeof message == 'string' ? { name: 'SERVER', message: message } : message;
 				if (/^\/ban-ip .{3,}/i.test(data.message) && bot.checkGroup('Staff', data.name)) {
 					var ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(data.message)[1].toLocaleUpperCase());
 					if (ip) {
@@ -868,7 +868,7 @@ function MessageBot() {
 						bot.core.send(ip + ' has been added to the blacklist.');
 					}
 				}
-				return data; 
+				return message; 
 			};
 
 			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);

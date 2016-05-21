@@ -128,8 +128,8 @@ function MessageBot() { //jshint ignore:line
 		 * @return void
 		 */
 		bot.start = function start() {
-			let ipBanCheck = (data) => {
-				data = (typeof data == 'string') ? {name: 'SERVER', message: data} : data;
+			let ipBanCheck = (message) => {
+				let data = (typeof message == 'string') ? {name: 'SERVER', message} : message;
 				if (/^\/ban-ip .{3,}/i.test(data.message) && bot.checkGroup('Staff', data.name)) {
 					let ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(data.message)[1].toLocaleUpperCase());
 					if (ip) {
@@ -137,7 +137,7 @@ function MessageBot() { //jshint ignore:line
 						bot.core.send(`${ip} has been added to the blacklist.`);
 					}
 				}
-				return data; //This is being attached as a beforesend listener
+				return message; //This is being attached as a beforesend listener
 			};
 
 			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);
