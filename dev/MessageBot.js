@@ -9,11 +9,11 @@ function MessageBot() { //jshint ignore:line
 		core: MessageBotCore(),
 		ui: MessageBotUI(),
 		uMID: 0,
-		version: '5.1.0',
 		extensions: [],
 		preferences: {},
 		extensionURL: '//blockheadsfans.com/messagebot/extension/{id}/code/raw'
 	};
+	bot.version = bot.core.version;
 
 	//Save functions
 	{
@@ -111,6 +111,7 @@ function MessageBot() { //jshint ignore:line
 		bot.savePrefs = function savePrefs() {
 			var prefs = {};
 			prefs.announcementDelay = parseInt(document.querySelector('#mb_ann_delay').value);
+			prefs.maxResponses = parseInt(document.querySelector('#mb_resp_max').value);
 			prefs.regexTriggers = document.querySelector('#mb_regex_triggers').checked;
 			prefs.disableTrim = document.querySelector('#mb_disable_trim').checked;
 			prefs.notify = document.querySelector('#mb_notify_message').checked;
@@ -425,6 +426,8 @@ function MessageBot() { //jshint ignore:line
 				}
 				return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
 			};
+			let sentMessages = 0;
+
 			bot.triggerArr.forEach((msg) => {
 				if (triggerMatch(msg.trigger, data.message) && bot.checkGroup(msg.group, data.name) && !bot.checkGroup(msg.not_group, data.name) && bot.checkJoins(msg.joins_low, msg.joins_high, bot.core.getJoins(data.name))) {
 
@@ -432,7 +435,10 @@ function MessageBot() { //jshint ignore:line
 					toSend = bot.replaceAll(toSend, '{{name}}', data.name.toLocaleLowerCase());
 					toSend = bot.replaceAll(toSend, '{{Name}}', data.name[0] + data.name.substring(1).toLocaleLowerCase());
 					toSend = bot.replaceAll(toSend, '{{ip}}', bot.core.getIP(data.name));
-					bot.core.send(toSend);
+					if (sentMessages < bot.preferences.maxResponses) {
+						sentMessages++;
+						bot.core.send(toSend);
+					}
 				}
 			});
 		};
@@ -631,6 +637,7 @@ function MessageBot() { //jshint ignore:line
 		var str = localStorage.getItem('mb_preferences');
 		bot.preferences = str === null ? {} : JSON.parse(str);
 		checkPref('number', 'announcementDelay', 10);
+		checkPref('number', 'maxResponses', 2);
 		checkPref('boolean', 'regexTriggers', false);
 		checkPref('boolean', 'disableTrim', false);
 		checkPref('boolean', 'notify', true);
@@ -658,6 +665,7 @@ function MessageBot() { //jshint ignore:line
 
 		//Handle preferences
 		document.querySelector('#mb_ann_delay').value = bot.preferences.announcementDelay;
+		document.querySelector('#mb_resp_max').value = bot.preferences.maxResponses;
 		document.querySelector('#mb_regex_triggers').checked = ((bot.preferences.regexTriggers) ? 'checked' : '');
 		document.querySelector('#mb_disable_trim').checked = ((bot.preferences.disableTrim) ? 'checked' : '');
 		document.querySelector('#mb_notify_message').checked = ((bot.preferences.notify) ? 'checked' : '');

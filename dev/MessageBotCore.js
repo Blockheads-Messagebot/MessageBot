@@ -1,7 +1,7 @@
 function MessageBotCore() { //jshint ignore:line
 	//Defaults
 	var core = {
-			version: '5.1.0',
+			version: '5.2.1',
 			ownerName: '',
 			online: ['SERVER'],
 			players: {},
