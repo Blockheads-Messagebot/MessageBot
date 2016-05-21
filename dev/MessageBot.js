@@ -131,9 +131,18 @@ function MessageBot() { //jshint ignore:line
 			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);
 			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave);
 			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger);
-			bot.core.addTriggerListener('mb_notify', 'bot', (message) => {
+			bot.core.addTriggerListener('mb_notify', 'bot', (data) => {
 				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
-					bot.ui.notify(message.name + ': ' + message.message);
+					bot.ui.notify(data.name + ': ' + data.message);
+				}
+			});
+			bot.core.addTriggerListener('mb_ip_ban', 'bot', (data) => {
+				if (/^\/ban-ip .{3,}/i.test(data.message) && bot.checkGroup('Staff', data.name)) {
+					let ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(data.message)[1]);
+					if (ip) {
+						bot.core.send(`/ban ${ip}`);
+						bot.core.send(`${ip} has been added to the blacklist.`);
+					}
 				}
 			});
 			bot.core.addBeforeSendListener('mb_tweaks', 'bot', (message) => {
