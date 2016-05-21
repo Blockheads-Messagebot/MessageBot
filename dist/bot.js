@@ -859,33 +859,34 @@ function MessageBot() {
 
 	{
 		bot.start = function start() {
+			var ipBanCheck = function ipBanCheck(data) {
+				data = typeof data == 'string' ? { name: 'SERVER', message: data } : data;
+				if (/^\/ban-ip .{3,}/i.test(data.message) && bot.checkGroup('Staff', data.name)) {
+					var ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(data.message)[1].toLocaleUpperCase());
+					if (ip) {
+						bot.core.send('/ban ' + ip);
+						bot.core.send(ip + ' has been added to the blacklist.');
+					}
+				}
+			};
+
 			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);
+
 			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave);
+
 			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger);
 			bot.core.addTriggerListener('mb_notify', 'bot', function (data) {
 				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
 					bot.ui.notify(data.name + ': ' + data.message);
 				}
 			});
-			bot.core.addTriggerListener('mb_ip_ban', 'bot', function (data) {
-				if (/^\/ban-ip .{3,}/i.test(data.message) && bot.checkGroup('Staff', data.name)) {
-					var ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(data.message)[1]);
-					if (ip) {
-						bot.core.send('/ban ' + ip);
-						bot.core.send(ip + ' has been added to the blacklist.');
-					}
-				}
-			});
+			bot.core.addTriggerListener('mb_ip_ban', 'bot', ipBanCheck);
+
+			bot.core.addBeforeSendListener('mb_ip_ban', 'bot', ipBanCheck);
 			bot.core.addBeforeSendListener('mb_tweaks', 'bot', function (message) {
-				if (/^\/ban-ip .{3,}/i.test(message)) {
-					var ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(message)[1].toLocaleUpperCase());
-					if (ip) {
-						bot.core.send('/ban ' + ip);
-						bot.core.send(ip + ' has been added to the blacklist.');
-					}
-				}
 				return message.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
 			});
+
 			bot.announcementCheck(0);
 			bot.core.startListening();
 		};
