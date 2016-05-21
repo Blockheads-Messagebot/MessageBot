@@ -868,6 +868,7 @@ function MessageBot() {
 						bot.core.send(ip + ' has been added to the blacklist.');
 					}
 				}
+				return data; 
 			};
 
 			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);

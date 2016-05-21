@@ -1175,6 +1175,7 @@ function MessageBot() {
 						bot.core.send(ip + ' has been added to the blacklist.');
 					}
 				}
+				return data; //This is being attached as a beforesend listener
 			};
 
 			bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);
