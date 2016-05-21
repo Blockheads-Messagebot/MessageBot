@@ -23,7 +23,6 @@ function MessageBotCore() { //jshint ignore:line
 			};
 
 	core.worldName = document.title.substring(0, document.title.indexOf('Manager | Portal') - 1);
-	core.chatId = window.chatId || 0;
 
 	//In regards to sending chat
 	{
@@ -346,7 +345,8 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.startListening = function startListening() {
-			core.chatId = (window.chatId < 20) ? 0 : window.chatId - 20;
+			core.chatId = window.chatId || 0;
+			core.chatId = (core.chatId < 20) ? 0 : core.chatId - 20;
 			core.pollChat(core);
 			core.listening = true;
 		};
