@@ -61,7 +61,7 @@ function MessageBotCore() {
 
 			Object.keys(core.sendChecks).forEach(function (key) {
 				if (tmpMsg) {
-					tmpMsg = core.sendChecks[key](tmpMsg);
+					tmpMsg = core.sendChecks[key].listener(tmpMsg);
 				}
 			});
 

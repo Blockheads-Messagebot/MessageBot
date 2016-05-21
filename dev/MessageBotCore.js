@@ -74,7 +74,7 @@ function MessageBotCore() { //jshint ignore:line
 
 			Object.keys(core.sendChecks).forEach((key) => {
 				if (tmpMsg) {
-					tmpMsg = core.sendChecks[key](tmpMsg);
+					tmpMsg = core.sendChecks[key].listener(tmpMsg);
 				}
 			});
 
