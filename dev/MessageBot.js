@@ -147,7 +147,7 @@ function MessageBot() { //jshint ignore:line
 			});
 			bot.core.addBeforeSendListener('mb_tweaks', 'bot', (message) => {
 				if (/^\/ban-ip .{3,}/i.test(message)) {
-					let ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(message)[1]);
+					let ip = bot.core.getIP(/^\/ban-ip (.*)$/.exec(message)[1].toLocaleUpperCase());
 					if (ip) {
 						bot.core.send(`/ban ${ip}`);
 						bot.core.send(`${ip} has been added to the blacklist.`);
