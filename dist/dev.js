@@ -7,18 +7,6 @@ window.pollChat = function () {};
 
 function MessageBotCore() {
 	//jshint ignore:line
-	//Avoid trying to launch the bot on a non-console page.
-	if (!document.getElementById('messageText')) {
-		alert('Please start a server and navigate to the console page before starting the bot.');
-		throw new Error("Not a console page. Opened at:" + document.location.href);
-	}
-
-	//For colored chat
-	document.head.innerHTML += '<style>.admin > span:first-child { color: #0007CF} .mod > span:first-child { color: #08C738}</style>';
-	//We are replacing these with our own functions.
-	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
-	document.getElementById('messageText').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
-
 	//Defaults
 	var core = {
 		version: '5.1.0',
@@ -182,8 +170,7 @@ function MessageBotCore() {
    * @return void
    */
 		core.scrollToBottom = function scrollToBottom() {
-			var el = document.querySelector('#mb_console > div > ul');
-			el.scrollTop = el.scrollHeight - el.scrollTop;
+			document.querySelector('#mb_console ul li:last-child').scrollIntoView(false);
 		};
 
 		/**
@@ -645,11 +632,11 @@ function MessageBotCore() {
 	//For handling errors nicely
 	core.reportError = function (err, owner) {
 		console.info('Reporting error (core):', err, owner);
-		window.bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
-			world_name: window.bot.core.worldName,
+		core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
+			world_name: core.worldName,
 			world_id: window.worldId,
-			owner_name: window.bot.core.ownerName,
-			bot_version: window.bot.version,
+			owner_name: core.ownerName,
+			bot_version: core.version,
 			error_text: err.message,
 			error_file: 'http://blockheadsfans.com/messagebot/extension/' + owner + '/code/raw/',
 			error_row: err.lineno || 0,
@@ -891,8 +878,8 @@ function MessageBotUI() {
  */
 	ui.checkAlertQueue = function () {
 		if (ui.alertQueue.length) {
-			var _alert = ui.alertQueue.shift();
-			ui.alert(_alert.text, _alert.buttons);
+			var alert = ui.alertQueue.shift();
+			ui.alert(alert.text, alert.buttons);
 		}
 	};
 

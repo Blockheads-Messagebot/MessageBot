@@ -1,16 +1,4 @@
 function MessageBotCore() { //jshint ignore:line
-	//Avoid trying to launch the bot on a non-console page.
-	if (!document.getElementById('messageText')) {
-		alert('Please start a server and navigate to the console page before starting the bot.');
-		throw new Error("Not a console page. Opened at:" + document.location.href);
-	}
-
-	//For colored chat
-	document.head.innerHTML += '<style>.admin > span:first-child { color: #0007CF} .mod > span:first-child { color: #08C738}</style>';
-	//We are replacing these with our own functions.
-	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
-	document.getElementById('messageText').setAttribute('onkeydown',  'bot.core.enterCheck(event, bot.core)');
-
 	//Defaults
 	var core = {
 			version: '5.1.0',
@@ -174,8 +162,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.scrollToBottom = function scrollToBottom() {
-			let el = document.querySelector('#mb_console > div > ul');
-			el.scrollTop = el.scrollHeight - el.scrollTop;
+			document.querySelector('#mb_console ul li:last-child').scrollIntoView(false);
 		};
 
 		/**
@@ -615,12 +602,12 @@ function MessageBotCore() { //jshint ignore:line
 	//For handling errors nicely
 	core.reportError = (err, owner) => {
 		console.info('Reporting error (core):', err, owner);
-		window.bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+		core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
 			{
-				world_name: window.bot.core.worldName,
+				world_name: core.worldName,
 				world_id: window.worldId,
-				owner_name: window.bot.core.ownerName,
-				bot_version: window.bot.version,
+				owner_name: core.ownerName,
+				bot_version: core.version,
 				error_text: err.message,
 				error_file: `http://blockheadsfans.com/messagebot/extension/${owner}/code/raw/`,
 				error_row: err.lineno || 0,

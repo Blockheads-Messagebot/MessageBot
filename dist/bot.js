@@ -5,15 +5,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 window.pollChat = function () {};
 
 function MessageBotCore() {
-	if (!document.getElementById('messageText')) {
-		void 0;
-		throw new Error("Not a console page. Opened at:" + document.location.href);
-	}
-
-	document.head.innerHTML += '<style>.admin > span:first-child { color: #0007CF} .mod > span:first-child { color: #08C738}</style>';
-	document.getElementById('messageButton').setAttribute('onclick', 'return bot.core.userSend(bot.core);');
-	document.getElementById('messageText').setAttribute('onkeydown', 'bot.core.enterCheck(event, bot.core)');
-
 	var core = {
 		version: '5.1.0',
 		ownerName: '',
@@ -139,8 +130,7 @@ function MessageBotCore() {
 		};
 
 		core.scrollToBottom = function scrollToBottom() {
-			var el = document.querySelector('#mb_console > div > ul');
-			el.scrollTop = el.scrollHeight - el.scrollTop;
+			document.querySelector('#mb_console ul li:last-child').scrollIntoView(false);
 		};
 
 		core.parseMessage = function parseMessage(message) {
@@ -446,11 +436,11 @@ function MessageBotCore() {
 
 	core.reportError = function (err, owner) {
 		void 0;
-		window.bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
-			world_name: window.bot.core.worldName,
+		core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
+			world_name: core.worldName,
 			world_id: window.worldId,
-			owner_name: window.bot.core.ownerName,
-			bot_version: window.bot.version,
+			owner_name: core.ownerName,
+			bot_version: core.version,
 			error_text: err.message,
 			error_file: 'http://blockheadsfans.com/messagebot/extension/' + owner + '/code/raw/',
 			error_row: err.lineno || 0,
@@ -654,8 +644,8 @@ function MessageBotUI() {
 
 	ui.checkAlertQueue = function () {
 		if (ui.alertQueue.length) {
-			var _alert = ui.alertQueue.shift();
-			ui.alert(_alert.text, _alert.buttons);
+			var alert = ui.alertQueue.shift();
+			ui.alert(alert.text, alert.buttons);
 		}
 	};
 
