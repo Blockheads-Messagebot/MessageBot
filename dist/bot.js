@@ -49,7 +49,12 @@ function MessageBotCore() {
 				var tmpMsg = core.toSend.shift();
 				Object.keys(core.sendChecks).forEach(function (key) {
 					if (tmpMsg) {
-						tmpMsg = core.sendChecks[key](tmpMsg);
+						try {
+							tmpMsg = core.sendChecks[key].listener(tmpMsg);
+						} catch (e) {
+							void 0;
+							core.reportError(e, core.sendChecks[key].owner);
+						}
 					}
 				});
 				if (tmpMsg) {
@@ -91,6 +96,7 @@ function MessageBotCore() {
 					}
 				}).catch(function (error) {
 					core.addMessageToPage('<span style="color:#f00;">Error sending: ' + error + '</span>', true);
+					core.reportError(error, 'bot');
 				}).then(function () {
 					core.scrollToBottom();
 				});
