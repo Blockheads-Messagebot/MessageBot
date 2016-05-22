@@ -705,6 +705,9 @@ function MessageBotCore() { //jshint ignore:line
 				}
 			}
 		});
+	})
+	.catch(() => {
+		core.addMessageToPage(`<span style="color:#f00;">The world took too long to start. The bot will not be able to function correctly.</span>`, true);
 	});
 
 	//Start listening for messages to send
