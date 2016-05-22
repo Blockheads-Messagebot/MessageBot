@@ -161,7 +161,7 @@ function MessageBotCore() { //jshint ignore:line
 		 * @return void
 		 */
 		core.scrollToBottom = function scrollToBottom() {
-			document.querySelector('#mb_console ul li:last-child').scrollIntoView(false);
+			document.querySelector('#mb_console li:last-child').scrollIntoView(false);
 		};
 
 		/**
@@ -626,60 +626,85 @@ function MessageBotCore() { //jshint ignore:line
 			});
 	};
 
-	//Get the player list
-	core.ajax.get(`/worlds/logs/${window.worldId}`).then(function(response) {
-		core.logs = response.split('\n');
-		core.logs.forEach((line) => {
-			if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
-				var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
-				var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
+	//Make sure the world is online.
+	(function(core) {
+		return new Promise((resolve, reject) => {
+			let fails = 0;
+            (function waitForWorld(core) {
+                core.ajax.postJSON(`/api`, { command: 'status', worldId: window.worldId }).then((world) => {
+                    if (world.worldStatus == 'online') {
+                        return resolve();
+                    } else if (world.worldStatus == 'offline') {
+						core.ajax.postJSON('/api', { command: 'start', worldId: window.worldId }).then(() => {
+							waitForWorld();
+						});
+					} else {
+						fails++;
+						if (fails > 10) {
+							return reject();
+						}
+                        setTimeout(waitForWorld, 5000, core);
+                    }
+                });
+            }(core));
+        });
+	}(core))
+	.then(() => {
+		//The world is now online. Fetch logs, online players, and lists.
+		core.ajax.get(`/worlds/logs/${window.worldId}`).then(function(response) {
+			core.logs = response.split('\n');
+			core.logs.forEach((line) => {
+				if (line.indexOf(core.worldName + ' - Player Connected ') > -1) {
+					var player = line.substring(line.indexOf(' - Player Connected ') + 20, line.lastIndexOf('|', line.lastIndexOf('|') - 1) - 1);
+					var ip = line.substring(line.lastIndexOf(' | ', line.lastIndexOf(' | ') - 1) + 3, line.lastIndexOf(' | '));
 
-				if (core.players.hasOwnProperty(player)) {
-					core.players[player].joins++;
-				} else {
-					core.players[player] = {};
-					core.players[player].ips = [];
-					core.players[player].joins = 1;
+					if (core.players.hasOwnProperty(player)) {
+						core.players[player].joins++;
+					} else {
+						core.players[player] = {};
+						core.players[player].ips = [];
+						core.players[player].joins = 1;
+					}
+					core.players[player].ip = ip;
+					if (core.players[player].ips.indexOf(ip) < 0) {
+						core.players[player].ips.push(ip);
+					}
 				}
-				core.players[player].ip = ip;
-				if (core.players[player].ips.indexOf(ip) < 0) {
-					core.players[player].ips.push(ip);
+			});
+		});
+
+		//Get staff lists
+		core.ajax.get(`/worlds/lists/${window.worldId}`).then(function(response) {
+			var doc = (new DOMParser()).parseFromString(response, 'text/html');
+			core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
+			core.adminList.push(core.ownerName);
+			core.adminList.push('SERVER');
+			core.adminList.forEach((admin, index) => {
+				core.adminList[index] = admin.toUpperCase();
+			});
+			var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
+			mList.forEach((mod, index) => {
+				mList[index] = mod.toUpperCase();
+			});
+			core.modList = mList.filter(function (mod) {
+				return core.adminList.indexOf(mod) < 0;
+			});
+
+			core.staffList = core.adminList.concat(core.modList);
+		});
+
+		//Get online players
+		core.ajax.get(`/worlds/${window.worldId}`).then(function(response) {
+			var doc = (new DOMParser()).parseFromString(response, 'text/html');
+			core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
+			var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
+			var playerElemsCount = playerElems.length;
+			for (var i = 0; i < playerElemsCount; i++) {
+				if (core.online.indexOf(playerElems[i].textContent) < 0) {
+					core.online.push(playerElems[i].textContent);
 				}
 			}
 		});
-	});
-
-	//Get staff lists
-	core.ajax.get(`/worlds/lists/${window.worldId}`).then(function(response) {
-		var doc = (new DOMParser()).parseFromString(response, 'text/html');
-		core.adminList = doc.querySelector('textarea[name=admins]').value.split('\n');
-		core.adminList.push(core.ownerName);
-		core.adminList.push('SERVER');
-		core.adminList.forEach((admin, index) => {
-			core.adminList[index] = admin.toUpperCase();
-		});
-		var mList = doc.querySelector('textarea[name=modlist]').value.split('\n');
-		mList.forEach((mod, index) => {
-			mList[index] = mod.toUpperCase();
-		});
-		core.modList = mList.filter(function (mod) {
-			return core.adminList.indexOf(mod) < 0;
-		});
-
-		core.staffList = core.adminList.concat(core.modList);
-	});
-
-	//Get online players
-	core.ajax.get(`/worlds/${window.worldId}`).then(function(response) {
-		var doc = (new DOMParser()).parseFromString(response, 'text/html');
-		core.ownerName = doc.querySelector('.subheader~tr>td:not([class])').textContent;
-		var playerElems = doc.querySelector('.manager.padded:nth-child(1)').querySelectorAll('tr:not(.history)>td.left');
-		var playerElemsCount = playerElems.length;
-		for (var i = 0; i < playerElemsCount; i++) {
-			if (core.online.indexOf(playerElems[i].textContent) < 0) {
-				core.online.push(playerElems[i].textContent);
-			}
-		}
 	});
 
 	//Start listening for messages to send

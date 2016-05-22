@@ -145,12 +145,12 @@ function MessageBot() { //jshint ignore:line
 			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave);
 
 			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger);
+			bot.core.addTriggerListener('mb_ip_ban', 'bot', ipBanCheck);
 			bot.core.addTriggerListener('mb_notify', 'bot', (data) => {
 				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
 					bot.ui.notify(data.name + ': ' + data.message);
 				}
 			});
-			bot.core.addTriggerListener('mb_ip_ban', 'bot', ipBanCheck);
 
 			bot.core.addBeforeSendListener('mb_ip_ban', 'bot', ipBanCheck);
 			bot.core.addBeforeSendListener('mb_tweaks', 'bot', (message) => {
@@ -344,6 +344,7 @@ function MessageBot() { //jshint ignore:line
 					}
 				}).catch((err) => {
 					console.error(err);
+					bot.core.reportError(err, 'bot');
 					bot.core.addMessageToPage(`<span style="color:#f00;">Fetching extension names failed with error: ${bot.stripHTML(err.message)}</span>`, true);
 					el.innerHTML = 'Error fetching extension names';
 				});
@@ -744,7 +745,10 @@ function MessageBot() { //jshint ignore:line
 
 			bot.listExtensions();
 		})
-		.catch((err) => { console.error(err); });
+		.catch((err) => {
+			console.error(err);
+			bot.core.reportError(err, 'bot');
+		});
 
 	return bot;
 }

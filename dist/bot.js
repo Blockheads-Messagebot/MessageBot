@@ -129,7 +129,7 @@ function MessageBotCore() {
 		};
 
 		core.scrollToBottom = function scrollToBottom() {
-			document.querySelector('#mb_console ul li:last-child').scrollIntoView(false);
+			document.querySelector('#mb_console li:last-child').scrollIntoView(false);
 		};
 
 		core.parseMessage = function parseMessage(message) {
@@ -876,12 +876,12 @@ function MessageBot() {
 			bot.core.addLeaveListener('mb_leave', 'bot', bot.onLeave);
 
 			bot.core.addTriggerListener('mb_trigger', 'bot', bot.onTrigger);
+			bot.core.addTriggerListener('mb_ip_ban', 'bot', ipBanCheck);
 			bot.core.addTriggerListener('mb_notify', 'bot', function (data) {
 				if (bot.preferences.notify && document.querySelector('#mb_console.visible') === null) {
 					bot.ui.notify(data.name + ': ' + data.message);
 				}
 			});
-			bot.core.addTriggerListener('mb_ip_ban', 'bot', ipBanCheck);
 
 			bot.core.addBeforeSendListener('mb_ip_ban', 'bot', ipBanCheck);
 			bot.core.addBeforeSendListener('mb_tweaks', 'bot', function (message) {
@@ -1003,6 +1003,7 @@ function MessageBot() {
 				}
 			}).catch(function (err) {
 				void 0;
+				bot.core.reportError(err, 'bot');
 				bot.core.addMessageToPage('<span style="color:#f00;">Fetching extension names failed with error: ' + bot.stripHTML(err.message) + '</span>', true);
 				el.innerHTML = 'Error fetching extension names';
 			});
@@ -1311,6 +1312,7 @@ function MessageBot() {
 		bot.listExtensions();
 	}).catch(function (err) {
 		void 0;
+		bot.core.reportError(err, 'bot');
 	});
 
 	return bot;
