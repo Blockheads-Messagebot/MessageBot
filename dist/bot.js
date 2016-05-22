@@ -466,7 +466,7 @@ function MessageBotCore() {
 						return resolve();
 					} else if (world.worldStatus == 'offline') {
 						core.ajax.postJSON('/api', { command: 'start', worldId: window.worldId }).then(function () {
-							waitForWorld();
+							waitForWorld(core);
 						});
 					} else {
 						fails++;
