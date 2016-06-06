@@ -1896,7 +1896,7 @@ function MessageBotExtension(namespace) {
   * @return boolean true on success, false otherwise
   */
 	extension.addJoinListener = function addJoinListener(uniqueId, listener) {
-		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, this.id, listener);
+		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	/**

@@ -1384,7 +1384,7 @@ function MessageBotExtension(namespace) {
 	};
 
 	extension.addJoinListener = function addJoinListener(uniqueId, listener) {
-		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, this.id, listener);
+		return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, listener);
 	};
 
 	extension.removeJoinListener = function removeJoinListener(uniqueId) {
