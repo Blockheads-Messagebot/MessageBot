@@ -22,6 +22,7 @@ function MessageBotCore() {
 		triggerFuncs: {},
 		serverFuncs: {},
 		otherFuncs: {},
+		addMessageToPageFuncs: {},
 		sendChecks: {},
 		adminList: [],
 		modList: [],
@@ -108,8 +109,6 @@ function MessageBotCore() {
 				}).catch(function (error) {
 					core.addMessageToPage('<span style="color:#f00;">Error sending: ' + error + '</span>', true);
 					core.reportError(error, 'bot');
-				}).then(function () {
-					core.scrollToBottom();
 				});
 			} else {
 				button.textContent = 'CANCELED';
@@ -161,15 +160,6 @@ function MessageBotCore() {
 					setTimeout(core.pollChat, 5000, core);
 				}
 			});
-		};
-
-		/**
-   * Function used to scroll chat to show new messages.
-   *
-   * @return void
-   */
-		core.scrollToBottom = function scrollToBottom() {
-			document.querySelector('#mb_console li:last-child').scrollIntoView(false);
 		};
 
 		/**
@@ -289,6 +279,7 @@ function MessageBotCore() {
    * Adds a message to the console, expects this to be assigned to the core
    *
    * @param string|object Either an object with properties name and message, or a string
+   * @param bool Whether or not to parse the object as HTML or as text. Default: false (text)
    * @return void
    */
 		core.addMessageToPage = function addMessageToPage(msg) {
@@ -316,11 +307,17 @@ function MessageBotCore() {
 			var chat = document.querySelector('#mb_console ul');
 			chat.appendChild(msgEl);
 
-			core.scrollToBottom();
-
 			while (chat.children.length > core.chatMsgMaxCount) {
 				chat.removeChild(chat.childNodes[0]);
 			}
+
+			Object.keys(core.addMessageToPageFuncs).forEach(function (key) {
+				try {
+					core.addMessageToPageFuncs[key].listener();
+				} catch (e) {
+					core.reportError(e, core.addMessageToPageFuncs[key].owner);
+				}
+			});
 		};
 	}
 
@@ -523,6 +520,35 @@ function MessageBotCore() {
    */
 		core.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
 			delete core.sendChecks[uniqueId];
+		};
+	}
+
+	//Core listeners
+	{
+		/**
+   * Method used to add a listener
+   *
+   * @param string id the unique id of the listener
+   * @param string owner the ID of the owner of the listener. Extension ID or bot.
+   * @param function listener the function which will be attatched to join messages
+   * @return bool true on success, false if the unique ID has already been used or the listener is not a function
+   */
+		core.addAddMessageListener = function addAddMessageListener(id, owner, listener) {
+			if (!core.addMessageToPageFuncs[id]) {
+				core.addMessageToPageFuncs[id] = { owner: owner, listener: listener };
+				return true;
+			}
+			return false;
+		};
+
+		/**
+   * Removes the listener on join messages by the id, if it exists.
+   *
+   * @param string id the unique id of the listener
+   * @return void
+   */
+		core.removeAddMessageListener = function removeAddMessageListener(id) {
+			delete core.addMessageToPageFuncs[id];
 		};
 	}
 
@@ -1221,6 +1247,8 @@ function MessageBot() {
 				return message.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
 			});
 
+			bot.core.addAddMessageListener('scroll_chat', 'bot', bot.showNewChat);
+
 			bot.announcementCheck(0);
 			bot.core.startListening();
 		};
@@ -1260,6 +1288,20 @@ function MessageBot() {
 		bot.changeTab = function changeTab(e) {
 			console.warn('bot.changeTab has been depricated and will be removed in the next minor release. Use extension.ui.changeTab instead.');
 			bot.ui.changeTab(e);
+		};
+
+		/**
+   * Function used to show new chat, if the user hasn't disabled this.
+   *
+   * @return void
+   */
+		bot.showNewChat = function showNewChat() {
+			var chatContainer = document.querySelector('#mb_console ul');
+			var lastLine = document.querySelector('#mb_console li:last-child');
+
+			if (chatContainer.scrollHeight - chatContainer.clientHeight - chatContainer.scrollTop <= lastLine.clientHeight * 2) {
+				lastLine.scrollIntoView(false);
+			}
 		};
 	}
 

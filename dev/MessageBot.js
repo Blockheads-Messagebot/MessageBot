@@ -157,6 +157,8 @@ function MessageBot() { //jshint ignore:line
 				return message.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
 			});
 
+			bot.core.addAddMessageListener('scroll_chat', 'bot', bot.showNewChat);
+
 			bot.announcementCheck(0);
 			bot.core.startListening();
 		};
@@ -196,6 +198,20 @@ function MessageBot() { //jshint ignore:line
 		bot.changeTab = function changeTab(e) {
 			console.warn('bot.changeTab has been depricated and will be removed in the next minor release. Use extension.ui.changeTab instead.');
 			bot.ui.changeTab(e);
+		};
+
+		/**
+		 * Function used to show new chat, if the user hasn't disabled this.
+		 *
+		 * @return void
+		 */
+		bot.showNewChat = function showNewChat() {
+			let chatContainer = document.querySelector('#mb_console ul');
+			let lastLine = document.querySelector('#mb_console li:last-child');
+
+			if (chatContainer.scrollHeight - chatContainer.clientHeight - chatContainer.scrollTop <= lastLine.clientHeight * 2) {
+				lastLine.scrollIntoView(false);
+			}
 		};
 	}
 

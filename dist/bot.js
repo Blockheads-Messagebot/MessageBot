@@ -19,6 +19,7 @@ function MessageBotCore() {
 		triggerFuncs: {},
 		serverFuncs: {},
 		otherFuncs: {},
+		addMessageToPageFuncs: {},
 		sendChecks: {},
 		adminList: [],
 		modList: [],
@@ -87,8 +88,6 @@ function MessageBotCore() {
 				}).catch(function (error) {
 					core.addMessageToPage('<span style="color:#f00;">Error sending: ' + error + '</span>', true);
 					core.reportError(error, 'bot');
-				}).then(function () {
-					core.scrollToBottom();
 				});
 			} else {
 				button.textContent = 'CANCELED';
@@ -126,10 +125,6 @@ function MessageBotCore() {
 					setTimeout(core.pollChat, 5000, core);
 				}
 			});
-		};
-
-		core.scrollToBottom = function scrollToBottom() {
-			document.querySelector('#mb_console li:last-child').scrollIntoView(false);
 		};
 
 		core.parseMessage = function parseMessage(message) {
@@ -256,11 +251,17 @@ function MessageBotCore() {
 			var chat = document.querySelector('#mb_console ul');
 			chat.appendChild(msgEl);
 
-			core.scrollToBottom();
-
 			while (chat.children.length > core.chatMsgMaxCount) {
 				chat.removeChild(chat.childNodes[0]);
 			}
+
+			Object.keys(core.addMessageToPageFuncs).forEach(function (key) {
+				try {
+					core.addMessageToPageFuncs[key].listener();
+				} catch (e) {
+					core.reportError(e, core.addMessageToPageFuncs[key].owner);
+				}
+			});
 		};
 	}
 
@@ -366,6 +367,20 @@ function MessageBotCore() {
 
 		core.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
 			delete core.sendChecks[uniqueId];
+		};
+	}
+
+	{
+		core.addAddMessageListener = function addAddMessageListener(id, owner, listener) {
+			if (!core.addMessageToPageFuncs[id]) {
+				core.addMessageToPageFuncs[id] = { owner: owner, listener: listener };
+				return true;
+			}
+			return false;
+		};
+
+		core.removeAddMessageListener = function removeAddMessageListener(id) {
+			delete core.addMessageToPageFuncs[id];
 		};
 	}
 
@@ -913,6 +928,8 @@ function MessageBot() {
 				return message.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
 			});
 
+			bot.core.addAddMessageListener('scroll_chat', 'bot', bot.showNewChat);
+
 			bot.announcementCheck(0);
 			bot.core.startListening();
 		};
@@ -930,6 +947,15 @@ function MessageBot() {
 		bot.changeTab = function changeTab(e) {
 			void 0;
 			bot.ui.changeTab(e);
+		};
+
+		bot.showNewChat = function showNewChat() {
+			var chatContainer = document.querySelector('#mb_console ul');
+			var lastLine = document.querySelector('#mb_console li:last-child');
+
+			if (chatContainer.scrollHeight - chatContainer.clientHeight - chatContainer.scrollTop <= lastLine.clientHeight * 2) {
+				lastLine.scrollIntoView(false);
+			}
 		};
 	}
 
