@@ -14,7 +14,7 @@ window.addEventListener('error', (err) => {
                 return;
             }
             console.info('Reporting error:', err);
-    		bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+            bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
                 {
                     world_name: bot.core.worldName,
                     world_id: window.worldId,
@@ -36,7 +36,7 @@ window.addEventListener('error', (err) => {
                     console.error(err);
                     bot.ui.notify(`Error reporting exception: ${err}`);
                 });
-    	}
+        }
     } catch (e) {
         console.error(e);
     }
