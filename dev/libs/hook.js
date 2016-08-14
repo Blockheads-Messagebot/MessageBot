@@ -14,6 +14,7 @@ var getHook = (function() { //jshint ignore:line
         }
 
         return listeners[key].reduce(function(previous, current) {
+            // Just a precaution...
             try {
                 return current(previous, ...args);
             } catch(e) {
