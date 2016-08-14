@@ -1,7 +1,7 @@
 function MessageBotUI() { //jshint ignore:line
-    document.head.innerHTML = '{{inject ../dist/tmphead.html}}';
-    document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
-    document.body.innerHTML = '{{inject ../dist/tmpbody.html}}';
+    document.head.innerHTML = '{{inject ../../dist/tmphead.html}}';
+    document.head.innerHTML += '<style>{{inject ../../dist/tmpbot.css}}<style>';
+    document.body.innerHTML = '{{inject ../../dist/tmpbody.html}}';
 
     var mainToggle = document.querySelector('#toggle');
 

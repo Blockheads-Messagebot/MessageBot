@@ -23,10 +23,10 @@
     "gulp-jshint": "^2.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-strip-comments": "^2.4.3",
-    "gulp-strip-debug": "^1.1.0",
+    "gulp-strip-debug": "^1.1.0"
   },
   "jshintConfig": {
-    "esnext": true,
+    "esversion": 6,
     "browser": true,
     "devel": true,
     "unused": "strict",

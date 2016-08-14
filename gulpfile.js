@@ -48,7 +48,7 @@ gulp.task('_mincss', function() {
 });
 
 gulp.task('inject', ['_minhtml', '_mincss'], function() {
-    return gulp.src('dev/bot.js')
+    return gulp.src('dev/start.js')
         .pipe(injectFile({
             pattern: '{{inject <filename>}}'
         }))
@@ -68,7 +68,7 @@ gulp.task('clean', ['inject'], function() {
 });
 
 gulp.task('watch', ['all'], function() {
-    gulp.watch('dev/*', ['all']);
+    gulp.watch(['dev/*', 'dev/libs/*', 'dev/page/*'], ['all']);
 });
 
 gulp.task('all', ['clean'], function() {
