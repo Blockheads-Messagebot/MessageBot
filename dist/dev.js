@@ -553,107 +553,7 @@ function MessageBotCore() {
     }
 
     //For making requests
-    core.ajax = function () {
-        /**
-         * Helper function to make XHR requests.
-         *
-         * @param string protocol
-         * @param string url
-         * @param object paramObj -- WARNING. Only accepts shallow objects.
-         * @return Promise
-         */
-        function xhr(protocol) {
-            var url = arguments.length <= 1 || arguments[1] === undefined ? '/' : arguments[1];
-            var paramObj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-            var paramStr = Object.keys(paramObj).map(function (k) {
-                return encodeURIComponent(k) + '=' + encodeURIComponent(paramObj[k]);
-            }).join('&');
-            return new Promise(function (resolve, reject) {
-                var req = new XMLHttpRequest();
-                req.open(protocol, url);
-                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                if (protocol == 'POST') {
-                    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                }
-
-                req.onload = function () {
-                    if (req.status == 200) {
-                        resolve(req.response);
-                    } else {
-                        reject(Error(req.statusText));
-                    }
-                };
-                // Handle network errors
-                req.onerror = function () {
-                    reject(Error("Network Error"));
-                };
-                if (paramStr) {
-                    req.send(paramStr);
-                } else {
-                    req.send();
-                }
-            });
-        }
-
-        /**
-         * Function to GET a page. Passes the response of the XHR in the resolve promise.
-         *
-         * @param string url
-         * @param string paramStr
-         * @return Promise
-         */
-        function get() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return xhr('GET', url, paramObj);
-        }
-
-        /**
-         * Returns a JSON object in the promise resolve method.
-          *
-         * @param string url
-         * @param object paramObj
-         * @return Promise
-         */
-        function getJSON() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return get(url, paramObj).then(JSON.parse);
-        }
-
-        /**
-         * Function to make a post request
-         *
-         * @param string url
-         * @param object paramObj
-         * @return Promise
-         */
-        function post() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return xhr('POST', url, paramObj);
-        }
-
-        /**
-         * Function to fetch JSON from a page through post.
-         *
-         * @param string url
-         * @param string paramObj
-         * @return Promise
-         */
-        function postJSON() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return post(url, paramObj).then(JSON.parse);
-        }
-
-        return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
-    }();
+    core.ajax = window.ajax;
 
     //For handling errors nicely
     core.reportError = function (err, owner) {
@@ -1102,8 +1002,7 @@ function MessageBot() {
         ui: MessageBotUI(),
         uMID: 0,
         extensions: [],
-        preferences: {},
-        extensionURL: '//blockheadsfans.com/messagebot/extension/{id}/code/raw'
+        preferences: {}
     };
     bot.version = bot.core.version;
 
@@ -1352,12 +1251,7 @@ function MessageBot() {
          * @param string extensionId the ID of the extension to load
          * @return void
          */
-        bot.addExtension = function addExtension(extensionId) {
-            var el = document.createElement('script');
-            el.src = bot.extensionURL.replace('{id}', extensionId);
-            el.crossOrigin = 'anonymous';
-            document.head.appendChild(el);
-        };
+        bot.addExtension = function addExtension(extensionId) {};
 
         /**
          * Method used to add an extension manually, by ID or url.
@@ -1429,6 +1323,7 @@ function MessageBot() {
                 return;
             }
 
+            // use bhfans api now
             bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/extension/name', { extensions: JSON.stringify(bot.extensions) }).then(function (resp) {
                 console.log('List Extensions: ', resp);
                 if (resp.status == 'ok') {
