@@ -27,5 +27,26 @@ function BHFansAPI(ajax) { //jshint ignore:line
         document.head.appendChild(el);
     };
 
+    api.reportError = (err) => {
+        console.error(err);
+        ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+            {
+                error_text: err.message,
+                error_row: err.lineno || 0,
+                error_column: err.colno || 0,
+            })
+            .then((resp) => {
+                if (resp.status == 'ok') {
+                    window.bot.ui.notify('Something went wrong, it has been reported.');
+                } else {
+                    throw new Error(resp.message);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                window.bot.ui.notify(`Error reporting exception: ${err}`);
+            });
+    };
+
     return api;
 }

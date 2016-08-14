@@ -1,4 +1,4 @@
-function getAjax() { //jshint ignore:line
+var getAjax = (function() { //jshint ignore:line
     /**
      * Helper function to make XHR requests.
      *
@@ -82,5 +82,7 @@ function getAjax() { //jshint ignore:line
         return post(url, paramObj).then(JSON.parse);
     }
 
-    return {xhr, get, getJSON, post, postJSON};
-}
+    return function() {
+        return {xhr, get, getJSON, post, postJSON};
+    };
+}());

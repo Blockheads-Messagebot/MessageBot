@@ -16,3 +16,13 @@
 # Development
 ##### Guides / Documentation
 See the [wiki](https://github.com/Bibliofile/Blockheads-MessageBot/wiki).
+
+##### Available Hooks
+Each level is separated by a period (`.`). There should be no spaces in the hook.
+
+- world
+    - join (name, ip)
+    - leave (name, ip)
+    - message (name, message)
+    - command (name, command, ...args)
+    - other

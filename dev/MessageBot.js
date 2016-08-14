@@ -1,23 +1,109 @@
-/*global
-    MessageBotCore,
-    MessageBotUI
-*/
-
-function MessageBot() { //jshint ignore:line
+function MessageBot(ajax, hook, bhfansapi, api, ui) { //jshint ignore:line
     var bot = {
-        devMode: false,
-        core: MessageBotCore(),
-        ui: MessageBotUI(),
+        version: '6.0.0',
+        ui: ui,
+        api: api,
+        hook: hook,
         uMID: 0,
         extensions: [],
         preferences: {},
+        online: [],
     };
-    bot.version = bot.core.version;
+
+    var world = {
+        name: document.title.substring(0, document.title.indexOf('Manager | Portal') - 1),
+        online: [],
+        owner: [],
+        players: {},
+        lists: undefined,
+    };
+    bot.world = world;
+
+    function checkChat() {
+        function getUsername(message) {
+            for (let i = 18; i > 4; i--) {
+                let possibleName = message.substring(0, message.lastIndexOf(': ', i));
+                if (~bot.online.indexOf(possibleName) || possibleName == 'SERVER') {
+                    return possibleName;
+                }
+            }
+            // Should ideally never happen.
+            return message.substring(0, message.lastIndexOf(': ', 18));
+        }
+
+        api.getMessages().then((msgs) => {
+            msgs.forEach((message) => {
+                if (message.startsWith(`${world.name} - Player Connected `)) {
+                    let name = message.substring(world.name.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
+                    let ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
+
+                    handlePlayerJoin(name, ip);
+                } else if (message.startsWith(`${world.name} - Player Disconnected `)) {
+                    let name = message.substring(world.name.length + 23);
+                    let ip = world.players[name].ip;
+
+                    handlePlayerLeave(name, ip);
+                } else if (message.indexOf(': ')) {
+                    let name = getUsername(message);
+                    let msg = message.substring(name.length + 2);
+
+                    handleUserMessage(name, msg);
+                } else {
+                    handleOtherMessage(message);
+                }
+            });
+        })
+        .catch((err) => {
+            bhfansapi.reportError(err);
+        })
+        .then(() => {
+            setTimeout(checkChat, 5000);
+        });
+    }
+
+    function handlePlayerJoin(name, ip) {
+        if (world.players.hasOwnProperty(name)) {
+            //Returning player
+            world.players[name].joins++;
+        } else {
+            //New player
+            world.players[name] = {joins: 1, ips: [ip]};
+        }
+        world.players[name].ip = ip;
+
+        if (!~world.online.indexOf(name)) {
+            world.online.push(name);
+        }
+
+        //TODO: Add the message to the page
+        hook.check('world.join', {name, ip});
+    }
+
+    function handlePlayerLeave(name, ip) {
+        var position = world.online.indexOf(name);
+        if (~position) {
+            world.online.splice(position, 1);
+        }
+
+        //TODO: Add the message to the page
+        hook.check('world.leave', {name, ip});
+    }
+
+    function handleUserMessage(name, message) {
+        //TODO: Check if this is a command message
+        //TODO: Add the message to the page
+        hook.check('world.message', {name, message});
+    }
+
+    function handleOtherMessage(message) {
+        //TODO: Add message to page
+        hook.check('world.other', message);
+    }
 
     //Save functions
     {
         /**
-         * Method used to save the bot's current config.
+         * Used to save the bot's current config.
          * Automatically called whenever the config changes
          *
          * @return void
@@ -71,7 +157,9 @@ function MessageBot() { //jshint ignore:line
          * Method used to create a backup for the user.
          */
         bot.generateBackup = function generateBackup() {
-            bot.ui.alert('<p>Copy the following code to a safe place.<br>Size: ' + Object.keys(localStorage).reduce((c, l) => c + l).length + ' bytes</p><p>' + bot.stripHTML(JSON.stringify(localStorage)) + '</p>');
+            var size = Object.keys(localStorage).reduce((c, l) => c + l).length;
+            var backup = bot.stripHTML(JSON.stringify(localStorage));
+            bot.ui.alert(`<p>Copy the following code to a safe place.<br>Size: ${size} bytes</p><p>${backup}</p>`);
         };
 
         /**
@@ -80,8 +168,8 @@ function MessageBot() { //jshint ignore:line
         bot.loadBackup = function loadBackup() {
             bot.ui.alert('Enter the backup code:<textarea style="width:99%;height:10em;"></textarea>',
                         [
-                            {text:'Load backup & restart bot', style:'success', action: function() {
-                                let code = document.querySelector('#alert textarea').value;
+                            { text: 'Load backup & restart bot', style: 'success', action: function() {
+                                var code = document.querySelector('#alert textarea').value;
                                 try {
                                     code = JSON.parse(code);
                                     if (code === null) {
@@ -99,8 +187,8 @@ function MessageBot() { //jshint ignore:line
                                 });
 
                                 location.reload();
-                            }},
-                            {text:'Cancel'}
+                            } },
+                            { text: 'Cancel' }
                         ]);
         };
 
@@ -136,7 +224,6 @@ function MessageBot() { //jshint ignore:line
                         bot.core.send(`${ip} has been added to the blacklist.`);
                     }
                 }
-                return message; //This is being attached as a beforesend listener
             };
 
             bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);
@@ -163,46 +250,7 @@ function MessageBot() { //jshint ignore:line
         };
 
         /**
-         * Function to add a tab anywhere on the page
-         *
-         * @param string navID the id to the div which holds the tab navigation.
-         * @param string contentID the id to the div which holds the divs of the tab contents.
-         * @param string tabName the name of the tab to add.
-         * @param string tabText the text to display on the tab.
-         * @return mixed false on failure, the content div on success.
-         */
-        bot.addTab = function addTab(navID, contentID, tabName, tabText) {
-            console.warn('bot.addTab has been depricated and will be removed in the next minor release. Use extension.ui.addInnerTab instead.');
-            bot.ui.addInnerTab(navID, contentID, tabName, tabText);
-        };
-
-        /**
-         * Removes a tab by its name. Should not be directly called by extensions.
-         *
-         * @param string tabName the name of the tab to be removed.
-         * @return bool true on success, false on failure.
-         */
-        bot.removeTab = function removeTab(tabName) {
-            console.warn('bot.removeTab has been depricated and will be removed in the next minor release. Use extension.ui.removeInnerTab instead.');
-            bot.ui.removeInnerTab(tabName);
-        };
-
-        /**
-         * Event handler that should be attatched to the div
-         * holding the navigation for a tab set.
-         *
-         * @param eventArgs e
-         * @return void
-         */
-        bot.changeTab = function changeTab(e) {
-            console.warn('bot.changeTab has been depricated and will be removed in the next minor release. Use extension.ui.changeTab instead.');
-            bot.ui.changeTab(e);
-        };
-
-        /**
-         * Function used to show new chat, if the user hasn't disabled this.
-         *
-         * @return void
+         * Scrolls to the bottom of the page, if the user isn't reading old chat
          */
         bot.showNewChat = function showNewChat() {
             let chatContainer = document.querySelector('#mb_console ul');

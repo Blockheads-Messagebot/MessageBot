@@ -113,14 +113,18 @@ function BlockheadsAPI(ajax, worldId) { //jshint ignore:line
     api.sendMessage = (message) => ajax.postJSON(`/api`, { command: 'send', message, worldId });
 
     api.getMessages = () => {
-        return ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId })
-            .then((data) => {
-                if (data.status == 'ok' && data.nextId != cache.firstId) {
-                    cache.firstId = data.nextId;
-                    return data.log;
-                } else if (data.status == 'error') {
-                    throw new Error(data.message);
-                }
+        return cache.worldStarted
+            .then(() => {
+                ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId })
+                    .then((data) => {
+                        if (data.status == 'ok' && data.nextId != cache.firstId) {
+                            cache.firstId = data.nextId;
+                            return data.log;
+                        } else if (data.status == 'error') {
+                            throw new Error(data.message);
+                        }
+                    }
+                );
             }
         );
     };
