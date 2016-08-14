@@ -265,7 +265,7 @@ function MessageBot() { //jshint ignore:line
          * @param string extensionId the ID of the extension to load
          * @return void
          */
-        bot.addExtension = function addExtension(extensionId) {
+        bot.addExtension = function addExtension() {
         };
 
         /**

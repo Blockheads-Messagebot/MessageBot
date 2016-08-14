@@ -3,7 +3,6 @@
 */
 
 var gulp = require('gulp');
-var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var babel = require('gulp-babel');
 var comments = require('gulp-strip-comments');
@@ -14,7 +13,7 @@ var cleanCSS = require('gulp-clean-css');
 var del = require('del');
 
 gulp.task('_minbodyhtml', function() {
-    return gulp.src('dev/body.html')
+    return gulp.src('dev/page/body.html')
         .pipe(htmlmin({
             collapseWhitespace: true,
             conservativeCollapse: true,
@@ -26,7 +25,7 @@ gulp.task('_minbodyhtml', function() {
 });
 
 gulp.task('_minheadhtml', function() {
-    return gulp.src('dev/head.html')
+    return gulp.src('dev/page/head.html')
         .pipe(htmlmin({
             collapseWhitespace: true,
             conservativeCollapse: true,
@@ -40,7 +39,7 @@ gulp.task('_minheadhtml', function() {
 gulp.task('_minhtml', ['_minheadhtml', '_minbodyhtml']);
 
 gulp.task('_mincss', function() {
-    return gulp.src('dev/bot.css')
+    return gulp.src('dev/page/bot.css')
         .pipe(cleanCSS({
             keepSpecialComments: 0
         }))
@@ -49,28 +48,22 @@ gulp.task('_mincss', function() {
 });
 
 gulp.task('inject', ['_minhtml', '_mincss'], function() {
-    return gulp.src('dev/MessageBotUI.js')
+    return gulp.src('dev/bot.js')
         .pipe(injectFile({
             pattern: '{{inject <filename>}}'
         }))
-        .pipe(rename('tmpMessageBotUI.js'))
-        .pipe(gulp.dest('dist'));
-});
-
-gulp.task('scripts', ['inject'], function() {
-    return gulp.src(['dev/header.js', 'dev/MessageBotCore.js', 'dist/tmpMessageBotUI.js', 'dev/MessageBot.js', 'dev/MessageBotExtension.js', 'dev/footer.js'])
-        .pipe(concat('dev.js'))
+        .pipe(rename('dev.js'))
+        .pipe(gulp.dest('dist'))
         .pipe(babel({
             presets: ['es2015']
         }))
-        .pipe(gulp.dest('dist'))
         .pipe(stripDebug())
         .pipe(comments())
         .pipe(rename('bot.js'))
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('clean', ['scripts'], function() {
+gulp.task('clean', ['inject'], function() {
     return del(['dist/tmp*']);
 });
 
@@ -78,7 +71,7 @@ gulp.task('watch', ['all'], function() {
     gulp.watch('dev/*', ['all']);
 });
 
-gulp.task('all', ['scripts', 'clean'], function() {
+gulp.task('all', ['clean'], function() {
     console.log('Build finished at ' + Date());
 });
 

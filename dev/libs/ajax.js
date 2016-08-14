@@ -1,4 +1,4 @@
-var ajax = (function() { //jshint ignore:line
+function getAjax() { //jshint ignore:line
     /**
      * Helper function to make XHR requests.
      *
@@ -83,4 +83,4 @@ var ajax = (function() { //jshint ignore:line
     }
 
     return {xhr, get, getJSON, post, postJSON};
-}());
+}
