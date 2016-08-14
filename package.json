@@ -32,6 +32,7 @@
     "browser": true,
     "devel": true,
     "unused": "strict",
-    "undef": true
+    "undef": true,
+    "strict": "implied"
   }
 }

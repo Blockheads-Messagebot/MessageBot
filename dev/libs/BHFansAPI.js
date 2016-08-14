@@ -19,6 +19,7 @@ function BHFansAPI(ajax) { //jshint ignore:line
         return cache.getStore();
     };
 
+    // Loads the specified extension from BHFans
     api.startExtension = (id) => {
         var el = document.createElement('script');
         el.src = `//blockheadsfans.com/messagebot/extension/${id}/code/raw`;
