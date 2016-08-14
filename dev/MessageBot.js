@@ -11,7 +11,6 @@ function MessageBot() { //jshint ignore:line
         uMID: 0,
         extensions: [],
         preferences: {},
-        extensionURL: '//blockheadsfans.com/messagebot/extension/{id}/code/raw'
     };
     bot.version = bot.core.version;
 
@@ -267,10 +266,6 @@ function MessageBot() { //jshint ignore:line
          * @return void
          */
         bot.addExtension = function addExtension(extensionId) {
-            var el = document.createElement('script');
-            el.src = bot.extensionURL.replace('{id}', extensionId);
-            el.crossOrigin = 'anonymous';
-            document.head.appendChild(el);
         };
 
         /**
@@ -347,6 +342,7 @@ function MessageBot() { //jshint ignore:line
                 return;
             }
 
+            // use bhfans api now
             bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/extension/name',
                 {extensions: JSON.stringify(bot.extensions)})
                 .then((resp) => {

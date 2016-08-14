@@ -384,70 +384,7 @@ function MessageBotCore() {
         };
     }
 
-    core.ajax = function () {
-        function xhr(protocol) {
-            var url = arguments.length <= 1 || arguments[1] === undefined ? '/' : arguments[1];
-            var paramObj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-            var paramStr = Object.keys(paramObj).map(function (k) {
-                return encodeURIComponent(k) + '=' + encodeURIComponent(paramObj[k]);
-            }).join('&');
-            return new Promise(function (resolve, reject) {
-                var req = new XMLHttpRequest();
-                req.open(protocol, url);
-                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                if (protocol == 'POST') {
-                    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                }
-
-                req.onload = function () {
-                    if (req.status == 200) {
-                        resolve(req.response);
-                    } else {
-                        reject(Error(req.statusText));
-                    }
-                };
-                req.onerror = function () {
-                    reject(Error("Network Error"));
-                };
-                if (paramStr) {
-                    req.send(paramStr);
-                } else {
-                    req.send();
-                }
-            });
-        }
-
-        function get() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return xhr('GET', url, paramObj);
-        }
-
-        function getJSON() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return get(url, paramObj).then(JSON.parse);
-        }
-
-        function post() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return xhr('POST', url, paramObj);
-        }
-
-        function postJSON() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-            return post(url, paramObj).then(JSON.parse);
-        }
-
-        return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
-    }();
+    core.ajax = window.ajax;
 
     core.reportError = function (err, owner) {
         void 0;
@@ -805,8 +742,7 @@ function MessageBot() {
         ui: MessageBotUI(),
         uMID: 0,
         extensions: [],
-        preferences: {},
-        extensionURL: '//blockheadsfans.com/messagebot/extension/{id}/code/raw'
+        preferences: {}
     };
     bot.version = bot.core.version;
 
@@ -985,12 +921,7 @@ function MessageBot() {
     }
 
     {
-        bot.addExtension = function addExtension(extensionId) {
-            var el = document.createElement('script');
-            el.src = bot.extensionURL.replace('{id}', extensionId);
-            el.crossOrigin = 'anonymous';
-            document.head.appendChild(el);
-        };
+        bot.addExtension = function addExtension(extensionId) {};
 
         bot.manuallyAddExtension = function manuallyAddExtension() {
             bot.ui.alert('Enter the ID or URL of an extension:<br><input style="width:calc(100% - 7px);"/>', [{ text: 'Add', style: 'success', action: function action() {
