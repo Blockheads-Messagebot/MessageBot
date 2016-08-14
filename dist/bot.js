@@ -5,7 +5,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 window.pollChat = function () {};
 
-function getAjax() {
+var getAjax = function () {
     function xhr(protocol) {
         var url = arguments.length <= 1 || arguments[1] === undefined ? '/' : arguments[1];
         var paramObj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -67,8 +67,10 @@ function getAjax() {
         return post(url, paramObj).then(JSON.parse);
     }
 
-    return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
-}
+    return function () {
+        return { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
+    };
+}();
 
 var getHook = function () {
     var listeners = {};
@@ -80,7 +82,16 @@ var getHook = function () {
         listeners[key].push(callback);
     }
 
-    function call(key, initial) {
+    function remove(key, callback) {
+        if (listeners[key]) {
+            var position = listeners[key].indexOf(callback);
+            if (~position) {
+                listeners[key].splice(position, 1);
+            }
+        }
+    }
+
+    function check(key, initial) {
         for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
             args[_key - 2] = arguments[_key];
         }
@@ -91,7 +102,11 @@ var getHook = function () {
 
         return listeners[key].reduce(function (previous, current) {
             try {
-                return current.apply(undefined, [previous].concat(args));
+                var result = current.apply(undefined, [previous].concat(args));
+                if (typeof result != 'undefined') {
+                    return result;
+                }
+                return previous;
             } catch (e) {
                 void 0;
                 return previous;
@@ -100,7 +115,7 @@ var getHook = function () {
     }
 
     return function () {
-        return { listen: listen, call: call };
+        return { listen: listen, remove: remove, check: check };
     };
 }();
 
@@ -133,6 +148,24 @@ function BHFansAPI(ajax) {
         el.src = '//blockheadsfans.com/messagebot/extension/' + id + '/code/raw';
         el.crossOrigin = 'anonymous';
         document.head.appendChild(el);
+    };
+
+    api.reportError = function (err) {
+        void 0;
+        ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
+            error_text: err.message,
+            error_row: err.lineno || 0,
+            error_column: err.colno || 0
+        }).then(function (resp) {
+            if (resp.status == 'ok') {
+                window.bot.ui.notify('Something went wrong, it has been reported.');
+            } else {
+                throw new Error(resp.message);
+            }
+        }).catch(function (err) {
+            void 0;
+            window.bot.ui.notify('Error reporting exception: ' + err);
+        });
     };
 
     return api;
@@ -255,13 +288,15 @@ function BlockheadsAPI(ajax, worldId) {
     };
 
     api.getMessages = function () {
-        return ajax.postJSON('/api', { command: 'getchat', worldId: worldId, firstId: cache.firstId }).then(function (data) {
-            if (data.status == 'ok' && data.nextId != cache.firstId) {
-                cache.firstId = data.nextId;
-                return data.log;
-            } else if (data.status == 'error') {
-                throw new Error(data.message);
-            }
+        return cache.worldStarted.then(function () {
+            ajax.postJSON('/api', { command: 'getchat', worldId: worldId, firstId: cache.firstId }).then(function (data) {
+                if (data.status == 'ok' && data.nextId != cache.firstId) {
+                    cache.firstId = data.nextId;
+                    return data.log;
+                } else if (data.status == 'error') {
+                    throw new Error(data.message);
+                }
+            });
         });
     };
 
@@ -468,17 +503,97 @@ function MessageBotUI() {
     return ui;
 }
 
-
-function MessageBot() {
+function MessageBot(ajax, hook, bhfansapi, api, ui) {
     var bot = {
-        devMode: false,
-        core: MessageBotCore(),
-        ui: MessageBotUI(),
+        version: '6.0.0',
+        ui: ui,
+        api: api,
+        hook: hook,
         uMID: 0,
         extensions: [],
-        preferences: {}
+        preferences: {},
+        online: []
     };
-    bot.version = bot.core.version;
+
+    var world = {
+        name: document.title.substring(0, document.title.indexOf('Manager | Portal') - 1),
+        online: [],
+        owner: [],
+        players: {},
+        lists: undefined
+    };
+    bot.world = world;
+
+    function checkChat() {
+        function getUsername(message) {
+            for (var i = 18; i > 4; i--) {
+                var possibleName = message.substring(0, message.lastIndexOf(': ', i));
+                if (~bot.online.indexOf(possibleName) || possibleName == 'SERVER') {
+                    return possibleName;
+                }
+            }
+            return message.substring(0, message.lastIndexOf(': ', 18));
+        }
+
+        api.getMessages().then(function (msgs) {
+            msgs.forEach(function (message) {
+                if (message.startsWith(world.name + ' - Player Connected ')) {
+                    var name = message.substring(world.name.length + 20, message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1);
+                    var ip = message.substring(message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3, message.lastIndexOf(' | '));
+
+                    handlePlayerJoin(name, ip);
+                } else if (message.startsWith(world.name + ' - Player Disconnected ')) {
+                    var _name = message.substring(world.name.length + 23);
+                    var _ip = world.players[_name].ip;
+
+                    handlePlayerLeave(_name, _ip);
+                } else if (message.indexOf(': ')) {
+                    var _name2 = getUsername(message);
+                    var msg = message.substring(_name2.length + 2);
+
+                    handleUserMessage(_name2, msg);
+                } else {
+                    handleOtherMessage(message);
+                }
+            });
+        }).catch(function (err) {
+            bhfansapi.reportError(err);
+        }).then(function () {
+            setTimeout(checkChat, 5000);
+        });
+    }
+
+    function handlePlayerJoin(name, ip) {
+        if (world.players.hasOwnProperty(name)) {
+            world.players[name].joins++;
+        } else {
+            world.players[name] = { joins: 1, ips: [ip] };
+        }
+        world.players[name].ip = ip;
+
+        if (! ~world.online.indexOf(name)) {
+            world.online.push(name);
+        }
+
+        hook.check('world.join', { name: name, ip: ip });
+    }
+
+    function handlePlayerLeave(name, ip) {
+        var position = world.online.indexOf(name);
+        if (~position) {
+            world.online.splice(position, 1);
+        }
+
+        hook.check('world.leave', { name: name, ip: ip });
+    }
+
+    function handleUserMessage(name, message) {
+        hook.check('world.message', { name: name, message: message });
+    }
+
+    function handleOtherMessage(message) {
+        hook.check('world.other', message);
+    }
 
     {
         bot.saveConfig = function saveConfig() {
@@ -527,9 +642,11 @@ function MessageBot() {
         };
 
         bot.generateBackup = function generateBackup() {
-            bot.ui.alert('<p>Copy the following code to a safe place.<br>Size: ' + Object.keys(localStorage).reduce(function (c, l) {
+            var size = Object.keys(localStorage).reduce(function (c, l) {
                 return c + l;
-            }).length + ' bytes</p><p>' + bot.stripHTML(JSON.stringify(localStorage)) + '</p>');
+            }).length;
+            var backup = bot.stripHTML(JSON.stringify(localStorage));
+            bot.ui.alert('<p>Copy the following code to a safe place.<br>Size: ' + size + ' bytes</p><p>' + backup + '</p>');
         };
 
         bot.loadBackup = function loadBackup() {
@@ -578,7 +695,6 @@ function MessageBot() {
                         bot.core.send(ip + ' has been added to the blacklist.');
                     }
                 }
-                return message; 
             };
 
             bot.core.addJoinListener('mb_join', 'bot', bot.onJoin);
@@ -602,21 +718,6 @@ function MessageBot() {
 
             bot.announcementCheck(0);
             bot.core.startListening();
-        };
-
-        bot.addTab = function addTab(navID, contentID, tabName, tabText) {
-            void 0;
-            bot.ui.addInnerTab(navID, contentID, tabName, tabText);
-        };
-
-        bot.removeTab = function removeTab(tabName) {
-            void 0;
-            bot.ui.removeInnerTab(tabName);
-        };
-
-        bot.changeTab = function changeTab(e) {
-            void 0;
-            bot.ui.changeTab(e);
         };
 
         bot.showNewChat = function showNewChat() {
@@ -1125,7 +1226,8 @@ function MessageBotExtension(namespace) {
     return extension;
 }
 
-var bot = MessageBot(getAjax(), getHook(), BHFansAPI(), BlockheadsAPI());
+
+var bot = MessageBot(getAjax(), getHook(), BHFansAPI(getAjax()), BlockheadsAPI(getAjax(), window.worldId), MessageBotUI());
 bot.start();
 
 window.addEventListener('error', function (err) {

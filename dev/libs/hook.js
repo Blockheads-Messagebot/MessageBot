@@ -8,7 +8,16 @@ var getHook = (function() { //jshint ignore:line
         listeners[key].push(callback);
     }
 
-    function call(key, initial, ...args) {
+    function remove(key, callback) {
+        if (listeners[key]) {
+            var position = listeners[key].indexOf(callback);
+            if (~position) {
+                listeners[key].splice(position, 1);
+            }
+        }
+    }
+
+    function check(key, initial, ...args) {
         if (!listeners[key]) {
             return initial;
         }
@@ -16,7 +25,11 @@ var getHook = (function() { //jshint ignore:line
         return listeners[key].reduce(function(previous, current) {
             // Just a precaution...
             try {
-                return current(previous, ...args);
+                var result = current(previous, ...args);
+                if (typeof result != 'undefined') {
+                    return result;
+                }
+                return previous;
             } catch(e) {
                 console.log(e);
                 return previous;
@@ -25,6 +38,6 @@ var getHook = (function() { //jshint ignore:line
     }
 
     return function() {
-        return {listen, call};
+        return {listen, remove, check};
     };
 }());

@@ -4,7 +4,8 @@
     getHook,
     BHFansAPI,
     BlockheadsAPI,
-    MessageBot
+    MessageBot,
+    MessageBotUI
 */
 
 //Overwrite the pollChat function to kill the default chat function
@@ -19,7 +20,14 @@ window.pollChat = function() {};
 {{inject MessageBot.js}}
 {{inject MessageBotExtension.js}}
 // jshint ignore:end
-var bot = MessageBot(getAjax(), getHook(), BHFansAPI(), BlockheadsAPI());
+
+var bot = MessageBot(
+            getAjax(),
+            getHook(),
+            BHFansAPI(getAjax()),
+            BlockheadsAPI(getAjax(), window.worldId),
+            MessageBotUI()
+        );
 bot.start();
 
 window.addEventListener('error', (err) => {

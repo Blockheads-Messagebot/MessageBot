@@ -1,5 +1,8 @@
 #Node
 node_modules
 
+# Atom files
+.tags
+
 #System files
 .DS_Store
