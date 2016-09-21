@@ -22,7 +22,16 @@ Each level is separated by a period (`.`). There should be no spaces in the hook
 
 - world
     - join (name, ip)
-    - leave (name, ip)
-    - message (name, message)
-    - command (name, command, ...args)
-    - other
+    - leave (name)
+    - message (name, message) - non server messages, includes / messages.
+    - chat (name, message) - non server messages, does not include / messages.
+    - servermessage (message) - does not include / messages
+    - command (name, command, args) - for example ("BIB", "transfer", "1 BIB2") -- messages from server included.
+    - other (message)
+    - send (message) - called when a message is sent.
+- bot
+    - send (message) - update called.
+- ui
+    - addmessagetopage
+    - messageAdded
+    - messageDeleted

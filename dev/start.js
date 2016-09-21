@@ -2,6 +2,7 @@
 /*globals
     getAjax,
     getHook,
+    getStorage,
     BHFansAPI,
     BlockheadsAPI,
     MessageBot,
@@ -12,23 +13,29 @@
 window.pollChat = function() {};
 
 // jshint ignore:start
-{{inject libs/ajax.js}}
-{{inject libs/hook.js}}
-{{inject libs/BHFansAPI.js}}
-{{inject libs/BlockheadsAPI.js}}
-{{inject libs/MessageBotUI.js}}
+{{inject libs/ajax.js}} //Browser
+{{inject libs/hook.js}} //Node + Browser
+{{inject libs/BlockheadsAPI.js}} //Browser -- Depends: ajax, worldId, hook
+window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook);
+{{inject libs/storage.js}} //Browser -- Depends: worldId
+window.storage = CreateStorage(window.worldId);
+{{inject libs/BHFansAPI.js}} //Depends: ajax, storage
+window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
+{{inject libs/MessageBotUI.js}} //Depends: hook, BHFansAPI
+window.botui = MessageBotUI(window.hook, window.bhfansapi);
+{{inject libs/popups.js}} //Depends: botui, bhfansapi
 {{inject MessageBot.js}}
 {{inject MessageBotExtension.js}}
 // jshint ignore:end
 
-var bot = MessageBot(
-            getAjax(),
-            getHook(),
-            BHFansAPI(getAjax()),
-            BlockheadsAPI(getAjax(), window.worldId),
-            MessageBotUI()
+var bot = MessageBot( //jshint unused:false
+            window.ajax,
+            window.hook,
+            window.storage,
+            window.bhfansapi,
+            window.api,
+            window.botui
         );
-bot.start();
 
 window.addEventListener('error', (err) => {
     //Wrap everything here in a try catch so that errors with our error reporting don't generate more errors to be reported... infinite loop.
@@ -37,29 +44,7 @@ window.addEventListener('error', (err) => {
             return;
         }
 
-        console.info('Reporting error:', err);
-        bot.core.ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
-            {
-                world_name: bot.core.worldName,
-                world_id: window.worldId,
-                owner_name: bot.core.ownerName,
-                bot_version: bot.version,
-                error_text: err.message,
-                error_file: err.filename,
-                error_row: err.lineno,
-                error_column: err.colno,
-            })
-            .then((resp) => {
-                if (resp.status == 'ok') {
-                    bot.ui.notify('Something went wrong, it has been reported.');
-                } else {
-                    throw new Error(resp.message);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-                bot.ui.notify(`Error reporting exception: ${err}`);
-            });
+        window.bhfansapi.reportError(err);
     } catch (e) {
         console.error(e);
     }

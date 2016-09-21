@@ -4,6 +4,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
         bot: window.bot,
         core: window.bot.core,
         ui: window.bot.ui,
+        hook: window.hook,
         settingsTab: null,
         mainTabs: {}
     };
@@ -62,7 +63,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
      * @return boolean true if the extension auto launches.
      */
     extension.autoLaunch = function autoLaunch() {
-        return this.bot.extensions.indexOf(this.id) > -1;
+        return this.bot.extensions.includes(this.id);
     };
 
     /**
@@ -72,8 +73,11 @@ function MessageBotExtension(namespace) { //jshint ignore:line
      * @param boolean shouldAutoload
      * @return void
      */
+
+     //TODO: Save config here.
     extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
-        this.bot.setAutoLaunch(this.id, shouldAutoload);
+        window.bhfansapi.autoloadExtension(this.id, shouldAutoload);
+        extension.hook.check('extension.added', this.id);
     };
 
     /**

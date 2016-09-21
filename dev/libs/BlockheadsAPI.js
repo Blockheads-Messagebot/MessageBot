@@ -1,17 +1,40 @@
-function BlockheadsAPI(ajax, worldId) { //jshint ignore:line
-    var cache = {
-        worldStarted: worldStarted(),
-        getLogs: getLogs(),
-        getLists: getLists(),
-        getHomepage: getHomepage(),
-        firstId: 0
-    };
+(function() {
+    var apiLoad = performance.now();
 
-    function worldStarted() {
-        return new Promise(function (resolve, reject) {
-            var fails = 0;
-            (function check() {
-                ajax.postJSON(`/api`, { command: 'status', worldId: worldId })
+    function logWithTime(...args) {
+        console.info.call(
+            null,
+            ...args,
+            'Took',
+            ((performance.now() - apiLoad) / 1000).toFixed(3),
+            'seconds'
+        );
+    }
+
+    var api = function(ajax, worldId, hook) {
+        var world = {
+            name: '',
+            online: []
+        };
+
+        var cache = {
+            worldStarted: worldStarted(),
+            firstId: 0,
+        };
+        cache.getLogs = getLogs();
+        cache.getLists = getLists();
+        cache.getHomepage = getHomepage();
+
+        cache.worldStarted.then(() => logWithTime('World online.'));
+        cache.getLogs.then(() => logWithTime('Logs fetched.'));
+        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
+        cache.getLists.then(() => logWithTime('Lists fetched.'));
+
+        function worldStarted() {
+            return new Promise(function (resolve, reject) {
+                var fails = 0;
+                (function check() {
+                    ajax.postJSON(`/api`, { command: 'status', worldId: worldId })
                     .then((world) => {
                         if (world.worldStatus == 'online') {
                             return resolve();
@@ -27,95 +50,107 @@ function BlockheadsAPI(ajax, worldId) { //jshint ignore:line
                             setTimeout(check, 3000);
                         }
                     });
-            }());
-        });
-    }
+                }());
+            });
+        }
 
-    function getLogs() {
-        return cache.worldStarted.then(() => {
-            return ajax.get(`/worlds/logs/${worldId}`)
-                .then((log) => log.split('\n'));
-            }
-        );
-    }
+        function getLogs() {
+            return cache.worldStarted.then(() => {
+                    return ajax.get(`/worlds/logs/${worldId}`)
+                                .then((log) => log.split('\n'));
+                });
+        }
 
-    function getLists() {
-        return cache.worldStarted.then(() => ajax.get(`/worlds/lists/${worldId}`)
-            .then((html) => {
-                var doc = (new DOMParser()).parseFromString(html, 'text/html');
+        function getLists() {
+            return cache.worldStarted
+                .then(() => ajax.get(`/worlds/lists/${worldId}`))
+                .then((html) => {
+                    var doc = (new DOMParser()).parseFromString(html, 'text/html');
 
-                function getList(name) {
-                    return doc.querySelector(`textarea[name=${name}]`)
+                    function getList(name) {
+                        var list = doc.querySelector(`textarea[name=${name}]`)
                             .value
                             .toLocaleUpperCase()
                             .split('\n');
-                }
+                        return [...new Set(list)]; //Remove duplicates
+                    }
 
-                var admin = getList('admins');
-                var mod = getList('modlist');
-                mod = mod.filter((name) => admin.indexOf(name) < 0 );
-                var staff = admin.concat(mod);
+                    var admin = getList('admins');
+                    var mod = getList('modlist');
+                    mod = mod.filter((name) => admin.indexOf(name) < 0 );
+                    var staff = admin.concat(mod);
 
-                var white = getList('whitelist');
-                var black = getList('blacklist');
+                    var white = getList('whitelist');
+                    var black = getList('blacklist');
 
-                return {admin, mod, staff, white, black};
-            })
-        );
-    }
-
-    function getHomepage() {
-        return ajax.get(`/worlds/${window.worldId}`);
-    }
-
-    var api = {};
-
-    api.worldStarted = (refresh = false) => {
-        if (refresh) {
-            cache.worldStarted = worldStarted();
+                    return {admin, mod, staff, white, black};
+                });
         }
-        return cache.worldStarted();
-    };
 
-    api.getLogs = (refresh = false) => {
-        if (refresh) {
-            cache.getLogs = getLogs();
+        function getHomepage() {
+            return ajax.get(`/worlds/${worldId}`);
         }
-        return cache.getLogs;
-    };
 
-    // An online list is maintained by the bot, this should NOT be used to get the online players frequently.
-    api.getOnlinePlayers = (refresh = false) => {
-        if (refresh) {
-            cache.getHomepage = getHomepage();
-        }
-        return cache.getHomepage.then((html) => {
-            var doc = (new DOMParser()).parseFromString(html, 'text/html');
-            var playerElems = doc.querySelector('.manager.padded:nth-child(1)')
-                .querySelectorAll('tr:not(.history)>td.left');
-            var players = [];
+        var api = {};
 
-            Array.from(playerElems).forEach((el) => {
-                players.push(el.textContent.toLocaleUpperCase());
+        api.worldStarted = (refresh = false) => {
+            if (refresh) {
+                cache.worldStarted = worldStarted();
+            }
+            return cache.worldStarted;
+        };
+
+        api.getLogs = (refresh = false) => {
+            if (refresh) {
+                cache.getLogs = getLogs();
+            }
+            return cache.getLogs;
+        };
+
+        // An online list is maintained by the bot, this should NOT be used to get the online players frequently.
+        api.getOnlinePlayers = (refresh = false) => {
+            if (refresh) {
+                cache.getHomepage = getHomepage();
+            }
+            return cache.getHomepage.then((html) => {
+                var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                var playerElems = doc.querySelector('.manager.padded:nth-child(1)')
+                    .querySelectorAll('tr:not(.history)>td.left');
+                var players = [];
+
+                Array.from(playerElems).forEach((el) => {
+                    players.push(el.textContent.toLocaleUpperCase());
+                });
+
+                return players;
             });
+        };
+        api.getOnlinePlayers()
+            .then((players) => world.players = [...new Set(players.concat(world.players))]);
 
-            return players;
-        });
-    };
+        api.getOwnerName = () => {
+            return cache.getHomepage.then((html) => {
+                var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                return doc.querySelector('.subheader~tr>td:not([class])').textContent.toLocaleUpperCase();
+            });
+        };
 
-    api.getOwnerName = () => {
-        return cache.getHomepage.then((html) => {
-            var doc = (new DOMParser()).parseFromString(html, 'text/html');
-            return doc.querySelector('.subheader~tr>td:not([class])').textContent.toLocaleUpperCase();
-        });
-    };
+        api.getWorldName = () => {
+            return cache.getHomepage.then((html) => {
+                var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                return doc.querySelector('#title').textContent;
+            });
+        };
+        api.getWorldName().then((name) => world.name = name);
 
-    api.sendMessage = (message) => ajax.postJSON(`/api`, { command: 'send', message, worldId });
+        api.send = (message) => {
+            hook.check('world.send', message);
+            return ajax.postJSON(`/api`, { command: 'send', message, worldId });
+        };
 
-    api.getMessages = () => {
-        return cache.worldStarted
-            .then(() => {
-                ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId })
+        function getMessages() {
+            return cache.worldStarted.then(() => {
+                    return ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId })
                     .then((data) => {
                         if (data.status == 'ok' && data.nextId != cache.firstId) {
                             cache.firstId = data.nextId;
@@ -123,11 +158,91 @@ function BlockheadsAPI(ajax, worldId) { //jshint ignore:line
                         } else if (data.status == 'error') {
                             throw new Error(data.message);
                         }
+                        return [];
                     }
                 );
+            });
+        }
+
+        function getUsername(message) {
+            for (let i = 18; i > 4; i--) {
+                let possibleName = message.substring(0, message.lastIndexOf(': ', i));
+                if (world.online.includes(possibleName) || possibleName == 'SERVER') {
+                    return possibleName;
+                }
             }
-        );
+            // Should ideally never happen.
+            return message.substring(0, message.lastIndexOf(': ', 18));
+        }
+
+        function checkChat() {
+            getMessages().then((msgs) => {
+                msgs.forEach((message) => {
+                    if (message.startsWith(`${world.name} - Player Connected `)) {
+                        let name = message.substring(
+                            world.name.length + 20,
+                            message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1
+                        );
+                        let ip = message.substring(
+                            message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3,
+                            message.lastIndexOf(' | ')
+                        );
+
+                        if (!world.online.includes(name)) {
+                            world.online.push(name);
+                        }
+                        hook.check('world.join', name, ip);
+
+                    } else if (message.startsWith(`${world.name} - Player Disconnected `)) {
+                        let name = message.substring(world.name.length + 23);
+
+                        if (world.online.includes(name)) {
+                            world.online.splice(world.online.indexOf(name), 1);
+                        }
+                        hook.check('world.leave', name);
+
+                    } else if (message.includes(': ')) {
+                        let name = getUsername(message);
+                        let msg = message.substring(name.length + 2);
+
+                        if (name == 'SERVER') {
+                            hook.check('world.servermessage', msg);
+                        } else {
+                            hook.check('world.message', name, msg);
+
+                            if (msg.startsWith('/')) {
+                                //Command message, those from server not caught here
+                                var command = message.substring(1, message.indexOf(' '));
+                                var args = message.substring(command.length + 2);
+
+                                hook.check('world.command', name, command, args);
+                                return;
+                            }
+
+                            hook.check('world.chat', name, message);
+                        }
+
+                    } else {
+                        hook.check('world.other', message);
+                    }
+                });
+            })
+            .then(() => {
+                setTimeout(checkChat, 5000);
+            });
+        }
+        checkChat();
+
+        api.getLists = (refresh = false) => {
+            if (refresh) {
+                cache.getLists = getLists();
+            }
+
+            return cache.getLists;
+        };
+
+        return api;
     };
 
-    return api;
-}
+    window.BlockheadsAPI = api;
+}());
