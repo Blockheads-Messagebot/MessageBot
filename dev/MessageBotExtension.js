@@ -2,36 +2,8 @@ function MessageBotExtension(namespace) { //jshint ignore:line
     var extension = {
         id: namespace,
         bot: window.bot,
-        core: window.bot.core,
-        ui: window.bot.ui,
+        ui: window.botui,
         hook: window.hook,
-        settingsTab: null,
-        mainTabs: {}
-    };
-
-    /**
-     * DEPRICATED. Will be removed next minor version. Use addTab instead.
-     *
-     * @param string tabText the text to display on the tab
-     * @return void
-     */
-    extension.addSettingsTab = function addSettingsTab(tabText) {
-        console.warn('addSettingsTab has been depricated. Use addTab(tabText, tabId) instead.');
-        this.ui.addTab(tabText, 'settings_' + this.id);
-        this.settingsTab = document.querySelector('#mb_settings_' + this.id);
-    };
-
-    /**
-     * DEPRICATED. Will be removed next minor version. Use addTab instead.
-     *
-     * @param string tabId the ID of the tab to add
-     * @param string tabText the text which to place on the tab
-     * @return void
-     */
-    extension.addMainTab = function addMainTab(tabId, tabText) {
-        console.warn('addMainTab has been depricated. Use addTab(tabText, tabId, "msgs_tabs") instead.');
-        this.ui.addTab(tabText, 'main_' + this.id + '_' + tabId, 'msgs');
-        this.mainTabs[tabId] = document.querySelector('#mb_main_' + this.id + '_' + tabId);
     };
 
     /**
@@ -43,7 +15,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
      * @return void
      */
     extension.addTab = function addTab(tabText, tabId, tabGroup = '#mainNavContents') {
-        this.ui.addTab(tabText, this.id + '_' + tabId, tabGroup);
+        extension.ui.addTab(tabText, this.id + '_' + tabId, tabGroup);
     };
 
     /**

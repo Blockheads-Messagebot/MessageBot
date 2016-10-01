@@ -9,7 +9,8 @@ var comments = require('gulp-strip-comments');
 var stripDebug = require('gulp-strip-debug');
 var injectFile = require('gulp-inject-file');
 var htmlmin = require('gulp-htmlmin');
-var cleanCSS = require('gulp-clean-css');
+var replace = require('gulp-replace');
+var sass = require('gulp-sass');
 var del = require('del');
 
 gulp.task('_minbodyhtml', function() {
@@ -18,7 +19,6 @@ gulp.task('_minbodyhtml', function() {
             collapseWhitespace: true,
             conservativeCollapse: true,
             quoteCharacter: '"',
-            minifyCSS: true
         }))
         .pipe(rename('tmpbody.html'))
         .pipe(gulp.dest('dist'));
@@ -38,16 +38,15 @@ gulp.task('_minheadhtml', function() {
 
 gulp.task('_minhtml', ['_minheadhtml', '_minbodyhtml']);
 
-gulp.task('_mincss', function() {
-    return gulp.src('dev/page/bot.css')
-        .pipe(cleanCSS({
-            keepSpecialComments: 0
-        }))
+gulp.task('_sass', function() {
+    return gulp.src('dev/page/main.scss')
+        .pipe(sass({outputStyle: 'compressed', includePaths: ['dev/page/partials']}).on('error', sass.logError))
+        .pipe(replace(/\n/g, ''))
         .pipe(rename('tmpbot.css'))
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('inject', ['_minhtml', '_mincss'], function() {
+gulp.task('inject', ['_minhtml', '_sass'], function() {
     return gulp.src('dev/start.js')
         .pipe(injectFile({
             pattern: '{{inject <filename>}}'
@@ -67,12 +66,12 @@ gulp.task('clean', ['inject'], function() {
     return del(['dist/tmp*']);
 });
 
-gulp.task('watch', ['all'], function() {
-    gulp.watch(['dev/*', 'dev/libs/*', 'dev/page/*'], ['all']);
-});
-
 gulp.task('all', ['clean'], function() {
     console.log('Build finished at ' + Date());
+});
+
+gulp.task('watch', ['all'], function() {
+    gulp.watch(['dev/**'], ['all']);
 });
 
 gulp.task('default', ['watch']);

@@ -22,6 +22,8 @@
     "gulp-inject-file": "0.0.16",
     "gulp-jshint": "^2.0.1",
     "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-sass": "^2.3.2",
     "gulp-strip-comments": "^2.4.3",
     "gulp-strip-debug": "^1.1.0"
   },
