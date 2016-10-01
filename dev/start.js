@@ -12,7 +12,22 @@
 //Overwrite the pollChat function to kill the default chat function
 window.pollChat = function() {};
 
+//IE doesn't like console.log unless dev tools are open.
+if (!window.console) {
+    window.console = {};
+    window.log = window.log || [];
+    console.log = function(...args) {
+        window.log.push(args);
+    };
+}
+['info', 'error', 'warn', 'assert'].forEach(method => {
+    if (!console[method]) {
+        console[method] = console.log;
+    }
+});
+
 // jshint ignore:start
+{{inject libs/migration.js}} //Update localStorage entries with old data
 {{inject libs/ajax.js}} //Browser
 {{inject libs/hook.js}} //Node + Browser
 {{inject libs/BlockheadsAPI.js}} //Browser -- Depends: ajax, worldId, hook

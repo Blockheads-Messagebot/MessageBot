@@ -35,3 +35,5 @@ Each level is separated by a period (`.`). There should be no spaces in the hook
     - addmessagetopage
     - messageAdded
     - messageDeleted
+    - messageChanged
+    - prefChanged

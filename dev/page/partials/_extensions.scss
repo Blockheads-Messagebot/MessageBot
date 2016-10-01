@@ -1,0 +1,27 @@
+#mb_extensions {
+    #mb_load_man {
+        @extend .top-right-button;
+        width: inherit;
+        padding: 0 7px;
+    }
+
+    h3 {
+        margin: 0 0 5px 0;
+    }
+
+    .ext {
+        @extend .third-box;
+        height: 130px;
+
+        h4, p {
+            margin: 0;
+        }
+
+        button {
+            @extend .button;
+            position: absolute;
+            bottom: 7px;
+            padding: 5px 8px;
+        }
+    }
+}

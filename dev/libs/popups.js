@@ -5,9 +5,9 @@
     }
 
     onClick('#mb_backup_load', function loadBackup() {
-        ui.alert('Enter the backup code:<textarea style="width:99%;height:10em;"></textarea>',
+        ui.alert('Enter the backup code:<textarea style="width:calc(100% - 7px);height:160px;"></textarea>',
                     [
-                        { text: 'Load backup & restart bot', style: 'success', action: function() {
+                        { text: 'Load & refresh page', style: 'success', action: function() {
                             var code = document.querySelector('#alert textarea').value;
                             try {
                                 code = JSON.parse(code);
@@ -48,5 +48,10 @@
                         }},
                         {text: 'Cancel'}
                     ]);
+    });
+
+    onClick('#mb_backup_save', function showBackup() {
+        var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
+        ui.alert(`Copy this to a safe place:<br><textarea style="width: calc(100% - 7px);height:160px;">${backup}</textarea>`);
     });
 }(window.botui, window.bhfansapi));

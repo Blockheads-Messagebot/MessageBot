@@ -9,6 +9,78 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 window.pollChat = function () {};
 
+if (!window.console) {
+    window.console = {};
+    window.log = window.log || [];
+    console.log = function () {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        window.log.push(args);
+    };
+}
+['info', 'error', 'warn', 'assert'].forEach(function (method) {
+    if (!console[method]) {
+        console[method] = console.log;
+    }
+});
+
+(function (storage) {
+    function update(keys, operator) {
+        Object.keys(storage).forEach(function (item) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var key = _step.value;
+
+                    if (item.startsWith(key)) {
+                        storage.setItem(item, operator(storage.getItem(item)));
+                        break;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+        });
+    }
+
+    if (!storage.length) {
+        return; 
+    }
+
+    switch (storage.getItem('mb_version')) {
+        case '5.2.0':
+        case '5.2.1':
+            update(['announcementArr', 'joinArr', 'leaveArr', 'triggerArr'], function (raw) {
+                try {
+                    var parsed = JSON.parse(raw);
+                    parsed.forEach(function (msg) {
+                        if (msg.message) {
+                            msg.message = msg.message.replace(/\\n/g, '\n');
+                        }
+                    });
+                    return JSON.stringify(parsed);
+                } catch (e) {
+                    return raw;
+                }
+            });
+    }
+})(localStorage);
 (function () {
     var ajax = function () {
         function xhr(protocol) {
@@ -99,8 +171,8 @@ window.pollChat = function () {};
         }
 
         function check(key) {
-            for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                args[_key - 1] = arguments[_key];
+            for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+                args[_key2 - 1] = arguments[_key2];
             }
 
             key = key.toLocaleLowerCase();
@@ -118,8 +190,8 @@ window.pollChat = function () {};
         }
 
         function update(key, initial) {
-            for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-                args[_key2 - 2] = arguments[_key2];
+            for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+                args[_key3 - 2] = arguments[_key3];
             }
 
             key = key.toLocaleLowerCase();
@@ -161,8 +233,8 @@ window.pollChat = function () {};
     function logWithTime() {
         var _console$info;
 
-        for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-            args[_key3] = arguments[_key3];
+        for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+            args[_key4] = arguments[_key4];
         }
 
         (_console$info = console.info).call.apply(_console$info, [null].concat(args, ['Took', ((performance.now() - apiLoad) / 1000).toFixed(3), 'seconds']));
@@ -480,15 +552,14 @@ window.storage = CreateStorage(window.worldId);
         function listExtensions() {
             var target = document.querySelector('#mb_ext_list');
 
-            if (!extensions.length) {
-                target.innerHTML = '<p>No extensions installed</p>';
-                return;
-            }
-
             api.getExtensionNames(extensions).then(function (resp) {
                 if (resp.status == 'ok') {
+                    if (!resp.extensions.length) {
+                        target.innerHTML = '<p>No extensions installed</p>';
+                        return;
+                    }
                     target.innerHTML = resp.extensions.reduce(function (html, ext) {
-                        return html + '<li>' + ext.name.replace(/</g, '&lt;') + ' (' + ext.id + ') <a onclick="BHFansAPI().removeExtension(\'' + ext.id + '\');" class="button button-sm">Remove</a></li>';
+                        return html + '<li>' + ext.name.replace(/</g, '&lt;') + ' (' + ext.id + ') <a onclick="bhfansapi.removeExtension(\'' + ext.id + '\');" class="button">Remove</a></li>';
                     }, '<ul style="margin-left:1.5em;">') + '</ul>';
                 } else {
                     target.innerHTML = 'Error fetching extension names: ' + resp.message;
@@ -537,7 +608,7 @@ window.storage = CreateStorage(window.worldId);
                 extensions.splice(extensions.indexOf(id), 1);
                 storage.set('mb_extensions', extensions, false);
 
-                var button = document.querySelector('div[extension-id=' + id + '] > button');
+                var button = document.querySelector('#mb_extensions div[data-id=' + id + '] button');
                 if (button !== null) {
                     button.textContent = 'Removed';
                     button.disabled = true;
@@ -584,6 +655,7 @@ window.storage = CreateStorage(window.worldId);
             }
         };
 
+        setTimeout(listExtensions, 500);
         return api;
     }
 
@@ -591,18 +663,20 @@ window.storage = CreateStorage(window.worldId);
 })();
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 (function () {
-    var ui = function ui(hook, bhfansapi) {
+    var create = function create(hook, bhfansapi) {
         var uniqueMessageID = 0;
+
+        document.head.innerHTML = '<title>Console</title> <meta name="viewport" content="width=device-width,initial-scale=1"> ';
+        document.head.innerHTML += '<style>html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}#botTemplates{display:none}header{background:#182b73 url("http://portal.theblockheads.net/static/images/portalHeader.png") no-repeat;background-position:80px;height:80px}#jMsgs,#lMsgs,#tMsgs,#aMsgs,#exts{padding-top:8px;margin-top:8px;border-top:1px solid;height:calc(100vh - 165px)}.third-box,#mb_join .msg,#mb_leave .msg,#mb_trigger .msg,#mb_announcements .msg,#mb_extensions .ext{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd),#mb_join .msg:nth-child(odd),#mb_leave .msg:nth-child(odd),#mb_trigger .msg:nth-child(odd),#mb_announcements .msg:nth-child(odd),#mb_extensions .ext:nth-child(odd){background:#ccc}.top-right-button,#mb_join .add,#mb_leave .add,#mb_trigger .add,#mb_announcements .add,#mb_extensions #mb_load_man{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}.button,#mb_extensions .ext button,#alert>.buttons>span{display:inline-block;padding:6px 12px;margin:0 5px;text-align:center;white-space:nowrap;cursor:pointer;border:1px solid rgba(0,0,0,0.15);border-radius:6px;background:#fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}#mb_settings h3{border-bottom:1px solid #999}#mb_settings a{text-decoration:underline}#mb_settings a.button{text-decoration:none;font-size:0.9em;padding:1px 5px}#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type="number"],#mb_leave input[type="number"],#mb_trigger input[type="number"],#mb_announcements input[type="number"]{width:5em}#mb_extensions #mb_load_man{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#mb_extensions .ext{height:130px}#mb_extensions .ext h4,#mb_extensions .ext p{margin:0}#mb_extensions .ext button{position:absolute;bottom:7px;padding:5px 8px}#alert{visibility:hidden;position:fixed;top:50px;left:0;right:0;margin:auto;z-index:101;width:50%;min-width:300px;min-height:200px;background:#fff;border-radius:10px;padding:10px 10px 55px 10px}#alert.visible{visibility:visible}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}#alert>.buttons [class]{color:#fff}#alert>.buttons .success{background:#5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%);border-color:#3e8f3e}#alert>.buttons .info{background:#5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%);border-color:#28a4c9}#alert>.buttons .danger{background:#d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%);border-color:#b92c28}#alert>.buttons .warning{background:#f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);border-color:#e38d13}.notification{opacity:0;transition:opacity 1s;position:fixed;top:1em;right:1em;min-width:200px;border-radius:5px;padding:5px;background:#9fafeb}.notification.visible{opacity:1}<style>';
+        document.body.innerHTML = '<div id="leftNav"> <input type="checkbox" id="leftToggle"> <label for="leftToggle">&#9776; Menu</label> <nav data-tab-group="main"> <span class="tab selected" data-tab-name="console">Console</span> <details data-tab-group="messages"> <summary>Messages</summary> <span class="tab" data-tab-name="join">Join</span> <span class="tab" data-tab-name="leave">Leave</span> <span class="tab" data-tab-name="trigger">Trigger</span> <span class="tab" data-tab-name="announcements">Announcements</span> </details> <span class="tab" data-tab-name="extensions">Extensions</span> <span class="tab" data-tab-name="settings">Settings</span> <div class="clearfix"> </nav> <div class="overlay"></div> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> joins, then say </label> <textarea class="m"></textarea> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <textarea class="m"></textarea> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Send:</label> <textarea class="m"></textarea> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="container"> <header></header> <div id="mb_console" data-tab-name="console" class="visible"> <div class="chat"> <ul></ul> </div> <div class="controls"> <input type="text" disabled="disabled"><button disabled="disabled">SEND</button> </div> </div> <div id="mb_join" data-tab-name="join"> <h3>These are checked when a player joins the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave" data-tab-name="leave"> <h3>These are checked when a player leaves the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger" data-tab-name="trigger"> <h3>These are checked whenever someone says something.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements" data-tab-name="announcements"> <h3>These are sent according to a regular schedule.</h3> <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions" data-tab-name="extensions"> <h3>Extensions can increase the functionality of the bot.</h3> <span>Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings" data-tab-name="settings"> <h3>Settings</h3> <label for="mb_ann_delay">Minutes between announcements: </label><br> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label><br> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">New chat notifications: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alertWrapper"> <div id="alert"> <div id="alertContent"></div> <div class="buttons"></div> </div> <div class="overlay"> ';
+
+        var mainToggle = document.querySelector('#leftNav input');
 
         function listenerHook(selector, type, hookname) {
             document.querySelector(selector).addEventListener(type, function () {
                 return hook.check('ui.' + hookname);
             });
         }
-
-        document.head.innerHTML = '<title>Console</title> <meta name="viewport" content="width=device-width,initial-scale=1"> ';
-        document.head.innerHTML += '<style>.button,a{cursor:pointer}body,html{min-height:100vh;position:relative;width:100%;margin:0;font-family:"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif}a{color:#182b73}#container>div:not(#header){display:none;padding:10px}#container>div.visible:not(#header),#mainNav{display:block}.overlay{position:fixed;top:0;left:0;bottom:0;right:0;opacity:0;visibility:hidden;z-index:8999;background:rgba(0,0,0,.6);transition:opacity .5s}#mainNav,#mainToggle{color:#fff;position:fixed;z-index:9999}#header{height:80px;width:100%;background:url(http://portal.theblockheads.net/static/images/portalHeader.png) 50px 0 no-repeat #051465}#mainNav{background:#182b73;padding-bottom:50px;width:250px;top:0;left:-250px;bottom:0;transition:left .5s;overflow:auto;-webkit-overflow-scrolling:touch}#toggle{display:none}#mainToggle{background:#374384;padding:5px;top:5px;left:5px;opacity:1;transition:left .5s,opacity .5s}.tab,.tab-header{display:block;padding:10px 0;text-align:center}.tab,.tab-group{border-bottom:1px solid rgba(255,255,255,.2)}.tab-body>.tab{border-bottom:1px solid #182B73}.tab.selected{background:radial-gradient(#7D88B3,#182B73)}.tab-body>.tab.selected{background:radial-gradient(#182B73,#7D88B3)}.tab-header-toggle{display:none}.tab-header{padding:10px 0 5px;display:block;text-align:center}.tab-body{background:rgba(255,255,255,.2);border-radius:10px;width:80%;margin-left:10%}.tab-header-toggle~.tab-body{overflow:hidden;max-height:0;margin-bottom:5px;transition:.5s cubic-bezier(0,1,.5,1)}.tab-header-toggle~.tab-header:after{font-size:50%;content:"▼";position:relative;top:-.25em;left:.5em}.tab-header-toggle:checked~.tab-body{display:block;transition:.5s ease-in;max-height:1000px;overflow:hidden}.tab-header-toggle:checked~.tab-header:after{content:"▲"}#mb_console>div:nth-child(1){height:calc(100vh - 220px)}@media screen and (min-width:668px){#mb_console>div:nth-child(1){height:calc(100vh - 150px)}}#mb_console>div>ul{height:100%;overflow-y:auto;width:100%;margin:0;padding:0}.mod>span:first-child{color:#05f529}.admin>span:first-child{color:#2b26bd}#mb_console>div:nth-child(2){display:flex}#mb_console button,#mb_console input{padding:5px;font-size:1em;margin:5px 0}#mb_console input{flex:1;border:1px solid #999}#mb_console button{background-color:#182b73;font-weight:700;color:#fff;border:0;height:40px}#toggle:checked~#mainToggle{left:255px;opacity:0;transition:left .5s,opacity .5s}#toggle:checked~#navOverlay{visibility:visible;opacity:1}#toggle:checked~#mainNav{left:0;transition:left .5s}#alert{visibility:hidden;position:fixed;left:0;right:0;top:50px;margin:auto;background:#fff;width:50%;border-radius:10px;padding:10px 10px 55px;min-width:300px;min-height:200px;z-index:8000}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}.button{color:#000;display:inline-block;padding:6px 12px;margin:0 5px;font-size:14px;line-height:1.428571429;text-align:center;white-space:nowrap;vertical-align:middle;border:1px solid rgba(0,0,0,.15);border-radius:4px;background:linear-gradient(to bottom,#fff 0,#e0e0e0 100%) #fff}.button-sm{padding:1px 5px;font-size:12px;line-height:1.5;border-radius:3px}.danger,.info,.success,.warning{color:#fff}.success{background:linear-gradient(to bottom,#5cb85c 0,#419641 100%) #5cb85c;border-color:#3e8f3e}.info{background:linear-gradient(to bottom,#5bc0de 0,#2aabd2 100%) #5bc0de;border-color:#28a4c9}.danger{background:linear-gradient(to bottom,#d9534f 0,#c12e2a 100%) #d9534f;border-color:#b92c28}.warning{background:linear-gradient(to bottom,#f0ad4e 0,#eb9316 100%) #f0ad4e;border-color:#e38d13}#alertOverlay{z-index:7999}#alert.visible,#alertOverlay.visible{visibility:visible;opacity:1}.notification{color:#fff;position:fixed;top:1em;right:1em;opacity:0;min-width:200px;border-radius:5px;background:#051465;padding:5px;transition:opacity 2s}.notification.visible{opacity:1}.ext,.msg{position:relative;width:calc(33% - 19px);min-width:280px;margin-left:5px;margin-bottom:5px;border:3px solid #878787;border-radius:10px;float:left;padding:5px}.ext p{margin:0}.ext:nth-child(odd),.msg:nth-child(odd){background:#C6C6C6}.msg>input{width:calc(100% - 10px);border:2px solid #666}.msg>input[type=number]{width:5em}.descgen{margin:0 0 5px}#mb_load_man,.add{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:90px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}#mb_load_man{width:inherit;padding:0 7px}#aMsgs,#exts,#jMsgs,#lMsgs,#tMsgs{padding-top:8px;margin-top:8px;border-top:1px solid;height:calc(100vh - 165px)}.ext{height:120px}.ext>h4{margin:0}.ext>button{position:absolute;bottom:7px;padding:3px 8px}.tabContainer>div{display:none;min-height:calc(100vh - 175px)}.tabContainer>div.visible{display:block}.botTabs{width:100%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-flow:row wrap;flex-flow:row wrap}.botTabs>div{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;-webkit-flex-grow:1;flex-grow:1;height:40px;margin-top:5px;margin-right:5px;min-width:120px;background:#182B73;color:#FFF;font-family:"Lucida Grande","Lucida Sans Unicode",sans-serif}.botTabs>div:last-child{margin-right:0}.botTabs>div.selected{color:#000;background:#E7E7E7}<style>';
-        document.body.innerHTML = '<input type="checkbox" name="menu" id="toggle"> <label for="toggle" id="mainToggle">&#9776; Menu</label> <nav id="mainNav"> <div id="mainNavContents"> <span class="tab selected" g-tab-name="console">CONSOLE</span> <div class="tab-group"> <input type="checkbox" name="group_msgs" id="group_msgs" class="tab-header-toggle"> <label class="tab-header" for="group_msgs">MESSAGES</label> <div class="tab-body" id="msgs_tabs"> <span class="tab" g-tab-name="join">JOIN</span> <span class="tab" g-tab-name="leave">LEAVE</span> <span class="tab" g-tab-name="trigger">TRIGGER</span> <span class="tab" g-tab-name="announcements">ANNOUNCEMENTS</span> </div> </div> <span class="tab" g-tab-name="extensions">EXTENSIONS</span> <span class="tab" g-tab-name="settings">SETTINGS</span> </div> <div class="clearfix"></div> </nav> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <input class="m"> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <input class="m"> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Say:</label> <input class="m"> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="navOverlay" class="overlay"></div> <div id="container"> <div id="header" class="visible"></div> <div id="mb_console" class="visible"> <div><ul></ul></div> <div><input type="text" disabled="disabled"><button disabled="disabled">SEND</button></div> </div> <div id="mb_join"> <h3 class="descgen">These are checked when a player joins the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave"> <h3 class="descgen">These are checked when a player leaves the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger"> <h3 class="descgen">These are checked whenever someone says something.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements"> <h3 class="descgen">These are sent according to a regular schedule.</h3> <span class="descdet">If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions"> <h3 class="descgen">Extensions can increase the functionality of the bot.</h3> <span class="descdet">Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings"> <h3>Settings</h3> <label for="mb_ann_delay">Delay between announcements (minutes): </label> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">Notification on new chat when not on console page: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alert"> <div></div> <div class="buttons"> </div> </div> <div id="alertOverlay" class="overlay"> </div>';
 
         ['jMsgs', 'lMsgs', 'tMsgs', 'aMsgs'].forEach(function (id) {
             listenerHook('#' + id, 'change', 'messageChanged');
@@ -627,19 +701,33 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         });
 
         document.querySelector('#exts').addEventListener('click', function extActions(e) {
-            var extId = e.target.parentElement.getAttribute('extension-id');
-            extId = extId || e.target.getAttribute('extension-id');
-            var button = document.querySelector('div[extension-id="' + extId + '"] > button');
-            if (e.target.tagName == 'BUTTON') {
-                if (e.target.textContent == 'Install') {
-                    bhfansapi.startExtension(extId);
-                    button.textContent = 'Remove';
-                } else {
-                    bhfansapi.removeExtension(extId);
-
-                    window[extId] = undefined;
-                }
+            if (e.target.tagName != 'BUTTON') {
+                return;
             }
+            var button = e.target;
+            var extId = button.parentElement.dataset.id;
+
+            if (button.textContent == 'Install') {
+                bhfansapi.startExtension(extId);
+                button.textContent = 'Remove';
+            } else {
+                bhfansapi.removeExtension(extId);
+            }
+        });
+
+        document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
+            var tabName = event.target.dataset.tabName;
+            if (!tabName) {
+                return;
+            }
+
+            Array.from(document.querySelectorAll('#container > .visible')).forEach(function (el) {
+                return el.classList.remove('visible');
+            });
+            document.querySelector('#container [data-tab-name=' + tabName + ']').classList.add('visible');
+
+            document.querySelector('#leftNav .selected').classList.remove('selected');
+            event.target.classList.add('selected');
         });
 
         if (!('content' in document.createElement('template'))) {
@@ -664,18 +752,40 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             }
         }
 
+        if (!('open' in document.createElement('details'))) {
+            var style = document.createElement('style');
+            style.textContent += 'details:not([open]) > :not(summary) { display: none !important; }' + 'details > summary:before { content: "▶"; display: inline-block; font-size: .8em; width: 1.5em; font-family:"Courier New"; }' + 'details[open] > summary:before { transform: rotate(90deg); }';
+            document.head.appendChild(style);
+
+            window.addEventListener('click', function (event) {
+                if (event.target.tagName == 'SUMMARY') {
+                    var details = event.target.parentNode;
+
+                    if (!details) {
+                        return;
+                    }
+
+                    if (details.getAttribute('open')) {
+                        details.open = false;
+                        details.removeAttribute('open');
+                    } else {
+                        details.open = true;
+                        details.setAttribute('open', 'open');
+                    }
+                }
+            });
+        }
+
         bhfansapi.getStore().then(function (resp) {
             if (resp.status != 'ok') {
-                bhfansapi.reportError(resp.message);
+                bhfansapi.reportError(new Error(resp.message));
                 document.getElementById('exts').innerHTML += resp.message;
                 return;
             }
             resp.extensions.forEach(function (extension) {
-                ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: 'h4', text: extension.title }, { selector: 'span', html: extension.snippet }, { selector: '.ext', 'extension-id': extension.id }, { selector: 'button', text: bhfansapi.extensionInstalled(extension.id) ? 'Remove' : 'Install' }]);
+                ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: 'h4', text: extension.title }, { selector: 'span', html: extension.snippet }, { selector: '.ext', 'data-id': extension.id }, { selector: 'button', text: bhfansapi.extensionInstalled(extension.id) ? 'Remove' : 'Install' }]);
             });
         });
-
-        var mainToggle = document.querySelector('#toggle');
 
         function addEmptyMsg(e) {
             var containerElem = e.target.parentElement.querySelector('div');
@@ -697,16 +807,11 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 
             e.stopPropagation();
         }
-
         Array.from(document.querySelectorAll('span.add')).forEach(function (el) {
             el.addEventListener('click', addEmptyMsg);
         });
 
-        var ui = {
-            alertActive: false,
-            alertQueue: [],
-            alertButtons: {}
-        };
+        var ui = {};
 
         ui.addMsg = function addMsg(container, template, saveObj) {
             var content = template.content;
@@ -742,37 +847,64 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             hook.check('ui.messageAdded');
         };
 
+        var alert = {
+            active: false,
+            queue: [],
+            buttons: {}
+        };
+
+        function buttonHandler(event) {
+            var button = alert.buttons[event.target.id] || {};
+            button.thisArg = button.thisArg || undefined;
+            button.dismiss = typeof button.dismiss == 'boolean' ? button.dismiss : true;
+            if (typeof button.action == 'function') {
+                button.action.call(button.thisArg);
+            }
+
+            if (button.dismiss || typeof button.action != 'function') {
+                document.querySelector('#alert').classList.remove('visible');
+                document.querySelector('#alert ~ .overlay').classList.remove('visible');
+                document.querySelector('#alert .buttons').innerHTML = '';
+                alert.buttons = {};
+                alert.active = false;
+
+                if (alert.queue.length) {
+                    var _alert = _alert.queue.shift();
+                    ui.alert(_alert.text, _alert.buttons);
+                }
+            }
+        }
+
         ui.alert = function (text) {
             var buttons = arguments.length <= 1 || arguments[1] === undefined ? [{ text: 'OK' }] : arguments[1];
 
-            function buildButton(ui, button) {
+            function buildButton(button) {
                 var el = document.createElement('span');
                 el.innerHTML = button.text;
-                el.classList.add('button');
                 if (button.style) {
                     el.classList.add(button.style);
                 }
                 el.id = button.id;
-                el.addEventListener('click', ui.buttonHandler.bind(ui));
-                document.querySelector('#alert > .buttons').appendChild(el);
+                el.addEventListener('click', buttonHandler);
+                document.querySelector('#alert .buttons').appendChild(el);
             }
 
-            if (ui.alertActive) {
-                ui.alertQueue.push({ text: text, buttons: buttons });
+            if (alert.active) {
+                alert.queue.push({ text: text, buttons: buttons });
                 return;
             }
-            ui.alertActive = true;
+            alert.active = true;
 
             buttons.forEach(function (button, i) {
                 button.dismiss = button.dismiss === false ? false : true; 
-                ui.alertButtons['button_' + i] = { action: button.action, thisArg: button.thisArg, dismiss: button.dismiss };
+                alert.buttons['button_' + i] = { action: button.action, thisArg: button.thisArg, dismiss: button.dismiss };
                 button.id = 'button_' + i;
-                buildButton(this, button);
-            }.bind(this));
-            document.querySelector('#alert > div').innerHTML = text;
+                buildButton(button);
+            });
+            document.querySelector('#alertContent').innerHTML = text;
 
-            document.querySelector('#alertOverlay').classList.toggle('visible');
-            document.querySelector('#alert').classList.toggle('visible');
+            document.querySelector('#alert ~ .overlay').classList.add('visible');
+            document.querySelector('#alert').classList.add('visible');
         };
 
         ui.notify = function (text) {
@@ -797,133 +929,47 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             }.bind(el), displayTime * 1000 + 2100);
         };
 
-        ui.buttonHandler = function (event) {
-            var alertButton = ui.alertButtons[event.target.id] || {};
-            alertButton.thisArg = alertButton.thisArg || undefined;
-            alertButton.dismiss = typeof alertButton.dismiss == 'boolean' ? alertButton.dismiss : true;
-            if (typeof alertButton.action == 'function') {
-                alertButton.action.call(alertButton.thisArg);
-            }
-            if (alertButton.dismiss || typeof alertButton.action != 'function') {
-                document.querySelector('#alert').classList.toggle('visible');
-                document.querySelector('#alertOverlay').classList.toggle('visible');
-                document.querySelector('#alert > .buttons').innerHTML = '';
-                ui.alertButtons = {};
-                ui.alertActive = false;
-                ui.checkAlertQueue();
-            }
-        };
-
-        ui.checkAlertQueue = function () {
-            if (ui.alertQueue.length) {
-                var alert = ui.alertQueue.shift();
-                ui.alert(alert.text, alert.buttons);
-            }
-        };
-
-        ui.globalTabChange = function (event) {
-            if (event.target.getAttribute('g-tab-name') !== null) {
-                Array.from(document.querySelectorAll('div.visible:not(#header)')).forEach(function (el) {
-                    return el.classList.remove('visible');
-                }); 
-                document.querySelector('#mb_' + event.target.getAttribute('g-tab-name')).classList.add('visible');
-                document.querySelector('span.tab.selected').classList.remove('selected');
-                event.target.classList.add('selected');
-            }
-        };
-
         ui.toggleMenu = function () {
             mainToggle.checked = !mainToggle.checked;
         };
 
-        ui.addTab = function addTab(tabText, tabId) {
-            var tabGroup = arguments.length <= 2 || arguments[2] === undefined ? '#mainNavContents' : arguments[2];
+        ui.addTab = function () {
+            var tabNameUID = 0;
 
-            if (tabGroup != '#mainNavContents') {
-                tabGroup = '#' + tabGroup + '_tabs';
-            }
-            var tab = document.createElement('span');
-            tab.textContent = tabText.toLocaleUpperCase();
-            tab.classList.add('tab');
-            tab.setAttribute('g-tab-name', tabId);
-            document.querySelector(tabGroup).appendChild(tab);
-            var tabContent = document.createElement('div');
-            tabContent.id = 'mb_' + tabId;
-            document.querySelector('#container').appendChild(tabContent);
-        };
+            return function addTab(tabText) {
+                var groupName = arguments.length <= 1 || arguments[1] === undefined ? 'main' : arguments[1];
 
-        ui.removeTab = function removeTab(tabId) {
-            var tab = document.querySelector('[g-tab-name="' + tabId + '"]');
-            if (tab) {
-                tab.remove();
-                document.querySelector('#mb_' + tabId).remove();
-            }
-        };
+                var tabName = 'botTab_' + tabNameUID++;
 
-        ui.addTabGroup = function addTabGroup(text, groupId) {
-            var container = document.createElement('div');
-            container.classList.add('tab-group');
-
-            var checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = 'group_' + groupId;
-            checkbox.id = 'group_' + groupId;
-            checkbox.classList.add('tab-header-toggle');
-            container.appendChild(checkbox);
-
-            var label = document.createElement('label');
-            label.classList.add('tab-header');
-            label.setAttribute('for', 'group_' + groupId);
-            label.textContent = text;
-            container.appendChild(label);
-
-            var innerContainer = document.createElement('div');
-            innerContainer.id = groupId + '_tabs';
-            innerContainer.classList.add('tab-body');
-            container.appendChild(innerContainer);
-            document.querySelector('#mainNavContents').appendChild(container);
-        };
-
-        ui.addInnerTab = function addInnerTab(navID, contentID, tabName, tabText) {
-            if (document.querySelector('#' + navID + ' > div[tab-name="' + tabName + '"]') === null) {
-                var tabNav = document.createElement('div');
-                tabNav.setAttribute('tab-name', tabName);
-                tabNav.textContent = this.stripHTML(tabText);
-                document.getElementById(navID).appendChild(tabNav);
+                var tab = document.createElement('span');
+                tab.textContent = tabText;
+                tab.classList.add('tab');
+                tab.dataset.tabName = tabName;
 
                 var tabContent = document.createElement('div');
-                tabContent.setAttribute('id', 'mb_' + tabName);
-                document.getElementById(contentID).appendChild(tabContent);
+                tabContent.dataset.tabName = tabName;
+
+                document.querySelector('#leftNav [data-tab-group=' + groupName + ']').appendChild(tab);
+                document.querySelector('#container').appendChild(tabContent);
 
                 return tabContent;
-            }
-            return document.querySelector('#mb_' + tabName);
+            };
+        }();
+
+        ui.removeTab = function removeTab(tabContent) {
+            document.querySelector('#leftNav [data-tab-name=' + tabContent.dataset.tabName + ']').remove();
+            tabContent.remove();
         };
 
-        ui.removeInnerTab = function removeInnerTab(tabName) {
-            if (document.querySelector('div[tab-name="' + tabName + '"]') !== null) {
-                document.querySelector('div[tab-name="' + tabName + '"]').remove();
-                document.querySelector('#mb_' + tabName).remove();
-                return true;
-            }
-            return false;
-        };
+        ui.addTabGroup = function addTabGroup(text, groupName) {
+            var details = document.createElement('details');
+            details.dataset.tabGroup = groupName;
 
-        ui.changeTab = function changeTab(e) {
-            if (e.target !== e.currentTarget) {
-                var i;
-                var tabs = e.currentTarget.children;
-                var tabContents = document.getElementById(e.currentTarget.getAttribute('tab-contents')).children;
-                for (i = 0; i < tabs.length; i++) {
-                    tabs[i].removeAttribute('class');
-                    tabContents[i].removeAttribute('class');
-                }
-                e.target.className = 'selected';
-                if (e.target.getAttribute('tab-name') !== null) {
-                    document.getElementById('mb_' + e.target.getAttribute('tab-name')).className = 'visible';
-                }
-            }
-            e.stopPropagation();
+            var summary = document.createElement('summary');
+            summary.textContent = text;
+            details.appendChild(summary);
+
+            document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
         };
 
         ui.addMessageToConsole = function addMessageToConsole(msg) {
@@ -976,13 +1022,12 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             document.querySelector(targetSelector).appendChild(document.importNode(content, true));
         };
 
-        document.querySelector('#navOverlay').addEventListener('click', ui.toggleMenu);
-        document.querySelector('#mainNav').addEventListener('click', ui.globalTabChange);
+        document.querySelector('#leftNav .overlay').addEventListener('click', ui.toggleMenu);
 
         return ui;
     };
 
-    window.MessageBotUI = ui;
+    window.MessageBotUI = create;
 })();
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
 (function (ui, bhfansapi) {
@@ -993,7 +1038,7 @@ window.botui = MessageBotUI(window.hook, window.bhfansapi);
     }
 
     onClick('#mb_backup_load', function loadBackup() {
-        ui.alert('Enter the backup code:<textarea style="width:99%;height:10em;"></textarea>', [{ text: 'Load backup & restart bot', style: 'success', action: function action() {
+        ui.alert('Enter the backup code:<textarea style="width:calc(100% - 7px);height:160px;"></textarea>', [{ text: 'Load & refresh page', style: 'success', action: function action() {
                 var code = document.querySelector('#alert textarea').value;
                 try {
                     code = JSON.parse(code);
@@ -1028,6 +1073,11 @@ window.botui = MessageBotUI(window.hook, window.bhfansapi);
                     }
                 }
             } }, { text: 'Cancel' }]);
+    });
+
+    onClick('#mb_backup_save', function showBackup() {
+        var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
+        ui.alert('Copy this to a safe place:<br><textarea style="width: calc(100% - 7px);height:160px;">' + backup + '</textarea>');
     });
 })(window.botui, window.bhfansapi);
 function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
@@ -1440,29 +1490,14 @@ function MessageBotExtension(namespace) {
     var extension = {
         id: namespace,
         bot: window.bot,
-        core: window.bot.core,
-        ui: window.bot.ui,
-        hook: window.hook,
-        settingsTab: null,
-        mainTabs: {}
-    };
-
-    extension.addSettingsTab = function addSettingsTab(tabText) {
-        void 0;
-        this.ui.addTab(tabText, 'settings_' + this.id);
-        this.settingsTab = document.querySelector('#mb_settings_' + this.id);
-    };
-
-    extension.addMainTab = function addMainTab(tabId, tabText) {
-        void 0;
-        this.ui.addTab(tabText, 'main_' + this.id + '_' + tabId, 'msgs');
-        this.mainTabs[tabId] = document.querySelector('#mb_main_' + this.id + '_' + tabId);
+        ui: window.botui,
+        hook: window.hook
     };
 
     extension.addTab = function addTab(tabText, tabId) {
         var tabGroup = arguments.length <= 2 || arguments[2] === undefined ? '#mainNavContents' : arguments[2];
 
-        this.ui.addTab(tabText, this.id + '_' + tabId, tabGroup);
+        extension.ui.addTab(tabText, this.id + '_' + tabId, tabGroup);
     };
 
     extension.addTabGroup = function addTabGroup(tabText, tabId) {

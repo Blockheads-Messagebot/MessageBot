@@ -1,15 +1,17 @@
 (function() {
-    var ui = function(hook, bhfansapi) { //jshint ignore:line
+    var create = function(hook, bhfansapi) { //jshint ignore:line
         var uniqueMessageID = 0;
+
+        document.head.innerHTML = '{{inject ../dist/tmphead.html}}';
+        document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
+        document.body.innerHTML = '{{inject ../dist/tmpbody.html}}';
+
+        var mainToggle = document.querySelector('#leftNav input');
 
         function listenerHook(selector, type, hookname) {
             document.querySelector(selector)
                 .addEventListener(type, () => hook.check(`ui.${hookname}`));
         }
-
-        document.head.innerHTML = '{{inject ../dist/tmphead.html}}';
-        document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
-        document.body.innerHTML = '{{inject ../dist/tmpbody.html}}';
 
         ['jMsgs', 'lMsgs', 'tMsgs', 'aMsgs'].forEach((id) => {
             listenerHook(`#${id}`, 'change', 'messageChanged');
@@ -35,23 +37,41 @@
             }
         });
 
+        //Install / uninstall extensions
         document.querySelector('#exts').addEventListener('click', function extActions(e) {
-            var extId = e.target.parentElement.getAttribute('extension-id');
-            //Handle clicks on the div itself, not a child elem
-            extId = extId  || e.target.getAttribute('extension-id');
-            var button = document.querySelector('div[extension-id="' + extId + '"] > button');
-            if (e.target.tagName == 'BUTTON') {
-                if (e.target.textContent == 'Install') {
-                    bhfansapi.startExtension(extId);
-                    button.textContent = 'Remove';
-                } else {
-                    bhfansapi.removeExtension(extId);
+            if (e.target.tagName != 'BUTTON') {
+                return;
+            }
+            var button = e.target;
+            var extId = button.parentElement.dataset.id;
 
-                    window[extId] = undefined;
-                }
+            if (button.textContent == 'Install') {
+                bhfansapi.startExtension(extId);
+                button.textContent = 'Remove';
+            } else {
+                bhfansapi.removeExtension(extId);
             }
         });
 
+        //Change screen tabs
+        document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
+            var tabName = event.target.dataset.tabName;
+            if(!tabName) {
+                return;
+            }
+
+            //Content
+            //We can't just remove the first due to browser lag
+            Array.from(document.querySelectorAll('#container > .visible'))
+                .forEach((el) => el.classList.remove('visible'));
+            document.querySelector(`#container [data-tab-name=${tabName}]`).classList.add('visible');
+
+            //Tabs
+            document.querySelector('#leftNav .selected').classList.remove('selected');
+            event.target.classList.add('selected');
+        });
+
+        //Template polyfill, IE
         if (!('content' in document.createElement('template'))) {
             let qPlates = document.getElementsByTagName('template'),
                 plateLen = qPlates.length,
@@ -74,9 +94,37 @@
             }
         }
 
+        //Details polyfill, older firefox, IE
+        if (!('open' in document.createElement('details'))) {
+            let style = document.createElement('style');
+            style.textContent += 'details:not([open]) > :not(summary) { display: none !important; }' +
+                'details > summary:before { content: "▶"; display: inline-block; font-size: .8em; width: 1.5em; font-family:"Courier New"; }' +
+                'details[open] > summary:before { transform: rotate(90deg); }';
+            document.head.appendChild(style);
+
+            window.addEventListener('click', function(event) {
+                if (event.target.tagName == 'SUMMARY') {
+                    var details = event.target.parentNode;
+
+                    if (!details) {
+                        return;
+                    }
+
+                    if (details.getAttribute('open')) {
+                        details.open = false;
+                        details.removeAttribute('open');
+                    } else {
+                        details.open = true;
+                        details.setAttribute('open', 'open');
+                    }
+                }
+            });
+        }
+
+        //Create the store page
         bhfansapi.getStore().then(resp => {
             if (resp.status != 'ok') {
-                bhfansapi.reportError(resp.message);
+                bhfansapi.reportError(new Error(resp.message));
                 document.getElementById('exts').innerHTML += resp.message;
                 return;
             }
@@ -84,14 +132,11 @@
                 ui.buildContentFromTemplate('#extTemplate', '#exts', [
                     {selector: 'h4', text: extension.title},
                     {selector: 'span', html: extension.snippet},
-                    {selector: '.ext', 'extension-id': extension.id},
+                    {selector: '.ext', 'data-id': extension.id},
                     {selector: 'button', text: bhfansapi.extensionInstalled(extension.id) ? 'Remove' : 'Install'}
                 ]);
             });
         });
-
-
-        var mainToggle = document.querySelector('#toggle');
 
         // Used by the user to add new messages
         function addEmptyMsg(e) {
@@ -114,19 +159,15 @@
 
             e.stopPropagation();
         }
-
         Array.from(document.querySelectorAll('span.add')).forEach((el) => {
             el.addEventListener('click', addEmptyMsg);
         });
 
-        var ui = {
-            alertActive: false,
-            alertQueue: [],
-            alertButtons: {},
-        };
+        var ui = {};
 
         /**
          * Adds a message to the specified container using the specified template and saved properties.
+         * It is not encouraged for extension developers to call this function.
          *
          * @param element container
          * @param element template
@@ -171,6 +212,37 @@
             hook.check('ui.messageAdded');
         };
 
+
+        var alert = {
+            active: false,
+            queue: [],
+            buttons: {},
+        };
+
+        function buttonHandler(event) {
+            var button = alert.buttons[event.target.id] || {};
+            button.thisArg = button.thisArg || undefined;
+            button.dismiss = typeof button.dismiss == 'boolean' ? button.dismiss : true;
+            if (typeof button.action == 'function') {
+                button.action.call(button.thisArg);
+            }
+
+            //Require that there be an action asociated with no-dismiss buttons.
+            if (button.dismiss || typeof button.action != 'function') {
+                document.querySelector('#alert').classList.remove('visible');
+                document.querySelector('#alert ~ .overlay').classList.remove('visible');
+                document.querySelector('#alert .buttons').innerHTML = '';
+                alert.buttons = {};
+                alert.active = false;
+
+                // Are more alerts waiting to be shown?
+                if (alert.queue.length) {
+                    let alert = alert.queue.shift();
+                    ui.alert(alert.text, alert.buttons);
+                }
+            }
+        }
+
         /**
         * Function used to require action from the user.
         *
@@ -184,34 +256,33 @@
         * @return void
         */
         ui.alert = function(text, buttons = [{text: 'OK'}]) {
-            function buildButton(ui, button) {
+            function buildButton(button) {
                 var el = document.createElement('span');
                 el.innerHTML = button.text;
-                el.classList.add('button');
                 if (button.style) {
                     el.classList.add(button.style);
                 }
                 el.id = button.id;
-                el.addEventListener('click', ui.buttonHandler.bind(ui));
-                document.querySelector('#alert > .buttons').appendChild(el);
+                el.addEventListener('click', buttonHandler);
+                document.querySelector('#alert .buttons').appendChild(el);
             }
 
-            if (ui.alertActive) {
-                ui.alertQueue.push({text, buttons});
+            if (alert.active) {
+                alert.queue.push({text, buttons});
                 return;
             }
-            ui.alertActive = true;
+            alert.active = true;
 
             buttons.forEach(function(button, i) {
                 button.dismiss = (button.dismiss === false) ? false : true; //Require that dismiss be set to false, otherwise true
-                ui.alertButtons['button_' + i] = {action: button.action, thisArg: button.thisArg, dismiss: button.dismiss};
+                alert.buttons['button_' + i] = {action: button.action, thisArg: button.thisArg, dismiss: button.dismiss};
                 button.id = 'button_' + i;
-                buildButton(this, button);
-            }.bind(this));
-            document.querySelector('#alert > div').innerHTML = text;
+                buildButton(button);
+            });
+            document.querySelector('#alertContent').innerHTML = text;
 
-            document.querySelector('#alertOverlay').classList.toggle('visible');
-            document.querySelector('#alert').classList.toggle('visible');
+            document.querySelector('#alert ~ .overlay').classList.add('visible');
+            document.querySelector('#alert').classList.add('visible');
         };
 
         /**
@@ -242,61 +313,6 @@
         };
 
         /**
-        * Internal function used to call button actions when ui.alert() is called.
-        * Note: this is bound to the UI.
-        *
-        * @param EventArgs event
-        * @return void
-        */
-        ui.buttonHandler = function(event) {
-            var alertButton = ui.alertButtons[event.target.id] || {};
-            alertButton.thisArg = alertButton.thisArg || undefined;
-            alertButton.dismiss = typeof alertButton.dismiss == 'boolean' ? alertButton.dismiss : true;
-            if (typeof alertButton.action == 'function') {
-                alertButton.action.call(alertButton.thisArg);
-            }
-            //Require that there be an action asociated with no-dismiss buttons.
-            if (alertButton.dismiss || typeof alertButton.action != 'function') {
-                document.querySelector('#alert').classList.toggle('visible');
-                document.querySelector('#alertOverlay').classList.toggle('visible');
-                document.querySelector('#alert > .buttons').innerHTML = '';
-                ui.alertButtons = {};
-                ui.alertActive = false;
-                ui.checkAlertQueue();
-            }
-        };
-
-        /**
-        * Internal function used to check for more alerts that need to be shown.
-        *
-        * @return void
-        */
-        ui.checkAlertQueue = function() {
-            if (ui.alertQueue.length) {
-                let alert = ui.alertQueue.shift();
-                ui.alert(alert.text, alert.buttons);
-            }
-        };
-
-        /**
-         * Internal method used to change the page displayed to the user.
-         *
-         * @param EventArgs event
-         * @return void
-         */
-        ui.globalTabChange = function(event) {
-            if(event.target.getAttribute('g-tab-name') !== null) {
-                //Content
-                Array.from(document.querySelectorAll('div.visible:not(#header)'))
-                    .forEach((el) => el.classList.remove('visible')); //We can't just remove the first due to browser lag
-                document.querySelector('#mb_' + event.target.getAttribute('g-tab-name')).classList.add('visible');
-                //Tabs
-                document.querySelector('span.tab.selected').classList.remove('selected');
-                event.target.classList.add('selected');
-            }
-        };
-
-        /**
          * Hides / shows the menu
          *
          * @return void
@@ -309,122 +325,56 @@
          * Used to add a tab to the bot's navigation.
          *
          * @param string tabText
-         * @param string tabId
-         * @param string tabGroup the base of the ID of the group ID. Optional.
-         * @return void
+         * @param string groupName Optional. If provided, the name of the group of tabs to add this tab to.
+         * @return div - The div to place tab content in
          */
-        ui.addTab = function addTab(tabText, tabId, tabGroup = '#mainNavContents') {
-            if (tabGroup != '#mainNavContents') {
-                tabGroup = `#${tabGroup}_tabs`;
-            }
-            var tab = document.createElement('span');
-            tab.textContent = tabText.toLocaleUpperCase();
-            tab.classList.add('tab');
-            tab.setAttribute('g-tab-name', tabId);
-            document.querySelector(tabGroup).appendChild(tab);
-            var tabContent = document.createElement('div');
-            tabContent.id = 'mb_' + tabId;
-            document.querySelector('#container').appendChild(tabContent);
-        };
+        ui.addTab = (function () {
+            var tabNameUID = 0;
+
+            return function addTab(tabText, groupName = 'main') {
+                var tabName = 'botTab_' + tabNameUID++;
+
+                var tab = document.createElement('span');
+                tab.textContent = tabText;
+                tab.classList.add('tab');
+                tab.dataset.tabName = tabName;
+
+                var tabContent = document.createElement('div');
+                tabContent.dataset.tabName = tabName;
+
+                document.querySelector(`#leftNav [data-tab-group=${groupName}]`).appendChild(tab);
+                document.querySelector('#container').appendChild(tabContent);
+
+                return tabContent;
+            };
+        }());
 
         /**
          * Removes a global tab by it's id.
+         *
+         * @param div tabContent The div returned by the addTab function.
          */
-        ui.removeTab = function removeTab(tabId) {
-            let tab = document.querySelector('[g-tab-name="' + tabId + '"]');
-            if (tab) {
-                tab.remove();
-                document.querySelector('#mb_' + tabId).remove();
-            }
-        };
-
-        ui.addTabGroup = function addTabGroup(text, groupId) {
-            var container = document.createElement('div');
-            container.classList.add('tab-group');
-
-            var checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = 'group_' + groupId;
-            checkbox.id = 'group_' + groupId;
-            checkbox.classList.add('tab-header-toggle');
-            container.appendChild(checkbox);
-
-            var label = document.createElement('label');
-            label.classList.add('tab-header');
-            label.setAttribute('for', 'group_' + groupId);
-            label.textContent = text;
-            container.appendChild(label);
-
-            var innerContainer = document.createElement('div');
-            innerContainer.id = groupId + '_tabs';
-            innerContainer.classList.add('tab-body');
-            container.appendChild(innerContainer);
-            document.querySelector('#mainNavContents').appendChild(container);
+        ui.removeTab = function removeTab(tabContent) {
+            document.querySelector(`#leftNav [data-tab-name=${tabContent.dataset.tabName}]`).remove();
+            tabContent.remove();
         };
 
         /**
-         * Function to add a tab anywhere on the page
+         * Creates a tab group in which tabs can be placed.
          *
-         * @param string navID the id to the div which holds the tab navigation.
-         * @param string contentID the id to the div which holds the divs of the tab contents.
-         * @param string tabName the name of the tab to add.
-         * @param string tabText the text to display on the tab.
-         * @return mixed false on failure, the content div on success.
-         */
-        ui.addInnerTab = function addInnerTab(navID, contentID, tabName, tabText) {
-            if (document.querySelector('#' + navID + ' > div[tab-name="' + tabName + '"]') === null) {
-                var tabNav = document.createElement('div');
-                tabNav.setAttribute('tab-name', tabName);
-                tabNav.textContent = this.stripHTML(tabText);
-                document.getElementById(navID).appendChild(tabNav);
-
-                var tabContent = document.createElement('div');
-                tabContent.setAttribute('id', 'mb_' + tabName);
-                document.getElementById(contentID).appendChild(tabContent);
-
-                return tabContent;
-            }
-            return document.querySelector('#mb_' + tabName);
-        };
-
-        /**
-         * Removes a tab by its name.
-         *
-         * @param string tabName the name of the tab to be removed.
-         * @return bool true on success, false on failure.
-         */
-        ui.removeInnerTab = function removeInnerTab(tabName) {
-            if (document.querySelector('div[tab-name="' + tabName + '"]') !== null) {
-                document.querySelector('div[tab-name="' + tabName + '"]').remove();
-                document.querySelector('#mb_' + tabName).remove();
-                return true;
-            }
-            return false;
-        };
-
-
-        /**
-         * Event handler that should be attatched to the div
-         * holding the navigation for a tab set.
-         *
-         * @param eventArgs e
+         * @param string text - The text the user will see
+         * @param string groupName - The name of the group which can be used to add tabs within the group.
          * @return void
          */
-        ui.changeTab = function changeTab(e) {
-            if (e.target !== e.currentTarget) {
-                var i;
-                var tabs = e.currentTarget.children;
-                var tabContents = document.getElementById(e.currentTarget.getAttribute('tab-contents')).children;
-                for (i = 0; i < tabs.length; i++) {
-                    tabs[i].removeAttribute('class');
-                    tabContents[i].removeAttribute('class');
-                }
-                e.target.className = 'selected';
-                if (e.target.getAttribute('tab-name') !== null) {
-                    document.getElementById('mb_' + e.target.getAttribute('tab-name')).className = 'visible';
-                }
-            }
-            e.stopPropagation();
+        ui.addTabGroup = function addTabGroup(text, groupName) {
+            var details = document.createElement('details');
+            details.dataset.tabGroup = groupName;
+
+            var summary = document.createElement('summary');
+            summary.textContent = text;
+            details.appendChild(summary);
+
+            document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
         };
 
         ui.addMessageToConsole = function addMessageToConsole(msg, name='', nameClass = '') {
@@ -451,9 +401,9 @@
             hook.check('ui.addmessagetopage');
         };
 
-        //rules format: array of objects
+        // rules format: array of objects
         // each object must have "selector"
-        // each object can have "text" or "html" - any further attributes will be considered attributes.
+        // each object can have "text" or "html" - any further keys will set as attributes.
         ui.buildContentFromTemplate = function(templateSelector, targetSelector, rules = []) {
             var content = document.querySelector(templateSelector).content;
 
@@ -475,11 +425,10 @@
             document.querySelector(targetSelector).appendChild(document.importNode(content, true));
         };
 
-        document.querySelector('#navOverlay').addEventListener('click', ui.toggleMenu);
-        document.querySelector('#mainNav').addEventListener('click', ui.globalTabChange);
+        document.querySelector('#leftNav .overlay').addEventListener('click', ui.toggleMenu);
 
         return ui;
     };
 
-    window.MessageBotUI = ui;
+    window.MessageBotUI = create;
 }());

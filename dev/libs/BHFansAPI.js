@@ -13,17 +13,16 @@
         function listExtensions() {
             var target = document.querySelector('#mb_ext_list');
 
-            if (!extensions.length) {
-                target.innerHTML = '<p>No extensions installed</p>';
-                return;
-            }
-
             api.getExtensionNames(extensions).then((resp) => {
                 if (resp.status == 'ok') {
+                    if (!resp.extensions.length) {
+                        target.innerHTML = '<p>No extensions installed</p>';
+                        return;
+                    }
                     target.innerHTML = resp.extensions
-                    .reduce((html, ext) => {
-                        return `${html}<li>${ext.name.replace(/</g, '&lt;')} (${ext.id}) <a onclick="BHFansAPI().removeExtension(\'${ext.id}\');" class="button button-sm">Remove</a></li>`;
-                    }, '<ul style="margin-left:1.5em;">') + '</ul>';
+                        .reduce((html, ext) => {
+                            return `${html}<li>${ext.name.replace(/</g, '&lt;')} (${ext.id}) <a onclick="bhfansapi.removeExtension(\'${ext.id}\');" class="button">Remove</a></li>`;
+                        }, '<ul style="margin-left:1.5em;">') + '</ul>';
                 } else {
                     target.innerHTML = `Error fetching extension names: ${resp.message}`;
                     throw new Error(resp.message);
@@ -31,6 +30,7 @@
             })
             .catch(api.reportError);
         }
+
 
         var api = {};
 
@@ -55,6 +55,7 @@
             listExtensions();
             storage.set('mb_extensions', extensions, false);
         };
+        //Delay starting extensions - avoids some odd bugs
         setTimeout(function() {
             storage.getObject('mb_extensions', [], false).forEach(api.startExtension);
         }, 1000);
@@ -73,14 +74,14 @@
                 extensions.splice(extensions.indexOf(id), 1);
                 storage.set('mb_extensions', extensions, false);
 
-                var button = document.querySelector(`div[extension-id=${id}] > button`);
+                var button = document.querySelector(`#mb_extensions div[data-id=${id}] button`);
                 if (button !== null) {
                     button.textContent = 'Removed';
                     button.disabled = true;
-                    setTimeout((function () {
+                    setTimeout(() => {
                         button.textContent = 'Install';
                         button.disabled = false;
-                    }), 3000);
+                    }, 3000);
                 }
                 listExtensions();
             }
@@ -124,6 +125,7 @@
             }
         };
 
+        setTimeout(listExtensions, 500);
         return api;
     }
 
