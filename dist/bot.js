@@ -593,9 +593,7 @@ window.storage = CreateStorage(window.worldId);
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
 
-            extensions.push(id);
             listExtensions();
-            storage.set('mb_extensions', extensions, false);
         };
         setTimeout(function () {
             storage.getObject('mb_extensions', [], false).forEach(api.startExtension);
@@ -657,6 +655,8 @@ window.storage = CreateStorage(window.worldId);
                     extensions.splice(extensions.indexOf(id), 1);
                 }
             }
+
+            storage.set('mb_extensions', extensions, false);
         };
 
         setTimeout(listExtensions, 500);
@@ -735,24 +735,18 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         });
 
         if (!('content' in document.createElement('template'))) {
-            var qPlates = document.getElementsByTagName('template'),
-                plateLen = qPlates.length,
-                elPlate = void 0,
-                qContent = void 0,
-                contentLen = void 0,
-                docContent = void 0;
+            var templates = document.getElementsByTagName('template');
 
-            for (var x = 0; x < plateLen; ++x) {
-                elPlate = qPlates[x];
-                qContent = elPlate.childNodes;
-                contentLen = qContent.length;
-                docContent = document.createDocumentFragment();
+            for (var i = 0; i < templates.length; i++) {
+                var template = templates[i];
+                var content = template.childNodes;
+                var fragment = document.createDocumentFragment();
 
-                while (qContent[0]) {
-                    docContent.appendChild(qContent[0]);
+                for (var j = 0; j < content.length; j++) {
+                    fragment.appendChild(content[j]);
                 }
 
-                elPlate.content = docContent;
+                template.content = fragment;
             }
         }
 
@@ -1496,13 +1490,15 @@ function MessageBotExtension(namespace) {
         bot: window.bot,
         ui: window.botui,
         hook: window.hook,
-        storage: window.storage
+        storage: window.storage,
+        ajax: window.ajax,
+        api: window.api
     };
 
     extension.hook.check(extension.id + '.loaded');
 
     extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
-        window.bhfansapi.autoloadExtension(this.id, shouldAutoload);
+        window.bhfansapi.autoloadExtension(extension.id, shouldAutoload);
     };
 
     return extension;

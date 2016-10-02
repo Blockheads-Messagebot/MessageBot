@@ -595,9 +595,7 @@ window.storage = CreateStorage(window.worldId);
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
 
-            extensions.push(id);
             listExtensions();
-            storage.set('mb_extensions', extensions, false);
         };
         //Delay starting extensions - avoids some odd bugs
         setTimeout(function() {
@@ -667,6 +665,8 @@ window.storage = CreateStorage(window.worldId);
                     extensions.splice(extensions.indexOf(id), 1);
                 }
             }
+
+            storage.set('mb_extensions', extensions, false);
         };
 
         setTimeout(listExtensions, 500);
@@ -752,24 +752,18 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 
         //Template polyfill, IE
         if (!('content' in document.createElement('template'))) {
-            let qPlates = document.getElementsByTagName('template'),
-                plateLen = qPlates.length,
-                elPlate,
-                qContent,
-                contentLen,
-                docContent;
+            let templates = document.getElementsByTagName('template');
 
-            for (let x = 0; x < plateLen; ++x) {
-                elPlate = qPlates[x];
-                qContent = elPlate.childNodes;
-                contentLen = qContent.length;
-                docContent = document.createDocumentFragment();
+            for (let i = 0; i < templates.length; i++) {
+                let template = templates[i];
+                let content = template.childNodes;
+                let fragment = document.createDocumentFragment();
 
-                while (qContent[0]) {
-                    docContent.appendChild(qContent[0]);
+                for (let j = 0; j < content.length; j++) {
+                    fragment.appendChild(content[j]);
                 }
 
-                elPlate.content = docContent;
+                template.content = fragment;
             }
         }
 
@@ -1611,6 +1605,8 @@ function MessageBotExtension(namespace) { //jshint ignore:line
         ui: window.botui,
         hook: window.hook,
         storage: window.storage,
+        ajax: window.ajax,
+        api: window.api,
     };
 
     extension.hook.check(`${extension.id}.loaded`);
@@ -1623,7 +1619,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
      * @return void
      */
     extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
-        window.bhfansapi.autoloadExtension(this.id, shouldAutoload);
+        window.bhfansapi.autoloadExtension(extension.id, shouldAutoload);
     };
 
     return extension;

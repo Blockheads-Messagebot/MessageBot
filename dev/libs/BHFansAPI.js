@@ -51,9 +51,7 @@
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
 
-            extensions.push(id);
             listExtensions();
-            storage.set('mb_extensions', extensions, false);
         };
         //Delay starting extensions - avoids some odd bugs
         setTimeout(function() {
@@ -123,6 +121,8 @@
                     extensions.splice(extensions.indexOf(id), 1);
                 }
             }
+
+            storage.set('mb_extensions', extensions, false);
         };
 
         setTimeout(listExtensions, 500);

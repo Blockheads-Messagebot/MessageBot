@@ -5,6 +5,8 @@ function MessageBotExtension(namespace) { //jshint ignore:line
         ui: window.botui,
         hook: window.hook,
         storage: window.storage,
+        ajax: window.ajax,
+        api: window.api,
     };
 
     extension.hook.check(`${extension.id}.loaded`);
@@ -17,7 +19,7 @@ function MessageBotExtension(namespace) { //jshint ignore:line
      * @return void
      */
     extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
-        window.bhfansapi.autoloadExtension(this.id, shouldAutoload);
+        window.bhfansapi.autoloadExtension(extension.id, shouldAutoload);
     };
 
     return extension;

@@ -73,24 +73,18 @@
 
         //Template polyfill, IE
         if (!('content' in document.createElement('template'))) {
-            let qPlates = document.getElementsByTagName('template'),
-                plateLen = qPlates.length,
-                elPlate,
-                qContent,
-                contentLen,
-                docContent;
+            let templates = document.getElementsByTagName('template');
 
-            for (let x = 0; x < plateLen; ++x) {
-                elPlate = qPlates[x];
-                qContent = elPlate.childNodes;
-                contentLen = qContent.length;
-                docContent = document.createDocumentFragment();
+            for (let i = 0; i < templates.length; i++) {
+                let template = templates[i];
+                let content = template.childNodes;
+                let fragment = document.createDocumentFragment();
 
-                while (qContent[0]) {
-                    docContent.appendChild(qContent[0]);
+                for (let j = 0; j < content.length; j++) {
+                    fragment.appendChild(content[j]);
                 }
 
-                elPlate.content = docContent;
+                template.content = fragment;
             }
         }
 
