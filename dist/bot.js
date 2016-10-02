@@ -504,6 +504,10 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook);
                 result = JSON.parse(result);
             } catch (e) {
                 result = fallback;
+            } finally {
+                if (result === null) {
+                    result = fallback;
+                }
             }
 
             return result;
@@ -1491,75 +1495,14 @@ function MessageBotExtension(namespace) {
         id: namespace,
         bot: window.bot,
         ui: window.botui,
-        hook: window.hook
+        hook: window.hook,
+        storage: window.storage
     };
 
-    extension.addTab = function addTab(tabText, tabId) {
-        var tabGroup = arguments.length <= 2 || arguments[2] === undefined ? '#mainNavContents' : arguments[2];
-
-        extension.ui.addTab(tabText, this.id + '_' + tabId, tabGroup);
-    };
-
-    extension.addTabGroup = function addTabGroup(tabText, tabId) {
-        this.ui.addTabGroup(tabText, this.id + '_' + tabId);
-    };
-
-    extension.autoLaunch = function autoLaunch() {
-        return this.bot.extensions.includes(this.id);
-    };
-
+    extension.hook.check(extension.id + '.loaded');
 
     extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
         window.bhfansapi.autoloadExtension(this.id, shouldAutoload);
-        extension.hook.check('extension.added', this.id);
-    };
-
-    extension.addJoinListener = function addJoinListener(uniqueId, listener) {
-        return this.core.addJoinListener(this.id + '_' + uniqueId, this.id, listener);
-    };
-
-    extension.removeJoinListener = function removeJoinListener(uniqueId) {
-        this.core.removeJoinListener(this.id + '_' + uniqueId);
-    };
-
-    extension.addLeaveListener = function addLeaveListener(uniqueId, listener) {
-        return this.core.addLeaveListener(this.id + '_' + uniqueId, this.id, listener);
-    };
-
-    extension.removeLeaveListener = function removeLeaveListener(uniqueId) {
-        this.core.removeLeaveListener(this.id + '_' + uniqueId);
-    };
-
-    extension.addTriggerListener = function addTriggerListener(uniqueId, listener) {
-        return this.core.addTriggerListener(this.id + '_' + uniqueId, this.id, listener);
-    };
-
-    extension.removeTriggerListener = function removeTriggerListener(uniqueId) {
-        this.core.removeTriggerListener(this.id + '_' + uniqueId);
-    };
-
-    extension.addServerListener = function addServerListener(uniqueId, listener) {
-        return this.core.addServerListener(this.id + '_' + uniqueId, this.id, listener);
-    };
-
-    extension.removeServerListener = function removeServerListener(uniqueId) {
-        this.core.removeServerListener(this.id + '_' + uniqueId);
-    };
-
-    extension.addOtherListener = function addOtherListener(uniqueId, listener) {
-        return this.core.addOtherListener(this.id + '_' + uniqueId, this.id, listener);
-    };
-
-    extension.removeOtherListener = function removeOtherListener(uniqueId) {
-        this.core.removeOtherListener(this.id + '_' + uniqueId);
-    };
-
-    extension.addBeforeSendListener = function addBeforeSendListener(uniqueId, listener) {
-        return this.core.addBeforeSendListener(this.id + '_' + uniqueId, this.id, listener);
-    };
-
-    extension.removeBeforeSendListener = function removeBeforeSendListener(uniqueId) {
-        this.core.removeBeforeSendListener(this.id + '_' + uniqueId);
     };
 
     return extension;

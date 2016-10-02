@@ -22,6 +22,10 @@
                 result = JSON.parse(result);
             } catch(e) {
                 result = fallback;
+            } finally {
+                if (result === null) {
+                    result = fallback;
+                }
             }
 
             return result;

@@ -37,3 +37,6 @@ Each level is separated by a period (`.`). There should be no spaces in the hook
     - messageDeleted
     - messageChanged
     - prefChanged
+
+- extension (in this case, replace extension with the extension ID that you are listening for)
+    - loaded
