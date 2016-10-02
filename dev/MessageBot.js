@@ -79,8 +79,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     Promise.all([api.getLogs(), api.getWorldName()])
         .then((values) => {
             var [log, worldName] = values;
-            var last = storage.getObject('mb_lastLogLoad', 0, false);
-            storage.set('mb_lastLogLoad', Math.floor(Date.now().valueOf()), false);
+            var last = storage.getObject('mb_lastLogLoad', 0);
+            storage.set('mb_lastLogLoad', Math.floor(Date.now().valueOf()));
 
             log.forEach(line => {
                 var time = new Date(line.substring(0, line.indexOf('b')));
