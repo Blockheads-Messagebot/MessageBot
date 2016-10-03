@@ -386,6 +386,11 @@ if (!window.console) {
 
         api.send = function (message) {
             hook.check('world.send', message);
+            if (message.startsWith('/')) {
+                var command = message.substring(1, message.indexOf(' '));
+                var _args = message.substring(command.length + 2);
+                hook.check('world.command', 'SERVER', command, _args);
+            }
             return ajax.postJSON('/api', { command: 'send', message: message, worldId: worldId });
         };
 
