@@ -145,6 +145,11 @@
 
         api.send = (message) => {
             hook.check('world.send', message);
+            if (message.startsWith('/')) {
+                let command = message.substring(1, message.indexOf(' '));
+                let args = message.substring(command.length + 2);
+                hook.check('world.command', 'SERVER', command, args);
+            }
             return ajax.postJSON(`/api`, { command: 'send', message, worldId });
         };
 
