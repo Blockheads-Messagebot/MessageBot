@@ -7,7 +7,9 @@
             if (!listeners[key]) {
                 listeners[key] = [];
             }
-            listeners[key].push(callback);
+            if (!listeners[key].includes(callback)) {
+                listeners[key].push(callback);
+            }
         }
 
         function remove(key, callback) {
@@ -49,7 +51,7 @@
                     }
                     return previous;
                 } catch(e) {
-                    console.log(e);
+                    console.error(e);
                     return previous;
                 }
             }, initial);
