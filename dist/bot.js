@@ -387,21 +387,24 @@ if (!window.console) {
         });
 
         api.send = function (message) {
-            hook.check('world.send', message);
-            if (message.startsWith('/')) {
+            return ajax.postJSON('/api', { command: 'send', message: message, worldId: worldId }).then(function (resp) {
+                hook.check('world.send', message);
+                if (message.startsWith('/')) {
 
-                var command = message.substr(1);
+                    var command = message.substr(1);
 
-                if (!command.startsWith(' ')) {
-                    var _args = '';
-                    if (command.includes(' ')) {
-                        command = command.substring(0, command.indexOf(' '));
-                        _args = message.substring(message.indexOf(' ') + 1);
+                    if (!command.startsWith(' ')) {
+                        var _args = '';
+                        if (command.includes(' ')) {
+                            command = command.substring(0, command.indexOf(' '));
+                            _args = message.substring(message.indexOf(' ') + 1);
+                        }
+                        hook.check('world.command', 'SERVER', command, _args);
                     }
-                    hook.check('world.command', 'SERVER', command, _args);
                 }
-            }
-            return ajax.postJSON('/api', { command: 'send', message: message, worldId: worldId });
+
+                return resp;
+            });
         };
 
         function getMessages() {

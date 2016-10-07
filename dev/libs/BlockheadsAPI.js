@@ -144,22 +144,26 @@
         api.getWorldName().then((name) => world.name = name);
 
         api.send = (message) => {
-            hook.check('world.send', message);
-            if (message.startsWith('/')) {
+            return ajax.postJSON(`/api`, { command: 'send', message, worldId })
+                .then(function(resp) {
+                    hook.check('world.send', message);
+                    if (message.startsWith('/')) {
 
-                let command = message.substr(1);
+                        let command = message.substr(1);
 
-                //Disallow commands starting with space.
-                if (!command.startsWith(' ')) {
-                    let args = '';
-                    if (command.includes(' ')) {
-                        command = command.substring(0, command.indexOf(' '));
-                        args = message.substring(message.indexOf(' ') + 1);
+                        //Disallow commands starting with space.
+                        if (!command.startsWith(' ')) {
+                            let args = '';
+                            if (command.includes(' ')) {
+                                command = command.substring(0, command.indexOf(' '));
+                                args = message.substring(message.indexOf(' ') + 1);
+                            }
+                            hook.check('world.command', 'SERVER', command, args);
+                        }
                     }
-                    hook.check('world.command', 'SERVER', command, args);
-                }
-            }
-            return ajax.postJSON(`/api`, { command: 'send', message, worldId });
+
+                    return resp;
+                });
         };
 
         function getMessages() {
