@@ -158,7 +158,9 @@ if (!window.console) {
             if (!listeners[key]) {
                 listeners[key] = [];
             }
-            listeners[key].push(callback);
+            if (!listeners[key].includes(callback)) {
+                listeners[key].push(callback);
+            }
         }
 
         function remove(key, callback) {
