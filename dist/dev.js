@@ -379,9 +379,18 @@ if (!window.console) {
         api.send = (message) => {
             hook.check('world.send', message);
             if (message.startsWith('/')) {
-                let command = message.substring(1, message.indexOf(' '));
-                let args = message.substring(command.length + 2);
-                hook.check('world.command', 'SERVER', command, args);
+
+                let command = message.substr(1);
+
+                //Disallow commands starting with space.
+                if (!command.startsWith(' ')) {
+                    let args = '';
+                    if (command.includes(' ')) {
+                        command = command.substring(0, command.indexOf(' '));
+                        args = message.substring(message.indexOf(' ') + 1);
+                    }
+                    hook.check('world.command', 'SERVER', command, args);
+                }
             }
             return ajax.postJSON(`/api`, { command: 'send', message, worldId });
         };
@@ -449,12 +458,19 @@ if (!window.console) {
                             hook.check('world.message', name, msg);
 
                             if (msg.startsWith('/')) {
-                                //Command message, those from server not caught here
-                                var command = message.substring(1, message.indexOf(' '));
-                                var args = message.substring(command.length + 2);
 
-                                hook.check('world.command', name, command, args);
-                                return;
+                                let command = msg.substr(1);
+
+                                //Disallow commands starting with space.
+                                if (!command.startsWith(' ')) {
+                                    let args = '';
+                                    if (command.includes(' ')) {
+                                        command = command.substring(0, command.indexOf(' '));
+                                        args = msg.substring(msg.indexOf(' ') + 1);
+                                    }
+                                    hook.check('world.command', name, command, args);
+                                    return;
+                                }
                             }
 
                             hook.check('world.chat', name, message);

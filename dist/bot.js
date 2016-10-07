@@ -387,9 +387,17 @@ if (!window.console) {
         api.send = function (message) {
             hook.check('world.send', message);
             if (message.startsWith('/')) {
-                var command = message.substring(1, message.indexOf(' '));
-                var _args = message.substring(command.length + 2);
-                hook.check('world.command', 'SERVER', command, _args);
+
+                var command = message.substr(1);
+
+                if (!command.startsWith(' ')) {
+                    var _args = '';
+                    if (command.includes(' ')) {
+                        command = command.substring(0, command.indexOf(' '));
+                        _args = message.substring(message.indexOf(' ') + 1);
+                    }
+                    hook.check('world.command', 'SERVER', command, _args);
+                }
             }
             return ajax.postJSON('/api', { command: 'send', message: message, worldId: worldId });
         };
@@ -446,11 +454,18 @@ if (!window.console) {
                             hook.check('world.message', _name2, msg);
 
                             if (msg.startsWith('/')) {
-                                var command = message.substring(1, message.indexOf(' '));
-                                var args = message.substring(command.length + 2);
 
-                                hook.check('world.command', _name2, command, args);
-                                return;
+                                var command = msg.substr(1);
+
+                                if (!command.startsWith(' ')) {
+                                    var _args2 = '';
+                                    if (command.includes(' ')) {
+                                        command = command.substring(0, command.indexOf(' '));
+                                        _args2 = msg.substring(msg.indexOf(' ') + 1);
+                                    }
+                                    hook.check('world.command', _name2, command, _args2);
+                                    return;
+                                }
                             }
 
                             hook.check('world.chat', _name2, message);
