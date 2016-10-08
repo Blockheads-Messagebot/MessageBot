@@ -25,7 +25,8 @@ Each level is separated by a period (`.`). There should be no spaces in the hook
     - leave (name)
     - message (name, message) - non server messages, includes / messages.
     - chat (name, message) - non server messages, does not include / messages.
-    - servermessage (message) - does not include / messages
+    - servermessage (message) - server messages, includes / messages
+    - serverchat (message) - does not include / messages
     - command (name, command, args) - for example ("BIB", "transfer", "1 BIB2") -- messages from server included. Note that this does **not** include messages where the command starts with a space. That is, `/ test something` will not be caught by this hook.
     - other (message)
     - send (message) - called when a message is sent.
