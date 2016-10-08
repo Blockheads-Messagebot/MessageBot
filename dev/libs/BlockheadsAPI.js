@@ -147,8 +147,8 @@
             return ajax.postJSON(`/api`, { command: 'send', message, worldId })
                 .then(function(resp) {
                     hook.check('world.send', message);
+                    hook.check('world.servermessage', message);
                     if (message.startsWith('/')) {
-
                         let command = message.substr(1);
 
                         //Disallow commands starting with space.
@@ -224,7 +224,7 @@
                         let msg = message.substring(name.length + 2);
 
                         if (name == 'SERVER') {
-                            hook.check('world.servermessage', msg);
+                            hook.check('world.serverchat', msg);
                         } else {
                             hook.check('world.message', name, msg);
 
