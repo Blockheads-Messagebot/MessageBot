@@ -389,8 +389,8 @@ if (!window.console) {
         api.send = function (message) {
             return ajax.postJSON('/api', { command: 'send', message: message, worldId: worldId }).then(function (resp) {
                 hook.check('world.send', message);
+                hook.check('world.servermessage', message);
                 if (message.startsWith('/')) {
-
                     var command = message.substr(1);
 
                     if (!command.startsWith(' ')) {
@@ -454,7 +454,7 @@ if (!window.console) {
                         var msg = message.substring(_name2.length + 2);
 
                         if (_name2 == 'SERVER') {
-                            hook.check('world.servermessage', msg);
+                            hook.check('world.serverchat', msg);
                         } else {
                             hook.check('world.message', _name2, msg);
 
@@ -993,6 +993,17 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             details.appendChild(summary);
 
             document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
+        };
+
+        ui.removeTabGroup = function removeTabGroup(groupName) {
+            var group = document.querySelector('#leftNav [data-tab-group="' + groupName + '"]');
+            var items = Array.from(group.querySelectorAll('span'));
+
+            items.forEach(function (item) {
+                document.querySelector('#container [data-tab-name="' + item.dataset.tabName + '"]').remove();
+            });
+
+            group.remove();
         };
 
         ui.addMessageToConsole = function addMessageToConsole(msg) {
