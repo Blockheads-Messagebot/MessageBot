@@ -371,6 +371,23 @@
             document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
         };
 
+        /**
+         * Removes a tab group and all tabs contained within the specified group.
+         *
+         * @param string groupName the name of the group that was used in ui.addTabGroup.
+         */
+        ui.removeTabGroup = function removeTabGroup(groupName) {
+            var group = document.querySelector(`#leftNav [data-tab-group="${groupName}"]`);
+            var items = Array.from(group.querySelectorAll('span'));
+
+            items.forEach(item => {
+                //Tab content
+                document.querySelector(`#container [data-tab-name="${item.dataset.tabName}"]`).remove();
+            });
+
+            group.remove();
+        };
+
         ui.addMessageToConsole = function addMessageToConsole(msg, name='', nameClass = '') {
             var msgEl = document.createElement('li');
             if (nameClass) {
