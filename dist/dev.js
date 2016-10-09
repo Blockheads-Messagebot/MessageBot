@@ -337,6 +337,7 @@ if (!window.console) {
 
         api.getLogs = (refresh = false) => {
             if (refresh) {
+                api.worldStarted(true);
                 cache.getLogs = getLogs();
             }
             return cache.getLogs;
@@ -495,6 +496,7 @@ if (!window.console) {
 
         api.getLists = (refresh = false) => {
             if (refresh) {
+                api.worldStarted(true);
                 cache.getLists = getLists();
             }
 
