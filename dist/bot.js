@@ -342,6 +342,7 @@ if (!window.console) {
             var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
             if (refresh) {
+                api.worldStarted(true);
                 cache.getLogs = getLogs();
             }
             return cache.getLogs;
@@ -489,6 +490,7 @@ if (!window.console) {
             var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
             if (refresh) {
+                api.worldStarted(true);
                 cache.getLists = getLists();
             }
 
