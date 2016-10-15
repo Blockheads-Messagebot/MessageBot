@@ -290,9 +290,10 @@ if (!window.console) {
         }
 
         function getLogs() {
-            return cache.worldStarted.then(() => {
+            return cache.worldStarted
+                .then(() => {
                     return ajax.get(`/worlds/logs/${worldId}`)
-                                .then((log) => log.split('\n'));
+                        .then((log) => log.split('\n'));
                 });
         }
 
@@ -779,23 +780,6 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             event.target.classList.add('selected');
         });
 
-        //Template polyfill, IE
-        if (!('content' in document.createElement('template'))) {
-            let templates = document.getElementsByTagName('template');
-
-            for (let i = 0; i < templates.length; i++) {
-                let template = templates[i];
-                let content = template.childNodes;
-                let fragment = document.createDocumentFragment();
-
-                for (let j = 0; j < content.length; j++) {
-                    fragment.appendChild(content[j]);
-                }
-
-                template.content = fragment;
-            }
-        }
-
         //Details polyfill, older firefox, IE
         if (!('open' in document.createElement('details'))) {
             let style = document.createElement('style');
@@ -1124,7 +1108,20 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         // each object must have "selector"
         // each object can have "text" or "html" - any further keys will set as attributes.
         ui.buildContentFromTemplate = function(templateSelector, targetSelector, rules = []) {
-            var content = document.querySelector(templateSelector).content;
+            var template = document.querySelector(templateSelector);
+            //Fix IE
+            if (!('content' in template)) {
+                let content = template.childNodes;
+                let fragment = document.createDocumentFragment();
+
+                for (let j = 0; j < content.length; j++) {
+                    fragment.appendChild(content[j]);
+                }
+
+                template.content = fragment;
+            }
+
+            var content = template.content;
 
             rules.forEach((rule) => {
                 var el = content.querySelector(rule.selector);

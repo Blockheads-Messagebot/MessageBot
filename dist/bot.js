@@ -761,22 +761,6 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             event.target.classList.add('selected');
         });
 
-        if (!('content' in document.createElement('template'))) {
-            var templates = document.getElementsByTagName('template');
-
-            for (var i = 0; i < templates.length; i++) {
-                var template = templates[i];
-                var content = template.childNodes;
-                var fragment = document.createDocumentFragment();
-
-                for (var j = 0; j < content.length; j++) {
-                    fragment.appendChild(content[j]);
-                }
-
-                template.content = fragment;
-            }
-        }
-
         if (!('open' in document.createElement('details'))) {
             var style = document.createElement('style');
             style.textContent += 'details:not([open]) > :not(summary) { display: none !important; }' + 'details > summary:before { content: "▶"; display: inline-block; font-size: .8em; width: 1.5em; font-family:"Courier New"; }' + 'details[open] > summary:before { transform: rotate(90deg); }';
@@ -1038,7 +1022,19 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         ui.buildContentFromTemplate = function (templateSelector, targetSelector) {
             var rules = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
 
-            var content = document.querySelector(templateSelector).content;
+            var template = document.querySelector(templateSelector);
+            if (!('content' in template)) {
+                var _content = template.childNodes;
+                var fragment = document.createDocumentFragment();
+
+                for (var j = 0; j < _content.length; j++) {
+                    fragment.appendChild(_content[j]);
+                }
+
+                template.content = fragment;
+            }
+
+            var content = template.content;
 
             rules.forEach(function (rule) {
                 var el = content.querySelector(rule.selector);
