@@ -55,9 +55,10 @@
         }
 
         function getLogs() {
-            return cache.worldStarted.then(() => {
+            return cache.worldStarted
+                .then(() => {
                     return ajax.get(`/worlds/logs/${worldId}`)
-                                .then((log) => log.split('\n'));
+                        .then((log) => log.split('\n'));
                 });
         }
 
