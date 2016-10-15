@@ -1303,13 +1303,42 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
 
         ui.addMessageToConsole(name + ' (' + ip + ') has joined the server', 'SERVER', 'join world admin');
     });
-
     hook.listen('world.leave', function handlePlayerLeave(name) {
         if (world.online.includes(name)) {
             world.online.splice(world.online.indexOf(name), 1);
         }
 
         ui.addMessageToConsole(name + ' has left the server', 'SERVER', 'leave world admin');
+    });
+
+    hook.listen('world.command', function (name, command, target) {
+        target = target.toLocaleUpperCase();
+        if (!bot.checkGroup('admin', name)) {
+            return;
+        }
+
+        var lists = world.lists;
+        switch (command.toLocaleLowerCase()) {
+            case 'admin':
+                if (!lists.admin.includes(target)) {
+                    lists.admin.push(target);
+                }
+                break;
+            case 'unadmin':
+                if (lists.admin.includes(target)) {
+                    lists.admin.splice(lists.admin.indexOf(target), 1);
+                }
+                break;
+            case 'mod':
+                if (!lists.mod.includes(target)) {
+                    lists.mod.push(target);
+                }
+                break;
+            case 'unmod':
+                if (lists.mod.includes(target)) {
+                    lists.mod.splice(lists.mod.indexOf(target), 1);
+                }
+        }
     });
 
     hook.listen('ui.messageChanged', saveConfig);
