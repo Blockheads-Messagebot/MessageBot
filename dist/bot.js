@@ -1117,11 +1117,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     (function checkBuffer() {
         if (chatBuffer.length) {
             hook.check('bot.send');
-            var message = chatBuffer.shift();
-            if (message.startsWith('/')) {
-                ui.addMessageToConsole(message, 'SERVER', 'admin admin-command');
-            }
-            api.send(message).then(setTimeout(checkBuffer, 1000));
+            api.send(chatBuffer.shift()).then(setTimeout(checkBuffer, 1000));
         } else {
             setTimeout(checkBuffer, 500);
         }
@@ -1278,10 +1274,15 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
                 msgClass += ' admin';
             }
         }
+        if (message.startsWith('/')) {
+            msgClass += ' command';
+        }
         ui.addMessageToConsole(message, name, msgClass);
     });
-    hook.listen('world.servermessage', function (message) {
-        ui.addMessageToConsole(message, 'SERVER', 'admin');
+    hook.listen('world.send', function (message) {
+        if (message.startsWith('/')) {
+            ui.addMessageToConsole(message, 'SERVER', 'admin command');
+        }
     });
 
     hook.listen('world.join', function handlePlayerJoin(name, ip) {
@@ -1313,31 +1314,53 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
 
     hook.listen('world.command', function (name, command, target) {
         target = target.toLocaleUpperCase();
+        command = command.toLocaleLowerCase();
+
         if (!bot.checkGroup('admin', name)) {
             return;
         }
 
         var lists = world.lists;
-        switch (command.toLocaleLowerCase()) {
-            case 'admin':
-                if (!lists.admin.includes(target)) {
-                    lists.admin.push(target);
+        if (['admin', 'unadmin', 'mod', 'unmod'].includes(command)) {
+            if (command.startsWith('un')) {
+                command = command.substr(2);
+                if (lists[command].includes(target)) {
+                    lists[command].splice(lists[command].indexOf(target), 1);
                 }
-                break;
-            case 'unadmin':
-                if (lists.admin.includes(target)) {
-                    lists.admin.splice(lists.admin.indexOf(target), 1);
+            } else {
+                if (!lists[command].includes(target)) {
+                    lists[command].push(target);
                 }
-                break;
-            case 'mod':
-                if (!lists.mod.includes(target)) {
-                    lists.mod.push(target);
+            }
+
+            lists.mod = lists.mod.filter(function (name) {
+                return lists.admin.indexOf(name) < 0;
+            });
+            lists.staff = lists.admin.concat(lists.mod);
+        }
+
+        if (['whitelist', 'unwhitelist'].includes(command)) {
+            if (command.startsWith('un')) {
+                if (lists.white.includes(target)) {
+                    lists.white.splice(lists.white.indexOf(target), 1);
                 }
-                break;
-            case 'unmod':
-                if (lists.mod.includes(target)) {
-                    lists.mod.splice(lists.mod.indexOf(target), 1);
+            } else {
+                if (!lists.white.includes(target)) {
+                    lists.white.push(target);
                 }
+            }
+        }
+
+        if (['ban', 'unban'].includes(command)) {
+            if (command.startsWith('un')) {
+                if (lists.black.includes(target)) {
+                    lists.black.splice(lists.black.indexOf(target), 1);
+                }
+            } else {
+                if (!lists.black.includes(target)) {
+                    lists.black.push(target);
+                }
+            }
         }
     });
 
@@ -1396,10 +1419,6 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
         api.send(message).then(function (response) {
             if (response.status == 'ok') {
                 input.value = '';
-
-                if (message.startsWith('/')) {
-                    ui.addMessageToConsole(message, 'SERVER', 'admin admin-command');
-                }
             } else {
                 button.textContent = 'RETRY';
                 throw new Error(JSON.stringify(response));
