@@ -295,6 +295,7 @@ if (!window.console) {
     window.CreateStorage = storage;
 })();
 window.storage = CreateStorage(window.worldId);
+
 (function () {
     function api(ajax, storage) {
         var cache = {
@@ -420,6 +421,7 @@ window.storage = CreateStorage(window.worldId);
     window.CreateBHFansAPI = api;
 })();
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
+
 (function () {
     var apiLoad = performance.now();
 
@@ -703,6 +705,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
     window.BlockheadsAPI = api;
 })();
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
+
 (function () {
     var create = function create(hook, bhfansapi) {
         var uniqueMessageID = 0;
@@ -1071,6 +1074,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
     window.MessageBotUI = create;
 })();
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
+
 (function (ui, bhfansapi) {
     function onClick(selector, handler) {
         Array.from(document.querySelectorAll(selector)).forEach(function (el) {
@@ -1121,6 +1125,7 @@ window.botui = MessageBotUI(window.hook, window.bhfansapi);
         ui.alert('Copy this to a safe place:<br><textarea style="width: calc(100% - 7px);height:160px;">' + backup + '</textarea>');
     });
 })(window.botui, window.bhfansapi);
+
 function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     var chatBuffer = [];
     (function checkBuffer() {
@@ -1445,7 +1450,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     }
 
     document.querySelector('#mb_console input').addEventListener('keydown', function (event) {
-        if (event.key == "Enter") {
+        if (event.key == "Enter" || event.keyCode == 13) {
             event.preventDefault();
             userSend(event.target.value);
         }

@@ -343,7 +343,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
 
     //Listen for user to send message
     document.querySelector('#mb_console input').addEventListener('keydown', function(event) {
-        if (event.key == "Enter") {
+        if (event.key == "Enter" || event.keyCode == 13) {
             event.preventDefault();
             userSend(event.target.value);
         }

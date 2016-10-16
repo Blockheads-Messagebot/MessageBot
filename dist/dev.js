@@ -295,6 +295,7 @@ if (!window.console) {
 }());
  //Browser -- Depends: worldId
 window.storage = CreateStorage(window.worldId);
+
 (function() {
     function api(ajax, storage) {
         var cache = {
@@ -430,6 +431,7 @@ window.storage = CreateStorage(window.worldId);
 }());
  //Depends: ajax, storage
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
+
 (function() {
     var apiLoad = performance.now();
 
@@ -716,6 +718,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 }());
  //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
+
 (function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
         var uniqueMessageID = 0;
@@ -1158,6 +1161,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 }());
  //Depends: hook, BHFansAPI
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
+
 (function(ui, bhfansapi) {
     function onClick(selector, handler) {
         Array.from(document.querySelectorAll(selector))
@@ -1216,6 +1220,7 @@ window.botui = MessageBotUI(window.hook, window.bhfansapi);
     });
 }(window.botui, window.bhfansapi));
  //Depends: botui, bhfansapi
+
 function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:line
     //Helps avoid messages that are tacked onto the end of other messages.
     var chatBuffer = [];
@@ -1561,7 +1566,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
 
     //Listen for user to send message
     document.querySelector('#mb_console input').addEventListener('keydown', function(event) {
-        if (event.key == "Enter") {
+        if (event.key == "Enter" || event.keyCode == 13) {
             event.preventDefault();
             userSend(event.target.value);
         }
