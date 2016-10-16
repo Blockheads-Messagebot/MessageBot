@@ -101,9 +101,8 @@
         //Create the store page
         bhfansapi.getStore().then(resp => {
             if (resp.status != 'ok') {
-                bhfansapi.reportError(new Error(resp.message));
                 document.getElementById('exts').innerHTML += resp.message;
-                return;
+                throw new Error(resp.message);
             }
             resp.extensions.forEach(extension => {
                 ui.buildContentFromTemplate('#extTemplate', '#exts', [
@@ -113,7 +112,7 @@
                     {selector: 'button', text: bhfansapi.extensionInstalled(extension.id) ? 'Remove' : 'Install'}
                 ]);
             });
-        });
+        }).catch(bhfansapi.reportError);
 
         // Used by the user to add new messages
         function addEmptyMsg(e) {

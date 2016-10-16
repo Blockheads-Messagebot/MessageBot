@@ -2,8 +2,7 @@
     var apiLoad = performance.now();
 
     function logWithTime(...args) {
-        console.info.call(
-            null,
+        console.info(
             ...args,
             'Took',
             ((performance.now() - apiLoad) / 1000).toFixed(3),
@@ -11,7 +10,7 @@
         );
     }
 
-    var api = function(ajax, worldId, hook) {
+    var api = function(ajax, worldId, hook, bhfansapi) {
         var world = {
             name: '',
             online: []
@@ -35,27 +34,28 @@
                 var fails = 0;
                 (function check() {
                     ajax.postJSON(`/api`, { command: 'status', worldId: worldId })
-                    .then((world) => {
-                        if (world.worldStatus == 'online') {
-                            return resolve();
-                        } else if (world.worldStatus == 'offline') {
-                            ajax.postJSON('/api', { command: 'start', worldId: worldId })
-                                .then(check);
-                        } else {
-                            // World status is either startup, shutdown, or unavailible
-                            fails++;
-                            if (fails > 10) {
-                                return reject();
+                        .then((world) => {
+                            if (world.worldStatus == 'online') {
+                                return resolve();
+                            } else if (world.worldStatus == 'offline') {
+                                ajax.postJSON('/api', { command: 'start', worldId: worldId })
+                                    .then(check, check); //Check even if there is an error
+                            } else {
+                                // World status is either startup, shutdown, or unavailible
+                                fails++;
+                                if (fails > 10) {
+                                    return reject();
+                                }
+                                setTimeout(check, 3000);
                             }
-                            setTimeout(check, 3000);
-                        }
-                    });
+                        })
+                        .catch(bhfansapi.reportError);
                 }());
             });
         }
 
         function getLogs() {
-            return cache.worldStarted
+            return api.worldStarted()
                 .then(() => {
                     return ajax.get(`/worlds/logs/${worldId}`)
                         .then((log) => log.split('\n'));
@@ -63,7 +63,7 @@
         }
 
         function getLists() {
-            return cache.worldStarted
+            return api.worldStarted()
                 .then(() => ajax.get(`/worlds/lists/${worldId}`))
                 .then((html) => {
                     var doc = (new DOMParser()).parseFromString(html, 'text/html');
@@ -89,7 +89,8 @@
         }
 
         function getHomepage() {
-            return ajax.get(`/worlds/${worldId}`);
+            return ajax.get(`/worlds/${worldId}`)
+                .catch(getHomepage);
         }
 
         var api = {};
@@ -98,7 +99,8 @@
             if (refresh) {
                 cache.worldStarted = worldStarted();
             }
-            return cache.worldStarted;
+            return cache.worldStarted
+                .catch(() => api.worldStarted(true));
         };
 
         api.getLogs = (refresh = false) => {
@@ -106,7 +108,8 @@
                 api.worldStarted(true);
                 cache.getLogs = getLogs();
             }
-            return cache.getLogs;
+            return cache.getLogs
+                .catch(() => api.getLogs(true));
         };
 
         // An online list is maintained by the bot, this should NOT be used to get the online players frequently.
@@ -114,18 +117,20 @@
             if (refresh) {
                 cache.getHomepage = getHomepage();
             }
-            return cache.getHomepage.then((html) => {
-                var doc = (new DOMParser()).parseFromString(html, 'text/html');
-                var playerElems = doc.querySelector('.manager.padded:nth-child(1)')
-                    .querySelectorAll('tr:not(.history)>td.left');
-                var players = [];
+            return cache.getHomepage
+                .then((html) => {
+                    var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                    var playerElems = doc.querySelector('.manager.padded:nth-child(1)')
+                        .querySelectorAll('tr:not(.history)>td.left');
+                    var players = [];
 
-                Array.from(playerElems).forEach((el) => {
-                    players.push(el.textContent.toLocaleUpperCase());
-                });
+                    Array.from(playerElems).forEach((el) => {
+                        players.push(el.textContent.toLocaleUpperCase());
+                    });
 
-                return players;
-            });
+                    return players;
+                })
+                .catch(() => api.getOnlinePlayers(true));
         };
         api.getOnlinePlayers()
             .then((players) => world.players = [...new Set(players.concat(world.players))]);
@@ -165,23 +170,22 @@
                     }
 
                     return resp;
-                });
+                })
+                .catch(() => api.send(message));
         };
 
         function getMessages() {
-            return cache.worldStarted.then(() => {
-                    return ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId })
-                    .then((data) => {
-                        if (data.status == 'ok' && data.nextId != cache.firstId) {
-                            cache.firstId = data.nextId;
-                            return data.log;
-                        } else if (data.status == 'error') {
-                            throw new Error(data.message);
-                        }
-                        return [];
+            return cache.worldStarted
+                .then(() => ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId }))
+                .then((data) => {
+                    if (data.status == 'ok' && data.nextId != cache.firstId) {
+                        cache.firstId = data.nextId;
+                        return data.log;
+                    } else if (data.status == 'error') {
+                        throw new Error(data.message);
                     }
-                );
-            });
+                    return [];
+                });
         }
 
         function getUsername(message) {
@@ -254,6 +258,7 @@
                     }
                 });
             })
+            .catch(bhfansapi.reportError)
             .then(() => {
                 setTimeout(checkChat, 5000);
             });

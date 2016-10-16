@@ -235,345 +235,6 @@ if (!window.console) {
 }());
  //Node + Browser
 (function() {
-    var apiLoad = performance.now();
-
-    function logWithTime(...args) {
-        console.info.call(
-            null,
-            ...args,
-            'Took',
-            ((performance.now() - apiLoad) / 1000).toFixed(3),
-            'seconds'
-        );
-    }
-
-    var api = function(ajax, worldId, hook) {
-        var world = {
-            name: '',
-            online: []
-        };
-
-        var cache = {
-            worldStarted: worldStarted(),
-            firstId: 0,
-        };
-        cache.getLogs = getLogs();
-        cache.getLists = getLists();
-        cache.getHomepage = getHomepage();
-
-        cache.worldStarted.then(() => logWithTime('World online.'));
-        cache.getLogs.then(() => logWithTime('Logs fetched.'));
-        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
-        cache.getLists.then(() => logWithTime('Lists fetched.'));
-
-        function worldStarted() {
-            return new Promise(function (resolve, reject) {
-                var fails = 0;
-                (function check() {
-                    ajax.postJSON(`/api`, { command: 'status', worldId: worldId })
-                    .then((world) => {
-                        if (world.worldStatus == 'online') {
-                            return resolve();
-                        } else if (world.worldStatus == 'offline') {
-                            ajax.postJSON('/api', { command: 'start', worldId: worldId })
-                                .then(check);
-                        } else {
-                            // World status is either startup, shutdown, or unavailible
-                            fails++;
-                            if (fails > 10) {
-                                return reject();
-                            }
-                            setTimeout(check, 3000);
-                        }
-                    });
-                }());
-            });
-        }
-
-        function getLogs() {
-            return cache.worldStarted
-                .then(() => {
-                    return ajax.get(`/worlds/logs/${worldId}`)
-                        .then((log) => log.split('\n'));
-                });
-        }
-
-        function getLists() {
-            return cache.worldStarted
-                .then(() => ajax.get(`/worlds/lists/${worldId}`))
-                .then((html) => {
-                    var doc = (new DOMParser()).parseFromString(html, 'text/html');
-
-                    function getList(name) {
-                        var list = doc.querySelector(`textarea[name=${name}]`)
-                            .value
-                            .toLocaleUpperCase()
-                            .split('\n');
-                        return [...new Set(list)]; //Remove duplicates
-                    }
-
-                    var admin = getList('admins');
-                    var mod = getList('modlist');
-                    mod = mod.filter((name) => admin.indexOf(name) < 0 );
-                    var staff = admin.concat(mod);
-
-                    var white = getList('whitelist');
-                    var black = getList('blacklist');
-
-                    return {admin, mod, staff, white, black};
-                });
-        }
-
-        function getHomepage() {
-            return ajax.get(`/worlds/${worldId}`);
-        }
-
-        var api = {};
-
-        api.worldStarted = (refresh = false) => {
-            if (refresh) {
-                cache.worldStarted = worldStarted();
-            }
-            return cache.worldStarted;
-        };
-
-        api.getLogs = (refresh = false) => {
-            if (refresh) {
-                api.worldStarted(true);
-                cache.getLogs = getLogs();
-            }
-            return cache.getLogs;
-        };
-
-        // An online list is maintained by the bot, this should NOT be used to get the online players frequently.
-        api.getOnlinePlayers = (refresh = false) => {
-            if (refresh) {
-                cache.getHomepage = getHomepage();
-            }
-            return cache.getHomepage.then((html) => {
-                var doc = (new DOMParser()).parseFromString(html, 'text/html');
-                var playerElems = doc.querySelector('.manager.padded:nth-child(1)')
-                    .querySelectorAll('tr:not(.history)>td.left');
-                var players = [];
-
-                Array.from(playerElems).forEach((el) => {
-                    players.push(el.textContent.toLocaleUpperCase());
-                });
-
-                return players;
-            });
-        };
-        api.getOnlinePlayers()
-            .then((players) => world.players = [...new Set(players.concat(world.players))]);
-
-        api.getOwnerName = () => {
-            return cache.getHomepage.then((html) => {
-                var doc = (new DOMParser()).parseFromString(html, 'text/html');
-                return doc.querySelector('.subheader~tr>td:not([class])').textContent.toLocaleUpperCase();
-            });
-        };
-
-        api.getWorldName = () => {
-            return cache.getHomepage.then((html) => {
-                var doc = (new DOMParser()).parseFromString(html, 'text/html');
-                return doc.querySelector('#title').textContent;
-            });
-        };
-        api.getWorldName().then((name) => world.name = name);
-
-        api.send = (message) => {
-            return ajax.postJSON(`/api`, { command: 'send', message, worldId })
-                .then(function(resp) {
-                    hook.check('world.send', message);
-                    hook.check('world.servermessage', message);
-                    if (message.startsWith('/')) {
-                        let command = message.substr(1);
-
-                        //Disallow commands starting with space.
-                        if (!command.startsWith(' ')) {
-                            let args = '';
-                            if (command.includes(' ')) {
-                                command = command.substring(0, command.indexOf(' '));
-                                args = message.substring(message.indexOf(' ') + 1);
-                            }
-                            hook.check('world.command', 'SERVER', command, args);
-                        }
-                    }
-
-                    return resp;
-                });
-        };
-
-        function getMessages() {
-            return cache.worldStarted.then(() => {
-                    return ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId })
-                    .then((data) => {
-                        if (data.status == 'ok' && data.nextId != cache.firstId) {
-                            cache.firstId = data.nextId;
-                            return data.log;
-                        } else if (data.status == 'error') {
-                            throw new Error(data.message);
-                        }
-                        return [];
-                    }
-                );
-            });
-        }
-
-        function getUsername(message) {
-            for (let i = 18; i > 4; i--) {
-                let possibleName = message.substring(0, message.lastIndexOf(': ', i));
-                if (world.online.includes(possibleName) || possibleName == 'SERVER') {
-                    return possibleName;
-                }
-            }
-            // Should ideally never happen.
-            return message.substring(0, message.lastIndexOf(': ', 18));
-        }
-
-        function checkChat() {
-            getMessages().then((msgs) => {
-                msgs.forEach((message) => {
-                    if (message.startsWith(`${world.name} - Player Connected `)) {
-                        let name = message.substring(
-                            world.name.length + 20,
-                            message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1
-                        );
-                        let ip = message.substring(
-                            message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3,
-                            message.lastIndexOf(' | ')
-                        );
-
-                        if (!world.online.includes(name)) {
-                            world.online.push(name);
-                        }
-                        hook.check('world.join', name, ip);
-
-                    } else if (message.startsWith(`${world.name} - Player Disconnected `)) {
-                        let name = message.substring(world.name.length + 23);
-
-                        if (world.online.includes(name)) {
-                            world.online.splice(world.online.indexOf(name), 1);
-                        }
-                        hook.check('world.leave', name);
-
-                    } else if (message.includes(': ')) {
-                        let name = getUsername(message);
-                        let msg = message.substring(name.length + 2);
-
-                        if (name == 'SERVER') {
-                            hook.check('world.serverchat', msg);
-                        } else {
-                            hook.check('world.message', name, msg);
-
-                            if (msg.startsWith('/')) {
-
-                                let command = msg.substr(1);
-
-                                //Disallow commands starting with space.
-                                if (!command.startsWith(' ')) {
-                                    let args = '';
-                                    if (command.includes(' ')) {
-                                        command = command.substring(0, command.indexOf(' '));
-                                        args = msg.substring(msg.indexOf(' ') + 1);
-                                    }
-                                    hook.check('world.command', name, command, args);
-                                    return;
-                                }
-                            }
-
-                            hook.check('world.chat', name, message);
-                        }
-
-                    } else {
-                        hook.check('world.other', message);
-                    }
-                });
-            })
-            .then(() => {
-                setTimeout(checkChat, 5000);
-            });
-        }
-        checkChat();
-
-        api.getLists = (refresh = false) => {
-            if (refresh) {
-                api.worldStarted(true);
-                cache.getLists = getLists();
-            }
-
-            return cache.getLists;
-        };
-
-        return api;
-    };
-
-    window.BlockheadsAPI = api;
-}());
- //Browser -- Depends: ajax, worldId, hook
-window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook);
-(function() {
-    var storage = function(worldId) {
-        function getString(key, fallback, local = true) {
-            var result;
-            if (local) {
-                result = localStorage.getItem(`${key}${worldId}`);
-            } else {
-                result = localStorage.getItem(key);
-            }
-
-            return (result === null) ? fallback : result;
-        }
-
-        function getObject(key, fallback, local = true) {
-            var result = getString(key, false, local);
-
-            if (!result) {
-                return fallback;
-            }
-
-            try {
-                result = JSON.parse(result);
-            } catch(e) {
-                result = fallback;
-            } finally {
-                if (result === null) {
-                    result = fallback;
-                }
-            }
-
-            return result;
-        }
-
-        function set(key, data, local = true) {
-            if (local) {
-                key = `${key}${worldId}`;
-            }
-
-            if (typeof data == 'string') {
-                localStorage.setItem(key, data);
-            } else {
-                localStorage.setItem(key, JSON.stringify(data));
-            }
-        }
-
-        function clearNamespace(namespace) {
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith(namespace)) {
-                    localStorage.removeItem(key);
-                }
-            });
-        }
-
-        return {getString, getObject, set, clearNamespace};
-    };
-
-    //Node doesn't have localStorage.
-    window.CreateStorage = storage;
-}());
- //Browser -- Depends: worldId
-window.storage = CreateStorage(window.worldId);
-(function() {
     function api(ajax, storage) {
         var cache = {
             getStore: getStore(),
@@ -709,11 +370,355 @@ window.storage = CreateStorage(window.worldId);
  //Depends: ajax, storage
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 (function() {
+    var apiLoad = performance.now();
+
+    function logWithTime(...args) {
+        console.info(
+            ...args,
+            'Took',
+            ((performance.now() - apiLoad) / 1000).toFixed(3),
+            'seconds'
+        );
+    }
+
+    var api = function(ajax, worldId, hook, bhfansapi) {
+        var world = {
+            name: '',
+            online: []
+        };
+
+        var cache = {
+            worldStarted: worldStarted(),
+            firstId: 0,
+        };
+        cache.getLogs = getLogs();
+        cache.getLists = getLists();
+        cache.getHomepage = getHomepage();
+
+        cache.worldStarted.then(() => logWithTime('World online.'));
+        cache.getLogs.then(() => logWithTime('Logs fetched.'));
+        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
+        cache.getLists.then(() => logWithTime('Lists fetched.'));
+
+        function worldStarted() {
+            return new Promise(function (resolve, reject) {
+                var fails = 0;
+                (function check() {
+                    ajax.postJSON(`/api`, { command: 'status', worldId: worldId })
+                        .then((world) => {
+                            if (world.worldStatus == 'online') {
+                                return resolve();
+                            } else if (world.worldStatus == 'offline') {
+                                ajax.postJSON('/api', { command: 'start', worldId: worldId })
+                                    .then(check, check); //Check even if there is an error
+                            } else {
+                                // World status is either startup, shutdown, or unavailible
+                                fails++;
+                                if (fails > 10) {
+                                    return reject();
+                                }
+                                setTimeout(check, 3000);
+                            }
+                        })
+                        .catch(bhfansapi.reportError);
+                }());
+            });
+        }
+
+        function getLogs() {
+            return api.worldStarted()
+                .then(() => {
+                    return ajax.get(`/worlds/logs/${worldId}`)
+                        .then((log) => log.split('\n'));
+                });
+        }
+
+        function getLists() {
+            return api.worldStarted()
+                .then(() => ajax.get(`/worlds/lists/${worldId}`))
+                .then((html) => {
+                    var doc = (new DOMParser()).parseFromString(html, 'text/html');
+
+                    function getList(name) {
+                        var list = doc.querySelector(`textarea[name=${name}]`)
+                            .value
+                            .toLocaleUpperCase()
+                            .split('\n');
+                        return [...new Set(list)]; //Remove duplicates
+                    }
+
+                    var admin = getList('admins');
+                    var mod = getList('modlist');
+                    mod = mod.filter((name) => admin.indexOf(name) < 0 );
+                    var staff = admin.concat(mod);
+
+                    var white = getList('whitelist');
+                    var black = getList('blacklist');
+
+                    return {admin, mod, staff, white, black};
+                });
+        }
+
+        function getHomepage() {
+            return ajax.get(`/worlds/${worldId}`)
+                .catch(getHomepage);
+        }
+
+        var api = {};
+
+        api.worldStarted = (refresh = false) => {
+            if (refresh) {
+                cache.worldStarted = worldStarted();
+            }
+            return cache.worldStarted
+                .catch(() => api.worldStarted(true));
+        };
+
+        api.getLogs = (refresh = false) => {
+            if (refresh) {
+                api.worldStarted(true);
+                cache.getLogs = getLogs();
+            }
+            return cache.getLogs
+                .catch(() => api.getLogs(true));
+        };
+
+        // An online list is maintained by the bot, this should NOT be used to get the online players frequently.
+        api.getOnlinePlayers = (refresh = false) => {
+            if (refresh) {
+                cache.getHomepage = getHomepage();
+            }
+            return cache.getHomepage
+                .then((html) => {
+                    var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                    var playerElems = doc.querySelector('.manager.padded:nth-child(1)')
+                        .querySelectorAll('tr:not(.history)>td.left');
+                    var players = [];
+
+                    Array.from(playerElems).forEach((el) => {
+                        players.push(el.textContent.toLocaleUpperCase());
+                    });
+
+                    return players;
+                })
+                .catch(() => api.getOnlinePlayers(true));
+        };
+        api.getOnlinePlayers()
+            .then((players) => world.players = [...new Set(players.concat(world.players))]);
+
+        api.getOwnerName = () => {
+            return cache.getHomepage.then((html) => {
+                var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                return doc.querySelector('.subheader~tr>td:not([class])').textContent.toLocaleUpperCase();
+            });
+        };
+
+        api.getWorldName = () => {
+            return cache.getHomepage.then((html) => {
+                var doc = (new DOMParser()).parseFromString(html, 'text/html');
+                return doc.querySelector('#title').textContent;
+            });
+        };
+        api.getWorldName().then((name) => world.name = name);
+
+        api.send = (message) => {
+            return ajax.postJSON(`/api`, { command: 'send', message, worldId })
+                .then(function(resp) {
+                    hook.check('world.send', message);
+                    hook.check('world.servermessage', message);
+                    if (message.startsWith('/')) {
+                        let command = message.substr(1);
+
+                        //Disallow commands starting with space.
+                        if (!command.startsWith(' ')) {
+                            let args = '';
+                            if (command.includes(' ')) {
+                                command = command.substring(0, command.indexOf(' '));
+                                args = message.substring(message.indexOf(' ') + 1);
+                            }
+                            hook.check('world.command', 'SERVER', command, args);
+                        }
+                    }
+
+                    return resp;
+                })
+                .catch(() => api.send(message));
+        };
+
+        function getMessages() {
+            return cache.worldStarted
+                .then(() => ajax.postJSON(`/api`, { command: 'getchat', worldId, firstId: cache.firstId }))
+                .then((data) => {
+                    if (data.status == 'ok' && data.nextId != cache.firstId) {
+                        cache.firstId = data.nextId;
+                        return data.log;
+                    } else if (data.status == 'error') {
+                        throw new Error(data.message);
+                    }
+                    return [];
+                });
+        }
+
+        function getUsername(message) {
+            for (let i = 18; i > 4; i--) {
+                let possibleName = message.substring(0, message.lastIndexOf(': ', i));
+                if (world.online.includes(possibleName) || possibleName == 'SERVER') {
+                    return possibleName;
+                }
+            }
+            // Should ideally never happen.
+            return message.substring(0, message.lastIndexOf(': ', 18));
+        }
+
+        function checkChat() {
+            getMessages().then((msgs) => {
+                msgs.forEach((message) => {
+                    if (message.startsWith(`${world.name} - Player Connected `)) {
+                        let name = message.substring(
+                            world.name.length + 20,
+                            message.lastIndexOf('|', message.lastIndexOf('|') - 1) - 1
+                        );
+                        let ip = message.substring(
+                            message.lastIndexOf(' | ', message.lastIndexOf(' | ') - 1) + 3,
+                            message.lastIndexOf(' | ')
+                        );
+
+                        if (!world.online.includes(name)) {
+                            world.online.push(name);
+                        }
+                        hook.check('world.join', name, ip);
+
+                    } else if (message.startsWith(`${world.name} - Player Disconnected `)) {
+                        let name = message.substring(world.name.length + 23);
+
+                        if (world.online.includes(name)) {
+                            world.online.splice(world.online.indexOf(name), 1);
+                        }
+                        hook.check('world.leave', name);
+
+                    } else if (message.includes(': ')) {
+                        let name = getUsername(message);
+                        let msg = message.substring(name.length + 2);
+
+                        if (name == 'SERVER') {
+                            hook.check('world.serverchat', msg);
+                        } else {
+                            hook.check('world.message', name, msg);
+
+                            if (msg.startsWith('/')) {
+
+                                let command = msg.substr(1);
+
+                                //Disallow commands starting with space.
+                                if (!command.startsWith(' ')) {
+                                    let args = '';
+                                    if (command.includes(' ')) {
+                                        command = command.substring(0, command.indexOf(' '));
+                                        args = msg.substring(msg.indexOf(' ') + 1);
+                                    }
+                                    hook.check('world.command', name, command, args);
+                                    return;
+                                }
+                            }
+
+                            hook.check('world.chat', name, message);
+                        }
+
+                    } else {
+                        hook.check('world.other', message);
+                    }
+                });
+            })
+            .catch(bhfansapi.reportError)
+            .then(() => {
+                setTimeout(checkChat, 5000);
+            });
+        }
+        checkChat();
+
+        api.getLists = (refresh = false) => {
+            if (refresh) {
+                api.worldStarted(true);
+                cache.getLists = getLists();
+            }
+
+            return cache.getLists;
+        };
+
+        return api;
+    };
+
+    window.BlockheadsAPI = api;
+}());
+ //Browser -- Depends: ajax, worldId, hook
+window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
+(function() {
+    var storage = function(worldId) {
+        function getString(key, fallback, local = true) {
+            var result;
+            if (local) {
+                result = localStorage.getItem(`${key}${worldId}`);
+            } else {
+                result = localStorage.getItem(key);
+            }
+
+            return (result === null) ? fallback : result;
+        }
+
+        function getObject(key, fallback, local = true) {
+            var result = getString(key, false, local);
+
+            if (!result) {
+                return fallback;
+            }
+
+            try {
+                result = JSON.parse(result);
+            } catch(e) {
+                result = fallback;
+            } finally {
+                if (result === null) {
+                    result = fallback;
+                }
+            }
+
+            return result;
+        }
+
+        function set(key, data, local = true) {
+            if (local) {
+                key = `${key}${worldId}`;
+            }
+
+            if (typeof data == 'string') {
+                localStorage.setItem(key, data);
+            } else {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+        }
+
+        function clearNamespace(namespace) {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith(namespace)) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+
+        return {getString, getObject, set, clearNamespace};
+    };
+
+    //Node doesn't have localStorage.
+    window.CreateStorage = storage;
+}());
+ //Browser -- Depends: worldId
+window.storage = CreateStorage(window.worldId);
+(function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
         var uniqueMessageID = 0;
 
         document.head.innerHTML = '<title>Console</title> <meta name="viewport" content="width=device-width,initial-scale=1"> ';
-        document.head.innerHTML += '<style>html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}#botTemplates{display:none}header{background:#182b73 url("http://portal.theblockheads.net/static/images/portalHeader.png") no-repeat;background-position:80px;height:80px}#jMsgs,#lMsgs,#tMsgs,#aMsgs,#exts{padding-top:8px;margin-top:8px;border-top:1px solid;height:calc(100vh - 165px)}.third-box,#mb_join .msg,#mb_leave .msg,#mb_trigger .msg,#mb_announcements .msg,#mb_extensions .ext{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd),#mb_join .msg:nth-child(odd),#mb_leave .msg:nth-child(odd),#mb_trigger .msg:nth-child(odd),#mb_announcements .msg:nth-child(odd),#mb_extensions .ext:nth-child(odd){background:#ccc}.top-right-button,#mb_join .add,#mb_leave .add,#mb_trigger .add,#mb_announcements .add,#mb_extensions #mb_load_man{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}.button,#mb_extensions .ext button,#alert>.buttons>span{display:inline-block;padding:6px 12px;margin:0 5px;text-align:center;white-space:nowrap;cursor:pointer;border:1px solid rgba(0,0,0,0.15);border-radius:6px;background:#fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}#mb_settings h3{border-bottom:1px solid #999}#mb_settings a{text-decoration:underline}#mb_settings a.button{text-decoration:none;font-size:0.9em;padding:1px 5px}#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type="number"],#mb_leave input[type="number"],#mb_trigger input[type="number"],#mb_announcements input[type="number"]{width:5em}#mb_extensions #mb_load_man{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#mb_extensions .ext{height:130px}#mb_extensions .ext h4,#mb_extensions .ext p{margin:0}#mb_extensions .ext button{position:absolute;bottom:7px;padding:5px 8px}#alert{visibility:hidden;position:fixed;top:50px;left:0;right:0;margin:auto;z-index:101;width:50%;min-width:300px;min-height:200px;background:#fff;border-radius:10px;padding:10px 10px 55px 10px}#alert.visible{visibility:visible}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}#alert>.buttons [class]{color:#fff}#alert>.buttons .success{background:#5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%);border-color:#3e8f3e}#alert>.buttons .info{background:#5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%);border-color:#28a4c9}#alert>.buttons .danger{background:#d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%);border-color:#b92c28}#alert>.buttons .warning{background:#f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);border-color:#e38d13}.notification{opacity:0;transition:opacity 1s;position:fixed;top:1em;right:1em;min-width:200px;border-radius:5px;padding:5px;background:#9fafeb}.notification.visible{opacity:1}<style>';
+        document.head.innerHTML += '<style>html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}#botTemplates{display:none}header{background:#182b73 url("http://portal.theblockheads.net/static/images/portalHeader.png") no-repeat;background-position:80px;height:80px}#jMsgs,#lMsgs,#tMsgs,#aMsgs,#exts{padding-top:8px;margin-top:8px;border-top:1px solid;height:calc(100vh - 185px)}.third-box,#mb_join .msg,#mb_leave .msg,#mb_trigger .msg,#mb_announcements .msg,#mb_extensions .ext{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd),#mb_join .msg:nth-child(odd),#mb_leave .msg:nth-child(odd),#mb_trigger .msg:nth-child(odd),#mb_announcements .msg:nth-child(odd),#mb_extensions .ext:nth-child(odd){background:#ccc}.top-right-button,#mb_join .add,#mb_leave .add,#mb_trigger .add,#mb_announcements .add,#mb_extensions #mb_load_man{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}.button,#mb_extensions .ext button,#alert>.buttons>span{display:inline-block;padding:6px 12px;margin:0 5px;text-align:center;white-space:nowrap;cursor:pointer;border:1px solid rgba(0,0,0,0.15);border-radius:6px;background:#fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}#mb_settings h3{border-bottom:1px solid #999}#mb_settings a{text-decoration:underline}#mb_settings a.button{text-decoration:none;font-size:0.9em;padding:1px 5px}#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type="number"],#mb_leave input[type="number"],#mb_trigger input[type="number"],#mb_announcements input[type="number"]{width:5em}#mb_extensions #mb_load_man{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#mb_extensions .ext{height:130px}#mb_extensions .ext h4,#mb_extensions .ext p{margin:0}#mb_extensions .ext button{position:absolute;bottom:7px;padding:5px 8px}#alert{visibility:hidden;position:fixed;top:50px;left:0;right:0;margin:auto;z-index:101;width:50%;min-width:300px;min-height:200px;background:#fff;border-radius:10px;padding:10px 10px 55px 10px}#alert.visible{visibility:visible}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}#alert>.buttons [class]{color:#fff}#alert>.buttons .success{background:#5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%);border-color:#3e8f3e}#alert>.buttons .info{background:#5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%);border-color:#28a4c9}#alert>.buttons .danger{background:#d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%);border-color:#b92c28}#alert>.buttons .warning{background:#f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);border-color:#e38d13}.notification{opacity:0;transition:opacity 1s;position:fixed;top:1em;right:1em;min-width:200px;border-radius:5px;padding:5px;background:#9fafeb}.notification.visible{opacity:1}<style>';
         document.body.innerHTML = '<div id="leftNav"> <input type="checkbox" id="leftToggle"> <label for="leftToggle">&#9776; Menu</label> <nav data-tab-group="main"> <span class="tab selected" data-tab-name="console">Console</span> <details data-tab-group="messages"> <summary>Messages</summary> <span class="tab" data-tab-name="join">Join</span> <span class="tab" data-tab-name="leave">Leave</span> <span class="tab" data-tab-name="trigger">Trigger</span> <span class="tab" data-tab-name="announcements">Announcements</span> </details> <span class="tab" data-tab-name="extensions">Extensions</span> <span class="tab" data-tab-name="settings">Settings</span> <div class="clearfix"> </nav> <div class="overlay"></div> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> joins, then say </label> <textarea class="m"></textarea> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <textarea class="m"></textarea> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Send:</label> <textarea class="m"></textarea> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="container"> <header></header> <div id="mb_console" data-tab-name="console" class="visible"> <div class="chat"> <ul></ul> </div> <div class="controls"> <input type="text" disabled="disabled"><button disabled="disabled">SEND</button> </div> </div> <div id="mb_join" data-tab-name="join"> <h3>These are checked when a player joins the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave" data-tab-name="leave"> <h3>These are checked when a player leaves the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger" data-tab-name="trigger"> <h3>These are checked whenever someone says something.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements" data-tab-name="announcements"> <h3>These are sent according to a regular schedule.</h3> <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions" data-tab-name="extensions"> <h3>Extensions can increase the functionality of the bot.</h3> <span>Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings" data-tab-name="settings"> <h3>Settings</h3> <label for="mb_ann_delay">Minutes between announcements: </label><br> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label><br> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">New chat notifications: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alertWrapper"> <div id="alert"> <div id="alertContent"></div> <div class="buttons"></div> </div> <div class="overlay"> ';
 
         var mainToggle = document.querySelector('#leftNav input');
@@ -811,9 +816,8 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         //Create the store page
         bhfansapi.getStore().then(resp => {
             if (resp.status != 'ok') {
-                bhfansapi.reportError(new Error(resp.message));
                 document.getElementById('exts').innerHTML += resp.message;
-                return;
+                throw new Error(resp.message);
             }
             resp.extensions.forEach(extension => {
                 ui.buildContentFromTemplate('#extTemplate', '#exts', [
@@ -823,7 +827,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
                     {selector: 'button', text: bhfansapi.extensionInstalled(extension.id) ? 'Remove' : 'Install'}
                 ]);
             });
-        });
+        }).catch(bhfansapi.reportError);
 
         // Used by the user to add new messages
         function addEmptyMsg(e) {
@@ -1227,7 +1231,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
             ['#mb_console input', '#mb_console button'].forEach((selector) => {
                 document.querySelector(selector).disabled = false;
             });
-        });
+        })
+        .catch(bhfansapi.reportError);
 
     var bot = {
         version: '6.0.0',
@@ -1279,7 +1284,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
             world.lists = lists;
             world.name = worldName;
             world.owner = owner;
-        });
+        })
+        .catch(bhfansapi.reportError);
 
     //Update the players object
     Promise.all([api.getLogs(), api.getWorldName()])
@@ -1314,7 +1320,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
                 }
             });
         })
-        .then(() => storage.set('mb_players', world.players));
+        .then(() => storage.set('mb_players', world.players))
+        .catch(bhfansapi.reportError);
 
     //Handle default / missing preferences
     (function(prefs) {
@@ -1540,7 +1547,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
                     throw new Error(JSON.stringify(response));
                 }
             })
-            .catch((e) => bhfansapi.reportError(e))
+            .catch(bhfansapi.reportError)
             .then(() => {
                 [input, button].forEach((el) => el.disabled = false);
                 if (document.querySelector('#mb_console.visible')) {

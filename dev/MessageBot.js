@@ -16,7 +16,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
             ['#mb_console input', '#mb_console button'].forEach((selector) => {
                 document.querySelector(selector).disabled = false;
             });
-        });
+        })
+        .catch(bhfansapi.reportError);
 
     var bot = {
         version: '6.0.0',
@@ -68,7 +69,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
             world.lists = lists;
             world.name = worldName;
             world.owner = owner;
-        });
+        })
+        .catch(bhfansapi.reportError);
 
     //Update the players object
     Promise.all([api.getLogs(), api.getWorldName()])
@@ -103,7 +105,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
                 }
             });
         })
-        .then(() => storage.set('mb_players', world.players));
+        .then(() => storage.set('mb_players', world.players))
+        .catch(bhfansapi.reportError);
 
     //Handle default / missing preferences
     (function(prefs) {
@@ -329,7 +332,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
                     throw new Error(JSON.stringify(response));
                 }
             })
-            .catch((e) => bhfansapi.reportError(e))
+            .catch(bhfansapi.reportError)
             .then(() => {
                 [input, button].forEach((el) => el.disabled = false);
                 if (document.querySelector('#mb_console.visible')) {
