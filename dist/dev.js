@@ -391,15 +391,6 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             worldStarted: worldStarted(),
             firstId: 0,
         };
-        cache.getLogs = getLogs();
-        cache.getLists = getLists();
-        cache.getHomepage = getHomepage();
-
-        cache.worldStarted.then(() => logWithTime('World online.'));
-        cache.getLogs.then(() => logWithTime('Logs fetched.'));
-        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
-        cache.getLists.then(() => logWithTime('Lists fetched.'));
-
         function worldStarted() {
             return new Promise(function (resolve, reject) {
                 var fails = 0;
@@ -644,6 +635,15 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 
             return cache.getLists;
         };
+
+        cache.getLogs = getLogs();
+        cache.getLists = getLists();
+        cache.getHomepage = getHomepage();
+
+        cache.worldStarted.then(() => logWithTime('World online.'));
+        cache.getLogs.then(() => logWithTime('Logs fetched.'));
+        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
+        cache.getLists.then(() => logWithTime('Lists fetched.'));
 
         return api;
     };
