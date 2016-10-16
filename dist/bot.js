@@ -231,6 +231,71 @@ if (!window.console) {
     }
 })();
 (function () {
+    var storage = function storage(worldId) {
+        function getString(key, fallback) {
+            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            var result;
+            if (local) {
+                result = localStorage.getItem('' + key + worldId);
+            } else {
+                result = localStorage.getItem(key);
+            }
+
+            return result === null ? fallback : result;
+        }
+
+        function getObject(key, fallback) {
+            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            var result = getString(key, false, local);
+
+            if (!result) {
+                return fallback;
+            }
+
+            try {
+                result = JSON.parse(result);
+            } catch (e) {
+                result = fallback;
+            } finally {
+                if (result === null) {
+                    result = fallback;
+                }
+            }
+
+            return result;
+        }
+
+        function set(key, data) {
+            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            if (local) {
+                key = '' + key + worldId;
+            }
+
+            if (typeof data == 'string') {
+                localStorage.setItem(key, data);
+            } else {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+        }
+
+        function clearNamespace(namespace) {
+            Object.keys(localStorage).forEach(function (key) {
+                if (key.startsWith(namespace)) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+
+        return { getString: getString, getObject: getObject, set: set, clearNamespace: clearNamespace };
+    };
+
+    window.CreateStorage = storage;
+})();
+window.storage = CreateStorage(window.worldId);
+(function () {
     function api(ajax, storage) {
         var cache = {
             getStore: getStore()
@@ -638,71 +703,6 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
     window.BlockheadsAPI = api;
 })();
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
-(function () {
-    var storage = function storage(worldId) {
-        function getString(key, fallback) {
-            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-
-            var result;
-            if (local) {
-                result = localStorage.getItem('' + key + worldId);
-            } else {
-                result = localStorage.getItem(key);
-            }
-
-            return result === null ? fallback : result;
-        }
-
-        function getObject(key, fallback) {
-            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-
-            var result = getString(key, false, local);
-
-            if (!result) {
-                return fallback;
-            }
-
-            try {
-                result = JSON.parse(result);
-            } catch (e) {
-                result = fallback;
-            } finally {
-                if (result === null) {
-                    result = fallback;
-                }
-            }
-
-            return result;
-        }
-
-        function set(key, data) {
-            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-
-            if (local) {
-                key = '' + key + worldId;
-            }
-
-            if (typeof data == 'string') {
-                localStorage.setItem(key, data);
-            } else {
-                localStorage.setItem(key, JSON.stringify(data));
-            }
-        }
-
-        function clearNamespace(namespace) {
-            Object.keys(localStorage).forEach(function (key) {
-                if (key.startsWith(namespace)) {
-                    localStorage.removeItem(key);
-                }
-            });
-        }
-
-        return { getString: getString, getObject: getObject, set: set, clearNamespace: clearNamespace };
-    };
-
-    window.CreateStorage = storage;
-})();
-window.storage = CreateStorage(window.worldId);
 (function () {
     var create = function create(hook, bhfansapi) {
         var uniqueMessageID = 0;

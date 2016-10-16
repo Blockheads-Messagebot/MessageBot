@@ -30,12 +30,12 @@ if (!window.console) {
 {{inject libs/migration.js}} //Update localStorage entries with old data
 {{inject libs/ajax.js}} //Browser
 {{inject libs/hook.js}} //Node + Browser
+{{inject libs/storage.js}} //Browser -- Depends: worldId
+window.storage = CreateStorage(window.worldId);
 {{inject libs/BHFansAPI.js}} //Depends: ajax, storage
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 {{inject libs/BlockheadsAPI.js}} //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
-{{inject libs/storage.js}} //Browser -- Depends: worldId
-window.storage = CreateStorage(window.worldId);
 {{inject libs/MessageBotUI.js}} //Depends: hook, BHFansAPI
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
 {{inject libs/popups.js}} //Depends: botui, bhfansapi

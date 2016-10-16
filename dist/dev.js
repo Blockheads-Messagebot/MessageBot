@@ -235,6 +235,67 @@ if (!window.console) {
 }());
  //Node + Browser
 (function() {
+    var storage = function(worldId) {
+        function getString(key, fallback, local = true) {
+            var result;
+            if (local) {
+                result = localStorage.getItem(`${key}${worldId}`);
+            } else {
+                result = localStorage.getItem(key);
+            }
+
+            return (result === null) ? fallback : result;
+        }
+
+        function getObject(key, fallback, local = true) {
+            var result = getString(key, false, local);
+
+            if (!result) {
+                return fallback;
+            }
+
+            try {
+                result = JSON.parse(result);
+            } catch(e) {
+                result = fallback;
+            } finally {
+                if (result === null) {
+                    result = fallback;
+                }
+            }
+
+            return result;
+        }
+
+        function set(key, data, local = true) {
+            if (local) {
+                key = `${key}${worldId}`;
+            }
+
+            if (typeof data == 'string') {
+                localStorage.setItem(key, data);
+            } else {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+        }
+
+        function clearNamespace(namespace) {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith(namespace)) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+
+        return {getString, getObject, set, clearNamespace};
+    };
+
+    //Node doesn't have localStorage.
+    window.CreateStorage = storage;
+}());
+ //Browser -- Depends: worldId
+window.storage = CreateStorage(window.worldId);
+(function() {
     function api(ajax, storage) {
         var cache = {
             getStore: getStore(),
@@ -655,67 +716,6 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 }());
  //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
-(function() {
-    var storage = function(worldId) {
-        function getString(key, fallback, local = true) {
-            var result;
-            if (local) {
-                result = localStorage.getItem(`${key}${worldId}`);
-            } else {
-                result = localStorage.getItem(key);
-            }
-
-            return (result === null) ? fallback : result;
-        }
-
-        function getObject(key, fallback, local = true) {
-            var result = getString(key, false, local);
-
-            if (!result) {
-                return fallback;
-            }
-
-            try {
-                result = JSON.parse(result);
-            } catch(e) {
-                result = fallback;
-            } finally {
-                if (result === null) {
-                    result = fallback;
-                }
-            }
-
-            return result;
-        }
-
-        function set(key, data, local = true) {
-            if (local) {
-                key = `${key}${worldId}`;
-            }
-
-            if (typeof data == 'string') {
-                localStorage.setItem(key, data);
-            } else {
-                localStorage.setItem(key, JSON.stringify(data));
-            }
-        }
-
-        function clearNamespace(namespace) {
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith(namespace)) {
-                    localStorage.removeItem(key);
-                }
-            });
-        }
-
-        return {getString, getObject, set, clearNamespace};
-    };
-
-    //Node doesn't have localStorage.
-    window.CreateStorage = storage;
-}());
- //Browser -- Depends: worldId
-window.storage = CreateStorage(window.worldId);
 (function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
         var uniqueMessageID = 0;
