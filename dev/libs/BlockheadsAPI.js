@@ -20,6 +20,16 @@
             worldStarted: worldStarted(),
             firstId: 0,
         };
+
+        cache.getLogs = getLogs();
+        cache.getLists = getLists();
+        cache.getHomepage = getHomepage();
+
+        cache.worldStarted.then(() => logWithTime('World online.'));
+        cache.getLogs.then(() => logWithTime('Logs fetched.'));
+        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
+        cache.getLists.then(() => logWithTime('Lists fetched.'));
+
         var api = {};
 
         function worldStarted() {
@@ -265,14 +275,7 @@
             return cache.getLists;
         };
 
-        cache.getLogs = getLogs();
-        cache.getLists = getLists();
-        cache.getHomepage = getHomepage();
 
-        cache.worldStarted.then(() => logWithTime('World online.'));
-        cache.getLogs.then(() => logWithTime('Logs fetched.'));
-        cache.getHomepage.then(() => logWithTime('Homepage fetched.'));
-        cache.getLists.then(() => logWithTime('Lists fetched.'));
 
         return api;
     };
