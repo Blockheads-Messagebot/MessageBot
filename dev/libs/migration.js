@@ -33,6 +33,7 @@
                     return raw;
                 }
             });
+        case '6.0.0a':
     }
     //jshint +W086
 }(localStorage));
