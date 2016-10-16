@@ -1384,6 +1384,9 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
         }
         ui.addMessageToConsole(message, name, msgClass);
     });
+    hook.listen('world.serverchat', function(message) {
+        ui.addMessageToConsole(message, 'SERVER', 'admin');
+    });
     hook.listen('world.send', function(message) {
         if (message.startsWith('/')) {
             ui.addMessageToConsole(message, 'SERVER', 'admin command');
