@@ -378,6 +378,8 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
             worldStarted: worldStarted(),
             firstId: 0
         };
+        var api = {};
+
         function worldStarted() {
             return new Promise(function (resolve, reject) {
                 var fails = 0;
@@ -400,7 +402,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         }
 
         function getLogs() {
-            return api.worldStarted().then(function () {
+            return cache.worldStarted.then(function () {
                 return ajax.get('/worlds/logs/' + worldId).then(function (log) {
                     return log.split('\n');
                 });
@@ -408,7 +410,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         }
 
         function getLists() {
-            return api.worldStarted().then(function () {
+            return cache.worldStarted.then(function () {
                 return ajax.get('/worlds/lists/' + worldId);
             }).then(function (html) {
                 var doc = new DOMParser().parseFromString(html, 'text/html');
@@ -435,8 +437,6 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
         function getHomepage() {
             return ajax.get('/worlds/' + worldId).catch(getHomepage);
         }
-
-        var api = {};
 
         api.worldStarted = function () {
             var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];

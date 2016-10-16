@@ -20,6 +20,8 @@
             worldStarted: worldStarted(),
             firstId: 0,
         };
+        var api = {};
+
         function worldStarted() {
             return new Promise(function (resolve, reject) {
                 var fails = 0;
@@ -46,7 +48,7 @@
         }
 
         function getLogs() {
-            return api.worldStarted()
+            return cache.worldStarted
                 .then(() => {
                     return ajax.get(`/worlds/logs/${worldId}`)
                         .then((log) => log.split('\n'));
@@ -54,7 +56,7 @@
         }
 
         function getLists() {
-            return api.worldStarted()
+            return cache.worldStarted
                 .then(() => ajax.get(`/worlds/lists/${worldId}`))
                 .then((html) => {
                     var doc = (new DOMParser()).parseFromString(html, 'text/html');
@@ -83,8 +85,6 @@
             return ajax.get(`/worlds/${worldId}`)
                 .catch(getHomepage);
         }
-
-        var api = {};
 
         api.worldStarted = (refresh = false) => {
             if (refresh) {
