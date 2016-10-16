@@ -1116,7 +1116,6 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     var chatBuffer = [];
     (function checkBuffer() {
         if (chatBuffer.length) {
-            hook.check('bot.send');
             api.send(chatBuffer.shift()).then(setTimeout(checkBuffer, 1000));
         } else {
             setTimeout(checkBuffer, 500);
