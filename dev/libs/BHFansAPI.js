@@ -15,6 +15,9 @@
 
             api.getExtensionNames(extensions).then((resp) => {
                 if (resp.status == 'ok') {
+                    Array.from(document.querySelectorAll('#exts button'))
+                        .forEach(btn => btn.textContent = 'Install');
+
                     if (!resp.extensions.length) {
                         target.innerHTML = '<p>No extensions installed</p>';
                         return;
@@ -23,6 +26,10 @@
                         .reduce((html, ext) => {
                             return `${html}<li>${ext.name.replace(/</g, '&lt;')} (${ext.id}) <a onclick="bhfansapi.removeExtension(\'${ext.id}\');" class="button">Remove</a></li>`;
                         }, '<ul style="margin-left:1.5em;">') + '</ul>';
+
+                    resp.extensions.forEach(ex => {
+                        document.querySelector(`#exts [data-id="${ex.id}"] button`).textContent = 'Remove';
+                    });
                 } else {
                     target.innerHTML = `Error fetching extension names: ${resp.message}`;
                     throw new Error(resp.message);

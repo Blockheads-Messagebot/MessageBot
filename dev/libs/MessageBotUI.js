@@ -47,7 +47,6 @@
 
             if (button.textContent == 'Install') {
                 bhfansapi.startExtension(extId);
-                button.textContent = 'Remove';
             } else {
                 bhfansapi.removeExtension(extId);
             }
@@ -64,7 +63,7 @@
             //We can't just remove the first due to browser lag
             Array.from(document.querySelectorAll('#container > .visible'))
                 .forEach((el) => el.classList.remove('visible'));
-            document.querySelector(`#container [data-tab-name=${tabName}]`).classList.add('visible');
+            document.querySelector(`#container > [data-tab-name=${tabName}]`).classList.add('visible');
 
             //Tabs
             document.querySelector('#leftNav .selected').classList.remove('selected');

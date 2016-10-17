@@ -10,15 +10,6 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
         }
     }());
 
-    //Enable sending messages once the server is online
-    api.worldStarted()
-        .then(() => {
-            ['#mb_console input', '#mb_console button'].forEach((selector) => {
-                document.querySelector(selector).disabled = false;
-            });
-        })
-        .catch(bhfansapi.reportError);
-
     var bot = {
         version: '6.0.0',
         ui: ui,
