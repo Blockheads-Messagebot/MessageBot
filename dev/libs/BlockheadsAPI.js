@@ -153,7 +153,13 @@
 
         api.send = (message) => {
             return ajax.postJSON(`/api`, { command: 'send', message, worldId })
-                .then(function(resp) {
+                .then((resp) => {
+                    if (resp.status != 'ok') {
+                        throw new Error(resp.message);
+                    }
+                    return resp;
+                })
+                .then((resp) => {
                     hook.check('world.send', message);
                     hook.check('world.servermessage', message);
                     if (message.startsWith('/')) {
@@ -172,7 +178,11 @@
 
                     return resp;
                 })
-                .catch(() => api.send(message));
+                .catch((err) => {
+                    if (err == 'World not running') {
+                        cache.firstID = 0;
+                    }
+                });
         };
 
         function getMessages() {

@@ -594,7 +594,13 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 
         api.send = (message) => {
             return ajax.postJSON(`/api`, { command: 'send', message, worldId })
-                .then(function(resp) {
+                .then((resp) => {
+                    if (resp.status != 'ok') {
+                        throw new Error(resp.message);
+                    }
+                    return resp;
+                })
+                .then((resp) => {
                     hook.check('world.send', message);
                     hook.check('world.servermessage', message);
                     if (message.startsWith('/')) {
@@ -613,7 +619,11 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
 
                     return resp;
                 })
-                .catch(() => api.send(message));
+                .catch((err) => {
+                    if (err == 'World not running') {
+                        cache.firstID = 0;
+                    }
+                });
         };
 
         function getMessages() {
@@ -1233,9 +1243,9 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     (function checkBuffer() {
         if (chatBuffer.length) {
             api.send(chatBuffer.shift())
-                .then(setTimeout(checkBuffer, 1000));
+                .then(checkBuffer);
         } else {
-            setTimeout(checkBuffer, 500);
+            setTimeout(checkBuffer, 1000);
         }
     }());
 
