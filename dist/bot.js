@@ -851,7 +851,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
         ui.addMsg = function addMsg(container, template, saveObj) {
             var content = template.content;
             content.querySelector('div').id = 'm' + uniqueMessageID;
-            content.querySelector('.m').value = saveObj.message || '';
+            content.querySelector('.m').textContent = saveObj.message || '';
 
             if (template.id != 'aTemplate') {
                 var numInputs = content.querySelectorAll('input[type="number"]');
@@ -1146,7 +1146,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
         if (chatBuffer.length) {
             api.send(chatBuffer.shift()).then(checkBuffer);
         } else {
-            setTimeout(checkBuffer, 1000);
+            setTimeout(checkBuffer, 500);
         }
     })();
 
@@ -1447,7 +1447,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
                 button.textContent = 'RETRY';
                 throw new Error(JSON.stringify(response));
             }
-        }).catch(bhfansapi.reportError).then(function () {
+        }).catch(function () {}).then(function () {
             [input, button].forEach(function (el) {
                 return el.disabled = false;
             });

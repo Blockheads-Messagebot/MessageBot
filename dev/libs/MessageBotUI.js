@@ -151,7 +151,7 @@
         ui.addMsg = function addMsg(container, template, saveObj) {
             var content = template.content;
             content.querySelector('div').id = 'm' + uniqueMessageID;
-            content.querySelector('.m').value = saveObj.message || '';
+            content.querySelector('.m').textContent = saveObj.message || '';
 
             if (template.id != 'aTemplate') {
                 var numInputs = content.querySelectorAll('input[type="number"]');

@@ -323,7 +323,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
                     throw new Error(JSON.stringify(response));
                 }
             })
-            .catch(bhfansapi.reportError)
+            .catch(() => { /* Nothing */ })
             .then(() => {
                 [input, button].forEach((el) => el.disabled = false);
                 if (document.querySelector('#mb_console.visible')) {
