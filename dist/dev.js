@@ -62,7 +62,12 @@ if (!window.console) {
                     return raw;
                 }
             });
+            break; //Next bugfix only relates to 6.0 bot.
         case '6.0.0a':
+        case '6.0.0':
+            setTimeout(function() {
+                window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
+            }, 1000);
     }
     //jshint +W086
 }(localStorage));
@@ -403,6 +408,7 @@ window.storage = CreateStorage(window.worldId);
                 error_file: err.filename,
                 error_row: err.lineno || 0,
                 error_column: err.colno || 0,
+                error_stack: err.stack || '',
             })
             .then((resp) => {
                 if (resp.status == 'ok') {
@@ -738,11 +744,9 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
 (function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
-        var uniqueMessageID = 0;
-
         document.head.innerHTML = '<title>Console</title> <meta name="viewport" content="width=device-width,initial-scale=1"> ';
         document.head.innerHTML += '<style>html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}#botTemplates{display:none}header{background:#182b73 url("http://portal.theblockheads.net/static/images/portalHeader.png") no-repeat;background-position:80px;height:80px}#jMsgs,#lMsgs,#tMsgs,#aMsgs,#exts{padding-top:8px;margin-top:8px;border-top:1px solid;height:calc(100vh - 185px)}.third-box,#mb_join .msg,#mb_leave .msg,#mb_trigger .msg,#mb_announcements .msg,#mb_extensions .ext{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd),#mb_join .msg:nth-child(odd),#mb_leave .msg:nth-child(odd),#mb_trigger .msg:nth-child(odd),#mb_announcements .msg:nth-child(odd),#mb_extensions .ext:nth-child(odd){background:#ccc}.top-right-button,#mb_join .add,#mb_leave .add,#mb_trigger .add,#mb_announcements .add,#mb_extensions #mb_load_man{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}.button,#mb_extensions .ext button,#alert>.buttons>span{display:inline-block;padding:6px 12px;margin:0 5px;text-align:center;white-space:nowrap;cursor:pointer;border:1px solid rgba(0,0,0,0.15);border-radius:6px;background:#fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}#mb_settings h3{border-bottom:1px solid #999}#mb_settings a{text-decoration:underline}#mb_settings a.button{text-decoration:none;font-size:0.9em;padding:1px 5px}#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type="number"],#mb_leave input[type="number"],#mb_trigger input[type="number"],#mb_announcements input[type="number"]{width:5em}#mb_extensions #mb_load_man{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#mb_extensions .ext{height:130px}#mb_extensions .ext h4,#mb_extensions .ext p{margin:0}#mb_extensions .ext button{position:absolute;bottom:7px;padding:5px 8px}#alert{visibility:hidden;position:fixed;top:50px;left:0;right:0;margin:auto;z-index:101;width:50%;min-width:300px;min-height:200px;background:#fff;border-radius:10px;padding:10px 10px 55px 10px}#alert.visible{visibility:visible}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}#alert>.buttons [class]{color:#fff}#alert>.buttons .success{background:#5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%);border-color:#3e8f3e}#alert>.buttons .info{background:#5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%);border-color:#28a4c9}#alert>.buttons .danger{background:#d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%);border-color:#b92c28}#alert>.buttons .warning{background:#f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);border-color:#e38d13}.notification{opacity:0;transition:opacity 1s;position:fixed;top:1em;right:1em;min-width:200px;border-radius:5px;padding:5px;background:#9fafeb}.notification.visible{opacity:1}<style>';
-        document.body.innerHTML = '<div id="leftNav"> <input type="checkbox" id="leftToggle"> <label for="leftToggle">&#9776; Menu</label> <nav data-tab-group="main"> <span class="tab selected" data-tab-name="console">Console</span> <details data-tab-group="messages"> <summary>Messages</summary> <span class="tab" data-tab-name="join">Join</span> <span class="tab" data-tab-name="leave">Leave</span> <span class="tab" data-tab-name="trigger">Trigger</span> <span class="tab" data-tab-name="announcements">Announcements</span> </details> <span class="tab" data-tab-name="extensions">Extensions</span> <span class="tab" data-tab-name="settings">Settings</span> <div class="clearfix"> </nav> <div class="overlay"></div> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> joins, then say </label> <textarea class="m"></textarea> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <textarea class="m"></textarea> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Send:</label> <textarea class="m"></textarea> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="container"> <header></header> <div id="mb_console" data-tab-name="console" class="visible"> <div class="chat"> <ul></ul> </div> <div class="controls"> <input type="text"><button>SEND</button> </div> </div> <div id="mb_join" data-tab-name="join"> <h3>These are checked when a player joins the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave" data-tab-name="leave"> <h3>These are checked when a player leaves the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger" data-tab-name="trigger"> <h3>These are checked whenever someone says something.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements" data-tab-name="announcements"> <h3>These are sent according to a regular schedule.</h3> <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions" data-tab-name="extensions"> <h3>Extensions can increase the functionality of the bot.</h3> <span>Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings" data-tab-name="settings"> <h3>Settings</h3> <label for="mb_ann_delay">Minutes between announcements: </label><br> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label><br> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">New chat notifications: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alertWrapper"> <div id="alert"> <div id="alertContent"></div> <div class="buttons"></div> </div> <div class="overlay"> ';
+        document.body.innerHTML = '<div id="leftNav"> <input type="checkbox" id="leftToggle"> <label for="leftToggle">&#9776; Menu</label> <nav data-tab-group="main"> <span class="tab selected" data-tab-name="console">Console</span> <details data-tab-group="messages"> <summary>Messages</summary> <span class="tab" data-tab-name="join">Join</span> <span class="tab" data-tab-name="leave">Leave</span> <span class="tab" data-tab-name="trigger">Trigger</span> <span class="tab" data-tab-name="announcements">Announcements</span> </details> <span class="tab" data-tab-name="extensions">Extensions</span> <span class="tab" data-tab-name="settings">Settings</span> <div class="clearfix"> </nav> <div class="overlay"></div> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <textarea class="m"></textarea> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <textarea class="m"></textarea> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Send:</label> <textarea class="m"></textarea> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="container"> <header></header> <div id="mb_console" data-tab-name="console" class="visible"> <div class="chat"> <ul></ul> </div> <div class="controls"> <input type="text"><button>SEND</button> </div> </div> <div id="mb_join" data-tab-name="join"> <h3>These are checked when a player joins the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave" data-tab-name="leave"> <h3>These are checked when a player leaves the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger" data-tab-name="trigger"> <h3>These are checked whenever someone says something.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements" data-tab-name="announcements"> <h3>These are sent according to a regular schedule.</h3> <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions" data-tab-name="extensions"> <h3>Extensions can increase the functionality of the bot.</h3> <span>Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings" data-tab-name="settings"> <h3>Settings</h3> <label for="mb_ann_delay">Minutes between announcements: </label><br> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label><br> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">New chat notifications: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alertWrapper"> <div id="alert"> <div id="alertContent"></div> <div class="buttons"></div> </div> <div class="overlay"> ';
 
         var mainToggle = document.querySelector('#leftNav input');
 
@@ -859,16 +863,16 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
             switch (containerElem.id) {
                 case 'jMsgs':
                 case 'lMsgs':
-                    template = document.getElementById('jlTemplate');
+                    template = 'jlTemplate';
                     break;
                 case 'tMsgs':
-                    template = document.getElementById('tTemplate');
+                    template = 'tTemplate';
                     break;
                 default:
-                    template = document.getElementById('aTemplate');
+                    template = 'aTemplate';
             }
 
-            ui.addMsg(containerElem, template, {});
+            ui.addMsg(`#${template}`, `#${containerElem.id}`, {});
 
             e.stopPropagation();
         }
@@ -886,31 +890,25 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
          * @param element template
          * @param object saveObj
          */
-        ui.addMsg = function addMsg(container, template, saveObj) {
-            var content = template.content;
-            content.querySelector('div').id = 'm' + uniqueMessageID;
-            content.querySelector('.m').textContent = saveObj.message || '';
+        ui.addMsg = function addMsg(templateSelector, containerSelector, saveObj) {
+            var rules = [
+                {selector: '.m', text: saveObj.message || ''},
+            ];
 
-            if (template.id != 'aTemplate') {
-                var numInputs = content.querySelectorAll('input[type="number"]');
-                numInputs[0].value = saveObj.joins_low || 0;
-                numInputs[1].value = saveObj.joins_high || 9999;
-                if (template.id == 'tTemplate') {
-                    content.querySelector('.t').value = saveObj.trigger || '';
-                }
-            }
-            container.appendChild(document.importNode(content, true));
-
-            //Groups done after appending or it doesn't work.
-            if (template.id != 'aTemplate') {
-                var selects = document.querySelectorAll('#m' + uniqueMessageID + ' > select');
-
-                selects[0].value = saveObj.group || 'All';
-
-                selects[1].value = saveObj.not_group || 'Nobody';
+            if (templateSelector != '#aTemplate') {
+                rules.push({selector: 'input[type="number"]', value: saveObj.joins_low || 0});
+                rules.push({selector: `input[type="number"]:not([value="${saveObj.joins_low || 0}"])`, value: saveObj.joins_high || 9999});
+                rules.push({selector: `option[value="${saveObj.group || 'All'}"]`, selected: 'selected'});
+                rules.push({selector: `option[value="${saveObj.not_group || 'Nobody'}"]`, selected: 'selected'});
             }
 
-            document.querySelector('#m' + uniqueMessageID + ' > a')
+            if (templateSelector == '#tTemplate') {
+                rules.push({selector: '.t', value: saveObj.trigger || ''});
+            }
+
+            ui.buildContentFromTemplate(templateSelector, containerSelector, rules);
+
+            document.querySelector(`${containerSelector} > div:last-child a`)
                 .addEventListener('click', function(e) {
                     ui.alert('Really delete this message?', [
                         {text: 'Yes', style: 'success', action: function() {
@@ -921,7 +919,6 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
                     ]);
                 }, false);
 
-            uniqueMessageID++;
             hook.check('ui.messageAdded');
         };
 
@@ -1250,13 +1247,14 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }());
 
     var bot = {
-        version: '6.0.0',
+        version: '6.0.1',
         ui: ui,
         api: api,
         hook: hook,
         storage: storage,
         preferences: storage.getObject('mb_preferences', {}, false),
     };
+    storage.set('mb_version', bot.version, false);
 
     bot.send = function send(message) {
         chatBuffer.push(hook.update('bot.send', message));
@@ -1363,11 +1361,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     //Add the configured messages to the page.
     (function(msgs, ids, tids) {
         msgs.forEach((type, index) => {
-            var container = document.getElementById(ids[index]);
-            var template = document.getElementById(tids[index]);
-
             messages[type].forEach((msg) => {
-                ui.addMsg(container, template, msg);
+                ui.addMsg(`#${tids[index]}`, `#${ids[index]}`, msg);
             });
         });
     }(
@@ -1534,8 +1529,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
             storage.set(key, to);
         }
 
-        saveFromWrapper('lMsgs', messages.leave, 'joinArr');
-        saveFromWrapper('jMsgs', messages.join, 'leaveArr');
+        saveFromWrapper('lMsgs', messages.leave, 'leaveArr');
+        saveFromWrapper('jMsgs', messages.join, 'joinArr');
         saveFromWrapper('tMsgs', messages.trigger, 'triggerArr');
         saveFromWrapper('aMsgs', messages.announcement, 'announcementArr');
 

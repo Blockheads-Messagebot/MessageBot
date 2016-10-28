@@ -33,7 +33,12 @@
                     return raw;
                 }
             });
+            break; //Next bugfix only relates to 6.0 bot.
         case '6.0.0a':
+        case '6.0.0':
+            setTimeout(function() {
+                window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
+            }, 1000);
     }
     //jshint +W086
 }(localStorage));

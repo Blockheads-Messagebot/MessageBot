@@ -1,7 +1,5 @@
 (function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
-        var uniqueMessageID = 0;
-
         document.head.innerHTML = '{{inject ../dist/tmphead.html}}';
         document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
         document.body.innerHTML = '{{inject ../dist/tmpbody.html}}';
@@ -121,16 +119,16 @@
             switch (containerElem.id) {
                 case 'jMsgs':
                 case 'lMsgs':
-                    template = document.getElementById('jlTemplate');
+                    template = 'jlTemplate';
                     break;
                 case 'tMsgs':
-                    template = document.getElementById('tTemplate');
+                    template = 'tTemplate';
                     break;
                 default:
-                    template = document.getElementById('aTemplate');
+                    template = 'aTemplate';
             }
 
-            ui.addMsg(containerElem, template, {});
+            ui.addMsg(`#${template}`, `#${containerElem.id}`, {});
 
             e.stopPropagation();
         }
@@ -148,31 +146,25 @@
          * @param element template
          * @param object saveObj
          */
-        ui.addMsg = function addMsg(container, template, saveObj) {
-            var content = template.content;
-            content.querySelector('div').id = 'm' + uniqueMessageID;
-            content.querySelector('.m').textContent = saveObj.message || '';
+        ui.addMsg = function addMsg(templateSelector, containerSelector, saveObj) {
+            var rules = [
+                {selector: '.m', text: saveObj.message || ''},
+            ];
 
-            if (template.id != 'aTemplate') {
-                var numInputs = content.querySelectorAll('input[type="number"]');
-                numInputs[0].value = saveObj.joins_low || 0;
-                numInputs[1].value = saveObj.joins_high || 9999;
-                if (template.id == 'tTemplate') {
-                    content.querySelector('.t').value = saveObj.trigger || '';
-                }
-            }
-            container.appendChild(document.importNode(content, true));
-
-            //Groups done after appending or it doesn't work.
-            if (template.id != 'aTemplate') {
-                var selects = document.querySelectorAll('#m' + uniqueMessageID + ' > select');
-
-                selects[0].value = saveObj.group || 'All';
-
-                selects[1].value = saveObj.not_group || 'Nobody';
+            if (templateSelector != '#aTemplate') {
+                rules.push({selector: 'input[type="number"]', value: saveObj.joins_low || 0});
+                rules.push({selector: `input[type="number"]:not([value="${saveObj.joins_low || 0}"])`, value: saveObj.joins_high || 9999});
+                rules.push({selector: `option[value="${saveObj.group || 'All'}"]`, selected: 'selected'});
+                rules.push({selector: `option[value="${saveObj.not_group || 'Nobody'}"]`, selected: 'selected'});
             }
 
-            document.querySelector('#m' + uniqueMessageID + ' > a')
+            if (templateSelector == '#tTemplate') {
+                rules.push({selector: '.t', value: saveObj.trigger || ''});
+            }
+
+            ui.buildContentFromTemplate(templateSelector, containerSelector, rules);
+
+            document.querySelector(`${containerSelector} > div:last-child a`)
                 .addEventListener('click', function(e) {
                     ui.alert('Really delete this message?', [
                         {text: 'Yes', style: 'success', action: function() {
@@ -183,7 +175,6 @@
                     ]);
                 }, false);
 
-            uniqueMessageID++;
             hook.check('ui.messageAdded');
         };
 

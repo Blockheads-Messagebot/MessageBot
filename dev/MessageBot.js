@@ -11,13 +11,14 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }());
 
     var bot = {
-        version: '6.0.0',
+        version: '6.0.1',
         ui: ui,
         api: api,
         hook: hook,
         storage: storage,
         preferences: storage.getObject('mb_preferences', {}, false),
     };
+    storage.set('mb_version', bot.version, false);
 
     bot.send = function send(message) {
         chatBuffer.push(hook.update('bot.send', message));
@@ -124,11 +125,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     //Add the configured messages to the page.
     (function(msgs, ids, tids) {
         msgs.forEach((type, index) => {
-            var container = document.getElementById(ids[index]);
-            var template = document.getElementById(tids[index]);
-
             messages[type].forEach((msg) => {
-                ui.addMsg(container, template, msg);
+                ui.addMsg(`#${tids[index]}`, `#${ids[index]}`, msg);
             });
         });
     }(
@@ -295,8 +293,8 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
             storage.set(key, to);
         }
 
-        saveFromWrapper('lMsgs', messages.leave, 'joinArr');
-        saveFromWrapper('jMsgs', messages.join, 'leaveArr');
+        saveFromWrapper('lMsgs', messages.leave, 'leaveArr');
+        saveFromWrapper('jMsgs', messages.join, 'joinArr');
         saveFromWrapper('tMsgs', messages.trigger, 'triggerArr');
         saveFromWrapper('aMsgs', messages.announcement, 'announcementArr');
 

@@ -105,6 +105,7 @@
                 error_file: err.filename,
                 error_row: err.lineno || 0,
                 error_column: err.colno || 0,
+                error_stack: err.stack || '',
             })
             .then((resp) => {
                 if (resp.status == 'ok') {
