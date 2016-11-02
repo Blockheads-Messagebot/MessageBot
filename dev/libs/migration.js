@@ -39,6 +39,11 @@
             setTimeout(function() {
                 window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
             }, 1000);
+            break; //Next bugfix only relates to 6.0.1.
+        case '6.0.1':
+            setTimeout(function() {
+                window.botui.alert("Due to a bug in 6.0.1, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
+            }, 1000);
     }
     //jshint +W086
 }(localStorage));

@@ -148,6 +148,7 @@
          */
         ui.addMsg = function addMsg(templateSelector, containerSelector, saveObj) {
             var rules = [
+                {selector: '[selected]', multiple: true, remove: ['selected']},
                 {selector: '.m', text: saveObj.message || ''},
             ];
 
@@ -173,7 +174,7 @@
                         }, thisArg: e.target.parentElement},
                         {text: 'Cancel'}
                     ]);
-                }, false);
+                });
 
             hook.check('ui.messageAdded');
         };
@@ -386,8 +387,49 @@
 
         // rules format: array of objects
         // each object must have "selector"
+        // each object can have "multiple" set to true, to update all matching elements
+        // each object can have "remove" - an array of attributes to remove. --- rules with this set will be run first!
+        // all other rules will be parsed in an undefined order.
         // each object can have "text" or "html" - any further keys will set as attributes.
         ui.buildContentFromTemplate = function(templateSelector, targetSelector, rules = []) {
+            function updateElement(el, rule) {
+                if ('text' in rule) {
+                    el.textContent = rule.text;
+                } else if ('html' in rule) {
+                    el.innerHTML = rule.html;
+                }
+
+                Object.keys(rule)
+                    .filter((key) => !['selector', 'text', 'html', 'remove', 'multiple'].includes(key))
+                    .forEach((key) => {
+                        el.setAttribute(key, rule[key]);
+                    });
+
+                if (Array.isArray(rule.remove)) {
+                    rule.remove.forEach(key => {
+                        el.removeAttribute(key);
+                    });
+                }
+            }
+
+            function handleRule(rule) {
+                if (rule.multiple) {
+                    let els = content.querySelectorAll(rule.selector);
+
+                    for (let el of els) {
+                        updateElement(el, rule);
+                    }
+                } else {
+                    let el = content.querySelector(rule.selector);
+                    if (!el) {
+                        console.warn(`Unable to update ${rule.selector} in ${templateSelector}.`, rule);
+                        return;
+                    }
+
+                    updateElement(el, rule);
+                }
+            }
+
             var template = document.querySelector(templateSelector);
             //Fix IE
             if (!('content' in template)) {
@@ -403,20 +445,11 @@
 
             var content = template.content;
 
-            rules.forEach((rule) => {
-                var el = content.querySelector(rule.selector);
-                if (rule.text) {
-                    el.textContent = rule.text;
-                } else if (rule.html) {
-                    el.innerHTML = rule.html;
-                }
+            rules.filter(rule => rule.remove)
+                .forEach(handleRule);
 
-                Object.keys(rule)
-                    .filter((key) => !['selector', 'text', 'html'].includes(key))
-                    .forEach((key) => {
-                        el.setAttribute(key, rule[key]);
-                    });
-            });
+            rules.filter(rule => !rule.remove)
+                .forEach(handleRule);
 
             document.querySelector(targetSelector).appendChild(document.importNode(content, true));
         };

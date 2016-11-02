@@ -11,7 +11,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }());
 
     var bot = {
-        version: '6.0.1',
+        version: '6.0.2',
         ui: ui,
         api: api,
         hook: hook,
@@ -137,13 +137,15 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
 
     // Sends announcements after the specified delay.
     (function announcementCheck(i) {
-        i = (messages.announcement.length >= i) ? 0 : i;
+        i = (i >= messages.announcement.length) ? 0 : i;
 
-        if (typeof messages.announcement[i] == 'string') {
-            bot.send(messages.announcement[i]);
+        var ann = messages.announcement[i];
+
+        if (ann && ann.message) {
+            bot.send(ann.message);
         }
-        setTimeout(announcementCheck, bot.preferences.announcementDelay * 60000, ++i);
-    }(0));
+        setTimeout(announcementCheck, bot.preferences.announcementDelay * 60000, i + 1);
+    })(0);
 
     //Add messages to page
     hook.listen('world.other', function(message) {

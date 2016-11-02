@@ -85,6 +85,11 @@ if (!window.console) {
             setTimeout(function () {
                 window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
             }, 1000);
+            break; 
+        case '6.0.1':
+            setTimeout(function () {
+                window.botui.alert("Due to a bug in 6.0.1, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
+            }, 1000);
     }
 })(localStorage);
 (function () {
@@ -360,8 +365,6 @@ window.storage = CreateStorage(window.worldId);
             el.src = '//blockheadsfans.com/messagebot/extension/' + id + '/code/raw';
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
-
-            listExtensions();
         };
         setTimeout(function () {
             storage.getObject('mb_extensions', [], false).forEach(api.startExtension);
@@ -372,7 +375,7 @@ window.storage = CreateStorage(window.worldId);
                 window[id].uninstall();
             } catch (e) {
             }
-            window[id] = undefined;
+            delete window[id];
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -853,7 +856,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
         var ui = {};
 
         ui.addMsg = function addMsg(templateSelector, containerSelector, saveObj) {
-            var rules = [{ selector: '.m', text: saveObj.message || '' }];
+            var rules = [{ selector: '[selected]', multiple: true, remove: ['selected'] }, { selector: '.m', text: saveObj.message || '' }];
 
             if (templateSelector != '#aTemplate') {
                 rules.push({ selector: 'input[type="number"]', value: saveObj.joins_low || 0 });
@@ -873,7 +876,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
                         this.remove();
                         hook.check('ui.messageDeleted');
                     }, thisArg: e.target.parentElement }, { text: 'Cancel' }]);
-            }, false);
+            });
 
             hook.check('ui.messageAdded');
         };
@@ -1044,6 +1047,65 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
         ui.buildContentFromTemplate = function (templateSelector, targetSelector) {
             var rules = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
 
+            function updateElement(el, rule) {
+                if ('text' in rule) {
+                    el.textContent = rule.text;
+                } else if ('html' in rule) {
+                    el.innerHTML = rule.html;
+                }
+
+                Object.keys(rule).filter(function (key) {
+                    return !['selector', 'text', 'html', 'remove', 'multiple'].includes(key);
+                }).forEach(function (key) {
+                    el.setAttribute(key, rule[key]);
+                });
+
+                if (Array.isArray(rule.remove)) {
+                    rule.remove.forEach(function (key) {
+                        el.removeAttribute(key);
+                    });
+                }
+            }
+
+            function handleRule(rule) {
+                if (rule.multiple) {
+                    var els = content.querySelectorAll(rule.selector);
+
+                    var _iteratorNormalCompletion2 = true;
+                    var _didIteratorError2 = false;
+                    var _iteratorError2 = undefined;
+
+                    try {
+                        for (var _iterator2 = els[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                            var el = _step2.value;
+
+                            updateElement(el, rule);
+                        }
+                    } catch (err) {
+                        _didIteratorError2 = true;
+                        _iteratorError2 = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                _iterator2.return();
+                            }
+                        } finally {
+                            if (_didIteratorError2) {
+                                throw _iteratorError2;
+                            }
+                        }
+                    }
+                } else {
+                    var _el = content.querySelector(rule.selector);
+                    if (!_el) {
+                        void 0;
+                        return;
+                    }
+
+                    updateElement(_el, rule);
+                }
+            }
+
             var template = document.querySelector(templateSelector);
             if (!('content' in template)) {
                 var _content = template.childNodes;
@@ -1058,20 +1120,13 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
             var content = template.content;
 
-            rules.forEach(function (rule) {
-                var el = content.querySelector(rule.selector);
-                if (rule.text) {
-                    el.textContent = rule.text;
-                } else if (rule.html) {
-                    el.innerHTML = rule.html;
-                }
+            rules.filter(function (rule) {
+                return rule.remove;
+            }).forEach(handleRule);
 
-                Object.keys(rule).filter(function (key) {
-                    return !['selector', 'text', 'html'].includes(key);
-                }).forEach(function (key) {
-                    el.setAttribute(key, rule[key]);
-                });
-            });
+            rules.filter(function (rule) {
+                return !rule.remove;
+            }).forEach(handleRule);
 
             document.querySelector(targetSelector).appendChild(document.importNode(content, true));
         };
@@ -1147,7 +1202,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     })();
 
     var bot = {
-        version: '6.0.1',
+        version: '6.0.2',
         ui: ui,
         api: api,
         hook: hook,
@@ -1268,12 +1323,14 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     })(['join', 'leave', 'trigger', 'announcement'], ['jMsgs', 'lMsgs', 'tMsgs', 'aMsgs'], ['jlTemplate', 'jlTemplate', 'tTemplate', 'aTemplate']);
 
     (function announcementCheck(i) {
-        i = messages.announcement.length >= i ? 0 : i;
+        i = i >= messages.announcement.length ? 0 : i;
 
-        if (typeof messages.announcement[i] == 'string') {
-            bot.send(messages.announcement[i]);
+        var ann = messages.announcement[i];
+
+        if (ann && ann.message) {
+            bot.send(ann.message);
         }
-        setTimeout(announcementCheck, bot.preferences.announcementDelay * 60000, ++i);
+        setTimeout(announcementCheck, bot.preferences.announcementDelay * 60000, i + 1);
     })(0);
 
     hook.listen('world.other', function (message) {

@@ -68,6 +68,11 @@ if (!window.console) {
             setTimeout(function() {
                 window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
             }, 1000);
+            break; //Next bugfix only relates to 6.0.1.
+        case '6.0.1':
+            setTimeout(function() {
+                window.botui.alert("Due to a bug in 6.0.1, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
+            }, 1000);
     }
     //jshint +W086
 }(localStorage));
@@ -360,8 +365,6 @@ window.storage = CreateStorage(window.worldId);
             el.src = `//blockheadsfans.com/messagebot/extension/${id}/code/raw`;
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
-
-            listExtensions();
         };
         //Delay starting extensions - avoids some odd bugs
         setTimeout(function() {
@@ -376,7 +379,7 @@ window.storage = CreateStorage(window.worldId);
             } catch(e) {
                 // Normal if an uninstall function was not defined.
             }
-            window[id] = undefined;
+            delete window[id];
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -436,6 +439,7 @@ window.storage = CreateStorage(window.worldId);
             storage.set('mb_extensions', extensions, false);
         };
 
+        //Timeout to allow for building the page before a response is recieved
         setTimeout(listExtensions, 500);
         return api;
     }
@@ -892,6 +896,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
          */
         ui.addMsg = function addMsg(templateSelector, containerSelector, saveObj) {
             var rules = [
+                {selector: '[selected]', multiple: true, remove: ['selected']},
                 {selector: '.m', text: saveObj.message || ''},
             ];
 
@@ -917,7 +922,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
                         }, thisArg: e.target.parentElement},
                         {text: 'Cancel'}
                     ]);
-                }, false);
+                });
 
             hook.check('ui.messageAdded');
         };
@@ -1130,8 +1135,49 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
         // rules format: array of objects
         // each object must have "selector"
+        // each object can have "multiple" set to true, to update all matching elements
+        // each object can have "remove" - an array of attributes to remove. --- rules with this set will be run first!
+        // all other rules will be parsed in an undefined order.
         // each object can have "text" or "html" - any further keys will set as attributes.
         ui.buildContentFromTemplate = function(templateSelector, targetSelector, rules = []) {
+            function updateElement(el, rule) {
+                if ('text' in rule) {
+                    el.textContent = rule.text;
+                } else if ('html' in rule) {
+                    el.innerHTML = rule.html;
+                }
+
+                Object.keys(rule)
+                    .filter((key) => !['selector', 'text', 'html', 'remove', 'multiple'].includes(key))
+                    .forEach((key) => {
+                        el.setAttribute(key, rule[key]);
+                    });
+
+                if (Array.isArray(rule.remove)) {
+                    rule.remove.forEach(key => {
+                        el.removeAttribute(key);
+                    });
+                }
+            }
+
+            function handleRule(rule) {
+                if (rule.multiple) {
+                    let els = content.querySelectorAll(rule.selector);
+
+                    for (let el of els) {
+                        updateElement(el, rule);
+                    }
+                } else {
+                    let el = content.querySelector(rule.selector);
+                    if (!el) {
+                        console.warn(`Unable to update ${rule.selector} in ${templateSelector}.`, rule);
+                        return;
+                    }
+
+                    updateElement(el, rule);
+                }
+            }
+
             var template = document.querySelector(templateSelector);
             //Fix IE
             if (!('content' in template)) {
@@ -1147,20 +1193,11 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
             var content = template.content;
 
-            rules.forEach((rule) => {
-                var el = content.querySelector(rule.selector);
-                if (rule.text) {
-                    el.textContent = rule.text;
-                } else if (rule.html) {
-                    el.innerHTML = rule.html;
-                }
+            rules.filter(rule => rule.remove)
+                .forEach(handleRule);
 
-                Object.keys(rule)
-                    .filter((key) => !['selector', 'text', 'html'].includes(key))
-                    .forEach((key) => {
-                        el.setAttribute(key, rule[key]);
-                    });
-            });
+            rules.filter(rule => !rule.remove)
+                .forEach(handleRule);
 
             document.querySelector(targetSelector).appendChild(document.importNode(content, true));
         };
@@ -1247,7 +1284,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }());
 
     var bot = {
-        version: '6.0.1',
+        version: '6.0.2',
         ui: ui,
         api: api,
         hook: hook,
@@ -1373,13 +1410,15 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
 
     // Sends announcements after the specified delay.
     (function announcementCheck(i) {
-        i = (messages.announcement.length >= i) ? 0 : i;
+        i = (i >= messages.announcement.length) ? 0 : i;
 
-        if (typeof messages.announcement[i] == 'string') {
-            bot.send(messages.announcement[i]);
+        var ann = messages.announcement[i];
+
+        if (ann && ann.message) {
+            bot.send(ann.message);
         }
-        setTimeout(announcementCheck, bot.preferences.announcementDelay * 60000, ++i);
-    }(0));
+        setTimeout(announcementCheck, bot.preferences.announcementDelay * 60000, i + 1);
+    })(0);
 
     //Add messages to page
     hook.listen('world.other', function(message) {

@@ -57,8 +57,6 @@
             el.src = `//blockheadsfans.com/messagebot/extension/${id}/code/raw`;
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
-
-            listExtensions();
         };
         //Delay starting extensions - avoids some odd bugs
         setTimeout(function() {
@@ -73,7 +71,7 @@
             } catch(e) {
                 // Normal if an uninstall function was not defined.
             }
-            window[id] = undefined;
+            delete window[id];
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -133,6 +131,7 @@
             storage.set('mb_extensions', extensions, false);
         };
 
+        //Timeout to allow for building the page before a response is recieved
         setTimeout(listExtensions, 500);
         return api;
     }
