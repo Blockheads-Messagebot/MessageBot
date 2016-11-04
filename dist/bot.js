@@ -324,12 +324,18 @@ window.storage = CreateStorage(window.worldId);
         }
 
         function listExtensions() {
-            var target = document.querySelector('#mb_ext_list');
-
             api.getExtensionNames(extensions).then(function (resp) {
+                var target = document.querySelector('#mb_ext_list');
                 if (resp.status == 'ok') {
                     Array.from(document.querySelectorAll('#exts button')).forEach(function (btn) {
                         return btn.textContent = 'Install';
+                    });
+
+                    resp.extensions.forEach(function (ex) {
+                        var button = document.querySelector('#exts [data-id="' + ex.id + '"] button');
+                        if (button) {
+                            button.textContent = 'Remove';
+                        }
                     });
 
                     if (!resp.extensions.length) {
@@ -339,10 +345,6 @@ window.storage = CreateStorage(window.worldId);
                     target.innerHTML = resp.extensions.reduce(function (html, ext) {
                         return html + '<li>' + ext.name.replace(/</g, '&lt;') + ' (' + ext.id + ') <a onclick="bhfansapi.removeExtension(\'' + ext.id + '\');" class="button">Remove</a></li>';
                     }, '<ul style="margin-left:1.5em;">') + '</ul>';
-
-                    resp.extensions.forEach(function (ex) {
-                        document.querySelector('#exts [data-id="' + ex.id + '"] button').textContent = 'Remove';
-                    });
                 } else {
                     target.innerHTML = 'Error fetching extension names: ' + resp.message;
                     throw new Error(resp.message);

@@ -323,12 +323,18 @@ window.storage = CreateStorage(window.worldId);
         }
 
         function listExtensions() {
-            var target = document.querySelector('#mb_ext_list');
-
             api.getExtensionNames(extensions).then((resp) => {
+                var target = document.querySelector('#mb_ext_list');
                 if (resp.status == 'ok') {
                     Array.from(document.querySelectorAll('#exts button'))
                         .forEach(btn => btn.textContent = 'Install');
+
+                    resp.extensions.forEach(ex => {
+                        var button = document.querySelector(`#exts [data-id="${ex.id}"] button`);
+                        if (button) {
+                            button.textContent = 'Remove';
+                        }
+                    });
 
                     if (!resp.extensions.length) {
                         target.innerHTML = '<p>No extensions installed</p>';
@@ -339,9 +345,6 @@ window.storage = CreateStorage(window.worldId);
                             return `${html}<li>${ext.name.replace(/</g, '&lt;')} (${ext.id}) <a onclick="bhfansapi.removeExtension(\'${ext.id}\');" class="button">Remove</a></li>`;
                         }, '<ul style="margin-left:1.5em;">') + '</ul>';
 
-                    resp.extensions.forEach(ex => {
-                        document.querySelector(`#exts [data-id="${ex.id}"] button`).textContent = 'Remove';
-                    });
                 } else {
                     target.innerHTML = `Error fetching extension names: ${resp.message}`;
                     throw new Error(resp.message);
