@@ -31,7 +31,9 @@
                 try {
                     listener(...args);
                 } catch (e) {
-                    console.error(e);
+                    if (key != 'error') {
+                        check('error', e);
+                    }
                 }
             });
         }
@@ -43,7 +45,6 @@
             }
 
             return listeners[key].reduce(function(previous, current) {
-                // Just a precaution...
                 try {
                     var result = current(previous, ...args);
                     if (typeof result != 'undefined') {
@@ -51,7 +52,9 @@
                     }
                     return previous;
                 } catch(e) {
-                    console.error(e);
+                    if (key != 'error') {
+                        check('error', e);
+                    }
                     return previous;
                 }
             }, initial);

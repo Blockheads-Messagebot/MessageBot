@@ -73,6 +73,7 @@ if (!window.console) {
             setTimeout(function() {
                 window.botui.alert("Due to a bug in 6.0.1, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
             }, 1000);
+        case '6.0.2':
     }
     //jshint +W086
 }(localStorage));
@@ -201,7 +202,9 @@ if (!window.console) {
                 try {
                     listener(...args);
                 } catch (e) {
-                    console.error(e);
+                    if (key != 'error') {
+                        check('error', e);
+                    }
                 }
             });
         }
@@ -213,7 +216,6 @@ if (!window.console) {
             }
 
             return listeners[key].reduce(function(previous, current) {
-                // Just a precaution...
                 try {
                     var result = current(previous, ...args);
                     if (typeof result != 'undefined') {
@@ -221,7 +223,9 @@ if (!window.console) {
                     }
                     return previous;
                 } catch(e) {
-                    console.error(e);
+                    if (key != 'error') {
+                        check('error', e);
+                    }
                     return previous;
                 }
             }, initial);
@@ -307,7 +311,7 @@ if (!window.console) {
 window.storage = CreateStorage(window.worldId);
 
 (function() {
-    function api(ajax, storage) {
+    function api(hook, ajax, storage) {
         var cache = {
             getStore: getStore(),
         };
@@ -379,7 +383,7 @@ window.storage = CreateStorage(window.worldId);
             } catch(e) {
                 // Normal if an uninstall function was not defined.
             }
-            delete window[id];
+            window[id] = undefined;
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -404,7 +408,6 @@ window.storage = CreateStorage(window.worldId);
 
         //FIXME: Avoid relying on window.bot.ui
         api.reportError = (err) => {
-            console.error(err);
             ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
             {
                 error_text: err.message,
@@ -439,6 +442,9 @@ window.storage = CreateStorage(window.worldId);
             storage.set('mb_extensions', extensions, false);
         };
 
+        //Listen for errors
+        hook.listen('error', api.reportError);
+
         //Timeout to allow for building the page before a response is recieved
         setTimeout(listExtensions, 500);
         return api;
@@ -447,7 +453,7 @@ window.storage = CreateStorage(window.worldId);
     window.CreateBHFansAPI = api;
 }());
  //Depends: ajax, storage
-window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
+window.bhfansapi = CreateBHFansAPI(window.hook, window.ajax, window.storage);
 
 (function() {
     var apiLoad = performance.now();
@@ -1284,7 +1290,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }());
 
     var bot = {
-        version: '6.0.2',
+        version: '6.0.3',
         ui: ui,
         api: api,
         hook: hook,
@@ -1788,14 +1794,7 @@ var bot = MessageBot( //jshint unused:false
         );
 
 window.addEventListener('error', (err) => {
-    //Wrap everything here in a try catch so that errors with our error reporting don't generate more errors to be reported... infinite loop.
-    try {
-        if (err.message == 'Script error') {
-            return;
-        }
-
-        window.bhfansapi.reportError(err);
-    } catch (e) {
-        console.error(e);
+    if (err.message != 'Script error') {
+        window.hook.check('error', err);
     }
 });

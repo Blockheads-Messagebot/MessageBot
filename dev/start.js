@@ -34,7 +34,7 @@ if (!window.console) {
 window.storage = CreateStorage(window.worldId);
 
 {{inject libs/BHFansAPI.js}} //Depends: ajax, storage
-window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
+window.bhfansapi = CreateBHFansAPI(window.hook, window.ajax, window.storage);
 
 {{inject libs/BlockheadsAPI.js}} //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
@@ -58,14 +58,7 @@ var bot = MessageBot( //jshint unused:false
         );
 
 window.addEventListener('error', (err) => {
-    //Wrap everything here in a try catch so that errors with our error reporting don't generate more errors to be reported... infinite loop.
-    try {
-        if (err.message == 'Script error') {
-            return;
-        }
-
-        window.bhfansapi.reportError(err);
-    } catch (e) {
-        console.error(e);
+    if (err.message != 'Script error') {
+        window.hook.check('error', err);
     }
 });

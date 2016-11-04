@@ -90,6 +90,7 @@ if (!window.console) {
             setTimeout(function () {
                 window.botui.alert("Due to a bug in 6.0.1, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
             }, 1000);
+        case '6.0.2':
     }
 })(localStorage);
 (function () {
@@ -197,7 +198,9 @@ if (!window.console) {
                 try {
                     listener.apply(undefined, args);
                 } catch (e) {
-                    void 0;
+                    if (key != 'error') {
+                        check('error', e);
+                    }
                 }
             });
         }
@@ -220,7 +223,9 @@ if (!window.console) {
                     }
                     return previous;
                 } catch (e) {
-                    void 0;
+                    if (key != 'error') {
+                        check('error', e);
+                    }
                     return previous;
                 }
             }, initial);
@@ -307,7 +312,7 @@ if (!window.console) {
 window.storage = CreateStorage(window.worldId);
 
 (function () {
-    function api(ajax, storage) {
+    function api(hook, ajax, storage) {
         var cache = {
             getStore: getStore()
         };
@@ -375,7 +380,7 @@ window.storage = CreateStorage(window.worldId);
                 window[id].uninstall();
             } catch (e) {
             }
-            delete window[id];
+            window[id] = undefined;
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -399,7 +404,6 @@ window.storage = CreateStorage(window.worldId);
         };
 
         api.reportError = function (err) {
-            void 0;
             ajax.postJSON('//blockheadsfans.com/messagebot/bot/error', {
                 error_text: err.message,
                 error_file: err.filename,
@@ -431,13 +435,15 @@ window.storage = CreateStorage(window.worldId);
             storage.set('mb_extensions', extensions, false);
         };
 
+        hook.listen('error', api.reportError);
+
         setTimeout(listExtensions, 500);
         return api;
     }
 
     window.CreateBHFansAPI = api;
 })();
-window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage);
+window.bhfansapi = CreateBHFansAPI(window.hook, window.ajax, window.storage);
 
 (function () {
     var apiLoad = performance.now();
@@ -1202,7 +1208,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     })();
 
     var bot = {
-        version: '6.0.2',
+        version: '6.0.3',
         ui: ui,
         api: api,
         hook: hook,
@@ -1664,13 +1670,7 @@ var bot = MessageBot(
 window.ajax, window.hook, window.storage, window.bhfansapi, window.api, window.botui);
 
 window.addEventListener('error', function (err) {
-    try {
-        if (err.message == 'Script error') {
-            return;
-        }
-
-        window.bhfansapi.reportError(err);
-    } catch (e) {
-        void 0;
+    if (err.message != 'Script error') {
+        window.hook.check('error', err);
     }
 });

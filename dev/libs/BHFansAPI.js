@@ -1,5 +1,5 @@
 (function() {
-    function api(ajax, storage) {
+    function api(hook, ajax, storage) {
         var cache = {
             getStore: getStore(),
         };
@@ -71,7 +71,7 @@
             } catch(e) {
                 // Normal if an uninstall function was not defined.
             }
-            delete window[id];
+            window[id] = undefined;
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -96,7 +96,6 @@
 
         //FIXME: Avoid relying on window.bot.ui
         api.reportError = (err) => {
-            console.error(err);
             ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
             {
                 error_text: err.message,
@@ -130,6 +129,9 @@
 
             storage.set('mb_extensions', extensions, false);
         };
+
+        //Listen for errors
+        hook.listen('error', api.reportError);
 
         //Timeout to allow for building the page before a response is recieved
         setTimeout(listExtensions, 500);
