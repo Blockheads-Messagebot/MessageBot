@@ -40,6 +40,12 @@ describe('hook.check', function() {
         hook.listen(key('key2'), container.func3);
     });
 
+    afterEach(function() {
+        hook.remove(key('key'), container.func);
+        hook.remove(key('key2'), container.func2);
+        hook.remove(key('key2'), container.func3);
+    });
+
     it('Should call listeners for equal keys', function() {
         hook.check(key('key'));
         expect(container.func).toHaveBeenCalled();

@@ -68,18 +68,25 @@ if (!window.console) {
             setTimeout(function() {
                 window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
             }, 1000);
-            break; //Next bugfix only relates to 6.0.1.
+            break; //Next bugfix only relates to 6.0.1 / 6.0.2.
         case '6.0.1':
-            setTimeout(function() {
-                window.botui.alert("Due to a bug in 6.0.1, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
-            }, 1000);
         case '6.0.2':
+            setTimeout(function() {
+                window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
+            }, 1000);
+        case '6.0.3':
     }
     //jshint +W086
 }(localStorage));
  //Update localStorage entries with old data
 (function() {
     var ajax = (function() { //jshint ignore:line
+        function urlStringify(obj) {
+            return Object.keys(obj)
+                .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+                .join('&');
+        }
+
         /**
          * Helper function to make XHR requests.
          *
@@ -89,9 +96,7 @@ if (!window.console) {
          * @return Promise
          */
         function xhr(protocol, url = '/', paramObj = {}) {
-            var paramStr = Object.keys(paramObj)
-                                .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(paramObj[k])}`)
-                                .join('&');
+            var paramStr = urlStringify(paramObj);
             return new Promise(function(resolve, reject) {
                 var req = new XMLHttpRequest();
                 req.open(protocol, url);
@@ -127,7 +132,15 @@ if (!window.console) {
          * @return Promise
          */
         function get(url = '/', paramObj = {}) {
-            return xhr('GET', url, paramObj);
+            if (Object.keys(paramObj).length) {
+                var addition = urlStringify(paramObj);
+                if (!url.includes('?')) {
+                    url += `?${addition}`;
+                } else {
+                    url += `&${addition}`;
+                }
+            }
+            return xhr('GET', url, {});
         }
 
         /**
@@ -311,7 +324,7 @@ if (!window.console) {
 window.storage = CreateStorage(window.worldId);
 
 (function() {
-    function api(hook, ajax, storage) {
+    function api(ajax, storage, global) {
         var cache = {
             getStore: getStore(),
         };
@@ -322,8 +335,10 @@ window.storage = CreateStorage(window.worldId);
             return ajax.getJSON('//blockheadsfans.com/messagebot/extension/store');
         }
 
-        function listExtensions() {
-            api.getExtensionNames(extensions).then((resp) => {
+        var api = {};
+
+        api.listExtensions = () => {
+            return api.getExtensionNames(extensions).then((resp) => {
                 var target = document.querySelector('#mb_ext_list');
                 if (resp.status == 'ok') {
                     Array.from(document.querySelectorAll('#exts button'))
@@ -351,10 +366,7 @@ window.storage = CreateStorage(window.worldId);
                 }
             })
             .catch(api.reportError);
-        }
-
-
-        var api = {};
+        };
 
         // ids is an array of extension ids
         api.getExtensionNames = (ids) => ajax.postJSON('//blockheadsfans.com/messagebot/extension/name', {extensions: JSON.stringify(ids)});
@@ -373,20 +385,15 @@ window.storage = CreateStorage(window.worldId);
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
         };
-        //Delay starting extensions - avoids some odd bugs
-        setTimeout(function() {
-            storage.getObject('mb_extensions', [], false).forEach(api.startExtension);
-        }, 1000);
-
 
         api.removeExtension = (id) => {
             //Try to call the uninstall function
             try {
-                window[id].uninstall();
+                global[id].uninstall();
             } catch(e) {
                 // Normal if an uninstall function was not defined.
             }
-            window[id] = undefined;
+            global[id] = undefined;
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -401,17 +408,17 @@ window.storage = CreateStorage(window.worldId);
                         button.disabled = false;
                     }, 3000);
                 }
-                listExtensions();
+                api.listExtensions();
             }
         };
 
         api.extensionInstalled = (id) => {
-            return extensions.includes(id);
+            return extensions.includes(id) || typeof global[id] != 'undefined';
         };
 
-        //FIXME: Avoid relying on window.bot.ui
+        //FIXME: Avoid relying on knowing bot.ui
         api.reportError = (err) => {
-            ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+            return ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
             {
                 error_text: err.message,
                 error_file: err.filename,
@@ -421,21 +428,20 @@ window.storage = CreateStorage(window.worldId);
             })
             .then((resp) => {
                 if (resp.status == 'ok') {
-                    window.bot.ui.notify('Something went wrong, it has been reported.');
+                    global.bot.ui.notify('Something went wrong, it has been reported.');
                 } else {
-                    throw new Error(resp.message);
+                    global.bot.ui.notify(`Error reporting exception: ${resp.message}`);
                 }
             })
             .catch((err) => {
                 console.error(err);
-                window.bot.ui.notify(`Error reporting exception: ${err}`);
             });
         };
 
         api.autoloadExtension = (id, shouldAutoload) => {
             if (!api.extensionInstalled(id) && shouldAutoload) {
                 extensions.push(id);
-                listExtensions();
+                api.listExtensions();
             } else if (!shouldAutoload) {
                 if (api.extensionInstalled(id)) {
                     extensions.splice(extensions.indexOf(id), 1);
@@ -445,18 +451,13 @@ window.storage = CreateStorage(window.worldId);
             storage.set('mb_extensions', extensions, false);
         };
 
-        //Listen for errors
-        hook.listen('error', api.reportError);
-
-        //Timeout to allow for building the page before a response is recieved
-        setTimeout(listExtensions, 500);
         return api;
     }
 
     window.CreateBHFansAPI = api;
 }());
  //Depends: ajax, storage
-window.bhfansapi = CreateBHFansAPI(window.hook, window.ajax, window.storage);
+window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
 (function() {
     var apiLoad = performance.now();
@@ -757,9 +758,9 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
 (function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
-        document.head.innerHTML = '<title>Console</title> <meta name="viewport" content="width=device-width,initial-scale=1"> ';
+        document.head.innerHTML = '<title>Console - MessageBot</title> <link rel="icon" href="http://forums.theblockheads.net/uploads/default/original/3X/b/d/bd489ba3dddafb66906af3b377069fe4a3551a3a.png"> <meta name="viewport" content="width=device-width,initial-scale=1"> ';
         document.head.innerHTML += '<style>html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}#botTemplates{display:none}header{background:#182b73 url("http://portal.theblockheads.net/static/images/portalHeader.png") no-repeat;background-position:80px;height:80px}#jMsgs,#lMsgs,#tMsgs,#aMsgs,#exts{padding-top:8px;margin-top:8px;border-top:1px solid;height:calc(100vh - 185px)}.third-box,#mb_join .msg,#mb_leave .msg,#mb_trigger .msg,#mb_announcements .msg,#mb_extensions .ext{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd),#mb_join .msg:nth-child(odd),#mb_leave .msg:nth-child(odd),#mb_trigger .msg:nth-child(odd),#mb_announcements .msg:nth-child(odd),#mb_extensions .ext:nth-child(odd){background:#ccc}.top-right-button,#mb_join .add,#mb_leave .add,#mb_trigger .add,#mb_announcements .add,#mb_extensions #mb_load_man{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}.button,#mb_extensions .ext button,#alert>.buttons>span{display:inline-block;padding:6px 12px;margin:0 5px;text-align:center;white-space:nowrap;cursor:pointer;border:1px solid rgba(0,0,0,0.15);border-radius:6px;background:#fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}#mb_settings h3{border-bottom:1px solid #999}#mb_settings a{text-decoration:underline}#mb_settings a.button{text-decoration:none;font-size:0.9em;padding:1px 5px}#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type="number"],#mb_leave input[type="number"],#mb_trigger input[type="number"],#mb_announcements input[type="number"]{width:5em}#mb_extensions #mb_load_man{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#mb_extensions .ext{height:130px}#mb_extensions .ext h4,#mb_extensions .ext p{margin:0}#mb_extensions .ext button{position:absolute;bottom:7px;padding:5px 8px}#alert{visibility:hidden;position:fixed;top:50px;left:0;right:0;margin:auto;z-index:101;width:50%;min-width:300px;min-height:200px;background:#fff;border-radius:10px;padding:10px 10px 55px 10px}#alert.visible{visibility:visible}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}#alert>.buttons [class]{color:#fff}#alert>.buttons .success{background:#5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%);border-color:#3e8f3e}#alert>.buttons .info{background:#5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%);border-color:#28a4c9}#alert>.buttons .danger{background:#d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%);border-color:#b92c28}#alert>.buttons .warning{background:#f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);border-color:#e38d13}.notification{opacity:0;transition:opacity 1s;position:fixed;top:1em;right:1em;min-width:200px;border-radius:5px;padding:5px;background:#9fafeb}.notification.visible{opacity:1}<style>';
-        document.body.innerHTML = '<div id="leftNav"> <input type="checkbox" id="leftToggle"> <label for="leftToggle">&#9776; Menu</label> <nav data-tab-group="main"> <span class="tab selected" data-tab-name="console">Console</span> <details data-tab-group="messages"> <summary>Messages</summary> <span class="tab" data-tab-name="join">Join</span> <span class="tab" data-tab-name="leave">Leave</span> <span class="tab" data-tab-name="trigger">Trigger</span> <span class="tab" data-tab-name="announcements">Announcements</span> </details> <span class="tab" data-tab-name="extensions">Extensions</span> <span class="tab" data-tab-name="settings">Settings</span> <div class="clearfix"> </nav> <div class="overlay"></div> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <textarea class="m"></textarea> <label> in chat if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <textarea class="m"></textarea> <label> if the player has joined between </label> <input type="number" value="0"> <label> and </label> <input type="number" value="9999"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Send:</label> <textarea class="m"></textarea> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="container"> <header></header> <div id="mb_console" data-tab-name="console" class="visible"> <div class="chat"> <ul></ul> </div> <div class="controls"> <input type="text"><button>SEND</button> </div> </div> <div id="mb_join" data-tab-name="join"> <h3>These are checked when a player joins the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave" data-tab-name="leave"> <h3>These are checked when a player leaves the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger" data-tab-name="trigger"> <h3>These are checked whenever someone says something.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements" data-tab-name="announcements"> <h3>These are sent according to a regular schedule.</h3> <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions" data-tab-name="extensions"> <h3>Extensions can increase the functionality of the bot.</h3> <span>Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings" data-tab-name="settings"> <h3>Settings</h3> <label for="mb_ann_delay">Minutes between announcements: </label><br> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label><br> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">New chat notifications: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alertWrapper"> <div id="alert"> <div id="alertContent"></div> <div class="buttons"></div> </div> <div class="overlay"> ';
+        document.body.innerHTML = '<div id="leftNav"> <input type="checkbox" id="leftToggle"> <label for="leftToggle">&#9776; Menu</label> <nav data-tab-group="main"> <span class="tab selected" data-tab-name="console">Console</span> <details data-tab-group="messages"> <summary>Messages</summary> <span class="tab" data-tab-name="join">Join</span> <span class="tab" data-tab-name="leave">Leave</span> <span class="tab" data-tab-name="trigger">Trigger</span> <span class="tab" data-tab-name="announcements">Announcements</span> </details> <span class="tab" data-tab-name="extensions">Extensions</span> <span class="tab" data-tab-name="settings">Settings</span> <div class="clearfix"> </nav> <div class="overlay"></div> </div> <div id="botTemplates"> <template id="jlTemplate"> <div class="msg"> <label>When the player is </label> <select data-target="group"> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select data-target="not_group"> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> then say </label> <textarea class="m"></textarea> <label> in chat if the player has joined between </label> <input type="number" value="0" data-target="joins_low"> <label> and </label> <input type="number" value="9999" data-target="joins_high"> <label> times.</label><br> <a>Delete</a> </div> </template> <template id="tTemplate"> <div class="msg"> <label>When </label> <select data-target="group"> <option value="All">anyone</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> who is not </label> <select data-target="not_group"> <option value="Nobody">nobody</option> <option value="Staff">a staff member</option> <option value="Mod">a mod</option> <option value="Admin">an admin</option> <option value="Owner">the owner</option> </select> <label> says </label> <input class="t"> <label> in chat, say </label> <textarea class="m"></textarea> <label> if the player has joined between </label> <input type="number" value="0" data-target="joins_low"> <label> and </label> <input type="number" value="9999" data-target="joins_high"> <label>times. </label><br> <a>Delete</a> </div> </template> <template id="aTemplate"> <div class="ann"> <label>Send:</label> <textarea class="m"></textarea> <a>Delete</a> <label style="display:block;margin-top:5px">Wait X minutes...</label> </div> </template> <template id="extTemplate"> <div class="ext"> <h4>Title</h4> <span>Description</span><br> <button class="button">Install</button> </div> </template> </div> <div id="container"> <header></header> <div id="mb_console" data-tab-name="console" class="visible"> <div class="chat"> <ul></ul> </div> <div class="controls"> <input type="text"><button>SEND</button> </div> </div> <div id="mb_join" data-tab-name="join"> <h3>These are checked when a player joins the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="jMsgs"></div> </div> <div id="mb_leave" data-tab-name="leave"> <h3>These are checked when a player leaves the server.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span> <div id="lMsgs"></div> </div> <div id="mb_trigger" data-tab-name="trigger"> <h3>These are checked whenever someone says something.</h3> <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span> <span class="add">+</span> <div id="tMsgs"></div> </div> <div id="mb_announcements" data-tab-name="announcements"> <h3>These are sent according to a regular schedule.</h3> <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span> <span class="add">+</span> <div id="aMsgs"></div> </div> <div id="mb_extensions" data-tab-name="extensions"> <h3>Extensions can increase the functionality of the bot.</h3> <span>Interested in creating one? <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki" target="_blank">Click here.</a></span> <span id="mb_load_man">Load By ID/URL</span> <div id="exts"></div> </div> <div id="mb_settings" data-tab-name="settings"> <h3>Settings</h3> <label for="mb_ann_delay">Minutes between announcements: </label><br> <input id="mb_ann_delay" type="number"><br> <label for="mb_resp_max">Maximum trigger responses to a message: </label><br> <input id="mb_resp_max" type="number"><br> <label for="mb_notify_message">New chat notifications: </label> <input id="mb_notify_message" type="checkbox"><br> <h3>Advanced Settings</h3> <a href="https://github.com/Bibliofile/Blockheads-MessageBot/wiki/Advanced-Options" target="_blank">Read this first</a><br> <label for="mb_disable_trim">Disable whitespace trimming: </label> <input id="mb_disable_trim" type="checkbox"><br> <label for="mb_regex_triggers">Parse triggers as RegEx: </label> <input id="mb_regex_triggers" type="checkbox"><br> <h3>Extensions</h3> <div id="mb_ext_list"></div> <h3>Backup / Restore</h3> <a id="mb_backup_save">Get backup code</a><br> <a id="mb_backup_load">Load previous backup</a> <div id="mb_backup"></div> </div> </div> <div id="alertWrapper"> <div id="alert"> <div id="alertContent"></div> <div class="buttons"></div> </div> <div class="overlay"> ';
 
         var mainToggle = document.querySelector('#leftNav input');
 
@@ -777,6 +778,10 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
         hook.listen('ui.addmessagetopage', function showNewChat() {
             let container = document.querySelector('#mb_console ul');
             let lastLine = document.querySelector('#mb_console li:last-child');
+
+            if (!container || !lastLine) {
+                return;
+            }
 
             if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 2) {
                 lastLine.scrollIntoView(false);
@@ -910,10 +915,10 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
             ];
 
             if (templateSelector != '#aTemplate') {
-                rules.push({selector: 'input[type="number"]', value: saveObj.joins_low || 0});
-                rules.push({selector: `input[type="number"]:not([value="${saveObj.joins_low || 0}"])`, value: saveObj.joins_high || 9999});
-                rules.push({selector: `option[value="${saveObj.group || 'All'}"]`, selected: 'selected'});
-                rules.push({selector: `option[value="${saveObj.not_group || 'Nobody'}"]`, selected: 'selected'});
+                rules.push({selector: `[data-target=joins_low]`, value: saveObj.joins_low || 0});
+                rules.push({selector: `[data-target=joins_high]`, value: saveObj.joins_high || 9999});
+                rules.push({selector: `[data-target=group] [value="${saveObj.group || 'All'}"]`, selected: 'selected'});
+                rules.push({selector: `[data-target=not_group] [value="${saveObj.not_group || 'Nobody'}"]`, selected: 'selected'});
             }
 
             if (templateSelector == '#tTemplate') {
@@ -1173,9 +1178,8 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
                 if (rule.multiple) {
                     let els = content.querySelectorAll(rule.selector);
 
-                    for (let el of els) {
-                        updateElement(el, rule);
-                    }
+                    Array.from(els)
+                        .forEach(el => updateElement(el, rule));
                 } else {
                     let el = content.querySelector(rule.selector);
                     if (!el) {
@@ -1292,8 +1296,14 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
         }
     }());
 
+    setTimeout(function() {
+        bhfansapi.listExtensions();
+        hook.listen('error', bhfansapi.reportError);
+        storage.getObject('mb_extensions', [], false).forEach(bhfansapi.startExtension);
+    }, 1000);
+
     var bot = {
-        version: '6.0.3',
+        version: '6.0.4',
         ui: ui,
         api: api,
         hook: hook,

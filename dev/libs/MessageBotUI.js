@@ -21,6 +21,10 @@
             let container = document.querySelector('#mb_console ul');
             let lastLine = document.querySelector('#mb_console li:last-child');
 
+            if (!container || !lastLine) {
+                return;
+            }
+
             if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 2) {
                 lastLine.scrollIntoView(false);
             }
@@ -153,10 +157,10 @@
             ];
 
             if (templateSelector != '#aTemplate') {
-                rules.push({selector: 'input[type="number"]', value: saveObj.joins_low || 0});
-                rules.push({selector: `input[type="number"]:not([value="${saveObj.joins_low || 0}"])`, value: saveObj.joins_high || 9999});
-                rules.push({selector: `option[value="${saveObj.group || 'All'}"]`, selected: 'selected'});
-                rules.push({selector: `option[value="${saveObj.not_group || 'Nobody'}"]`, selected: 'selected'});
+                rules.push({selector: `[data-target=joins_low]`, value: saveObj.joins_low || 0});
+                rules.push({selector: `[data-target=joins_high]`, value: saveObj.joins_high || 9999});
+                rules.push({selector: `[data-target=group] [value="${saveObj.group || 'All'}"]`, selected: 'selected'});
+                rules.push({selector: `[data-target=not_group] [value="${saveObj.not_group || 'Nobody'}"]`, selected: 'selected'});
             }
 
             if (templateSelector == '#tTemplate') {
@@ -416,9 +420,8 @@
                 if (rule.multiple) {
                     let els = content.querySelectorAll(rule.selector);
 
-                    for (let el of els) {
-                        updateElement(el, rule);
-                    }
+                    Array.from(els)
+                        .forEach(el => updateElement(el, rule));
                 } else {
                     let el = content.querySelector(rule.selector);
                     if (!el) {

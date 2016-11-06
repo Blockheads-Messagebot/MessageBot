@@ -1,5 +1,5 @@
 (function() {
-    function api(hook, ajax, storage) {
+    function api(ajax, storage, global) {
         var cache = {
             getStore: getStore(),
         };
@@ -10,8 +10,10 @@
             return ajax.getJSON('//blockheadsfans.com/messagebot/extension/store');
         }
 
-        function listExtensions() {
-            api.getExtensionNames(extensions).then((resp) => {
+        var api = {};
+
+        api.listExtensions = () => {
+            return api.getExtensionNames(extensions).then((resp) => {
                 var target = document.querySelector('#mb_ext_list');
                 if (resp.status == 'ok') {
                     Array.from(document.querySelectorAll('#exts button'))
@@ -39,10 +41,7 @@
                 }
             })
             .catch(api.reportError);
-        }
-
-
-        var api = {};
+        };
 
         // ids is an array of extension ids
         api.getExtensionNames = (ids) => ajax.postJSON('//blockheadsfans.com/messagebot/extension/name', {extensions: JSON.stringify(ids)});
@@ -61,20 +60,15 @@
             el.crossOrigin = 'anonymous';
             document.head.appendChild(el);
         };
-        //Delay starting extensions - avoids some odd bugs
-        setTimeout(function() {
-            storage.getObject('mb_extensions', [], false).forEach(api.startExtension);
-        }, 1000);
-
 
         api.removeExtension = (id) => {
             //Try to call the uninstall function
             try {
-                window[id].uninstall();
+                global[id].uninstall();
             } catch(e) {
                 // Normal if an uninstall function was not defined.
             }
-            window[id] = undefined;
+            global[id] = undefined;
 
             if (extensions.includes(id)) {
                 extensions.splice(extensions.indexOf(id), 1);
@@ -89,17 +83,17 @@
                         button.disabled = false;
                     }, 3000);
                 }
-                listExtensions();
+                api.listExtensions();
             }
         };
 
         api.extensionInstalled = (id) => {
-            return extensions.includes(id);
+            return extensions.includes(id) || typeof global[id] != 'undefined';
         };
 
-        //FIXME: Avoid relying on window.bot.ui
+        //FIXME: Avoid relying on knowing bot.ui
         api.reportError = (err) => {
-            ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
+            return ajax.postJSON('//blockheadsfans.com/messagebot/bot/error',
             {
                 error_text: err.message,
                 error_file: err.filename,
@@ -109,21 +103,20 @@
             })
             .then((resp) => {
                 if (resp.status == 'ok') {
-                    window.bot.ui.notify('Something went wrong, it has been reported.');
+                    global.bot.ui.notify('Something went wrong, it has been reported.');
                 } else {
-                    throw new Error(resp.message);
+                    global.bot.ui.notify(`Error reporting exception: ${resp.message}`);
                 }
             })
             .catch((err) => {
                 console.error(err);
-                window.bot.ui.notify(`Error reporting exception: ${err}`);
             });
         };
 
         api.autoloadExtension = (id, shouldAutoload) => {
             if (!api.extensionInstalled(id) && shouldAutoload) {
                 extensions.push(id);
-                listExtensions();
+                api.listExtensions();
             } else if (!shouldAutoload) {
                 if (api.extensionInstalled(id)) {
                     extensions.splice(extensions.indexOf(id), 1);
@@ -133,11 +126,6 @@
             storage.set('mb_extensions', extensions, false);
         };
 
-        //Listen for errors
-        hook.listen('error', api.reportError);
-
-        //Timeout to allow for building the page before a response is recieved
-        setTimeout(listExtensions, 500);
         return api;
     }
 

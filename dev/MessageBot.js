@@ -10,8 +10,14 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
         }
     }());
 
+    setTimeout(function() {
+        bhfansapi.listExtensions();
+        hook.listen('error', bhfansapi.reportError);
+        storage.getObject('mb_extensions', [], false).forEach(bhfansapi.startExtension);
+    }, 1000);
+
     var bot = {
-        version: '6.0.3',
+        version: '6.0.4',
         ui: ui,
         api: api,
         hook: hook,

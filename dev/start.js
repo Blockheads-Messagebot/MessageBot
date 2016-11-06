@@ -34,7 +34,7 @@ if (!window.console) {
 window.storage = CreateStorage(window.worldId);
 
 {{inject libs/BHFansAPI.js}} //Depends: ajax, storage
-window.bhfansapi = CreateBHFansAPI(window.hook, window.ajax, window.storage);
+window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
 {{inject libs/BlockheadsAPI.js}} //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);

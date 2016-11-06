@@ -1,5 +1,11 @@
 (function() {
     var ajax = (function() { //jshint ignore:line
+        function urlStringify(obj) {
+            return Object.keys(obj)
+                .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+                .join('&');
+        }
+
         /**
          * Helper function to make XHR requests.
          *
@@ -9,9 +15,7 @@
          * @return Promise
          */
         function xhr(protocol, url = '/', paramObj = {}) {
-            var paramStr = Object.keys(paramObj)
-                                .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(paramObj[k])}`)
-                                .join('&');
+            var paramStr = urlStringify(paramObj);
             return new Promise(function(resolve, reject) {
                 var req = new XMLHttpRequest();
                 req.open(protocol, url);
@@ -47,7 +51,15 @@
          * @return Promise
          */
         function get(url = '/', paramObj = {}) {
-            return xhr('GET', url, paramObj);
+            if (Object.keys(paramObj).length) {
+                var addition = urlStringify(paramObj);
+                if (!url.includes('?')) {
+                    url += `?${addition}`;
+                } else {
+                    url += `&${addition}`;
+                }
+            }
+            return xhr('GET', url, {});
         }
 
         /**
