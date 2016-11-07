@@ -46,6 +46,7 @@
                 window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
             }, 1000);
         case '6.0.3':
+        case '6.0.4':
     }
     //jshint +W086
 }(localStorage));
