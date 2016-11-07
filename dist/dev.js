@@ -75,6 +75,7 @@ if (!window.console) {
                 window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
             }, 1000);
         case '6.0.3':
+        case '6.0.4':
     }
     //jshint +W086
 }(localStorage));
@@ -439,12 +440,13 @@ window.storage = CreateStorage(window.worldId);
         };
 
         api.autoloadExtension = (id, shouldAutoload) => {
-            if (!api.extensionInstalled(id) && shouldAutoload) {
+            if (!extensions.includes(id) && shouldAutoload) {
                 extensions.push(id);
                 api.listExtensions();
             } else if (!shouldAutoload) {
-                if (api.extensionInstalled(id)) {
+                if (extensions.includes(id)) {
                     extensions.splice(extensions.indexOf(id), 1);
+                    api.listExtensions();
                 }
             }
 
@@ -1303,7 +1305,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }, 1000);
 
     var bot = {
-        version: '6.0.4',
+        version: '6.0.5',
         ui: ui,
         api: api,
         hook: hook,
