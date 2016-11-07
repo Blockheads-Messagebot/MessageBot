@@ -114,12 +114,13 @@
         };
 
         api.autoloadExtension = (id, shouldAutoload) => {
-            if (!api.extensionInstalled(id) && shouldAutoload) {
+            if (!extensions.includes(id) && shouldAutoload) {
                 extensions.push(id);
                 api.listExtensions();
             } else if (!shouldAutoload) {
-                if (api.extensionInstalled(id)) {
+                if (extensions.includes(id)) {
                     extensions.splice(extensions.indexOf(id), 1);
+                    api.listExtensions();
                 }
             }
 
