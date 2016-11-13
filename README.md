@@ -7,11 +7,10 @@
 4. Install complete!
 
 ##### Usage
-1. Go to http://portal.theblockheads.net
-2. Choose the world you want to run the bot on
-3. Make sure the world is started and navigate to the "console" page
-4. Click the bookmark
-5. Configure as you wish. Your messages will automatically be saved for the next time you open the bot.
+0. Go to http://portal.theblockheads.net
+0. Choose the world you want to run the bot on
+0. Click the bookmark
+0. Configure as you wish. Your messages will automatically be saved for the next time you open the bot.
 
 # Development
 ##### Guides / Documentation
