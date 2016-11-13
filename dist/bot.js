@@ -456,7 +456,7 @@ window.storage = CreateStorage(window.worldId);
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
 (function () {
-    var apiLoad = performance.now();
+    var apiLoad = Date.now();
 
     function logWithTime() {
         var _console;
@@ -465,7 +465,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
             args[_key4] = arguments[_key4];
         }
 
-        (_console = console).info.apply(_console, args.concat(['Took', ((performance.now() - apiLoad) / 1000).toFixed(3), 'seconds']));
+        (_console = console).info.apply(_console, args.concat(['Took', ((Date.now() - apiLoad) / 1000).toFixed(3), 'seconds']));
     }
 
     var api = function api(ajax, worldId, hook, bhfansapi) {
@@ -1194,7 +1194,9 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     var chatBuffer = [];
     (function checkBuffer() {
         if (chatBuffer.length) {
-            api.send(chatBuffer.shift()).then(checkBuffer);
+            api.send(chatBuffer.shift()).then(function () {
+                return setTimeout(checkBuffer, 500);
+            });
         } else {
             setTimeout(checkBuffer, 500);
         }

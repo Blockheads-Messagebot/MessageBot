@@ -462,13 +462,13 @@ window.storage = CreateStorage(window.worldId);
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
 (function() {
-    var apiLoad = performance.now();
+    var apiLoad = Date.now();
 
     function logWithTime(...args) {
         console.info(
             ...args,
             'Took',
-            ((performance.now() - apiLoad) / 1000).toFixed(3),
+            ((Date.now() - apiLoad) / 1000).toFixed(3),
             'seconds'
         );
     }
@@ -1292,7 +1292,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     (function checkBuffer() {
         if (chatBuffer.length) {
             api.send(chatBuffer.shift())
-                .then(checkBuffer);
+                .then(() => setTimeout(checkBuffer, 500));
         } else {
             setTimeout(checkBuffer, 500);
         }

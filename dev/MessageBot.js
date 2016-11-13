@@ -4,7 +4,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     (function checkBuffer() {
         if (chatBuffer.length) {
             api.send(chatBuffer.shift())
-                .then(checkBuffer);
+                .then(() => setTimeout(checkBuffer, 500));
         } else {
             setTimeout(checkBuffer, 500);
         }

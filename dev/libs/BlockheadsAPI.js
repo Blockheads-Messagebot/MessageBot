@@ -1,11 +1,11 @@
 (function() {
-    var apiLoad = performance.now();
+    var apiLoad = Date.now();
 
     function logWithTime(...args) {
         console.info(
             ...args,
             'Took',
-            ((performance.now() - apiLoad) / 1000).toFixed(3),
+            ((Date.now() - apiLoad) / 1000).toFixed(3),
             'seconds'
         );
     }
