@@ -17,7 +17,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }, 1000);
 
     var bot = {
-        version: '6.0.5',
+        version: '6.0.6',
         ui: ui,
         api: api,
         hook: hook,

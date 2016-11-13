@@ -93,6 +93,7 @@ if (!window.console) {
             }, 1000);
         case '6.0.3':
         case '6.0.4':
+        case '6.0.5':
     }
 })(localStorage);
 (function () {
@@ -1209,7 +1210,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     }, 1000);
 
     var bot = {
-        version: '6.0.5',
+        version: '6.0.6',
         ui: ui,
         api: api,
         hook: hook,

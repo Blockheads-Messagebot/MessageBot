@@ -76,6 +76,7 @@ if (!window.console) {
             }, 1000);
         case '6.0.3':
         case '6.0.4':
+        case '6.0.5':
     }
     //jshint +W086
 }(localStorage));
@@ -1305,7 +1306,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
     }, 1000);
 
     var bot = {
-        version: '6.0.5',
+        version: '6.0.6',
         ui: ui,
         api: api,
         hook: hook,

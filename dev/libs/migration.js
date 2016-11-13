@@ -47,6 +47,7 @@
             }, 1000);
         case '6.0.3':
         case '6.0.4':
+        case '6.0.5':
     }
     //jshint +W086
 }(localStorage));
