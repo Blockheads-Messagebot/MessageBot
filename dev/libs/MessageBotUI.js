@@ -1,8 +1,8 @@
 (function() {
     var create = function(hook, bhfansapi) { //jshint ignore:line
-        document.head.innerHTML = '{{inject ../dist/tmphead.html}}';
-        document.head.innerHTML += '<style>{{inject ../dist/tmpbot.css}}<style>';
-        document.body.innerHTML = '{{inject ../dist/tmpbody.html}}';
+        document.head.innerHTML = 'INCLUDE_FILE("../dist/tmphead.html")';
+        document.head.innerHTML += '<style>INCLUDE_FILE("../dist/tmpbot.css")<style>';
+        document.body.innerHTML = 'INCLUDE_FILE("../dist/tmpbody.html")';
 
         var mainToggle = document.querySelector('#leftNav input');
 

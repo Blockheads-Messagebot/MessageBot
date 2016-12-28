@@ -1,12 +1,7 @@
 //Imported vars / functions
 /*globals
-    getAjax,
-    getHook,
-    getStorage,
-    BHFansAPI,
-    BlockheadsAPI,
-    MessageBot,
-    MessageBotUI
+    INCLUDE_FILE,
+    MessageBot
 */
 
 //Overwrite the pollChat function to kill the default chat function
@@ -26,27 +21,27 @@ if (!window.console) {
     }
 });
 
-// jshint ignore:start
-{{inject libs/migration.js}} //Update localStorage entries with old data
-{{inject libs/ajax.js}} //Browser
-{{inject libs/hook.js}} //Node + Browser
-{{inject libs/storage.js}} //Browser -- Depends: worldId
+//jshint -W117
+INCLUDE_FILE('libs/migration.js'); //Update localStorage entries with old data
+INCLUDE_FILE('libs/ajax.js'); //Browser
+INCLUDE_FILE('libs/hook.js'); //Node + Browser
+INCLUDE_FILE('libs/storage.js'); //Browser -- Depends: worldId
 window.storage = CreateStorage(window.worldId);
 
-{{inject libs/BHFansAPI.js}} //Depends: ajax, storage
+INCLUDE_FILE('libs/BHFansAPI.js'); //Depends: ajax, storage
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
-{{inject libs/BlockheadsAPI.js}} //Browser -- Depends: ajax, worldId, hook
+INCLUDE_FILE('libs/BlockheadsAPI.js'); //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
 
-{{inject libs/MessageBotUI.js}} //Depends: hook, BHFansAPI
+INCLUDE_FILE('libs/MessageBotUI.js'); //Depends: hook, BHFansAPI
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
 
-{{inject libs/popups.js}} //Depends: botui, bhfansapi
+INCLUDE_FILE('libs/popups.js'); //Depends: botui, bhfansapi
 
-{{inject MessageBot.js}}
-{{inject MessageBotExtension.js}}
-// jshint ignore:end
+INCLUDE_FILE('MessageBot.js');
+INCLUDE_FILE('MessageBotExtension.js');
+//jshint +W117
 
 var bot = MessageBot( //jshint unused:false
             window.ajax,
