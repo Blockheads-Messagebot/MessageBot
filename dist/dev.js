@@ -1,12 +1,7 @@
 //Imported vars / functions
 /*globals
-    getAjax,
-    getHook,
-    getStorage,
-    BHFansAPI,
-    BlockheadsAPI,
-    MessageBot,
-    MessageBotUI
+    INCLUDE_FILE,
+    MessageBot
 */
 
 //Overwrite the pollChat function to kill the default chat function
@@ -26,7 +21,7 @@ if (!window.console) {
     }
 });
 
-// jshint ignore:start
+//jshint -W117
 (function(storage) {
     function update(keys, operator) {
         Object.keys(storage).forEach(item => {
@@ -80,7 +75,7 @@ if (!window.console) {
     }
     //jshint +W086
 }(localStorage));
- //Update localStorage entries with old data
+; //Update localStorage entries with old data
 (function() {
     var ajax = (function() { //jshint ignore:line
         function urlStringify(obj) {
@@ -183,7 +178,7 @@ if (!window.console) {
 
     window.ajax = ajax;
 }());
- //Browser
+; //Browser
 (function() {
     var hook = (function() {
         var listeners = {};
@@ -262,7 +257,7 @@ if (!window.console) {
         window.hook = hook;
     }
 }());
- //Node + Browser
+; //Node + Browser
 (function() {
     var storage = function(worldId) {
         function getString(key, fallback, local = true) {
@@ -322,7 +317,7 @@ if (!window.console) {
     //Node doesn't have localStorage.
     window.CreateStorage = storage;
 }());
- //Browser -- Depends: worldId
+; //Browser -- Depends: worldId
 window.storage = CreateStorage(window.worldId);
 
 (function() {
@@ -459,7 +454,7 @@ window.storage = CreateStorage(window.worldId);
 
     window.CreateBHFansAPI = api;
 }());
- //Depends: ajax, storage
+; //Depends: ajax, storage
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
 (function() {
@@ -756,7 +751,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
     window.BlockheadsAPI = api;
 }());
- //Browser -- Depends: ajax, worldId, hook
+; //Browser -- Depends: ajax, worldId, hook
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
 
 (function() {
@@ -1225,7 +1220,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
     window.MessageBotUI = create;
 }());
- //Depends: hook, BHFansAPI
+; //Depends: hook, BHFansAPI
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
 
 (function(ui, bhfansapi) {
@@ -1285,7 +1280,7 @@ window.botui = MessageBotUI(window.hook, window.bhfansapi);
         ui.alert(`Copy this to a safe place:<br><textarea style="width: calc(100% - 7px);height:160px;">${backup}</textarea>`);
     });
 }(window.botui, window.bhfansapi));
- //Depends: botui, bhfansapi
+; //Depends: botui, bhfansapi
 
 function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:line
     //Helps avoid messages that are tacked onto the end of other messages.
@@ -1770,7 +1765,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
 
     return bot;
 }
-
+;
 function MessageBotExtension(namespace) { //jshint ignore:line
     var extension = {
         id: namespace,
@@ -1797,8 +1792,8 @@ function MessageBotExtension(namespace) { //jshint ignore:line
 
     return extension;
 }
-
-// jshint ignore:end
+;
+//jshint +W117
 
 var bot = MessageBot( //jshint unused:false
             window.ajax,

@@ -96,6 +96,7 @@ if (!window.console) {
         case '6.0.5':
     }
 })(localStorage);
+; 
 (function () {
     var ajax = function () {
         function urlStringify(obj) {
@@ -176,6 +177,7 @@ if (!window.console) {
 
     window.ajax = ajax;
 })();
+; 
 (function () {
     var hook = function () {
         var listeners = {};
@@ -260,6 +262,7 @@ if (!window.console) {
         window.hook = hook;
     }
 })();
+; 
 (function () {
     var storage = function storage(worldId) {
         function getString(key, fallback) {
@@ -324,6 +327,7 @@ if (!window.console) {
 
     window.CreateStorage = storage;
 })();
+; 
 window.storage = CreateStorage(window.worldId);
 
 (function () {
@@ -454,6 +458,7 @@ window.storage = CreateStorage(window.worldId);
 
     window.CreateBHFansAPI = api;
 })();
+; 
 window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
 (function () {
@@ -745,6 +750,7 @@ window.bhfansapi = CreateBHFansAPI(window.ajax, window.storage, window);
 
     window.BlockheadsAPI = api;
 })();
+; 
 window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfansapi);
 
 (function () {
@@ -1138,6 +1144,7 @@ window.api = BlockheadsAPI(window.ajax, window.worldId, window.hook, window.bhfa
 
     window.MessageBotUI = create;
 })();
+; 
 window.botui = MessageBotUI(window.hook, window.bhfansapi);
 
 (function (ui, bhfansapi) {
@@ -1190,6 +1197,7 @@ window.botui = MessageBotUI(window.hook, window.bhfansapi);
         ui.alert('Copy this to a safe place:<br><textarea style="width: calc(100% - 7px);height:160px;">' + backup + '</textarea>');
     });
 })(window.botui, window.bhfansapi);
+; 
 
 function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
     var chatBuffer = [];
@@ -1646,7 +1654,7 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) {
 
     return bot;
 }
-
+;
 function MessageBotExtension(namespace) {
     var extension = {
         id: namespace,
@@ -1666,7 +1674,7 @@ function MessageBotExtension(namespace) {
 
     return extension;
 }
-
+;
 
 var bot = MessageBot( 
 window.ajax, window.hook, window.storage, window.bhfansapi, window.api, window.botui);
