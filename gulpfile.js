@@ -7,7 +7,7 @@ var rename = require('gulp-rename');
 var babel = require('gulp-babel');
 var comments = require('gulp-strip-comments');
 var stripDebug = require('gulp-strip-debug');
-var injectFile = require('gulp-inject-file');
+var include_file = require("gulp-include-file");
 var htmlmin = require('gulp-htmlmin');
 var replace = require('gulp-replace');
 var sass = require('gulp-sass');
@@ -48,8 +48,8 @@ gulp.task('_sass', function() {
 
 gulp.task('inject', ['_minhtml', '_sass'], function() {
     return gulp.src('dev/start.js')
-        .pipe(injectFile({
-            pattern: '{{inject <filename>}}'
+        .pipe(include_file({
+            transform: x => x //Don't do anything, wip migration to handle this properly.
         }))
         .pipe(rename('dev.js'))
         .pipe(gulp.dest('dist'))
