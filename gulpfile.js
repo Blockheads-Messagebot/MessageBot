@@ -6,12 +6,15 @@ var gulp = require('gulp');
 var rename = require('gulp-rename');
 var babel = require('gulp-babel');
 var comments = require('gulp-strip-comments');
-var stripDebug = require('gulp-strip-debug');
 var include_file = require("gulp-include-file");
 var htmlmin = require('gulp-htmlmin');
 var replace = require('gulp-replace');
 var sass = require('gulp-sass');
 var del = require('del');
+
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
 
 gulp.task('_minbodyhtml', function() {
     return gulp.src('dev/page/body.html')
@@ -47,16 +50,20 @@ gulp.task('_sass', function() {
 });
 
 gulp.task('inject', ['_minhtml', '_sass'], function() {
-    return gulp.src('dev/start.js')
-        .pipe(include_file({
-            transform: x => x //Don't do anything, wip migration to handle this properly.
-        }))
+    var b = browserify({
+      entries: './dev/start.js',
+      debug: true
+    });
+
+    return b.bundle()
+        .pipe(source('app.js')) //Can app.js be removed?
+        .pipe(buffer())
+        .pipe(include_file())
         .pipe(rename('dev.js'))
         .pipe(gulp.dest('dist'))
         .pipe(babel({
             presets: ['es2015']
         }))
-        .pipe(stripDebug())
         .pipe(comments())
         .pipe(rename('bot.js'))
         .pipe(gulp.dest('dist'));
