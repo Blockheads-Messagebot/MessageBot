@@ -1,11 +1,8 @@
 /*jshint
-    jasmine: true,
-    unused: true
+    jasmine: true
 */
 
-/*globals
-    ajax
-*/
+var ajax = require('../dev/libs/ajax');
 
 describe('ajax.xhr', function() {
     beforeEach(function() {
