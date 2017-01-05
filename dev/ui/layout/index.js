@@ -1,23 +1,16 @@
-// Contains functions for managing navigation
+/**
+ * @file Contains functions for managing the page layout
+ */
+
+// Set up listeners to change tabs / show menu
+require('./listeners');
 
 module.exports = {
-    toggleMenu,
     addTab,
     removeTab,
     addTabGroup,
     removeTabGroup,
 };
-
-/**
- * Hides / shows the menu.
- *
- * @example
- * toggleMenu();
- */
-function toggleMenu() {
-    var mainToggle = document.querySelector('#leftNav input');
-    mainToggle.checked = !mainToggle.checked;
-}
 
 var tabUID = 0;
 /**

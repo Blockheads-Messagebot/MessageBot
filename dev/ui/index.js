@@ -1,6 +1,15 @@
-// Build the API
-module.exports = require('./exports');
+require('./polyfills/details');
 
-// Build the page
-require('./page');
-require('./listeners');
+// Build the API
+Object.assign(module.exports, ...[
+    './layout',
+    './template',
+    './notifications',
+].map(require));
+
+// Functions which are no longer contained in this module, but are retained for now for backward compatability.
+const write = require('app/console/exports').write;
+module.exports.addMessageToConsole = function(msg, name = '', nameClass = '') {
+    console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
+    write(msg, name, nameClass);
+};

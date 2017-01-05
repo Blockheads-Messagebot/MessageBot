@@ -49,6 +49,13 @@ gulp.task('_sass', function() {
         .pipe(gulp.dest('dist'));
 });
 
+////// folders: view framework ui
+gulp.task('test', function() {
+    return gulp.src(['./dev/*.scss', './dev/*.sass'], {base: './dev/'})
+        .pipe(sass({outputStyle: 'compressed', includePaths: ['./dev/layout']}).on('error', sass.logError))
+        .pipe(gulp.dest('./dev'));
+});
+
 gulp.task('inject', ['_minhtml', '_sass'], function() {
     var b = browserify({
       entries: './dev/start.js',

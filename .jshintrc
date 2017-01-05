@@ -1,0 +1,9 @@
+{
+    "predef": {"INCLUDE_FILE": false, "require": false, "module": true},
+    "esversion": 6,
+    "browser": true,
+    "devel": true,
+    "unused": "strict",
+    "undef": true,
+    "strict": "implied"
+}
