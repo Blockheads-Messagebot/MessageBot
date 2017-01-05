@@ -13,6 +13,8 @@
 0. Configure as you wish. Your messages will automatically be saved for the next time you open the bot.
 
 # Development
+##### Local setup
+After cloning, create a symlink to /dev under /node_modules/app
 ##### Guides / Documentation
 See the [wiki](https://github.com/Bibliofile/Blockheads-MessageBot/wiki).
 
