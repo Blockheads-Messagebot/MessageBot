@@ -35,14 +35,6 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
-  "jshintConfig": {
-    "esversion": 6,
-    "browser": true,
-    "devel": true,
-    "unused": "strict",
-    "undef": true,
-    "strict": "implied"
-  },
   "scripts": {
     "test": "karma start karma.conf.js"
   }

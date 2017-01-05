@@ -1,0 +1,50 @@
+@import 'config'
+
+#mb_console
+    .chat
+        height: calc(100vh - 220px)
+        @media screen and (min-width: 668px)
+            height: calc(100vh - 155px)
+
+    ul
+        height: 100%
+        overflow-y: auto
+        margin: 0
+        padding: 0
+
+    li
+        list-style-type: none
+
+
+    .controls
+        display: flex
+        padding: 0 10px
+
+
+    input, button
+        margin: 5px 0
+
+
+    input
+        font-size: 1em //Without this iOS zoomes in on focus.
+        padding: 1px
+        flex: 1
+        border: solid 1px #999
+
+
+    button
+        background: $secondary-background
+        font-weight: bold
+        color: $secondary-text
+        border: 0
+        height: 40px
+        padding: 1px 4px
+
+
+    .mod > span:first-child
+        color: $mod-color
+
+    .admin > span:first-child
+        color: $admin-color
+
+}

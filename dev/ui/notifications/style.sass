@@ -1,0 +1,83 @@
+@import 'config'
+
+#alert
+    visibility: hidden
+    &.visible
+        visibility: visible
+
+    //Rougly center in the page
+    position: fixed
+    top: 50px
+    left: 0
+    right: 0
+    margin: auto
+
+    z-index: 101
+
+    //Sizing
+    width: 50%
+    min-width: 300px
+    min-height: 200px
+
+    background: #fff
+    border-radius: 10px
+    padding: 10px 10px 55px 10px
+
+    > div
+        webkit-overflow-scrolling: touch
+        max-height: 65vh
+        overflow-y: auto
+
+    > .buttons
+        position: absolute
+        bottom: 10px
+        left: 5px
+
+
+
+#alert > .buttons
+    > span
+        display: inline-block
+        padding: 6px 12px
+        margin: 0 5px
+        text-align: center
+        white-space: nowrap
+        cursor: pointer
+        border: 1px solid transparentize(#000, 0.85)
+        border-radius: 6px
+        background: #fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)
+
+    [class]
+        color: #fff
+
+    .success
+        background: #5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%)
+        border-color: #3e8f3e
+
+    .info
+        background: #5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%)
+        border-color: #28a4c9
+
+    .danger
+        background: #d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%)
+        border-color: #b92c28
+
+    .warning
+        background: #f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%)
+        border-color: #e38d13
+
+
+.notification
+    opacity: 0
+    transition: opacity 1s
+    &.visible
+        opacity: 1
+
+    position: fixed
+    top: 1em
+    right: 1em
+
+    min-width: 200px
+    border-radius: 5px
+    padding: 5px
+    background: lighten($secondary-background, 50%)

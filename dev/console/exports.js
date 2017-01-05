@@ -1,8 +1,9 @@
 module.exports = {
-    addMessageToConsole
+    write,
+    clear
 };
 
-function addMessageToConsole(msg, name = '', nameClass = '') {
+function write(msg, name = '', nameClass = '') {
     var msgEl = document.createElement('li');
     if (nameClass) {
         msgEl.setAttribute('class', nameClass);
@@ -22,4 +23,9 @@ function addMessageToConsole(msg, name = '', nameClass = '') {
 
     var chat = document.querySelector('#mb_console ul');
     chat.appendChild(msgEl);
+}
+
+function clear() {
+    var chat = document.querySelector('#mb_console ul');
+    chat.innerHTML = '';
 }
