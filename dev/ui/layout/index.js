@@ -2,8 +2,13 @@
  * @file Contains functions for managing the page layout
  */
 
+// Build page
+document.body.innerHTML += INCLUDE_FILE('layout.html');
+document.head.innerHTML += '<style>' + INCLUDE_FILE('style.css') + '</style>';
+
 // Set up listeners to change tabs / show menu
 require('./listeners');
+
 
 module.exports = {
     addTab,

@@ -1,11 +1,16 @@
 var bot = require('./MessageBot');
-var ui = require('./ui');
-var storage = require('./libs/storage');
-var ajax = require('./libs/ajax');
-var api = require('./libs/blockheads');
-var hook = require('./libs/hook');
+const bot_console = require('app/console');
+const ui = require('app/ui');
+const storage = require('app/libraries/storage');
+const ajax = require('app/libraries/ajax');
+const api = require('app/libraries/blockheads');
+const world = require('app/libraries/world');
+const hook = require('app/libraries/hook');
 
+// Array of IDs to autolaod at the next launch.
+var autoload = [];
 const STORAGE_ID = 'mb_extensions';
+
 
 /**
  * Used to create a new extension.
@@ -21,10 +26,12 @@ function MessageBotExtension(namespace) {
     var extension = {
         id: namespace,
         bot,
+        console: bot_console,
         ui,
         storage,
         ajax,
         api,
+        world,
         hook,
     };
 
@@ -87,9 +94,7 @@ MessageBotExtension.uninstall = function uninstall(id) {
 };
 
 // Load extensions that set themselves to autoload last launch.
-storage.getObject(STORAGE_ID, [], false).forEach(MessageBotExtension.install);
-
-// Array of IDs to autolaod at the next launch.
-var autoload = [];
+storage.getObject(STORAGE_ID, [], false)
+    .forEach(MessageBotExtension.install);
 
 module.exports = MessageBotExtension;
