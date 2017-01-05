@@ -1,11 +1,12 @@
 require('./polyfills/details');
 
 // Build the API
-Object.assign(module.exports, ...[
-    './layout',
-    './template',
-    './notifications',
-].map(require));
+Object.assign(
+    module.exports,
+    require('./layout'),
+    require('./template'),
+    require('./notifications')
+);
 
 // Functions which are no longer contained in this module, but are retained for now for backward compatability.
 const write = require('app/console/exports').write;

@@ -3,7 +3,9 @@ var hook = require('./hook');
 var bhfansapi = require('./bhfansapi');
 
 const worldId = window.worldId;
-checkChat();
+var cache = {
+    firstId: 0,
+};
 
 // Used to parse messages more accurately
 var world = {
@@ -16,10 +18,6 @@ getOnlinePlayers()
 getWorldName()
     .then(name => world.name = name);
 
-
-var cache = {
-    firstId: 0,
-};
 
 module.exports = {
     worldStarted,
@@ -48,9 +46,8 @@ function worldStarted(refresh = false) {
             var fails = 0;
             (function check() {
                 // Could this be more simplified?
-                //jshint maxcomplexity: 7
                 ajax.postJSON('/api', { command: 'status', worldId }).then(response => {
-                    switch (response.worldStarted) {
+                    switch (response.worldStatus) {
                         case 'online':
                             return resolve();
                         case 'offline':
@@ -58,16 +55,16 @@ function worldStarted(refresh = false) {
                                 .then(check, check);
                             break;
                         case 'unavailible':
-                            return reject('World unavailible.');
+                            return reject(new Error('World unavailible.'));
                         case 'startup':
                         case 'shutdown':
                             setTimeout(check, 3000);
                             if (++fails > 10) {
-                                return reject('World took too long to start.');
+                                return reject(new Error('World took too long to start.'));
                             }
                             break;
                         default:
-                            return reject('Unknown response.');
+                            return reject(new Error('Unknown response.'));
                     }
                 }).catch(bhfansapi.reportError);
             }());
@@ -286,6 +283,7 @@ function checkChat() {
         setTimeout(checkChat, 5000);
     });
 }
+checkChat();
 
 
 /**

@@ -2,8 +2,8 @@
  * @file Contains functions to interact with blockheadsfans.com - cannot be used by extensions.
  */
 
-var ui = require('../ui');
-var ajax = require('./ajax');
+var ui = require('app/ui');
+var ajax = require('app/libraries/ajax');
 
 const API_URLS = {
     STORE: '//blockheadsfans.com/messagebot/extension/store',

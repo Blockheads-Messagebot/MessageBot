@@ -1,4 +1,4 @@
-var ui = require('../exports');
+var ui = require('app/ui');
 var MessageBotExtension = require('../../MessageBotExtension');
 
 document.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
