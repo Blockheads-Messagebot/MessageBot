@@ -1,22 +1,19 @@
-//Imported vars / functions
-/*globals
-    INCLUDE_FILE
-*/
-
-//Overwrite the pollChat function to kill the default chat function
+// Overwrite the pollChat function to kill the default chat function
 window.pollChat = function() {};
 
-require('./polyfills/console');
-require('./libs/migration');
+// Overwrite the old page
+document.body.innerHTML = '';
+document.head.innerHTML = '';
 
-var ui = require('./ui');
-var bhfansapi = require('./libs/bhfansapi');
-var hook = require('./libs/hook');
+require('app/ui/polyfills/console');
+require('app/libraries/migration');
+
+var bhfansapi = require('app/libraries/bhfansapi');
+var hook = require('app/libraries/hook');
 
 hook.on('error', bhfansapi.reportError);
 
-INCLUDE_FILE('/dev/MessageBot.js');
-INCLUDE_FILE('/dev/MessageBotExtension.js');
+require('app/console');
 
 
 window.addEventListener('error', (err) => {

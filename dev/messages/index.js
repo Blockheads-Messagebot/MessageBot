@@ -1,6 +1,6 @@
-const layout = require('../layout');
+const ui = require('app/ui');
 
-layout.addTabGroup('Messages', 'messages');
+ui.addTabGroup('Messages', 'messages');
 
 require('./join');
 require('./leave');

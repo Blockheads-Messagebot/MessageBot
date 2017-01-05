@@ -1,5 +1,5 @@
-var bhfansapi = require('../../libs/bhfansapi');
-var ui = require('../exports');
+var bhfansapi = require('app/libraries/bhfansapi');
+var ui = require('app/ui');
 var hook = require('../../libs/hook');
 var MessageBotExtension = require('../../MessageBotExtension');
 

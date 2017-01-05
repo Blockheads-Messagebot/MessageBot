@@ -2,20 +2,53 @@
  * @file Contains functions for managing the page layout
  */
 
-// Build page
-document.body.innerHTML += INCLUDE_FILE('layout.html');
-document.head.innerHTML += '<style>' + INCLUDE_FILE('style.css') + '</style>';
+// Build page - only case in which body.innerHTML should be used.
+document.body.innerHTML += INCLUDE_FILE('/dev/ui/layout/layout.html');
+document.head.innerHTML += '<style>' + INCLUDE_FILE('/dev/ui/layout/style.css') + '</style>';
 
-// Set up listeners to change tabs / show menu
-require('./listeners');
+// Hide the menu when clicking the overlay
+document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);
+
+// Change tabs
+document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
+    var tabName = event.target.dataset.tabName;
+    if(!tabName) {
+        return;
+    }
+
+    //Content
+    //We can't just remove the first due to browser lag
+    Array.from(document.querySelectorAll('#container > .visible'))
+        .forEach(el => el.classList.remove('visible'));
+    document.querySelector(`#container > [data-tab-name=${tabName}]`).classList.add('visible');
+
+    //Tabs
+    Array.from(document.querySelectorAll('#leftNav .selected'))
+        .forEach(el => el.classList.remove('selected'));
+    event.target.classList.add('selected');
+});
+
 
 
 module.exports = {
+    toggleMenu,
     addTab,
     removeTab,
     addTabGroup,
     removeTabGroup,
 };
+
+
+/**
+ * Function used to show/hide the menu.
+ *
+ * @example
+ * toggleMenu();
+ */
+function toggleMenu() {
+    var mainToggle = document.querySelector('#leftNav input');
+    mainToggle.checked = !mainToggle.checked;
+}
 
 var tabUID = 0;
 /**
