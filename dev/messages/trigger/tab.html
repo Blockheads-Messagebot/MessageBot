@@ -1,0 +1,36 @@
+<template id="tTemplate">
+    <div class="msg">
+        <label>When </label>
+        <select data-target="group">
+            <option value="All">anyone</option>
+            <option value="Staff">a staff member</option>
+            <option value="Mod">a mod</option>
+            <option value="Admin">an admin</option>
+            <option value="Owner">the owner</option>
+        </select>
+        <label> who is not </label>
+        <select data-target="not_group">
+            <option value="Nobody">nobody</option>
+            <option value="Staff">a staff member</option>
+            <option value="Mod">a mod</option>
+            <option value="Admin">an admin</option>
+            <option value="Owner">the owner</option>
+        </select>
+        <label> says </label>
+        <input class="t">
+        <label> in chat, say </label>
+        <textarea class="m"></textarea>
+        <label> if the player has joined between </label>
+        <input type="number" value="0" data-target="joins_low">
+        <label> and </label>
+        <input type="number" value="9999" data-target="joins_high">
+        <label>times. </label><br>
+        <a>Delete</a>
+    </div>
+</template>
+<div id="mb_trigger">
+    <h3>These are checked whenever someone says something.</h3>
+    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger "te*st" will match "tea stuff" and "test")</span>
+    <span class="top-right-button">+</span>
+    <div id="tMsgs"></div>
+</div>
