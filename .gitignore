@@ -6,3 +6,6 @@ node_modules/*
 
 #System files
 .DS_Store
+
+# Partially failed build files
+*.css

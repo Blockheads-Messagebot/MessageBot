@@ -1,20 +1,24 @@
 @import 'config'
 
-#mb_announcements
+#mb_join, #mb_leave, #mb_trigger, #mb_announcements
     h3
         margin: 0 0 5px 0
 
-    textarea
+    > div
+        border-top: 1px solid #000
+
+    input, textarea
         border: 2px solid #666
         width: calc(100% - 10px)
 
+    textarea
         resize: none
         overflow: hidden
-
         padding: 1px 0
-
         height: 21px
         transition: height $animation-time
+        &:focus
+            height: 5em
 
-    textarea:focus
-        height: 5em
+    input[type="number"]
+        width: 5em

@@ -21,9 +21,9 @@ function send(message) {
         let str = message.split(settings.splitToken);
         let toSend = [];
 
-        for (let i = 0; i < str.length - 1; i++) {
+        for (let i = 0; i < str.length; i++) {
             let curr = str[i];
-            if (curr[curr.length - 1] == '\\') {
+            if (curr[curr.length - 1] == '\\' && i < str.length + 1) {
                 curr += settings.splitToken + str[++i];
             }
             toSend.push(curr);

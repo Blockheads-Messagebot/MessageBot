@@ -29,7 +29,6 @@ document.querySelector('#leftNav').addEventListener('click', function globalTabC
 });
 
 
-
 module.exports = {
     toggleMenu,
     addTab,
@@ -58,7 +57,7 @@ var tabUID = 0;
  * var tab = ui.addTab('Text');
  * var tab2 = ui.addTab('Custom Messages', 'messages');
  * @param {string} tabText
- * @param {string} groupName Optional. If provided, the name of the group of tabs to add this tab to.
+ * @param {string} [groupName=main] Optional. If provided, the name of the group of tabs to add this tab to.
  * @return {Node} - The div to place tab content in.
  */
 function addTab(tabText, groupName = 'main') {

@@ -70,45 +70,6 @@ function MessageBot(ajax, hook, storage, bhfansapi, api, ui) { //jshint ignore:l
         storage.set('mb_version', bot.version, false);
     }
 
-    //Handle user messages
-    function userSend(message) {
-        var input = document.querySelector('#mb_console input');
-        var button = document.querySelector('#mb_console button');
-        button.textContent = 'SEND';
-        [input, button].forEach((el) => el.disabled = true);
-
-        message = hook.update('bot.send', message);
-
-        // Don't add user messages to the buffer.
-        api.send(message)
-            .then((response) => {
-                if (response.status == 'ok') {
-                    input.value = '';
-
-                } else {
-                    button.textContent = 'RETRY';
-                    throw new Error(JSON.stringify(response));
-                }
-            })
-            .catch(() => { /* Nothing */ })
-            .then(() => {
-                [input, button].forEach((el) => el.disabled = false);
-                if (document.querySelector('#mb_console.visible')) {
-                    input.focus();
-                }
-            });
-    }
-
-    //Listen for user to send message
-    document.querySelector('#mb_console input').addEventListener('keydown', function(event) {
-        if (event.key == "Enter" || event.keyCode == 13) {
-            event.preventDefault();
-            userSend(event.target.value);
-        }
-    });
-    document.querySelector('#mb_console button').addEventListener('click', function() {
-        userSend(document.querySelector('#mb_console input').value);
-    });
 
 
     //Handle user defined messages.

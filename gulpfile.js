@@ -49,7 +49,7 @@ gulp.task('all', ['clean'], function() {
 });
 
 gulp.task('watch', ['all'], function() {
-    gulp.watch(['dev/**'], ['all']);
+    gulp.watch(['./dev/**', '!./dev/**/*.css'], ['all']);
 });
 
 gulp.task('default', ['watch']);
