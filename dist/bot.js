@@ -49,7 +49,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         Object.assign(module.exports, require('./send'), require('./checkGroup'));
     }, { "./checkGroup": 1, "./send": 3 }], 3: [function (require, module, exports) {
         var api = require('app/libraries/blockheads');
-        var report = require('app/libraries/bhfansapi').reportError;
         var settings = require('app/settings');
 
         var queue = [];
@@ -85,13 +84,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 return;
             }
 
-            api.send(queue.shift()).catch(function (err) {
-                report(new Error(err));
-            }).then(function () {
+            api.send(queue.shift()).catch(console.error).then(function () {
                 setTimeout(checkQueue, 1000);
             });
         })();
-    }, { "app/libraries/bhfansapi": 7, "app/libraries/blockheads": 8, "app/settings": 21 }], 4: [function (require, module, exports) {
+    }, { "app/libraries/blockheads": 8, "app/settings": 21 }], 4: [function (require, module, exports) {
         module.exports = {
             write: write,
             clear: clear

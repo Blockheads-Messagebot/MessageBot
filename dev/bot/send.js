@@ -1,5 +1,4 @@
 var api = require('app/libraries/blockheads');
-var report = require('app/libraries/bhfansapi').reportError;
 var settings = require('app/settings');
 
 var queue = [];
@@ -45,9 +44,7 @@ function send(message) {
     }
 
     api.send(queue.shift())
-        .catch(err => {
-            report(new Error(err));
-        })
+        .catch(console.error)
         .then(() => {
             setTimeout(checkQueue, 1000);
         });
