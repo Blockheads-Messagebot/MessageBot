@@ -130,7 +130,7 @@ function getLists(refresh = false) {
             });
     }
 
-    return cache.worldStarted;
+    return cache.getLists;
 }
 
 

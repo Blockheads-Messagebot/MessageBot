@@ -9,6 +9,7 @@ var polyfill = require('app/ui/polyfills/template');
  *
  * @example
  * ui.buildContentFromTemplate('#template', '#target', [{selector: 'input', value: 'Value'}]);
+ * ui.buildContentFromTemplate('template', 'div', [{selector: 'a', remove: ['href'], multiple: true}]);
  * @param {string} templateSelector
  * @param {string} targetSelector
  * @param {array} rules format: array of objects

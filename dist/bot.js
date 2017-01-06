@@ -1,5 +1,7 @@
 "use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -17,8 +19,35 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         s(r[o]);
     }return s;
 })({ 1: [function (require, module, exports) {
-        Object.assign(module.exports, require('./send'));
-    }, { "./send": 2 }], 2: [function (require, module, exports) {
+
+        module.exports = {
+            checkGroup: checkGroup
+        };
+
+        var world = require('app/libraries/world');
+
+        function checkGroup(group, name) {
+            console.warn('bot.checkGroup is depricated. Use world.isAdmin, world.isMod, etc. instead');
+
+            name = name.toLocaleUpperCase();
+            switch (group.toLocaleLowerCase()) {
+                case 'all':
+                    return world.isPlayer(name);
+                case 'admin':
+                    return world.isAdmin(name);
+                case 'mod':
+                    return world.isMod(name);
+                case 'staff':
+                    return world.isStaff(name);
+                case 'owner':
+                    return world.isOwner(name);
+                default:
+                    return false;
+            }
+        }
+    }, { "app/libraries/world": 12 }], 2: [function (require, module, exports) {
+        Object.assign(module.exports, require('./send'), require('./checkGroup'));
+    }, { "./checkGroup": 1, "./send": 3 }], 3: [function (require, module, exports) {
         var api = require('app/libraries/blockheads');
         var report = require('app/libraries/bhfansapi').reportError;
         var settings = require('app/settings');
@@ -34,9 +63,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 var str = message.split(settings.splitToken);
                 var toSend = [];
 
-                for (var i = 0; i < str.length - 1; i++) {
+                for (var i = 0; i < str.length; i++) {
                     var curr = str[i];
-                    if (curr[curr.length - 1] == '\\') {
+                    if (curr[curr.length - 1] == '\\' && i < str.length + 1) {
                         curr += settings.splitToken + str[++i];
                     }
                     toSend.push(curr);
@@ -62,7 +91,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 setTimeout(checkQueue, 1000);
             });
         })();
-    }, { "app/libraries/bhfansapi": 6, "app/libraries/blockheads": 7, "app/settings": 11 }], 3: [function (require, module, exports) {
+    }, { "app/libraries/bhfansapi": 7, "app/libraries/blockheads": 8, "app/settings": 20 }], 4: [function (require, module, exports) {
         module.exports = {
             write: write,
             clear: clear
@@ -97,16 +126,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var chat = document.querySelector('#mb_console ul');
             chat.innerHTML = '';
         }
-    }, {}], 4: [function (require, module, exports) {
+    }, {}], 5: [function (require, module, exports) {
         var self = module.exports = require('./exports');
-        var send = require('app/bot').send;
 
         var hook = require('app/libraries/hook');
         var world = require('app/libraries/world');
-
-        var tab = require('app/ui').addTab('Console');
-
-        tab.innerHTML = '<style>' + "#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}\n" + '</style>' + "<div id=\"mb_console\">\r\n    <div class=\"chat\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"controls\">\r\n        <input type=\"text\"/><button>SEND</button>\r\n    </div>\r\n</div>\r\n";
+        var send = require('app/bot').send;
+        var ui = require('app/ui');
 
         hook.on('world.other', function (message) {
             self.write(message, undefined, 'other');
@@ -146,6 +172,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             self.write(name + " has left the server", 'SERVER', "leave world admin");
         });
 
+        var tab = ui.addTab('Console');
+
+        tab.innerHTML = '<style>' + "#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}\n" + '</style>' + "<div id=\"mb_console\">\r\n    <div class=\"chat\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"controls\">\r\n        <input type=\"text\"/><button>SEND</button>\r\n    </div>\r\n</div>\r\n";
+
         new MutationObserver(function showNewChat() {
             var container = tab.querySelector('ul');
             var lastLine = tab.querySelector('li:last-child');
@@ -167,25 +197,22 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
         }).observe(tab.querySelector('.chat'), { childList: true });
 
-        function userSend(message) {
+        function userSend() {
             var input = tab.querySelector('input');
-            send(message);
+            send(input.value);
             input.value = '';
             input.focus();
         }
 
         tab.querySelector('input').addEventListener('keydown', function (event) {
-            var input = event.target;
             if (event.key == "Enter" || event.keyCode == 13) {
                 event.preventDefault();
-                userSend(input.value);
+                userSend();
             }
         });
 
-        tab.querySelector('button').addEventListener('click', function () {
-            userSend(tab.querySelector('input').value);
-        });
-    }, { "./exports": 3, "app/bot": 1, "app/libraries/hook": 8, "app/libraries/world": 10, "app/ui": 13 }], 5: [function (require, module, exports) {
+        tab.querySelector('button').addEventListener('click', userSend);
+    }, { "./exports": 4, "app/bot": 2, "app/libraries/hook": 9, "app/libraries/world": 12, "app/ui": 23 }], 6: [function (require, module, exports) {
 
         function get() {
             var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
@@ -262,7 +289,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         module.exports = { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
-    }, {}], 6: [function (require, module, exports) {
+    }, {}], 7: [function (require, module, exports) {
 
         var ui = require('app/ui');
         var ajax = require('app/libraries/ajax');
@@ -353,7 +380,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             getExtensionName: getExtensionName,
             reportError: reportError
         };
-    }, { "app/libraries/ajax": 5, "app/ui": 13 }], 7: [function (require, module, exports) {
+    }, { "app/libraries/ajax": 6, "app/ui": 23 }], 8: [function (require, module, exports) {
         var ajax = require('./ajax');
         var hook = require('./hook');
         var bhfansapi = require('./bhfansapi');
@@ -463,7 +490,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
 
-            return cache.worldStarted;
+            return cache.getLists;
         }
 
         function getHomepage() {
@@ -638,7 +665,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         function handleOtherMessages(message) {
             hook.check('world.other', message);
         }
-    }, { "./ajax": 5, "./bhfansapi": 6, "./hook": 8 }], 8: [function (require, module, exports) {
+    }, { "./ajax": 6, "./bhfansapi": 7, "./hook": 9 }], 9: [function (require, module, exports) {
         var listeners = {};
 
         function listen(key, callback) {
@@ -720,7 +747,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             fire: check,
             update: update
         };
-    }, {}], 9: [function (require, module, exports) {
+    }, {}], 10: [function (require, module, exports) {
         function update(keys, operator) {
             Object.keys(localStorage).forEach(function (item) {
                 var _iteratorNormalCompletion2 = true;
@@ -787,11 +814,627 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             case '6.0.4':
             case '6.0.5':
         }
-    }, {}], 10: [function (require, module, exports) {
-
     }, {}], 11: [function (require, module, exports) {
-        module.exports = {};
+        module.exports = {
+            getString: getString,
+            getObject: getObject,
+            set: set,
+            clearNamespace: clearNamespace
+        };
+
+        var NAMESPACE = window.worldId;
+
+        function getString(key, fallback) {
+            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            var result;
+            if (local) {
+                result = localStorage.getItem("" + key + NAMESPACE);
+            } else {
+                result = localStorage.getItem(key);
+            }
+
+            return result === null ? fallback : result;
+        }
+
+        function getObject(key, fallback) {
+            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            var result = getString(key, false, local);
+
+            if (!result) {
+                return fallback;
+            }
+
+            try {
+                result = JSON.parse(result);
+            } catch (e) {
+                result = fallback;
+            } finally {
+                if (result === null) {
+                    result = fallback;
+                }
+            }
+
+            return result;
+        }
+
+        function set(key, data) {
+            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            if (local) {
+                key = "" + key + NAMESPACE;
+            }
+
+            if (typeof data == 'string') {
+                localStorage.setItem(key, data);
+            } else {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+        }
+
+        function clearNamespace(namespace) {
+            Object.keys(localStorage).forEach(function (key) {
+                if (key.startsWith(namespace)) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
     }, {}], 12: [function (require, module, exports) {
+        var api = require('./blockheads');
+        var storage = require('./storage');
+        var hook = require('./hook');
+
+        var STORAGE = {
+            PLAYERS: 'mb_players',
+            LOG_LOAD: 'mb_lastLogLoad'
+        };
+
+        var world = module.exports = {
+            name: '',
+            online: [],
+            owner: '',
+            players: storage.getObject(STORAGE.PLAYERS, {}),
+            lists: { admin: [], mod: [], staff: [], black: [], white: [] },
+            isPlayer: isPlayer,
+            isAdmin: isAdmin,
+            isMod: isMod,
+            isStaff: isStaff,
+            isOwner: isOwner,
+            isOnline: isOnline,
+            getJoins: getJoins
+        };
+        var lists = world.lists;
+
+        function isPlayer(name) {
+            return world.players.hasOwnProperty(name.toLocaleUpperCase());
+        }
+
+        function isAdmin(name) {
+            return lists.admin.includes(name.toLocaleUpperCase());
+        }
+
+        function isMod(name) {
+            return lists.mod.includes(name.toLocaleUpperCase());
+        }
+
+        function isStaff(name) {
+            return isAdmin(name) || isMod(name);
+        }
+
+        function isOwner(name) {
+            return world.owner == name.toLocaleUpperCase();
+        }
+
+        function isOnline(name) {
+            return world.online.includes(name.toLocaleUpperCase());
+        }
+
+        function getJoins(name) {
+            return isPlayer(name) ? world.players[name.toLocaleUpperCase()].joins : 0;
+        }
+
+        hook.on('world.join', function (name) {
+            if (!world.online.includes(name)) {
+                world.online.push(name);
+            }
+        });
+        hook.on('world.leave', function (name) {
+            if (world.online.includes(name)) {
+                world.online.splice(world.online.indexOf(name), 1);
+            }
+        });
+
+        hook.on('world.join', checkPlayerJoin);
+
+        function buildStaffList() {
+            lists.mod = lists.mod.filter(function (name) {
+                return !lists.admin.includes(name);
+            });
+            lists.staff = lists.admin.concat(lists.mod);
+        }
+
+        function permissionCheck(name, command) {
+            command = command.toLocaleLowerCase();
+
+            if (['admin', 'unadmin', 'mod', 'unmod'].includes(command)) {
+                return lists.admin.includes(name);
+            }
+
+            if (['whitelist', 'unwhitelist', 'ban', 'unban'].includes(command)) {
+                return lists.staff.includes(name);
+            }
+
+            return false;
+        }
+
+        hook.on('world.command', function (name, command, target) {
+            if (!permissionCheck(name, command)) {
+                return;
+            }
+
+            var un = command.startsWith('un');
+
+            var group = {
+                admin: 'admin',
+                mod: 'mod',
+                whitelist: 'white',
+                ban: 'black'
+            }[un ? command.substr(2) : command];
+
+            if (un && lists[group].includes(target)) {
+                lists[group].splice(lists[group].indexOf(target), 1);
+                buildStaffList();
+            } else if (!un && !lists[group].includes(target)) {
+                lists[group].push(target);
+                buildStaffList();
+            }
+        });
+
+        function checkPlayerJoin(name, ip) {
+            if (world.players.hasOwnProperty(name)) {
+                world.players[name].joins++;
+                if (!world.players[name].ips.includes(ip)) {
+                    world.players[name].ips.push(ip);
+                }
+            } else {
+                world.players[name] = { joins: 1, ips: [ip] };
+            }
+            world.players[name].ip = ip;
+
+            storage.set(STORAGE.PLAYERS, world.players);
+        }
+
+        Promise.all([api.getLists(), api.getWorldName(), api.getOwnerName()]).then(function (values) {
+            var _values = _slicedToArray(values, 3);
+
+            var apiLists = _values[0];
+            var worldName = _values[1];
+            var owner = _values[2];
+
+
+            [owner, 'SERVER'].forEach(function (name) {
+                if (!apiLists.admin.includes(name)) {
+                    apiLists.admin.push(name);
+                }
+            });
+
+            world.lists = apiLists;
+            buildStaffList();
+            world.name = worldName;
+            world.owner = owner;
+        }).catch(console.error);
+
+        Promise.all([api.getLogs(), api.getWorldName()]).then(function (values) {
+            var _values2 = _slicedToArray(values, 2);
+
+            var lines = _values2[0];
+            var worldName = _values2[1];
+
+
+            var last = storage.getObject(STORAGE.LOG_LOAD, 0);
+            storage.set(STORAGE.LOG_LOAD, Math.floor(Date.now().valueOf()));
+
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = lines[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var line = _step3.value;
+
+                    var time = new Date(line.substring(0, line.indexOf('b')).replace(' ', 'T').replace(' ', 'Z'));
+                    var message = line.substring(line.indexOf(']') + 2);
+
+                    if (time < last) {
+                        continue;
+                    }
+
+                    if (message.startsWith(worldName + " - Player Connected ")) {
+                        var parts = line.substr(line.indexOf(' - Player Connected ') + 20); 
+
+                        var _parts$match = parts.match(/(.*) \| ([\w.]+) \| .{32}\s*/);
+
+                        var _parts$match2 = _slicedToArray(_parts$match, 3);
+
+                        var name = _parts$match2[1];
+                        var ip = _parts$match2[2];
+
+
+                        checkPlayerJoin(name, ip);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+
+            storage.set(STORAGE.PLAYERS, world.players);
+        });
+    }, { "./blockheads": 8, "./hook": 9, "./storage": 11 }], 13: [function (require, module, exports) {
+        var ui = require('app/ui');
+        var storage = require('app/libraries/storage');
+        var send = require('app/bot').send;
+        var preferences = require('app/settings');
+
+        var tab = ui.addTab('Announcements', 'messages');
+        tab.innerHTML = "<template id=\"aTemplate\">\r\n    <div>\r\n        <label>Send:</label>\r\n        <textarea class=\"m\"></textarea>\r\n        <a>Delete</a>\r\n        <label style=\"display:block;margin-top:5px;\">Wait X minutes...</label>\r\n    </div>\r\n</template>\r\n<div id=\"mb_announcements\">\r\n    <h3>These are sent according to a regular schedule.</h3>\r\n    <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"aMsgs\"></div>\r\n</div>\r\n";
+
+        module.exports = {
+            tab: tab,
+            save: save,
+            addMessage: addMessage
+        };
+
+        function addMessage() {
+            var text = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+
+            ui.buildContentFromTemplate('#aTemplate', '#aMsgs', [{ selector: '.m', text: text }]);
+        }
+
+        function save() {
+            announcements = Array.from(tab.querySelectorAll('.m')).map(function (el) {
+                return { message: el.value };
+            });
+
+            storage.set('announcementArr', announcements);
+        }
+
+        var announcements = storage.getObject('announcementArr', []);
+
+        announcements.map(function (ann) {
+            return ann.message;
+        }).forEach(addMessage);
+
+        (function announcementCheck(i) {
+            i = i >= announcements.length ? 0 : i;
+
+            var ann = announcements[i];
+
+            if (ann && ann.message) {
+                send(ann.message);
+            }
+            setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
+        })(0);
+    }, { "app/bot": 2, "app/libraries/storage": 11, "app/settings": 20, "app/ui": 23 }], 14: [function (require, module, exports) {
+        module.exports = {
+            buildAndSendMessage: buildAndSendMessage,
+            buildMessage: buildMessage
+        };
+
+        var world = require('app/libraries/world');
+        var send = require('app/bot').send;
+
+        function buildAndSendMessage(message, name) {
+            send(buildMessage(message, name));
+        }
+
+        function buildMessage(message, name) {
+            message = message.replace(/{{([^}]+)}}/g, function (full, key) {
+                return {
+                    NAME: name,
+                    Name: name[0] + name.substring(1).toLocaleLowerCase(),
+                    name: name.toLocaleLowerCase()
+                }[key] || full;
+            });
+
+            if (message.startsWith('/')) {
+                message = message.replace(/{{ip}}/gi, world.players.getIP(name));
+            }
+
+            return message;
+        }
+    }, { "app/bot": 2, "app/libraries/world": 12 }], 15: [function (require, module, exports) {
+        module.exports = {
+            checkJoinsAndGroup: checkJoinsAndGroup,
+            checkJoins: checkJoins,
+            checkGroup: checkGroup
+        };
+
+        var world = require('app/libraries/world');
+
+        function checkJoinsAndGroup(name, msg) {
+            return checkJoins(name, msg.joins_low, msg.joins_high) && checkGroup(name, msg.group, msg.not_group);
+        }
+
+        function checkJoins(name, low, high) {
+            return world.getJoins(name) >= low && world.getJoins(name) <= high;
+        }
+
+        function checkGroup(name, group, not_group) {
+            return isInGroup(name, group) && !isInGroup(name, not_group);
+        }
+
+        function isInGroup(name, group) {
+            name = name.toLocaleUpperCase();
+            switch (group.toLocaleLowerCase()) {
+                case 'all':
+                    return world.isPlayer(name);
+                case 'admin':
+                    return world.isAdmin(name);
+                case 'mod':
+                    return world.isMod(name);
+                case 'staff':
+                    return world.isStaff(name);
+                case 'owner':
+                    return world.isOwner(name);
+                default:
+                    return false;
+            }
+        }
+    }, { "app/libraries/world": 12 }], 16: [function (require, module, exports) {
+        Object.assign(module.exports, require('./buildMessage'), require('./checkJoinsAndGroup'));
+    }, { "./buildMessage": 14, "./checkJoinsAndGroup": 15 }], 17: [function (require, module, exports) {
+        var ui = require('app/ui');
+
+        var el = document.createElement('style');
+        el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join>div,#mb_leave>div,#mb_trigger>div,#mb_announcements>div{border-top:1px solid #000}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}\n";
+        document.head.appendChild(el);
+
+        ui.addTabGroup('Messages', 'messages');
+
+        [require('./join'), require('./leave'),
+        require('./announcements')].forEach(function (type) {
+            type.tab.addEventListener('click', function checkDelete(event) {
+                if (event.target.tagName != 'A') {
+                    return;
+                }
+
+                ui.alert('Really delete this message?', [{ text: 'Yes', style: 'danger', action: function action() {
+                        event.target.parentNode.remove();
+                        type.save();
+                    } }, { text: 'Cancel' }]);
+            });
+
+            type.tab.addEventListener('change', type.save);
+
+            type.tab.querySelector('.top-right-button').addEventListener('click', function () {
+                return type.addMessage();
+            });
+        });
+    }, { "./announcements": 13, "./join": 18, "./leave": 19, "app/ui": 23 }], 18: [function (require, module, exports) {
+        var ui = require('app/ui');
+
+        var storage = require('app/libraries/storage');
+        var hook = require('app/libraries/hook');
+        var helpers = require('app/messages/helpers');
+
+        var STORAGE_ID = 'joinArr';
+
+        var tab = ui.addTab('Join', 'messages');
+        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div class=\"third-box\">\r\n        <label>When a player who is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> joins, then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
+
+        module.exports = {
+            tab: tab,
+            save: save,
+            addMessage: addMessage
+        };
+
+        var joinMessages = storage.getObject(STORAGE_ID, []);
+        joinMessages.forEach(addMessage);
+
+        function addMessage() {
+            var msg = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+        }
+
+        function save() {
+            joinMessages = [];
+            Array.from(tab.querySelectorAll('.third-box')).forEach(function (container) {
+                if (!container.querySelector('.m').value) {
+                    return;
+                }
+
+                joinMessages.push({
+                    message: container.querySelector('.m').value,
+                    joins_low: +container.querySelector('[data-target="joins_low"]').value,
+                    joins_high: +container.querySelector('[data-target="joins_high"]').value,
+                    group: container.querySelector('[data-target="group"]').value,
+                    not_group: container.querySelector('[data-target="not_group"]').value
+                });
+            });
+
+            storage.set(STORAGE_ID, joinMessages);
+        }
+
+        hook.on('world.join', function onJoin(name) {
+            joinMessages.forEach(function (msg) {
+                if (helpers.checkJoinsAndGroup(name, msg)) {
+                    helpers.buildAndSendMessage(msg.message, name);
+                }
+            });
+        });
+    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 23 }], 19: [function (require, module, exports) {
+        var ui = require('app/ui');
+
+        var storage = require('app/libraries/storage');
+        var hook = require('app/libraries/hook');
+        var helpers = require('app/messages/helpers');
+
+        var STORAGE_ID = 'leaveArr';
+
+        var tab = ui.addTab('Leave', 'messages');
+        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div class=\"third-box\">\r\n        <label>When the player leaving is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
+
+        module.exports = {
+            tab: tab,
+            save: save,
+            addMessage: addMessage
+        };
+
+        var leaveMessages = storage.getObject(STORAGE_ID, []);
+        leaveMessages.forEach(addMessage);
+
+        function addMessage() {
+            var msg = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+        }
+
+        function save() {
+            leaveMessages = [];
+            Array.from(tab.querySelectorAll('.third-box')).forEach(function (container) {
+                if (!container.querySelector('.m').value) {
+                    return;
+                }
+
+                leaveMessages.push({
+                    message: container.querySelector('.m').value,
+                    joins_low: +container.querySelector('[data-target="joins_low"]').value,
+                    joins_high: +container.querySelector('[data-target="joins_high"]').value,
+                    group: container.querySelector('[data-target="group"]').value,
+                    not_group: container.querySelector('[data-target="not_group"]').value
+                });
+            });
+
+            storage.set(STORAGE_ID, leaveMessages);
+        }
+
+        hook.on('world.leave', function onLeave(name) {
+            leaveMessages.forEach(function (msg) {
+                if (helpers.checkJoinsAndGroup(name, msg)) {
+                    helpers.buildAndSendMessage(msg.message, name);
+                }
+            });
+        });
+    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 23 }], 20: [function (require, module, exports) {
+        var storage = require('app/libraries/storage');
+        var STORAGE_ID = 'mb_preferences';
+
+        var prefs = storage.getObject(STORAGE_ID, {}, false);
+
+        if (typeof Proxy == 'undefined') {
+            module.exports = prefs;
+            setInterval(function () {
+                storage.set(STORAGE_ID, prefs, false);
+            }, 30 * 1000);
+        } else {
+            module.exports = new Proxy(prefs, {
+                set: function set(obj, prop, val) {
+                    if (obj.hasOwnProperty(prop)) {
+                        obj[prop] = val;
+                        storage.set(STORAGE_ID, prefs, false);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        var prefsMap = [{ type: 'number', key: 'announcementDelay', default: 10 }, { type: 'number', key: 'maxResponses', default: 2 }, { type: 'boolean', key: 'notify', default: true },
+        { type: 'boolean', key: 'disableTrim', default: false }, { type: 'boolean', key: 'regexTriggers', default: false }, { type: 'boolean', key: 'splitMessages', default: false }, { type: 'text', key: 'splitToken', default: '<split>' }];
+
+        prefsMap.forEach(function (pref) {
+            if (_typeof(prefs[pref.key]) != pref.type) {
+                prefs[pref.key] = pref.default;
+            }
+        });
+    }, { "app/libraries/storage": 11 }], 21: [function (require, module, exports) {
+        var ui = require('app/ui');
+        var prefs = require('app/settings');
+
+        var tab = ui.addTab('Settings');
+        tab.innerHTML = '<style>' + "#mb_settings h3{border-bottom:1px solid #999}\n" + '</style>' + "<div id=\"mb_settings\">\r\n    <h3>Settings</h3>\r\n    <label>Minutes between announcements:</label><br>\r\n        <input data-key=\"announcementDelay\" type=\"number\"><br>\r\n    <label>Maximum trigger responses to a message:</label><br>\r\n        <input data-key=\"maxResponses\" type=\"number\"><br>\r\n    <label>New chat notifications: </label>\r\n        <input data-key=\"notify\" type=\"checkbox\"><br>\r\n\r\n    <h3>Advanced Settings - <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/1.-Advanced-Options/\" target=\"_blank\">Read this first</a></h3>\r\n    <label>Disable whitespace trimming: </label>\r\n        <input data-key=\"disableTrim\" type=\"checkbox\"><br>\r\n    <label>Parse triggers as RegEx: </label>\r\n        <input data-key=\"regexTriggers\" type=\"checkbox\"><br>\r\n    <label>Split messages: </label>\r\n        <input data-key=\"splitMessages\" type=\"checkbox\"><br>\r\n    <label>Split token: </label><br>\r\n        <input data-key=\"splitToken\" type=\"text\">\r\n\r\n    <h3>Extensions</h3>\r\n    <div id=\"mb_ext_list\"></div>\r\n\r\n    <h3>Backup / Restore</h3>\r\n    <a id=\"mb_backup_save\">Get backup code</a><br>\r\n    <a id=\"mb_backup_load\">Load previous backup</a>\r\n    <div id=\"mb_backup\"></div>\r\n</div>\r\n";
+
+        Object.keys(prefs).forEach(function (key) {
+            var el = tab.querySelector("[data-key=\"" + key + "\"]");
+            switch (_typeof(prefs[key])) {
+                case 'boolean':
+                    el.checked = prefs[key];
+                    break;
+                default:
+                    el.value = prefs[key];
+            }
+        });
+
+        tab.addEventListener('change', function save() {
+            var getValue = function getValue(key) {
+                return tab.querySelector("[data-key=\"" + key + "\"]").value;
+            };
+            var getInt = function getInt(key) {
+                return +getValue(key);
+            };
+            var getChecked = function getChecked(key) {
+                return tab.querySelector("[data-key=\"" + key + "\"]").checked;
+            };
+
+            Object.keys(prefs).forEach(function (key) {
+                var func;
+
+                switch (_typeof(prefs[key])) {
+                    case 'boolean':
+                        func = getChecked;
+                        break;
+                    case 'number':
+                        func = getInt;
+                        break;
+                    default:
+                        func = getValue;
+                }
+
+                prefs[key] = func(key);
+            });
+        });
+
+        tab.querySelector('#mb_backup_save').addEventListener('click', function showBackup() {
+            var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
+            ui.alert("Copy this to a safe place:<br><textarea style=\"width: calc(100% - 7px);height:160px;\">" + backup + "</textarea>");
+        });
+
+        tab.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
+            ui.alert('Enter the backup code:<textarea style="width:calc(100% - 7px);height:160px;"></textarea>', [{ text: 'Load & refresh page', style: 'success', action: function action() {
+                    var code = document.querySelector('#alert textarea').value;
+                    try {
+                        code = JSON.parse(code);
+                        if (code === null) {
+                            throw new Error('Invalid backup');
+                        }
+                    } catch (e) {
+                        ui.notify('Invalid backup code. No action taken.');
+                        return;
+                    }
+
+                    localStorage.clear();
+
+                    Object.keys(code).forEach(function (key) {
+                        localStorage.setItem(key, code[key]);
+                    });
+
+                    location.reload();
+                } }, { text: 'Cancel' }]);
+        });
+    }, { "app/settings": 20, "app/ui": 23 }], 22: [function (require, module, exports) {
         window.pollChat = function () {};
 
         document.body.innerHTML = '';
@@ -801,18 +1444,17 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         require('app/libraries/migration');
 
         var bhfansapi = require('app/libraries/bhfansapi');
-        var hook = require('app/libraries/hook');
-
-        hook.on('error', bhfansapi.reportError);
 
         require('app/console');
+        require('app/messages');
+        require('app/settings/page');
 
         window.addEventListener('error', function (err) {
             if (err.message != 'Script error') {
-                window.hook.check('error', err);
+                bhfansapi.reportError(err);
             }
         });
-    }, { "app/console": 4, "app/libraries/bhfansapi": 6, "app/libraries/hook": 8, "app/libraries/migration": 9, "app/ui/polyfills/console": 18 }], 13: [function (require, module, exports) {
+    }, { "app/console": 5, "app/libraries/bhfansapi": 7, "app/libraries/migration": 10, "app/messages": 17, "app/settings/page": 21, "app/ui/polyfills/console": 28 }], 23: [function (require, module, exports) {
         require('./polyfills/details');
 
         Object.assign(module.exports, require('./layout'), require('./template'), require('./notifications'));
@@ -825,7 +1467,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
             write(msg, name, nameClass);
         };
-    }, { "./layout": 14, "./notifications": 16, "./polyfills/details": 19, "./template": 21, "app/console/exports": 3 }], 14: [function (require, module, exports) {
+    }, { "./layout": 24, "./notifications": 26, "./polyfills/details": 29, "./template": 31, "app/console/exports": 4 }], 24: [function (require, module, exports) {
 
         document.body.innerHTML += "<div id=\"leftNav\">\r\n    <input type=\"checkbox\" id=\"leftToggle\">\r\n    <label for=\"leftToggle\">&#9776; Menu</label>\r\n\r\n    <nav data-tab-group=\"main\"></nav>\r\n    <div class=\"overlay\"></div>\r\n</div>\r\n\r\n<div id=\"container\">\r\n    <header></header>\r\n</div>\r\n";
         document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.third-box{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd){background:#ccc}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';
@@ -908,7 +1550,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             group.remove();
         }
-    }, {}], 15: [function (require, module, exports) {
+    }, {}], 25: [function (require, module, exports) {
         module.exports = {
             alert: alert
         };
@@ -974,7 +1616,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }
         }
-    }, {}], 16: [function (require, module, exports) {
+    }, {}], 26: [function (require, module, exports) {
         Object.assign(module.exports, require('./alert'), require('./notify'));
 
         var el = document.createElement('style');
@@ -986,7 +1628,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         el.innerHTML = "<div id=\"alert\">\r\n    <div id=\"alertContent\"></div>\r\n    <div class=\"buttons\"/></div>\r\n</div>\r\n<div class=\"overlay\"/></div>\r\n";
 
         document.body.appendChild(el);
-    }, { "./alert": 15, "./notify": 17 }], 17: [function (require, module, exports) {
+    }, { "./alert": 25, "./notify": 27 }], 27: [function (require, module, exports) {
         module.exports = {
             notify: notify
         };
@@ -1014,7 +1656,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }.bind(el), displayTime * 1000 + 2100);
         }
-    }, {}], 18: [function (require, module, exports) {
+    }, {}], 28: [function (require, module, exports) {
         if (!window.console) {
             window.console = {};
             window.log = window.log || [];
@@ -1031,7 +1673,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 console[method] = console.log;
             }
         });
-    }, {}], 19: [function (require, module, exports) {
+    }, {}], 29: [function (require, module, exports) {
         if (!('open' in document.createElement('details'))) {
             var style = document.createElement('style');
             style.textContent += "details:not([open]) > :not(summary) { display: none !important; } details > summary:before { content: \"▶\"; display: inline-block; font-size: .8em; width: 1.5em; font-family:\"Courier New\"; } details[open] > summary:before { transform: rotate(90deg); }";
@@ -1055,7 +1697,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, {}], 20: [function (require, module, exports) {
+    }, {}], 30: [function (require, module, exports) {
 
         module.exports = function (template) {
             if (!('content' in template)) {
@@ -1069,7 +1711,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 template.content = fragment;
             }
         };
-    }, {}], 21: [function (require, module, exports) {
+    }, {}], 31: [function (require, module, exports) {
         module.exports = {
             buildContentFromTemplate: buildContentFromTemplate
         };
@@ -1129,4 +1771,4 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
         }
-    }, { "app/ui/polyfills/template": 20 }] }, {}, [12]);
+    }, { "app/ui/polyfills/template": 30 }] }, {}, [22]);

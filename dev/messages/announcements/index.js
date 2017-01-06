@@ -1,14 +1,16 @@
 const ui = require('app/ui');
 const storage = require('app/libraries/storage');
-const api = require('app/libraries/blockheads');
-const preferences = require('app/preferences');
+const send = require('app/bot').send;
+const preferences = require('app/settings');
 
 var tab = ui.addTab('Announcements', 'messages');
-tab.innerHTML = '<style>' +
-    INCLUDE_FILE('/dev/messages/announcements/style.css') +
-    '</style>' +
-    INCLUDE_FILE('/dev/messages/announcements/tab.html');
+tab.innerHTML = INCLUDE_FILE('/dev/messages/announcements/tab.html');
 
+module.exports = {
+    tab,
+    save,
+    addMessage,
+};
 
 function addMessage(text = '') {
     ui.buildContentFromTemplate('#aTemplate', '#aMsgs', [
@@ -16,23 +18,14 @@ function addMessage(text = '') {
     ]);
 }
 
-
-// Adding messages
-tab.querySelector('.top-right-button').addEventListener('click', function() {
-    addMessage();
-});
-
-
-// Saving on change
-tab.addEventListener('change', function() {
+function save() {
     announcements = Array.from(tab.querySelectorAll('.m'))
         .map(el => {
             return {message: el.value};
         });
 
     storage.set('announcementArr', announcements);
-});
-
+}
 
 // Announcements collection
 var announcements = storage.getObject('announcementArr', []);
@@ -50,7 +43,7 @@ announcements
     var ann = announcements[i];
 
     if (ann && ann.message) {
-        api.send(ann.message);
+        send(ann.message);
     }
     setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
 })(0);

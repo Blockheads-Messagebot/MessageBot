@@ -8,16 +8,15 @@ document.head.innerHTML = '';
 require('app/ui/polyfills/console');
 require('app/libraries/migration');
 
-var bhfansapi = require('app/libraries/bhfansapi');
-var hook = require('app/libraries/hook');
-
-hook.on('error', bhfansapi.reportError);
+const bhfansapi = require('app/libraries/bhfansapi');
 
 require('app/console');
+require('app/messages');
+require('app/settings/page');
 
-
+// Error reporting
 window.addEventListener('error', (err) => {
     if (err.message != 'Script error') {
-        window.hook.check('error', err);
+        bhfansapi.reportError(err);
     }
 });
