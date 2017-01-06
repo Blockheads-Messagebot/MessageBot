@@ -91,7 +91,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 setTimeout(checkQueue, 1000);
             });
         })();
-    }, { "app/libraries/bhfansapi": 7, "app/libraries/blockheads": 8, "app/settings": 20 }], 4: [function (require, module, exports) {
+    }, { "app/libraries/bhfansapi": 7, "app/libraries/blockheads": 8, "app/settings": 21 }], 4: [function (require, module, exports) {
         module.exports = {
             write: write,
             clear: clear
@@ -212,7 +212,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         tab.querySelector('button').addEventListener('click', userSend);
-    }, { "./exports": 4, "app/bot": 2, "app/libraries/hook": 9, "app/libraries/world": 12, "app/ui": 23 }], 6: [function (require, module, exports) {
+    }, { "./exports": 4, "app/bot": 2, "app/libraries/hook": 9, "app/libraries/world": 12, "app/ui": 24 }], 6: [function (require, module, exports) {
 
         function get() {
             var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
@@ -380,7 +380,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             getExtensionName: getExtensionName,
             reportError: reportError
         };
-    }, { "app/libraries/ajax": 6, "app/ui": 23 }], 8: [function (require, module, exports) {
+    }, { "app/libraries/ajax": 6, "app/ui": 24 }], 8: [function (require, module, exports) {
         var ajax = require('./ajax');
         var hook = require('./hook');
         var bhfansapi = require('./bhfansapi');
@@ -1126,7 +1126,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
             setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
         })(0);
-    }, { "app/bot": 2, "app/libraries/storage": 11, "app/settings": 20, "app/ui": 23 }], 14: [function (require, module, exports) {
+    }, { "app/bot": 2, "app/libraries/storage": 11, "app/settings": 21, "app/ui": 24 }], 14: [function (require, module, exports) {
         module.exports = {
             buildAndSendMessage: buildAndSendMessage,
             buildMessage: buildMessage
@@ -1198,13 +1198,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var ui = require('app/ui');
 
         var el = document.createElement('style');
-        el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join>div,#mb_leave>div,#mb_trigger>div,#mb_announcements>div{border-top:1px solid #000}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}\n";
+        el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}#mb_join>div,#mb_leave>div,#mb_trigger>div{position:relative;display:flex;flex-flow:row wrap;border-top:1px solid #000}#mb_join>div>div,#mb_leave>div>div,#mb_trigger>div>div{width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#mb_join>div>div:nth-child(odd),#mb_leave>div>div:nth-child(odd),#mb_trigger>div>div:nth-child(odd){background:#ccc}\n";
         document.head.appendChild(el);
 
         ui.addTabGroup('Messages', 'messages');
 
-        [require('./join'), require('./leave'),
-        require('./announcements')].forEach(function (type) {
+        [require('./join'), require('./leave'), require('./trigger'), require('./announcements')].forEach(function (type) {
             type.tab.addEventListener('click', function checkDelete(event) {
                 if (event.target.tagName != 'A') {
                     return;
@@ -1222,7 +1221,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 return type.addMessage();
             });
         });
-    }, { "./announcements": 13, "./join": 18, "./leave": 19, "app/ui": 23 }], 18: [function (require, module, exports) {
+    }, { "./announcements": 13, "./join": 18, "./leave": 19, "./trigger": 20, "app/ui": 24 }], 18: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1232,7 +1231,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'joinArr';
 
         var tab = ui.addTab('Join', 'messages');
-        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div class=\"third-box\">\r\n        <label>When a player who is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> joins, then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div>\r\n        <label>When a player who is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> joins, then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1251,7 +1250,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         function save() {
             joinMessages = [];
-            Array.from(tab.querySelectorAll('.third-box')).forEach(function (container) {
+            Array.from(tab.querySelectorAll('#jMsgs > div')).forEach(function (container) {
                 if (!container.querySelector('.m').value) {
                     return;
                 }
@@ -1275,7 +1274,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         });
-    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 23 }], 19: [function (require, module, exports) {
+    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 24 }], 19: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1285,7 +1284,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'leaveArr';
 
         var tab = ui.addTab('Leave', 'messages');
-        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div class=\"third-box\">\r\n        <label>When the player leaving is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div>\r\n        <label>When the player leaving is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1304,7 +1303,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         function save() {
             leaveMessages = [];
-            Array.from(tab.querySelectorAll('.third-box')).forEach(function (container) {
+            Array.from(tab.querySelectorAll('#lMsgs > div')).forEach(function (container) {
                 if (!container.querySelector('.m').value) {
                     return;
                 }
@@ -1328,7 +1327,76 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         });
-    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 23 }], 20: [function (require, module, exports) {
+    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 24 }], 20: [function (require, module, exports) {
+        var ui = require('app/ui');
+
+        var storage = require('app/libraries/storage');
+        var hook = require('app/libraries/hook');
+        var helpers = require('app/messages/helpers');
+        var settings = require('app/settings');
+
+        var STORAGE_ID = 'triggerArr';
+
+        var tab = ui.addTab('Trigger', 'messages');
+        tab.innerHTML = "<template id=\"tTemplate\">\r\n    <div>\r\n        <label>When </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> who is not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> says </label>\r\n        <input class=\"t\">\r\n        <label> in chat, say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label>times. </label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_trigger\">\r\n    <h3>These are checked whenever someone says something.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger \"te*st\" will match \"tea stuff\" and \"test\")</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"tMsgs\"></div>\r\n</div>\r\n";
+
+        module.exports = {
+            tab: tab,
+            save: save,
+            addMessage: addMessage
+        };
+
+        var triggerMessages = storage.getObject(STORAGE_ID, []);
+        triggerMessages.forEach(addMessage);
+
+        function addMessage() {
+            var msg = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '.t', value: msg.trigger || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+        }
+
+        function save() {
+            triggerMessages = [];
+            Array.from(tab.querySelectorAll('#tMsgs > div')).forEach(function (container) {
+                if (!container.querySelector('.m').value || !container.querySelector('.t').value) {
+                    return;
+                }
+
+                triggerMessages.push({
+                    message: container.querySelector('.m').value,
+                    trigger: container.querySelector('.t').value,
+                    joins_low: +container.querySelector('[data-target="joins_low"]').value,
+                    joins_high: +container.querySelector('[data-target="joins_high"]').value,
+                    group: container.querySelector('[data-target="group"]').value,
+                    not_group: container.querySelector('[data-target="not_group"]').value
+                });
+            });
+
+            storage.set(STORAGE_ID, triggerMessages);
+        }
+
+        function triggerMatch(trigger, message) {
+            if (settings.regexTriggers) {
+                try {
+                    return new RegExp(trigger, 'i').test(message);
+                } catch (e) {
+                    ui.notify("Skipping trigger '" + trigger + "' as the RegEx is invaild.");
+                    return false;
+                }
+            }
+            return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
+        }
+
+        hook.on('world.message', function checkTriggers(name, message) {
+            var totalAllowed = settings.maxResponses;
+            triggerMessages.forEach(function (msg) {
+                if (totalAllowed && helpers.checkJoinsAndGroup(msg, name) && triggerMatch(msg.trigger, message)) {
+                    helpers.buildAndSendMessage(msg.message, name);
+                    totalAllowed--;
+                }
+            });
+        });
+    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/settings": 21, "app/ui": 24 }], 21: [function (require, module, exports) {
         var storage = require('app/libraries/storage');
         var STORAGE_ID = 'mb_preferences';
 
@@ -1360,7 +1428,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 prefs[pref.key] = pref.default;
             }
         });
-    }, { "app/libraries/storage": 11 }], 21: [function (require, module, exports) {
+    }, { "app/libraries/storage": 11 }], 22: [function (require, module, exports) {
         var ui = require('app/ui');
         var prefs = require('app/settings');
 
@@ -1434,7 +1502,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     location.reload();
                 } }, { text: 'Cancel' }]);
         });
-    }, { "app/settings": 20, "app/ui": 23 }], 22: [function (require, module, exports) {
+    }, { "app/settings": 21, "app/ui": 24 }], 23: [function (require, module, exports) {
         window.pollChat = function () {};
 
         document.body.innerHTML = '';
@@ -1454,7 +1522,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 bhfansapi.reportError(err);
             }
         });
-    }, { "app/console": 5, "app/libraries/bhfansapi": 7, "app/libraries/migration": 10, "app/messages": 17, "app/settings/page": 21, "app/ui/polyfills/console": 28 }], 23: [function (require, module, exports) {
+    }, { "app/console": 5, "app/libraries/bhfansapi": 7, "app/libraries/migration": 10, "app/messages": 17, "app/settings/page": 22, "app/ui/polyfills/console": 29 }], 24: [function (require, module, exports) {
         require('./polyfills/details');
 
         Object.assign(module.exports, require('./layout'), require('./template'), require('./notifications'));
@@ -1467,10 +1535,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
             write(msg, name, nameClass);
         };
-    }, { "./layout": 24, "./notifications": 26, "./polyfills/details": 29, "./template": 31, "app/console/exports": 4 }], 24: [function (require, module, exports) {
+    }, { "./layout": 25, "./notifications": 27, "./polyfills/details": 30, "./template": 32, "app/console/exports": 4 }], 25: [function (require, module, exports) {
 
         document.body.innerHTML += "<div id=\"leftNav\">\r\n    <input type=\"checkbox\" id=\"leftToggle\">\r\n    <label for=\"leftToggle\">&#9776; Menu</label>\r\n\r\n    <nav data-tab-group=\"main\"></nav>\r\n    <div class=\"overlay\"></div>\r\n</div>\r\n\r\n<div id=\"container\">\r\n    <header></header>\r\n</div>\r\n";
-        document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.third-box{position:relative;float:left;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}.third-box:nth-child(odd){background:#ccc}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';
+        document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';
 
         document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);
 
@@ -1550,7 +1618,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             group.remove();
         }
-    }, {}], 25: [function (require, module, exports) {
+    }, {}], 26: [function (require, module, exports) {
         module.exports = {
             alert: alert
         };
@@ -1616,7 +1684,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }
         }
-    }, {}], 26: [function (require, module, exports) {
+    }, {}], 27: [function (require, module, exports) {
         Object.assign(module.exports, require('./alert'), require('./notify'));
 
         var el = document.createElement('style');
@@ -1628,7 +1696,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         el.innerHTML = "<div id=\"alert\">\r\n    <div id=\"alertContent\"></div>\r\n    <div class=\"buttons\"/></div>\r\n</div>\r\n<div class=\"overlay\"/></div>\r\n";
 
         document.body.appendChild(el);
-    }, { "./alert": 25, "./notify": 27 }], 27: [function (require, module, exports) {
+    }, { "./alert": 26, "./notify": 28 }], 28: [function (require, module, exports) {
         module.exports = {
             notify: notify
         };
@@ -1656,7 +1724,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }.bind(el), displayTime * 1000 + 2100);
         }
-    }, {}], 28: [function (require, module, exports) {
+    }, {}], 29: [function (require, module, exports) {
         if (!window.console) {
             window.console = {};
             window.log = window.log || [];
@@ -1673,7 +1741,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 console[method] = console.log;
             }
         });
-    }, {}], 29: [function (require, module, exports) {
+    }, {}], 30: [function (require, module, exports) {
         if (!('open' in document.createElement('details'))) {
             var style = document.createElement('style');
             style.textContent += "details:not([open]) > :not(summary) { display: none !important; } details > summary:before { content: \"▶\"; display: inline-block; font-size: .8em; width: 1.5em; font-family:\"Courier New\"; } details[open] > summary:before { transform: rotate(90deg); }";
@@ -1697,7 +1765,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, {}], 30: [function (require, module, exports) {
+    }, {}], 31: [function (require, module, exports) {
 
         module.exports = function (template) {
             if (!('content' in template)) {
@@ -1711,7 +1779,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 template.content = fragment;
             }
         };
-    }, {}], 31: [function (require, module, exports) {
+    }, {}], 32: [function (require, module, exports) {
         module.exports = {
             buildContentFromTemplate: buildContentFromTemplate
         };
@@ -1771,4 +1839,4 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
         }
-    }, { "app/ui/polyfills/template": 30 }] }, {}, [22]);
+    }, { "app/ui/polyfills/template": 31 }] }, {}, [23]);

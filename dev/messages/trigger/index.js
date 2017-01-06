@@ -35,7 +35,7 @@ function addMessage(msg = {}) {
 
 function save() {
     triggerMessages = [];
-    Array.from(tab.querySelectorAll('.third-box')).forEach(container => {
+    Array.from(tab.querySelectorAll('#tMsgs > div')).forEach(container => {
         if (!container.querySelector('.m').value || !container.querySelector('.t').value) {
             return;
         }
