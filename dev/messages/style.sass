@@ -4,9 +4,6 @@
     h3
         margin: 0 0 5px 0
 
-    > div
-        border-top: 1px solid #000
-
     input, textarea
         border: 2px solid #666
         width: calc(100% - 10px)
@@ -22,3 +19,22 @@
 
     input[type="number"]
         width: 5em
+
+#mb_join, #mb_leave, #mb_trigger
+    > div
+        position: relative
+        display: flex
+        flex-flow: row wrap
+        border-top: 1px solid #000
+        > div
+            width: calc(33% - 19px)
+            min-width: 280px
+
+            padding: 5px
+            margin-left: 5px
+            margin-bottom: 5px
+
+            border: 3px solid #999
+            border-radius: 10px
+            &:nth-child(odd)
+                background: darken(#fff, 20%)

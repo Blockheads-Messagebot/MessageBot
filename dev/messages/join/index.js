@@ -33,7 +33,7 @@ function addMessage(msg = {}) {
 
 function save() {
     joinMessages = [];
-    Array.from(tab.querySelectorAll('.third-box')).forEach(container => {
+    Array.from(tab.querySelectorAll('#jMsgs > div')).forEach(container => {
         if (!container.querySelector('.m').value) {
             return;
         }

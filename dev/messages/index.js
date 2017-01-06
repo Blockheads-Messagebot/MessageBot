@@ -9,7 +9,7 @@ ui.addTabGroup('Messages', 'messages');
 [
     require('./join'),
     require('./leave'),
-    // require('./trigger'),
+    require('./trigger'),
     require('./announcements')
 ].forEach(type => {
     type.tab.addEventListener('click', function checkDelete(event) {
