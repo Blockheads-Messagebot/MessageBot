@@ -15,6 +15,13 @@
 # Development
 ##### Local setup
 After cloning, create a symlink to /dev under /node_modules/app
+
+To run tests:
+`npm run test`
+
+To build:
+`npm run build`
+
 ##### Guides / Documentation
 See the [wiki](https://github.com/Bibliofile/Blockheads-MessageBot/wiki).
 

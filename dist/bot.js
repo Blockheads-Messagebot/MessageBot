@@ -278,144 +278,149 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             chat.innerHTML = '';
         }
     }, {}], 7: [function (require, module, exports) {
-        var self = module.exports = require('./exports');
+        (function (__dirname) {
+            var self = module.exports = require('./exports');
 
-        var hook = require('app/libraries/hook');
-        var world = require('app/libraries/world');
-        var send = require('app/bot').send;
-        var ui = require('app/ui');
+            var hook = require('app/libraries/hook');
+            var world = require('app/libraries/world');
+            var send = require('app/bot').send;
+            var ui = require('app/ui');
+            var fs = require('fs');
 
-        hook.on('world.other', function (message) {
-            self.write(message, undefined, 'other');
-        });
-
-        hook.on('world.message', function (name, message) {
-            var msgClass = 'player';
-            if (world.isStaff(name)) {
-                msgClass = 'staff';
-                if (world.isMod(name)) {
-                    msgClass += ' mod';
-                } else {
-                    msgClass += ' admin';
-                }
-            }
-            if (message.startsWith('/')) {
-                msgClass += ' command';
-            }
-            self.write(message, name, msgClass);
-        });
-
-        hook.on('world.serverchat', function (message) {
-            self.write(message, 'SERVER', 'admin');
-        });
-
-        hook.on('world.send', function (message) {
-            if (message.startsWith('/')) {
-                self.write(message, 'SERVER', 'admin command');
-            }
-        });
-
-        hook.on('world.join', function handlePlayerJoin(name, ip) {
-            self.write(name + " (" + ip + ") has joined the server", 'SERVER', 'join world admin');
-        });
-
-        hook.on('world.leave', function handlePlayerLeave(name) {
-            self.write(name + " has left the server", 'SERVER', "leave world admin");
-        });
-
-        var tab = ui.addTab('Console');
-
-        tab.innerHTML = '<style>' + "#mb_console .chat{height:calc(100vh - 220px)}@media screen and (min-width: 668px){#mb_console .chat{height:calc(100vh - 155px)}}#mb_console ul{height:100%;overflow-y:auto;margin:0;padding:0}#mb_console li{list-style-type:none}#mb_console .controls{display:flex;padding:0 10px}#mb_console input,#mb_console button{margin:5px 0}#mb_console input{font-size:1em;padding:1px;flex:1;border:solid 1px #999}#mb_console button{background:#182b73;font-weight:bold;color:#fff;border:0;height:40px;padding:1px 4px}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}\n" + '</style>' + "<div id=\"mb_console\">\r\n    <div class=\"chat\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"controls\">\r\n        <input type=\"text\"/><button>SEND</button>\r\n    </div>\r\n</div>\r\n";
-
-        new MutationObserver(function showNewChat() {
-            var container = tab.querySelector('ul');
-            var lastLine = tab.querySelector('li:last-child');
-
-            if (!container || !lastLine) {
-                return;
-            }
-
-            if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 2) {
-                lastLine.scrollIntoView(false);
-            }
-        }).observe(tab.querySelector('.chat'), { childList: true });
-
-        new MutationObserver(function removeOldChat() {
-            var chat = tab.querySelector('ul');
-
-            while (chat.children.length > 500) {
-                chat.children[0].remove();
-            }
-        }).observe(tab.querySelector('.chat'), { childList: true });
-
-        function userSend() {
-            var input = tab.querySelector('input');
-            hook.fire('console.send', input.value);
-            send(input.value);
-            input.value = '';
-            input.focus();
-        }
-
-        tab.querySelector('input').addEventListener('keydown', function (event) {
-            if (event.key == "Enter" || event.keyCode == 13) {
-                userSend();
-            }
-        });
-
-        tab.querySelector('button').addEventListener('click', userSend);
-    }, { "./exports": 6, "app/bot": 3, "app/libraries/hook": 12, "app/libraries/world": 14, "app/ui": 26 }], 8: [function (require, module, exports) {
-        var bhfansapi = require('app/libraries/bhfansapi');
-        var ui = require('app/ui');
-        var hook = require('app/libraries/hook');
-        var MessageBotExtension = require('app/MessageBotExtension');
-
-        var tab = ui.addTab('Extensions');
-        tab.innerHTML = '<style>' + "#mb_extensions .top-right-button{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#exts{display:flex;flex-flow:row wrap;border-top:1px solid #000}#exts h4,#exts p{margin:0}#exts button{position:absolute;bottom:7px;padding:4px 8px;border-radius:8px;background:#fff}#exts>div{position:relative;height:130px;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#exts>div:nth-child(odd){background:#ccc}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div>\r\n        <h4>Title</h4>\r\n        <span>Description</span><br>\r\n        <button class=\"button\">Install</button>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" data-tab-name=\"extensions\">\r\n    <h3>Extensions can increase the functionality of the bot.</h3>\r\n    <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    <span class=\"top-right-button\">Load By ID/URL</span>\r\n    <div id=\"exts\"></div>\r\n</div>\r\n";
-
-        bhfansapi.getStore().then(function (resp) {
-            if (resp.status != 'ok') {
-                document.getElementById('exts').innerHTML += resp.message;
-                throw new Error(resp.message);
-            }
-            resp.extensions.forEach(function (extension) {
-                ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: 'h4', text: extension.title }, { selector: 'span', html: extension.snippet }, { selector: 'div', 'data-id': extension.id }, { selector: 'button', text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install' }]);
+            hook.on('world.other', function (message) {
+                self.write(message, undefined, 'other');
             });
-        }).catch(bhfansapi.reportError);
 
-        document.querySelector('#exts').addEventListener('click', function extActions(e) {
-            if (e.target.tagName != 'BUTTON') {
-                return;
+            hook.on('world.message', function (name, message) {
+                var msgClass = 'player';
+                if (world.isStaff(name)) {
+                    msgClass = 'staff';
+                    if (world.isMod(name)) {
+                        msgClass += ' mod';
+                    } else {
+                        msgClass += ' admin';
+                    }
+                }
+                if (message.startsWith('/')) {
+                    msgClass += ' command';
+                }
+                self.write(message, name, msgClass);
+            });
+
+            hook.on('world.serverchat', function (message) {
+                self.write(message, 'SERVER', 'admin');
+            });
+
+            hook.on('world.send', function (message) {
+                if (message.startsWith('/')) {
+                    self.write(message, 'SERVER', 'admin command');
+                }
+            });
+
+            hook.on('world.join', function handlePlayerJoin(name, ip) {
+                self.write(name + " (" + ip + ") has joined the server", 'SERVER', 'join world admin');
+            });
+
+            hook.on('world.leave', function handlePlayerLeave(name) {
+                self.write(name + " has left the server", 'SERVER', "leave world admin");
+            });
+
+            var tab = ui.addTab('Console');
+
+            tab.innerHTML = '<style>' + fs.readFileSync(__dirname + '/style.css') + '</style>' + fs.readFileSync(__dirname + '/tab.html');
+
+            new MutationObserver(function showNewChat() {
+                var container = tab.querySelector('ul');
+                var lastLine = tab.querySelector('li:last-child');
+
+                if (!container || !lastLine) {
+                    return;
+                }
+
+                if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 2) {
+                    lastLine.scrollIntoView(false);
+                }
+            }).observe(tab.querySelector('.chat'), { childList: true });
+
+            new MutationObserver(function removeOldChat() {
+                var chat = tab.querySelector('ul');
+
+                while (chat.children.length > 500) {
+                    chat.children[0].remove();
+                }
+            }).observe(tab.querySelector('.chat'), { childList: true });
+
+            function userSend() {
+                var input = tab.querySelector('input');
+                hook.fire('console.send', input.value);
+                send(input.value);
+                input.value = '';
+                input.focus();
             }
-            var el = e.target;
-            var id = el.parentElement.dataset.id;
 
-            if (el.textContent == 'Install') {
-                MessageBotExtension.install(id);
-            } else {
-                MessageBotExtension.uninstall(id);
-            }
-        });
+            tab.querySelector('input').addEventListener('keydown', function (event) {
+                if (event.key == "Enter" || event.keyCode == 13) {
+                    userSend();
+                }
+            });
 
-        hook.on('extension.install', function (id) {
-            var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"] button");
-            if (button) {
-                button.textContent = 'Remove';
-            }
-        });
+            tab.querySelector('button').addEventListener('click', userSend);
+        }).call(this, "/node_modules\\app\\console");
+    }, { "./exports": 6, "app/bot": 3, "app/libraries/hook": 12, "app/libraries/world": 14, "app/ui": 26, "fs": 35 }], 8: [function (require, module, exports) {
+        (function (__dirname) {
+            var bhfansapi = require('app/libraries/bhfansapi');
+            var ui = require('app/ui');
+            var hook = require('app/libraries/hook');
+            var MessageBotExtension = require('app/MessageBotExtension');
+            var fs = require('fs');
 
-        hook.on('extension.uninstall', function (id) {
-            var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"] button");
-            if (button) {
-                button.textContent = 'Removed';
-                button.disabled = true;
-                setTimeout(function () {
-                    button.textContent = 'Install';
-                    button.disabled = false;
-                }, 3000);
-            }
-        });
-    }, { "app/MessageBotExtension": 1, "app/libraries/bhfansapi": 10, "app/libraries/hook": 12, "app/ui": 26 }], 9: [function (require, module, exports) {
+            var tab = ui.addTab('Extensions');
+            tab.innerHTML = '<style>' + fs.readFileSync(__dirname + '/style.css') + '</style>' + fs.readFileSync(__dirname + '/tab.html');
 
+            bhfansapi.getStore().then(function (resp) {
+                if (resp.status != 'ok') {
+                    document.getElementById('exts').innerHTML += resp.message;
+                    throw new Error(resp.message);
+                }
+                resp.extensions.forEach(function (extension) {
+                    ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: 'h4', text: extension.title }, { selector: 'span', html: extension.snippet }, { selector: 'div', 'data-id': extension.id }, { selector: 'button', text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install' }]);
+                });
+            }).catch(bhfansapi.reportError);
+
+            document.querySelector('#exts').addEventListener('click', function extActions(e) {
+                if (e.target.tagName != 'BUTTON') {
+                    return;
+                }
+                var el = e.target;
+                var id = el.parentElement.dataset.id;
+
+                if (el.textContent == 'Install') {
+                    MessageBotExtension.install(id);
+                } else {
+                    MessageBotExtension.uninstall(id);
+                }
+            });
+
+            hook.on('extension.install', function (id) {
+                var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"] button");
+                if (button) {
+                    button.textContent = 'Remove';
+                }
+            });
+
+            hook.on('extension.uninstall', function (id) {
+                var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"] button");
+                if (button) {
+                    button.textContent = 'Removed';
+                    button.disabled = true;
+                    setTimeout(function () {
+                        button.textContent = 'Install';
+                        button.disabled = false;
+                    }, 3000);
+                }
+            });
+        }).call(this, "/node_modules\\app\\extensions");
+    }, { "app/MessageBotExtension": 1, "app/libraries/bhfansapi": 10, "app/libraries/hook": 12, "app/ui": 26, "fs": 35 }], 9: [function (require, module, exports) {
         function get() {
             var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
             var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -493,7 +498,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         module.exports = { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
     }, {}], 10: [function (require, module, exports) {
 
-        var ui = require('app/ui');
+        var hook = require('app/libraries/hook');
         var ajax = require('app/libraries/ajax');
 
         var API_URLS = {
@@ -506,42 +511,42 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             names: new Map()
         };
 
-        getStore().then(function (store) {
-            if (store.status != 'ok') {
-                return;
-            }
-
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-                for (var _iterator2 = store.extensions[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var ex = _step2.value;
-
-                    cache.names.set(ex.id, ex.title);
-                }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
-            }
-        }).catch(reportError);
-
         function getStore() {
             var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.getStore) {
-                cache.getStore = ajax.getJSON(API_URLS.STORE);
+                cache.getStore = ajax.getJSON(API_URLS.STORE).then(function (store) {
+                    if (store.status != 'ok') {
+                        return store;
+                    }
+
+                    var _iteratorNormalCompletion2 = true;
+                    var _didIteratorError2 = false;
+                    var _iteratorError2 = undefined;
+
+                    try {
+                        for (var _iterator2 = store.extensions[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                            var ex = _step2.value;
+
+                            cache.names.set(ex.id, ex.title);
+                        }
+                    } catch (err) {
+                        _didIteratorError2 = true;
+                        _iteratorError2 = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                _iterator2.return();
+                            }
+                        } finally {
+                            if (_didIteratorError2) {
+                                throw _iteratorError2;
+                            }
+                        }
+                    }
+
+                    return store;
+                });
             }
 
             return cache.getStore;
@@ -570,9 +575,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 error_stack: err.stack || ''
             }).then(function (resp) {
                 if (resp.status == 'ok') {
-                    ui.notify('Something went wrong, it has been reported.');
+                    hook.fire('error_report', 'Something went wrong, it has been reported.');
                 } else {
-                    ui.notify("Error reporting exception: " + resp.message);
+                    hook.fire('error_report', "Error reporting exception: " + resp.message);
                 }
             }).catch(console.error);
         }
@@ -582,7 +587,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             getExtensionName: getExtensionName,
             reportError: reportError
         };
-    }, { "app/libraries/ajax": 9, "app/ui": 26 }], 11: [function (require, module, exports) {
+    }, { "app/libraries/ajax": 9, "app/libraries/hook": 12 }], 11: [function (require, module, exports) {
         var ajax = require('./ajax');
         var hook = require('./hook');
         var bhfansapi = require('./bhfansapi');
@@ -1208,54 +1213,57 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             storage.set(STORAGE.PLAYERS, world.players);
         });
     }, { "./blockheads": 11, "./hook": 12, "./storage": 13 }], 15: [function (require, module, exports) {
-        var ui = require('app/ui');
-        var storage = require('app/libraries/storage');
-        var send = require('app/bot').send;
-        var preferences = require('app/settings');
+        (function (__dirname) {
+            var ui = require('app/ui');
+            var storage = require('app/libraries/storage');
+            var send = require('app/bot').send;
+            var preferences = require('app/settings');
+            var fs = require('fs');
 
-        var tab = ui.addTab('Announcements', 'messages');
-        tab.innerHTML = "<template id=\"aTemplate\">\r\n    <div>\r\n        <label>Send:</label>\r\n        <textarea class=\"m\"></textarea>\r\n        <a>Delete</a>\r\n        <label style=\"display:block;margin-top:5px;\">Wait X minutes...</label>\r\n    </div>\r\n</template>\r\n<div id=\"mb_announcements\">\r\n    <h3>These are sent according to a regular schedule.</h3>\r\n    <span>If you have one announcement, it is sent every X minutes, if you have two, then the first is sent at X minutes, and the second is sent X minutes after the first. Change X in the settings tab. Once the bot reaches the end of the list, it starts over at the top.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"aMsgs\"></div>\r\n</div>\r\n";
+            var tab = ui.addTab('Announcements', 'messages');
+            tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
 
-        module.exports = {
-            tab: tab,
-            save: save,
-            addMessage: addMessage,
-            start: function start() {
-                return announcementCheck(0);
+            module.exports = {
+                tab: tab,
+                save: save,
+                addMessage: addMessage,
+                start: function start() {
+                    return announcementCheck(0);
+                }
+            };
+
+            function addMessage() {
+                var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+                ui.buildContentFromTemplate('#aTemplate', '#aMsgs', [{ selector: '.m', text: text }]);
             }
-        };
 
-        function addMessage() {
-            var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+            function save() {
+                announcements = Array.from(tab.querySelectorAll('.m')).map(function (el) {
+                    return { message: el.value };
+                });
 
-            ui.buildContentFromTemplate('#aTemplate', '#aMsgs', [{ selector: '.m', text: text }]);
-        }
-
-        function save() {
-            announcements = Array.from(tab.querySelectorAll('.m')).map(function (el) {
-                return { message: el.value };
-            });
-
-            storage.set('announcementArr', announcements);
-        }
-
-        var announcements = storage.getObject('announcementArr', []);
-
-        announcements.map(function (ann) {
-            return ann.message;
-        }).forEach(addMessage);
-
-        function announcementCheck(i) {
-            i = i >= announcements.length ? 0 : i;
-
-            var ann = announcements[i];
-
-            if (ann && ann.message) {
-                send(ann.message);
+                storage.set('announcementArr', announcements);
             }
-            setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
-        }
-    }, { "app/bot": 3, "app/libraries/storage": 13, "app/settings": 23, "app/ui": 26 }], 16: [function (require, module, exports) {
+
+            var announcements = storage.getObject('announcementArr', []);
+
+            announcements.map(function (ann) {
+                return ann.message;
+            }).forEach(addMessage);
+
+            function announcementCheck(i) {
+                i = i >= announcements.length ? 0 : i;
+
+                var ann = announcements[i];
+
+                if (ann && ann.message) {
+                    send(ann.message);
+                }
+                setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
+            }
+        }).call(this, "/dev\\messages\\announcements");
+    }, { "app/bot": 3, "app/libraries/storage": 13, "app/settings": 23, "app/ui": 26, "fs": 35 }], 16: [function (require, module, exports) {
         module.exports = {
             buildAndSendMessage: buildAndSendMessage,
             buildMessage: buildMessage
@@ -1324,219 +1332,231 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     }, { "app/libraries/world": 14 }], 18: [function (require, module, exports) {
         Object.assign(module.exports, require('./buildMessage'), require('./checkJoinsAndGroup'));
     }, { "./buildMessage": 16, "./checkJoinsAndGroup": 17 }], 19: [function (require, module, exports) {
-        var ui = require('app/ui');
+        (function (__dirname) {
+            var ui = require('app/ui');
+            var fs = require('fs');
 
-        var el = document.createElement('style');
-        el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}#jMsgs,#lMsgs,#tMsgs{position:relative;display:flex;flex-flow:row wrap;border-top:1px solid #000}#jMsgs>div,#lMsgs>div,#tMsgs>div{width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#jMsgs>div:nth-child(odd),#lMsgs>div:nth-child(odd),#tMsgs>div:nth-child(odd){background:#ccc}\n";
-        document.head.appendChild(el);
+            var el = document.createElement('style');
+            el.innerHTML = fs.readFileSync(__dirname + '/style.css');
+            document.head.appendChild(el);
 
-        ui.addTabGroup('Messages', 'messages');
+            ui.addTabGroup('Messages', 'messages');
 
-        [require('./join'), require('./leave'), require('./trigger'), require('./announcements')].forEach(function (type) {
-            type.tab.addEventListener('click', function checkDelete(event) {
-                if (event.target.tagName != 'A') {
-                    return;
-                }
+            [require('./join'), require('./leave'), require('./trigger'), require('./announcements')].forEach(function (type) {
+                type.tab.addEventListener('click', function checkDelete(event) {
+                    if (event.target.tagName != 'A') {
+                        return;
+                    }
 
-                ui.alert('Really delete this message?', [{ text: 'Yes', style: 'danger', action: function action() {
-                        event.target.parentNode.remove();
-                        type.save();
-                    } }, { text: 'Cancel' }]);
-            });
-
-            type.tab.addEventListener('change', type.save);
-
-            type.tab.querySelector('.top-right-button').addEventListener('click', function () {
-                return type.addMessage();
-            });
-
-            setTimeout(type.start, 10000);
-        });
-    }, { "./announcements": 15, "./join": 20, "./leave": 21, "./trigger": 22, "app/ui": 26 }], 20: [function (require, module, exports) {
-        var ui = require('app/ui');
-
-        var storage = require('app/libraries/storage');
-        var hook = require('app/libraries/hook');
-        var helpers = require('app/messages/helpers');
-
-        var STORAGE_ID = 'joinArr';
-
-        var tab = ui.addTab('Join', 'messages');
-        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div>\r\n        <label>When a player who is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> joins, then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
-
-        module.exports = {
-            tab: tab,
-            save: save,
-            addMessage: addMessage,
-            start: function start() {
-                return hook.on('world.join', onJoin);
-            }
-        };
-
-        var joinMessages = storage.getObject(STORAGE_ID, []);
-        joinMessages.forEach(addMessage);
-
-        function addMessage() {
-            var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
-        }
-
-        function save() {
-            joinMessages = [];
-            Array.from(tab.querySelectorAll('#jMsgs > div')).forEach(function (container) {
-                if (!container.querySelector('.m').value) {
-                    return;
-                }
-
-                joinMessages.push({
-                    message: container.querySelector('.m').value,
-                    joins_low: +container.querySelector('[data-target="joins_low"]').value,
-                    joins_high: +container.querySelector('[data-target="joins_high"]').value,
-                    group: container.querySelector('[data-target="group"]').value,
-                    not_group: container.querySelector('[data-target="not_group"]').value
+                    ui.alert('Really delete this message?', [{ text: 'Yes', style: 'danger', action: function action() {
+                            event.target.parentNode.remove();
+                            type.save();
+                        } }, { text: 'Cancel' }]);
                 });
-            });
 
-            storage.set(STORAGE_ID, joinMessages);
-        }
+                type.tab.addEventListener('change', type.save);
 
-        function onJoin(name) {
-            joinMessages.forEach(function (msg) {
-                if (helpers.checkJoinsAndGroup(name, msg)) {
-                    helpers.buildAndSendMessage(msg.message, name);
-                }
-            });
-        }
-    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 21: [function (require, module, exports) {
-        var ui = require('app/ui');
-
-        var storage = require('app/libraries/storage');
-        var hook = require('app/libraries/hook');
-        var helpers = require('app/messages/helpers');
-
-        var STORAGE_ID = 'leaveArr';
-
-        var tab = ui.addTab('Leave', 'messages');
-        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div>\r\n        <label>When the player leaving is </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> and not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> then say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> in chat if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label> times.</label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
-
-        module.exports = {
-            tab: tab,
-            save: save,
-            addMessage: addMessage,
-            start: function start() {
-                return hook.on('world.leave', onLeave);
-            }
-        };
-
-        var leaveMessages = storage.getObject(STORAGE_ID, []);
-        leaveMessages.forEach(addMessage);
-
-        function addMessage() {
-            var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
-        }
-
-        function save() {
-            leaveMessages = [];
-            Array.from(tab.querySelectorAll('#lMsgs > div')).forEach(function (container) {
-                if (!container.querySelector('.m').value) {
-                    return;
-                }
-
-                leaveMessages.push({
-                    message: container.querySelector('.m').value,
-                    joins_low: +container.querySelector('[data-target="joins_low"]').value,
-                    joins_high: +container.querySelector('[data-target="joins_high"]').value,
-                    group: container.querySelector('[data-target="group"]').value,
-                    not_group: container.querySelector('[data-target="not_group"]').value
+                type.tab.querySelector('.top-right-button').addEventListener('click', function () {
+                    return type.addMessage();
                 });
+
+                setTimeout(type.start, 10000);
             });
+        }).call(this, "/node_modules\\app\\messages");
+    }, { "./announcements": 15, "./join": 20, "./leave": 21, "./trigger": 22, "app/ui": 26, "fs": 35 }], 20: [function (require, module, exports) {
+        (function (__dirname) {
+            var ui = require('app/ui');
 
-            storage.set(STORAGE_ID, leaveMessages);
-        }
+            var storage = require('app/libraries/storage');
+            var hook = require('app/libraries/hook');
+            var helpers = require('app/messages/helpers');
+            var fs = require('fs');
 
-        function onLeave(name) {
-            leaveMessages.forEach(function (msg) {
-                if (helpers.checkJoinsAndGroup(name, msg)) {
-                    helpers.buildAndSendMessage(msg.message, name);
+            var STORAGE_ID = 'joinArr';
+
+            var tab = ui.addTab('Join', 'messages');
+            tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
+
+            module.exports = {
+                tab: tab,
+                save: save,
+                addMessage: addMessage,
+                start: function start() {
+                    return hook.on('world.join', onJoin);
                 }
-            });
-        }
-    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 22: [function (require, module, exports) {
-        var ui = require('app/ui');
+            };
 
-        var storage = require('app/libraries/storage');
-        var hook = require('app/libraries/hook');
-        var helpers = require('app/messages/helpers');
-        var settings = require('app/settings');
+            var joinMessages = storage.getObject(STORAGE_ID, []);
+            joinMessages.forEach(addMessage);
 
-        var STORAGE_ID = 'triggerArr';
+            function addMessage() {
+                var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        var tab = ui.addTab('Trigger', 'messages');
-        tab.innerHTML = "<template id=\"tTemplate\">\r\n    <div>\r\n        <label>When </label>\r\n        <select data-target=\"group\">\r\n            <option value=\"All\">anyone</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> who is not </label>\r\n        <select data-target=\"not_group\">\r\n            <option value=\"Nobody\">nobody</option>\r\n            <option value=\"Staff\">a staff member</option>\r\n            <option value=\"Mod\">a mod</option>\r\n            <option value=\"Admin\">an admin</option>\r\n            <option value=\"Owner\">the owner</option>\r\n        </select>\r\n        <label> says </label>\r\n        <input class=\"t\">\r\n        <label> in chat, say </label>\r\n        <textarea class=\"m\"></textarea>\r\n        <label> if the player has joined between </label>\r\n        <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n        <label> and </label>\r\n        <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        <label>times. </label><br>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_trigger\">\r\n    <h3>These are checked whenever someone says something.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger \"te*st\" will match \"tea stuff\" and \"test\")</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"tMsgs\"></div>\r\n</div>\r\n";
-
-        module.exports = {
-            tab: tab,
-            save: save,
-            addMessage: addMessage,
-            start: function start() {
-                return hook.on('world.message', checkTriggers);
+                ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
             }
-        };
 
-        var triggerMessages = storage.getObject(STORAGE_ID, []);
-        triggerMessages.forEach(addMessage);
+            function save() {
+                joinMessages = [];
+                Array.from(tab.querySelectorAll('#jMsgs > div')).forEach(function (container) {
+                    if (!container.querySelector('.m').value) {
+                        return;
+                    }
 
-        function addMessage() {
-            var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '.t', value: msg.trigger || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
-        }
-
-        function save() {
-            triggerMessages = [];
-            Array.from(tab.querySelectorAll('#tMsgs > div')).forEach(function (container) {
-                if (!container.querySelector('.m').value || !container.querySelector('.t').value) {
-                    return;
-                }
-
-                triggerMessages.push({
-                    message: container.querySelector('.m').value,
-                    trigger: container.querySelector('.t').value,
-                    joins_low: +container.querySelector('[data-target="joins_low"]').value,
-                    joins_high: +container.querySelector('[data-target="joins_high"]').value,
-                    group: container.querySelector('[data-target="group"]').value,
-                    not_group: container.querySelector('[data-target="not_group"]').value
+                    joinMessages.push({
+                        message: container.querySelector('.m').value,
+                        joins_low: +container.querySelector('[data-target="joins_low"]').value,
+                        joins_high: +container.querySelector('[data-target="joins_high"]').value,
+                        group: container.querySelector('[data-target="group"]').value,
+                        not_group: container.querySelector('[data-target="not_group"]').value
+                    });
                 });
-            });
 
-            storage.set(STORAGE_ID, triggerMessages);
-        }
-
-        function triggerMatch(trigger, message) {
-            if (settings.regexTriggers) {
-                try {
-                    return new RegExp(trigger, 'i').test(message);
-                } catch (e) {
-                    ui.notify("Skipping trigger '" + trigger + "' as the RegEx is invaild.");
-                    return false;
-                }
+                storage.set(STORAGE_ID, joinMessages);
             }
-            return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
-        }
 
-        function checkTriggers(name, message) {
-            var totalAllowed = settings.maxResponses;
-            triggerMessages.forEach(function (msg) {
-                if (totalAllowed && helpers.checkJoinsAndGroup(name, msg) && triggerMatch(msg.trigger, message)) {
-                    helpers.buildAndSendMessage(msg.message, name);
-                    totalAllowed--;
+            function onJoin(name) {
+                joinMessages.forEach(function (msg) {
+                    if (helpers.checkJoinsAndGroup(name, msg)) {
+                        helpers.buildAndSendMessage(msg.message, name);
+                    }
+                });
+            }
+        }).call(this, "/dev\\messages\\join");
+    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26, "fs": 35 }], 21: [function (require, module, exports) {
+        (function (__dirname) {
+            var ui = require('app/ui');
+
+            var storage = require('app/libraries/storage');
+            var hook = require('app/libraries/hook');
+            var helpers = require('app/messages/helpers');
+            var fs = require('fs');
+
+            var STORAGE_ID = 'leaveArr';
+
+            var tab = ui.addTab('Leave', 'messages');
+            tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
+
+            module.exports = {
+                tab: tab,
+                save: save,
+                addMessage: addMessage,
+                start: function start() {
+                    return hook.on('world.leave', onLeave);
                 }
-            });
-        }
-    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/settings": 23, "app/ui": 26 }], 23: [function (require, module, exports) {
+            };
+
+            var leaveMessages = storage.getObject(STORAGE_ID, []);
+            leaveMessages.forEach(addMessage);
+
+            function addMessage() {
+                var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+                ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+            }
+
+            function save() {
+                leaveMessages = [];
+                Array.from(tab.querySelectorAll('#lMsgs > div')).forEach(function (container) {
+                    if (!container.querySelector('.m').value) {
+                        return;
+                    }
+
+                    leaveMessages.push({
+                        message: container.querySelector('.m').value,
+                        joins_low: +container.querySelector('[data-target="joins_low"]').value,
+                        joins_high: +container.querySelector('[data-target="joins_high"]').value,
+                        group: container.querySelector('[data-target="group"]').value,
+                        not_group: container.querySelector('[data-target="not_group"]').value
+                    });
+                });
+
+                storage.set(STORAGE_ID, leaveMessages);
+            }
+
+            function onLeave(name) {
+                leaveMessages.forEach(function (msg) {
+                    if (helpers.checkJoinsAndGroup(name, msg)) {
+                        helpers.buildAndSendMessage(msg.message, name);
+                    }
+                });
+            }
+        }).call(this, "/dev\\messages\\leave");
+    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26, "fs": 35 }], 22: [function (require, module, exports) {
+        (function (__dirname) {
+            var ui = require('app/ui');
+
+            var storage = require('app/libraries/storage');
+            var hook = require('app/libraries/hook');
+            var helpers = require('app/messages/helpers');
+            var settings = require('app/settings');
+            var fs = require('fs');
+
+            var STORAGE_ID = 'triggerArr';
+
+            var tab = ui.addTab('Trigger', 'messages');
+            tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
+
+            module.exports = {
+                tab: tab,
+                save: save,
+                addMessage: addMessage,
+                start: function start() {
+                    return hook.on('world.message', checkTriggers);
+                }
+            };
+
+            var triggerMessages = storage.getObject(STORAGE_ID, []);
+            triggerMessages.forEach(addMessage);
+
+            function addMessage() {
+                var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+                ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '.t', value: msg.trigger || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+            }
+
+            function save() {
+                triggerMessages = [];
+                Array.from(tab.querySelectorAll('#tMsgs > div')).forEach(function (container) {
+                    if (!container.querySelector('.m').value || !container.querySelector('.t').value) {
+                        return;
+                    }
+
+                    triggerMessages.push({
+                        message: container.querySelector('.m').value,
+                        trigger: container.querySelector('.t').value,
+                        joins_low: +container.querySelector('[data-target="joins_low"]').value,
+                        joins_high: +container.querySelector('[data-target="joins_high"]').value,
+                        group: container.querySelector('[data-target="group"]').value,
+                        not_group: container.querySelector('[data-target="not_group"]').value
+                    });
+                });
+
+                storage.set(STORAGE_ID, triggerMessages);
+            }
+
+            function triggerMatch(trigger, message) {
+                if (settings.regexTriggers) {
+                    try {
+                        return new RegExp(trigger, 'i').test(message);
+                    } catch (e) {
+                        ui.notify("Skipping trigger '" + trigger + "' as the RegEx is invaild.");
+                        return false;
+                    }
+                }
+                return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
+            }
+
+            function checkTriggers(name, message) {
+                var totalAllowed = settings.maxResponses;
+                triggerMessages.forEach(function (msg) {
+                    if (totalAllowed && helpers.checkJoinsAndGroup(name, msg) && triggerMatch(msg.trigger, message)) {
+                        helpers.buildAndSendMessage(msg.message, name);
+                        totalAllowed--;
+                    }
+                });
+            }
+        }).call(this, "/dev\\messages\\trigger");
+    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/settings": 23, "app/ui": 26, "fs": 35 }], 23: [function (require, module, exports) {
         var storage = require('app/libraries/storage');
         var STORAGE_ID = 'mb_preferences';
 
@@ -1569,80 +1589,83 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
         });
     }, { "app/libraries/storage": 13 }], 24: [function (require, module, exports) {
-        var ui = require('app/ui');
-        var prefs = require('app/settings');
+        (function (__dirname) {
+            var ui = require('app/ui');
+            var prefs = require('app/settings');
+            var fs = require('fs');
 
-        var tab = ui.addTab('Settings');
-        tab.innerHTML = '<style>' + "#mb_settings h3{border-bottom:1px solid #999}\n" + '</style>' + "<div id=\"mb_settings\">\r\n    <h3>Settings</h3>\r\n    <label>Minutes between announcements:</label><br>\r\n        <input data-key=\"announcementDelay\" type=\"number\"><br>\r\n    <label>Maximum trigger responses to a message:</label><br>\r\n        <input data-key=\"maxResponses\" type=\"number\"><br>\r\n    <label>New chat notifications: </label>\r\n        <input data-key=\"notify\" type=\"checkbox\"><br>\r\n\r\n    <h3>Advanced Settings - <small><a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/1.-Advanced-Options/\" target=\"_blank\">Read this first</a></small></h3>\r\n    <label>Disable whitespace trimming: </label>\r\n        <input data-key=\"disableTrim\" type=\"checkbox\"><br>\r\n    <label>Parse triggers as RegEx: </label>\r\n        <input data-key=\"regexTriggers\" type=\"checkbox\"><br>\r\n    <label>Split messages: </label>\r\n        <input data-key=\"splitMessages\" type=\"checkbox\"><br>\r\n    <label>Split token: </label><br>\r\n        <input data-key=\"splitToken\" type=\"text\">\r\n\r\n    <h3>Backup / Restore</h3>\r\n    <a id=\"mb_backup_save\">Get backup code</a><br>\r\n    <a id=\"mb_backup_load\">Load previous backup</a>\r\n    <div id=\"mb_backup\"></div>\r\n</div>\r\n";
-
-        Object.keys(prefs).forEach(function (key) {
-            var el = tab.querySelector("[data-key=\"" + key + "\"]");
-            switch (_typeof(prefs[key])) {
-                case 'boolean':
-                    el.checked = prefs[key];
-                    break;
-                default:
-                    el.value = prefs[key];
-            }
-        });
-
-        tab.addEventListener('change', function save() {
-            var getValue = function getValue(key) {
-                return tab.querySelector("[data-key=\"" + key + "\"]").value;
-            };
-            var getInt = function getInt(key) {
-                return +getValue(key);
-            };
-            var getChecked = function getChecked(key) {
-                return tab.querySelector("[data-key=\"" + key + "\"]").checked;
-            };
+            var tab = ui.addTab('Settings');
+            tab.innerHTML = '<style>' + fs.readFileSync(__dirname + '/style.css') + '</style>' + fs.readFileSync(__dirname + '/tab.html');
 
             Object.keys(prefs).forEach(function (key) {
-                var func;
-
+                var el = tab.querySelector("[data-key=\"" + key + "\"]");
                 switch (_typeof(prefs[key])) {
                     case 'boolean':
-                        func = getChecked;
-                        break;
-                    case 'number':
-                        func = getInt;
+                        el.checked = prefs[key];
                         break;
                     default:
-                        func = getValue;
+                        el.value = prefs[key];
                 }
-
-                prefs[key] = func(key);
             });
-        });
 
-        tab.querySelector('#mb_backup_save').addEventListener('click', function showBackup() {
-            var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
-            ui.alert("Copy this to a safe place:<br><textarea style=\"width: calc(100% - 7px);height:160px;\">" + backup + "</textarea>");
-        });
+            tab.addEventListener('change', function save() {
+                var getValue = function getValue(key) {
+                    return tab.querySelector("[data-key=\"" + key + "\"]").value;
+                };
+                var getInt = function getInt(key) {
+                    return +getValue(key);
+                };
+                var getChecked = function getChecked(key) {
+                    return tab.querySelector("[data-key=\"" + key + "\"]").checked;
+                };
 
-        tab.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
-            ui.alert('Enter the backup code:<textarea style="width:calc(100% - 7px);height:160px;"></textarea>', [{ text: 'Load & refresh page', style: 'success', action: function action() {
-                    var code = document.querySelector('#alert textarea').value;
-                    try {
-                        code = JSON.parse(code);
-                        if (code === null) {
-                            throw new Error('Invalid backup');
-                        }
-                    } catch (e) {
-                        ui.notify('Invalid backup code. No action taken.');
-                        return;
+                Object.keys(prefs).forEach(function (key) {
+                    var func;
+
+                    switch (_typeof(prefs[key])) {
+                        case 'boolean':
+                            func = getChecked;
+                            break;
+                        case 'number':
+                            func = getInt;
+                            break;
+                        default:
+                            func = getValue;
                     }
 
-                    localStorage.clear();
+                    prefs[key] = func(key);
+                });
+            });
 
-                    Object.keys(code).forEach(function (key) {
-                        localStorage.setItem(key, code[key]);
-                    });
+            tab.querySelector('#mb_backup_save').addEventListener('click', function showBackup() {
+                var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
+                ui.alert("Copy this to a safe place:<br><textarea style=\"width: calc(100% - 7px);height:160px;\">" + backup + "</textarea>");
+            });
 
-                    location.reload();
-                } }, { text: 'Cancel' }]);
-        });
-    }, { "app/settings": 23, "app/ui": 26 }], 25: [function (require, module, exports) {
+            tab.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
+                ui.alert('Enter the backup code:<textarea style="width:calc(100% - 7px);height:160px;"></textarea>', [{ text: 'Load & refresh page', style: 'success', action: function action() {
+                        var code = document.querySelector('#alert textarea').value;
+                        try {
+                            code = JSON.parse(code);
+                            if (code === null) {
+                                throw new Error('Invalid backup');
+                            }
+                        } catch (e) {
+                            ui.notify('Invalid backup code. No action taken.');
+                            return;
+                        }
+
+                        localStorage.clear();
+
+                        Object.keys(code).forEach(function (key) {
+                            localStorage.setItem(key, code[key]);
+                        });
+
+                        location.reload();
+                    } }, { text: 'Cancel' }]);
+            });
+        }).call(this, "/node_modules\\app\\settings");
+    }, { "app/settings": 23, "app/ui": 26, "fs": 35 }], 25: [function (require, module, exports) {
         window.pollChat = function () {};
 
         document.body.innerHTML = '';
@@ -1663,6 +1686,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         window.MessageBotExtension = require('app/MessageBotExtension');
 
         var bhfansapi = require('app/libraries/bhfansapi');
+        var hook = require('app/libraries/hook');
+        var ui = require('app/ui');
+        hook.on('error_report', function (msg) {
+            ui.notify(msg);
+        });
 
         require('app/console');
         document.querySelector('#leftNav span').click();
@@ -1675,7 +1703,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 bhfansapi.reportError(err);
             }
         });
-    }, { "app/MessageBotExtension": 1, "app/bot/migration": 4, "app/console": 7, "app/extensions": 8, "app/libraries/bhfansapi": 10, "app/messages": 19, "app/settings/page": 24, "app/ui/polyfills/console": 31 }], 26: [function (require, module, exports) {
+    }, { "app/MessageBotExtension": 1, "app/bot/migration": 4, "app/console": 7, "app/extensions": 8, "app/libraries/bhfansapi": 10, "app/libraries/hook": 12, "app/messages": 19, "app/settings/page": 24, "app/ui": 26, "app/ui/polyfills/console": 31 }], 26: [function (require, module, exports) {
         require('./polyfills/details');
 
         Object.assign(module.exports, require('./layout'), require('./template'), require('./notifications'));
@@ -1689,89 +1717,93 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             write(msg, name, nameClass);
         };
     }, { "./layout": 27, "./notifications": 29, "./polyfills/details": 32, "./template": 34, "app/console/exports": 6 }], 27: [function (require, module, exports) {
+        (function (__dirname) {
 
-        document.body.innerHTML += "<div id=\"leftNav\">\r\n    <input type=\"checkbox\" id=\"leftToggle\">\r\n    <label for=\"leftToggle\">&#9776; Menu</label>\r\n\r\n    <nav data-tab-group=\"main\"></nav>\r\n    <div class=\"overlay\"></div>\r\n</div>\r\n\r\n<div id=\"container\">\r\n    <header></header>\r\n</div>\r\n";
-        document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';
+            var fs = require('fs');
 
-        document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);
+            document.body.innerHTML += fs.readFileSync(__dirname + '/layout.html');
+            document.head.innerHTML += '<style>' + fs.readFileSync(__dirname + '/style.css') + '</style>';
 
-        document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
-            var tabName = event.target.dataset.tabName;
-            if (!tabName) {
-                return;
+            document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);
+
+            document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
+                var tabName = event.target.dataset.tabName;
+                if (!tabName) {
+                    return;
+                }
+
+                Array.from(document.querySelectorAll('#container > .visible')).forEach(function (el) {
+                    return el.classList.remove('visible');
+                });
+                document.querySelector("#container > [data-tab-name=" + tabName + "]").classList.add('visible');
+
+                Array.from(document.querySelectorAll('#leftNav .selected')).forEach(function (el) {
+                    return el.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+            });
+
+            module.exports = {
+                toggleMenu: toggleMenu,
+                addTab: addTab,
+                removeTab: removeTab,
+                addTabGroup: addTabGroup,
+                removeTabGroup: removeTabGroup
+            };
+
+            function toggleMenu() {
+                var mainToggle = document.querySelector('#leftNav input');
+                mainToggle.checked = !mainToggle.checked;
             }
 
-            Array.from(document.querySelectorAll('#container > .visible')).forEach(function (el) {
-                return el.classList.remove('visible');
-            });
-            document.querySelector("#container > [data-tab-name=" + tabName + "]").classList.add('visible');
+            var tabUID = 0;
+            function addTab(tabText) {
+                var groupName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'main';
 
-            Array.from(document.querySelectorAll('#leftNav .selected')).forEach(function (el) {
-                return el.classList.remove('selected');
-            });
-            event.target.classList.add('selected');
-        });
+                var tabName = 'botTab_' + tabUID++;
 
-        module.exports = {
-            toggleMenu: toggleMenu,
-            addTab: addTab,
-            removeTab: removeTab,
-            addTabGroup: addTabGroup,
-            removeTabGroup: removeTabGroup
-        };
+                var tab = document.createElement('span');
+                tab.textContent = tabText;
+                tab.classList.add('tab');
+                tab.dataset.tabName = tabName;
 
-        function toggleMenu() {
-            var mainToggle = document.querySelector('#leftNav input');
-            mainToggle.checked = !mainToggle.checked;
-        }
+                var tabContent = document.createElement('div');
+                tabContent.dataset.tabName = tabName;
 
-        var tabUID = 0;
-        function addTab(tabText) {
-            var groupName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'main';
+                document.querySelector("#leftNav [data-tab-group=" + groupName + "]").appendChild(tab);
+                document.querySelector('#container').appendChild(tabContent);
 
-            var tabName = 'botTab_' + tabUID++;
+                return tabContent;
+            }
 
-            var tab = document.createElement('span');
-            tab.textContent = tabText;
-            tab.classList.add('tab');
-            tab.dataset.tabName = tabName;
+            function removeTab(tabContent) {
+                document.querySelector("#leftNav [data-tab-name=" + tabContent.dataset.tabName + "]").remove();
+                tabContent.remove();
+            }
 
-            var tabContent = document.createElement('div');
-            tabContent.dataset.tabName = tabName;
+            function addTabGroup(text, groupName) {
+                var details = document.createElement('details');
+                details.dataset.tabGroup = groupName;
 
-            document.querySelector("#leftNav [data-tab-group=" + groupName + "]").appendChild(tab);
-            document.querySelector('#container').appendChild(tabContent);
+                var summary = document.createElement('summary');
+                summary.textContent = text;
+                details.appendChild(summary);
 
-            return tabContent;
-        }
+                document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
+            }
 
-        function removeTab(tabContent) {
-            document.querySelector("#leftNav [data-tab-name=" + tabContent.dataset.tabName + "]").remove();
-            tabContent.remove();
-        }
+            function removeTabGroup(groupName) {
+                var group = document.querySelector("#leftNav [data-tab-group=\"" + groupName + "\"]");
+                var items = Array.from(group.querySelectorAll('span'));
 
-        function addTabGroup(text, groupName) {
-            var details = document.createElement('details');
-            details.dataset.tabGroup = groupName;
+                items.forEach(function (item) {
+                    document.querySelector("#container > [data-tab-name=\"" + item.dataset.tabName + "\"]").remove();
+                });
 
-            var summary = document.createElement('summary');
-            summary.textContent = text;
-            details.appendChild(summary);
-
-            document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
-        }
-
-        function removeTabGroup(groupName) {
-            var group = document.querySelector("#leftNav [data-tab-group=\"" + groupName + "\"]");
-            var items = Array.from(group.querySelectorAll('span'));
-
-            items.forEach(function (item) {
-                document.querySelector("#container > [data-tab-name=\"" + item.dataset.tabName + "\"]").remove();
-            });
-
-            group.remove();
-        }
-    }, {}], 28: [function (require, module, exports) {
+                group.remove();
+            }
+        }).call(this, "/dev\\ui\\layout");
+    }, { "fs": 35 }], 28: [function (require, module, exports) {
         module.exports = {
             alert: alert
         };
@@ -1838,18 +1870,22 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
         }
     }, {}], 29: [function (require, module, exports) {
-        Object.assign(module.exports, require('./alert'), require('./notify'));
+        (function (__dirname) {
+            var fs = require('fs');
 
-        var el = document.createElement('style');
-        el.innerHTML = "#alert{visibility:hidden;position:fixed;top:50px;left:0;right:0;margin:auto;z-index:101;width:50%;min-width:300px;min-height:200px;background:#fff;border-radius:10px;padding:10px 10px 55px 10px}#alert.visible{visibility:visible}#alert>div{webkit-overflow-scrolling:touch;max-height:65vh;overflow-y:auto}#alert>.buttons{position:absolute;bottom:10px;left:5px}#alert>.buttons>span{display:inline-block;padding:6px 12px;margin:0 5px;text-align:center;white-space:nowrap;cursor:pointer;border:1px solid rgba(0,0,0,0.15);border-radius:6px;background:#fff linear-gradient(to bottom, #fff 0, #e0e0e0 100%)}#alert>.buttons [class]{color:#fff}#alert>.buttons .success{background:#5cb85c linear-gradient(to bottom, #5cb85c 0, #419641 100%);border-color:#3e8f3e}#alert>.buttons .info{background:#5bc0de linear-gradient(to bottom, #5bc0de 0, #2aabd2 100%);border-color:#28a4c9}#alert>.buttons .danger{background:#d9534f linear-gradient(to bottom, #d9534f 0, #c12e2a 100%);border-color:#b92c28}#alert>.buttons .warning{background:#f0ad4e linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);border-color:#e38d13}.notification{opacity:0;transition:opacity 1s;position:fixed;top:1em;right:1em;min-width:200px;border-radius:5px;padding:5px;background:#9fafeb}.notification.visible{opacity:1}\n";
-        document.head.appendChild(el);
+            Object.assign(module.exports, require('./alert'), require('./notify'));
 
-        el = document.createElement('div');
-        el.id = 'alertWrapper';
-        el.innerHTML = "<div id=\"alert\">\r\n    <div id=\"alertContent\"></div>\r\n    <div class=\"buttons\"/></div>\r\n</div>\r\n<div class=\"overlay\"/></div>\r\n";
+            var el = document.createElement('style');
+            el.innerHTML = fs.readFileSync(__dirname + '/style.css');
+            document.head.appendChild(el);
 
-        document.body.appendChild(el);
-    }, { "./alert": 28, "./notify": 30 }], 30: [function (require, module, exports) {
+            el = document.createElement('div');
+            el.id = 'alertWrapper';
+            el.innerHTML = fs.readFileSync(__dirname + '/notifications.html');
+
+            document.body.appendChild(el);
+        }).call(this, "/dev\\ui\\notifications");
+    }, { "./alert": 28, "./notify": 30, "fs": 35 }], 30: [function (require, module, exports) {
         module.exports = {
             notify: notify
         };
@@ -1992,4 +2028,4 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
         }
-    }, { "app/ui/polyfills/template": 33 }] }, {}, [25]);
+    }, { "app/ui/polyfills/template": 33 }], 35: [function (require, module, exports) {}, {}] }, {}, [25]);

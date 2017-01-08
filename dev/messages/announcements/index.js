@@ -2,9 +2,10 @@ const ui = require('app/ui');
 const storage = require('app/libraries/storage');
 const send = require('app/bot').send;
 const preferences = require('app/settings');
+const fs = require('fs');
 
 var tab = ui.addTab('Announcements', 'messages');
-tab.innerHTML = INCLUDE_FILE('/dev/messages/announcements/tab.html');
+tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
 
 module.exports = {
     tab,

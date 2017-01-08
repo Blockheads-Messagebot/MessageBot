@@ -14,6 +14,7 @@
   "homepage": "https://github.com/Bibliofile/Blockheads-MessageBot#readme",
   "devDependencies": {
     "babel-preset-es2015": "^6.18.0",
+    "brfs": "^1.4.3",
     "browserify": "^13.3.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
@@ -33,6 +34,8 @@
     "watchify": "^3.8.0"
   },
   "scripts": {
-    "test": "karma start karma.conf.js"
+    "test": "karma start karma.conf.js",
+    "build": "gulp all",
+    "watch": "gulp"
   }
 }

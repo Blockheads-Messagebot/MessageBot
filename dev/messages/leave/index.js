@@ -3,11 +3,12 @@ const ui = require('app/ui');
 const storage = require('app/libraries/storage');
 const hook = require('app/libraries/hook');
 const helpers = require('app/messages/helpers');
+const fs = require('fs');
 
 const STORAGE_ID = 'leaveArr';
 
 var tab = ui.addTab('Leave', 'messages');
-tab.innerHTML = INCLUDE_FILE('/dev/messages/leave/tab.html');
+tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
 
 module.exports = {
     tab,

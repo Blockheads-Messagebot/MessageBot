@@ -6,7 +6,6 @@ var gulp = require('gulp');
 var rename = require('gulp-rename');
 var babel = require('gulp-babel');
 var comments = require('gulp-strip-comments');
-var include_file = require("gulp-include-file");
 var sass = require('gulp-sass');
 var del = require('del');
 
@@ -23,13 +22,13 @@ gulp.task('_sass', function() {
 gulp.task('bundle', ['_sass'], function() {
     var b = browserify({
       entries: './dev/start.js',
-      debug: true
+      debug: true,
+      transform: ['brfs'],
     });
 
     return b.bundle()
         .pipe(source('app.js')) //Can app.js be removed?
         .pipe(buffer())
-        .pipe(include_file())
         .pipe(rename('dev.js'))
         .pipe(gulp.dest('dist'))
         .pipe(babel({

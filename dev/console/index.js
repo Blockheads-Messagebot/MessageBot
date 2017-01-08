@@ -4,6 +4,7 @@ const hook = require('app/libraries/hook');
 const world = require('app/libraries/world');
 const send = require('app/bot').send;
 const ui = require('app/ui');
+const fs = require('fs');
 
 
 // TODO: Parse these and provide options to show/hide different ones.
@@ -52,9 +53,9 @@ var tab = ui.addTab('Console');
 // Order is important here.
 
 tab.innerHTML = '<style>' +
-    INCLUDE_FILE('/dev/console/style.css') +
+    fs.readFileSync(__dirname + '/style.css') +
     '</style>' +
-    INCLUDE_FILE('/dev/console/tab.html');
+    fs.readFileSync(__dirname + '/tab.html');
 
 
 // Auto scroll when new messages are added to the page, unless the owner is reading old chat.

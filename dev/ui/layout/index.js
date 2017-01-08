@@ -2,9 +2,11 @@
  * @file Contains functions for managing the page layout
  */
 
+const fs = require('fs');
+
 // Build page - only case in which body.innerHTML should be used.
-document.body.innerHTML += INCLUDE_FILE('/dev/ui/layout/layout.html');
-document.head.innerHTML += '<style>' + INCLUDE_FILE('/dev/ui/layout/style.css') + '</style>';
+document.body.innerHTML += fs.readFileSync(__dirname + '/layout.html');
+document.head.innerHTML += '<style>' + fs.readFileSync(__dirname + '/style.css') + '</style>';
 
 // Hide the menu when clicking the overlay
 document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);

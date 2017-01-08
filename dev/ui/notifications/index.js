@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 Object.assign(
     module.exports,
     require('./alert'),
@@ -5,11 +7,11 @@ Object.assign(
 );
 
 var el = document.createElement('style');
-el.innerHTML = INCLUDE_FILE('/dev/ui/notifications/style.css');
+el.innerHTML = fs.readFileSync(__dirname + '/style.css');
 document.head.appendChild(el);
 
 el = document.createElement('div');
 el.id = 'alertWrapper';
-el.innerHTML = INCLUDE_FILE('/dev/ui/notifications/notifications.html');
+el.innerHTML = fs.readFileSync(__dirname + '/notifications.html');
 
 document.body.appendChild(el);
