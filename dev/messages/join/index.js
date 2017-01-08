@@ -13,12 +13,15 @@ module.exports = {
     tab,
     save,
     addMessage,
+    start: () => hook.on('world.join', onJoin),
 };
 
 var joinMessages = storage.getObject(STORAGE_ID, []);
 joinMessages.forEach(addMessage);
 
-
+/**
+ * Function to add a trigger message to the page.
+ */
 function addMessage(msg = {}) {
     ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [
         {selector: 'option', remove: ['selected'], multiple: true},
@@ -30,7 +33,9 @@ function addMessage(msg = {}) {
     ]);
 }
 
-
+/**
+ * Function used to save the user's messages.
+ */
 function save() {
     joinMessages = [];
     Array.from(tab.querySelectorAll('#jMsgs > div')).forEach(container => {
@@ -50,11 +55,15 @@ function save() {
     storage.set(STORAGE_ID, joinMessages);
 }
 
-// Listen to player joins and check messages
-hook.on('world.join', function onJoin(name) {
+/**
+ * Function used to listen to player joins
+ *
+ * @param {string} name
+ */
+function onJoin(name) {
     joinMessages.forEach(msg => {
         if (helpers.checkJoinsAndGroup(name, msg)) {
             helpers.buildAndSendMessage(msg.message, name);
         }
     });
-});
+}

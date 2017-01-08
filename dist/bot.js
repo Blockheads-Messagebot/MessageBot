@@ -295,7 +295,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var MessageBotExtension = require('app/MessageBotExtension');
 
         var tab = ui.addTab('Extensions');
-        tab.innerHTML = '<style>' + "#mb_extensions .top-right-button{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#exts{height:130px;display:flex;flex-flow:row wrap;border-top:1px solid #000}#exts h4,#exts p{margin:0}#exts button{position:absolute;bottom:7px;padding:5px 8px}#exts>div{position:relative;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#exts>div:nth-child(odd){background:#ccc}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div>\r\n        <h4>Title</h4>\r\n        <span>Description</span><br>\r\n        <button class=\"button\">Install</button>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" data-tab-name=\"extensions\">\r\n    <h3>Extensions can increase the functionality of the bot.</h3>\r\n    <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    <span class=\"top-right-button\">Load By ID/URL</span>\r\n    <div id=\"exts\"></div>\r\n</div>\r\n";
+        tab.innerHTML = '<style>' + "#mb_extensions .top-right-button{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#exts{display:flex;flex-flow:row wrap;border-top:1px solid #000}#exts h4,#exts p{margin:0}#exts button{position:absolute;bottom:7px;padding:5px 8px}#exts>div{position:relative;height:130px;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#exts>div:nth-child(odd){background:#ccc}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div>\r\n        <h4>Title</h4>\r\n        <span>Description</span><br>\r\n        <button class=\"button\">Install</button>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" data-tab-name=\"extensions\">\r\n    <h3>Extensions can increase the functionality of the bot.</h3>\r\n    <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    <span class=\"top-right-button\">Load By ID/URL</span>\r\n    <div id=\"exts\"></div>\r\n</div>\r\n";
 
         bhfansapi.getStore().then(function (resp) {
             if (resp.status != 'ok') {
@@ -1220,7 +1220,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         module.exports = {
             tab: tab,
             save: save,
-            addMessage: addMessage
+            addMessage: addMessage,
+            start: function start() {
+                return announcementCheck(0);
+            }
         };
 
         function addMessage() {
@@ -1243,7 +1246,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return ann.message;
         }).forEach(addMessage);
 
-        (function announcementCheck(i) {
+        function announcementCheck(i) {
             i = i >= announcements.length ? 0 : i;
 
             var ann = announcements[i];
@@ -1252,7 +1255,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 send(ann.message);
             }
             setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
-        })(0);
+        }
     }, { "app/bot": 3, "app/libraries/storage": 13, "app/settings": 23, "app/ui": 26 }], 16: [function (require, module, exports) {
         module.exports = {
             buildAndSendMessage: buildAndSendMessage,
@@ -1347,6 +1350,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             type.tab.querySelector('.top-right-button').addEventListener('click', function () {
                 return type.addMessage();
             });
+
+            setTimeout(type.start, 10000);
         });
     }, { "./announcements": 15, "./join": 20, "./leave": 21, "./trigger": 22, "app/ui": 26 }], 20: [function (require, module, exports) {
         var ui = require('app/ui');
@@ -1363,7 +1368,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         module.exports = {
             tab: tab,
             save: save,
-            addMessage: addMessage
+            addMessage: addMessage,
+            start: function start() {
+                return hook.on('world.join', onJoin);
+            }
         };
 
         var joinMessages = storage.getObject(STORAGE_ID, []);
@@ -1394,13 +1402,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             storage.set(STORAGE_ID, joinMessages);
         }
 
-        hook.on('world.join', function onJoin(name) {
+        function onJoin(name) {
             joinMessages.forEach(function (msg) {
                 if (helpers.checkJoinsAndGroup(name, msg)) {
                     helpers.buildAndSendMessage(msg.message, name);
                 }
             });
-        });
+        }
     }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 21: [function (require, module, exports) {
         var ui = require('app/ui');
 
@@ -1416,7 +1424,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         module.exports = {
             tab: tab,
             save: save,
-            addMessage: addMessage
+            addMessage: addMessage,
+            start: function start() {
+                return hook.on('world.leave', onLeave);
+            }
         };
 
         var leaveMessages = storage.getObject(STORAGE_ID, []);
@@ -1447,13 +1458,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             storage.set(STORAGE_ID, leaveMessages);
         }
 
-        hook.on('world.leave', function onLeave(name) {
+        function onLeave(name) {
             leaveMessages.forEach(function (msg) {
                 if (helpers.checkJoinsAndGroup(name, msg)) {
                     helpers.buildAndSendMessage(msg.message, name);
                 }
             });
-        });
+        }
     }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 22: [function (require, module, exports) {
         var ui = require('app/ui');
 
@@ -1470,7 +1481,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         module.exports = {
             tab: tab,
             save: save,
-            addMessage: addMessage
+            addMessage: addMessage,
+            start: function start() {
+                return hook.on('world.message', checkTriggers);
+            }
         };
 
         var triggerMessages = storage.getObject(STORAGE_ID, []);
@@ -1514,15 +1528,15 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return new RegExp(trigger.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*"), 'i').test(message);
         }
 
-        hook.on('world.message', function checkTriggers(name, message) {
+        function checkTriggers(name, message) {
             var totalAllowed = settings.maxResponses;
             triggerMessages.forEach(function (msg) {
-                if (totalAllowed && helpers.checkJoinsAndGroup(msg, name) && triggerMatch(msg.trigger, message)) {
+                if (totalAllowed && helpers.checkJoinsAndGroup(name, msg) && triggerMatch(msg.trigger, message)) {
                     helpers.buildAndSendMessage(msg.message, name);
                     totalAllowed--;
                 }
             });
-        });
+        }
     }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/settings": 23, "app/ui": 26 }], 23: [function (require, module, exports) {
         var storage = require('app/libraries/storage');
         var STORAGE_ID = 'mb_preferences';
