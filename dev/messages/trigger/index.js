@@ -14,12 +14,15 @@ module.exports = {
     tab,
     save,
     addMessage,
+    start: () => hook.on('world.message', checkTriggers),
 };
 
 var triggerMessages = storage.getObject(STORAGE_ID, []);
 triggerMessages.forEach(addMessage);
 
-
+/**
+ * Adds a trigger message to the page.
+ */
 function addMessage(msg = {}) {
     ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [
         {selector: 'option', remove: ['selected'], multiple: true},
@@ -32,7 +35,9 @@ function addMessage(msg = {}) {
     ]);
 }
 
-
+/**
+ * Saves the current trigger messages.
+ */
 function save() {
     triggerMessages = [];
     Array.from(tab.querySelectorAll('#tMsgs > div')).forEach(container => {
@@ -53,6 +58,12 @@ function save() {
     storage.set(STORAGE_ID, triggerMessages);
 }
 
+/**
+ * Checks a trigger against a message to see if it matches.
+ *
+ * @param {string} trigger the trigger to try to match
+ * @param {string} message
+ */
 function triggerMatch(trigger, message) {
     if (settings.regexTriggers) {
         try {
@@ -70,13 +81,18 @@ function triggerMatch(trigger, message) {
         ).test(message);
 }
 
-// Watch for triggers
-hook.on('world.message', function checkTriggers(name, message) {
+/**
+ * Function used to check incoming player messages for triggers
+ *
+ * @param {string} name the player's name
+ * @param {string} message
+ */
+function checkTriggers(name, message) {
     var totalAllowed = settings.maxResponses;
     triggerMessages.forEach(msg => {
-        if (totalAllowed && helpers.checkJoinsAndGroup(msg, name) && triggerMatch(msg.trigger, message)) {
+        if (totalAllowed && helpers.checkJoinsAndGroup(name, msg) && triggerMatch(msg.trigger, message)) {
             helpers.buildAndSendMessage(msg.message, name);
             totalAllowed--;
         }
     });
-});
+}

@@ -10,6 +10,7 @@ module.exports = {
     tab,
     save,
     addMessage,
+    start: () => announcementCheck(0),
 };
 
 function addMessage(text = '') {
@@ -37,7 +38,7 @@ announcements
 
 
 // Sends announcements after the specified delay.
-(function announcementCheck(i) {
+function announcementCheck(i) {
     i = (i >= announcements.length) ? 0 : i;
 
     var ann = announcements[i];
@@ -46,4 +47,4 @@ announcements
         send(ann.message);
     }
     setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
-})(0);
+}

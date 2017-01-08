@@ -30,4 +30,7 @@ ui.addTabGroup('Messages', 'messages');
 
     type.tab.querySelector('.top-right-button')
         .addEventListener('click', () => type.addMessage());
+
+    // Don't start responding to chat for 10 seconds
+    setTimeout(type.start, 10000);
 });

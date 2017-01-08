@@ -13,12 +13,15 @@ module.exports = {
     tab,
     save,
     addMessage,
+    start: () => hook.on('world.leave', onLeave),
 };
 
 var leaveMessages = storage.getObject(STORAGE_ID, []);
 leaveMessages.forEach(addMessage);
 
-
+/**
+ * Adds a leave message to the page.
+ */
 function addMessage(msg = {}) {
     ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [
         {selector: 'option', remove: ['selected'], multiple: true},
@@ -30,7 +33,9 @@ function addMessage(msg = {}) {
     ]);
 }
 
-
+/**
+ * Function used to save the current leave messages
+ */
 function save() {
     leaveMessages = [];
     Array.from(tab.querySelectorAll('#lMsgs > div')).forEach(container => {
@@ -50,11 +55,15 @@ function save() {
     storage.set(STORAGE_ID, leaveMessages);
 }
 
-// Listen to player joins and check messages
-hook.on('world.leave', function onLeave(name) {
+/**
+ * Function used to listen to player disconnections.
+ *
+ * @param {string} name the player leaving.
+ */
+function onLeave(name) {
     leaveMessages.forEach(msg => {
         if (helpers.checkJoinsAndGroup(name, msg)) {
             helpers.buildAndSendMessage(msg.message, name);
         }
     });
-});
+}
