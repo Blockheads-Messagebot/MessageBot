@@ -24,34 +24,82 @@ var world = module.exports = {
 };
 var lists = world.lists;
 
+/**
+ * Checks if a player has joined the server.
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isPlayer(name) {
     return world.players.hasOwnProperty(name.toLocaleUpperCase());
 }
 
+/**
+ * Checks if the player is the server
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isServer(name) {
     return name.toLocaleUpperCase() == 'SERVER';
 }
 
+/**
+ * Checks if the player is the owner or server.
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isOwner(name) {
     return world.owner == name.toLocaleUpperCase() || isServer(name);
 }
 
+/**
+ * Checks if the player is an admin
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isAdmin(name) {
     return lists.admin.includes(name.toLocaleUpperCase()) || isOwner(name);
 }
 
+/**
+ * Checks if the player is a mod
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isMod(name) {
     return lists.mod.includes(name.toLocaleUpperCase());
 }
 
+/**
+ * Checks if the player is a staff member.
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isStaff(name) {
     return isAdmin(name) || isMod(name);
 }
 
+/**
+ * Checks if a player is online
+ *
+ * @param {string} name
+ * @return {bool}
+ */
 function isOnline(name) {
     return world.online.includes(name.toLocaleUpperCase());
 }
 
+/**
+ * Gets the number of times the player has joined the server.
+ *
+ * @param {string} name
+ * @return {Number}
+ */
 function getJoins(name) {
     return isPlayer(name) ? world.players[name.toLocaleUpperCase()].joins : 0;
 }
@@ -71,20 +119,31 @@ hook.on('world.leave', function(name) {
 // Keep players list up to date
 hook.on('world.join', checkPlayerJoin);
 
+/**
+ * Internal function.
+ * Removes admins from the mod list and creates the staff list.
+ */
 function buildStaffList() {
     lists.mod = lists.mod.filter((name) => !lists.admin.includes(name) && name != 'SERVER' && name != world.owner);
     lists.staff = lists.admin.concat(lists.mod);
 }
 
+/**
+ * Internal function.
+ * Checks if a player has permission to perform a command
+ *
+ * @param {string} name
+ * @param {string} command
+ */
 function permissionCheck(name, command) {
     command = command.toLocaleLowerCase();
 
     if (['admin', 'unadmin', 'mod', 'unmod'].includes(command)) {
-        return lists.admin.includes(name);
+        return isAdmin(name);
     }
 
     if (['whitelist', 'unwhitelist', 'ban', 'unban'].includes(command)) {
-        return lists.staff.includes(name);
+        return isStaff(name);
     }
 
     return false;
@@ -114,7 +173,12 @@ hook.on('world.command', function(name, command, target) {
     }
 });
 
-// Add a player join
+/**
+ * Internal function. Increments a player's joins.
+ *
+ * @param {string} name
+ * @param {string} ip
+ */
 function checkPlayerJoin(name, ip) {
     if (world.players.hasOwnProperty(name)) {
         //Returning player
