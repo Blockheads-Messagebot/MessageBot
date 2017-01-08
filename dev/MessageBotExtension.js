@@ -7,7 +7,7 @@ const api = require('app/libraries/blockheads');
 const world = require('app/libraries/world');
 const hook = require('app/libraries/hook');
 
-// Array of IDs to autolaod at the next launch.
+// Array of IDs to autoload at the next launch.
 var autoload = [];
 var loaded = [];
 const STORAGE_ID = 'mb_extensions';

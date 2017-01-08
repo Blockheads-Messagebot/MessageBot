@@ -14,10 +14,11 @@ var world = module.exports = {
     players: storage.getObject(STORAGE.PLAYERS, {}),
     lists: {admin: [], mod: [], staff: [], black: [], white: []},
     isPlayer,
-    isAdmin,
-    isMod,
-    isStaff,
+    isServer,
     isOwner,
+    isAdmin,
+    isStaff,
+    isMod,
     isOnline,
     getJoins,
 };
@@ -27,8 +28,16 @@ function isPlayer(name) {
     return world.players.hasOwnProperty(name.toLocaleUpperCase());
 }
 
+function isServer(name) {
+    return name.toLocaleUpperCase() == 'SERVER';
+}
+
+function isOwner(name) {
+    return world.owner == name.toLocaleUpperCase() || isServer(name);
+}
+
 function isAdmin(name) {
-    return lists.admin.includes(name.toLocaleUpperCase());
+    return lists.admin.includes(name.toLocaleUpperCase()) || isOwner(name);
 }
 
 function isMod(name) {
@@ -37,10 +46,6 @@ function isMod(name) {
 
 function isStaff(name) {
     return isAdmin(name) || isMod(name);
-}
-
-function isOwner(name) {
-    return world.owner == name.toLocaleUpperCase();
 }
 
 function isOnline(name) {
@@ -67,7 +72,7 @@ hook.on('world.leave', function(name) {
 hook.on('world.join', checkPlayerJoin);
 
 function buildStaffList() {
-    lists.mod = lists.mod.filter((name) => !lists.admin.includes(name));
+    lists.mod = lists.mod.filter((name) => !lists.admin.includes(name) && name != 'SERVER' && name != world.owner);
     lists.staff = lists.admin.concat(lists.mod);
 }
 
@@ -123,6 +128,8 @@ function checkPlayerJoin(name, ip) {
     }
     world.players[name].ip = ip;
 
+    // Otherwise, we will double parse joins
+    storage.set(STORAGE.LOG_LOAD, Math.floor(Date.now().valueOf()));
     storage.set(STORAGE.PLAYERS, world.players);
 }
 
@@ -131,13 +138,6 @@ function checkPlayerJoin(name, ip) {
 Promise.all([api.getLists(), api.getWorldName(), api.getOwnerName()])
     .then((values) => {
         var [apiLists, worldName, owner] = values;
-
-        //Remove the owner & SERVER from the mod lists and add to admin / staff lists.
-        [owner, 'SERVER'].forEach(name => {
-            if (!apiLists.admin.includes(name)) {
-                apiLists.admin.push(name);
-            }
-        });
 
         world.lists = apiLists;
         buildStaffList();
