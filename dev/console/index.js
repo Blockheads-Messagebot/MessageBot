@@ -84,6 +84,7 @@ tab.innerHTML = '<style>' +
 // Listen for the user to send messages
 function userSend() {
     var input = tab.querySelector('input');
+    hook.fire('console.send', input.value);
     send(input.value);
     input.value = '';
     input.focus();
@@ -91,7 +92,6 @@ function userSend() {
 
 tab.querySelector('input').addEventListener('keydown', function(event) {
     if (event.key == "Enter" || event.keyCode == 13) {
-        event.preventDefault();
         userSend();
     }
 });

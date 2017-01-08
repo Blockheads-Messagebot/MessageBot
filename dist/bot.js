@@ -97,7 +97,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         storage.getObject(STORAGE_ID, [], false).forEach(MessageBotExtension.install);
 
         module.exports = MessageBotExtension;
-    }, { "app/bot": 3, "app/console": 6, "app/libraries/ajax": 8, "app/libraries/blockheads": 10, "app/libraries/hook": 11, "app/libraries/storage": 13, "app/libraries/world": 14, "app/ui": 26 }], 2: [function (require, module, exports) {
+    }, { "app/bot": 3, "app/console": 7, "app/libraries/ajax": 9, "app/libraries/blockheads": 11, "app/libraries/hook": 12, "app/libraries/storage": 13, "app/libraries/world": 14, "app/ui": 26 }], 2: [function (require, module, exports) {
 
         module.exports = {
             checkGroup: checkGroup
@@ -125,8 +125,81 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
         }
     }, { "app/libraries/world": 14 }], 3: [function (require, module, exports) {
-        Object.assign(module.exports, require('./send'), require('./checkGroup'));
-    }, { "./checkGroup": 2, "./send": 4 }], 4: [function (require, module, exports) {
+        var storage = require('app/libraries/storage');
+
+        var bot = Object.assign(module.exports, require('./send'), require('./checkGroup'));
+
+        bot.version = '6.1.0a';
+
+        storage.set('mb_version', bot.version);
+    }, { "./checkGroup": 2, "./send": 5, "app/libraries/storage": 13 }], 4: [function (require, module, exports) {
+        function update(keys, operator) {
+            Object.keys(localStorage).forEach(function (item) {
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var key = _step.value;
+
+                        if (item.startsWith(key)) {
+                            localStorage.setItem(item, operator(localStorage.getItem(item)));
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
+            });
+        }
+
+        switch (localStorage.getItem('mb_version')) {
+            case null:
+                break; 
+            case '5.2.0':
+            case '5.2.1':
+                update(['announcementArr', 'joinArr', 'leaveArr', 'triggerArr'], function (raw) {
+                    try {
+                        var parsed = JSON.parse(raw);
+                        parsed.forEach(function (msg) {
+                            if (msg.message) {
+                                msg.message = msg.message.replace(/\\n/g, '\n');
+                            }
+                        });
+                        return JSON.stringify(parsed);
+                    } catch (e) {
+                        return raw;
+                    }
+                });
+                break; 
+            case '6.0.0a':
+            case '6.0.0':
+                setTimeout(function () {
+                    window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
+                }, 1000);
+                break; 
+            case '6.0.1':
+            case '6.0.2':
+                setTimeout(function () {
+                    window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
+                }, 1000);
+            case '6.0.3':
+            case '6.0.4':
+            case '6.0.5':
+        }
+    }, {}], 5: [function (require, module, exports) {
         var api = require('app/libraries/blockheads');
         var settings = require('app/settings');
 
@@ -167,7 +240,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 setTimeout(checkQueue, 1000);
             });
         })();
-    }, { "app/libraries/blockheads": 10, "app/settings": 23 }], 5: [function (require, module, exports) {
+    }, { "app/libraries/blockheads": 11, "app/settings": 23 }], 6: [function (require, module, exports) {
         module.exports = {
             write: write,
             clear: clear
@@ -202,7 +275,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var chat = document.querySelector('#mb_console ul');
             chat.innerHTML = '';
         }
-    }, {}], 6: [function (require, module, exports) {
+    }, {}], 7: [function (require, module, exports) {
         var self = module.exports = require('./exports');
 
         var hook = require('app/libraries/hook');
@@ -275,6 +348,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         function userSend() {
             var input = tab.querySelector('input');
+            hook.fire('console.send', input.value);
             send(input.value);
             input.value = '';
             input.focus();
@@ -282,20 +356,19 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         tab.querySelector('input').addEventListener('keydown', function (event) {
             if (event.key == "Enter" || event.keyCode == 13) {
-                event.preventDefault();
                 userSend();
             }
         });
 
         tab.querySelector('button').addEventListener('click', userSend);
-    }, { "./exports": 5, "app/bot": 3, "app/libraries/hook": 11, "app/libraries/world": 14, "app/ui": 26 }], 7: [function (require, module, exports) {
+    }, { "./exports": 6, "app/bot": 3, "app/libraries/hook": 12, "app/libraries/world": 14, "app/ui": 26 }], 8: [function (require, module, exports) {
         var bhfansapi = require('app/libraries/bhfansapi');
         var ui = require('app/ui');
         var hook = require('app/libraries/hook');
         var MessageBotExtension = require('app/MessageBotExtension');
 
         var tab = ui.addTab('Extensions');
-        tab.innerHTML = '<style>' + "#mb_extensions .top-right-button{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#exts{display:flex;flex-flow:row wrap;border-top:1px solid #000}#exts h4,#exts p{margin:0}#exts button{position:absolute;bottom:7px;padding:5px 8px}#exts>div{position:relative;height:130px;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#exts>div:nth-child(odd){background:#ccc}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div>\r\n        <h4>Title</h4>\r\n        <span>Description</span><br>\r\n        <button class=\"button\">Install</button>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" data-tab-name=\"extensions\">\r\n    <h3>Extensions can increase the functionality of the bot.</h3>\r\n    <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    <span class=\"top-right-button\">Load By ID/URL</span>\r\n    <div id=\"exts\"></div>\r\n</div>\r\n";
+        tab.innerHTML = '<style>' + "#mb_extensions .top-right-button{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#exts{display:flex;flex-flow:row wrap;border-top:1px solid #000}#exts h4,#exts p{margin:0}#exts button{position:absolute;bottom:7px;padding:4px 8px;border-radius:8px;background:#fff}#exts>div{position:relative;height:130px;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#exts>div:nth-child(odd){background:#ccc}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div>\r\n        <h4>Title</h4>\r\n        <span>Description</span><br>\r\n        <button class=\"button\">Install</button>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" data-tab-name=\"extensions\">\r\n    <h3>Extensions can increase the functionality of the bot.</h3>\r\n    <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    <span class=\"top-right-button\">Load By ID/URL</span>\r\n    <div id=\"exts\"></div>\r\n</div>\r\n";
 
         bhfansapi.getStore().then(function (resp) {
             if (resp.status != 'ok') {
@@ -339,7 +412,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }, 3000);
             }
         });
-    }, { "app/MessageBotExtension": 1, "app/libraries/bhfansapi": 9, "app/libraries/hook": 11, "app/ui": 26 }], 8: [function (require, module, exports) {
+    }, { "app/MessageBotExtension": 1, "app/libraries/bhfansapi": 10, "app/libraries/hook": 12, "app/ui": 26 }], 9: [function (require, module, exports) {
 
         function get() {
             var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
@@ -416,7 +489,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         module.exports = { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
-    }, {}], 9: [function (require, module, exports) {
+    }, {}], 10: [function (require, module, exports) {
 
         var ui = require('app/ui');
         var ajax = require('app/libraries/ajax');
@@ -436,27 +509,27 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 return;
             }
 
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
 
             try {
-                for (var _iterator = store.extensions[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var ex = _step.value;
+                for (var _iterator2 = store.extensions[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var ex = _step2.value;
 
                     cache.names.set(ex.id, ex.title);
                 }
             } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
                     }
                 } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
                     }
                 }
             }
@@ -507,7 +580,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             getExtensionName: getExtensionName,
             reportError: reportError
         };
-    }, { "app/libraries/ajax": 8, "app/ui": 26 }], 10: [function (require, module, exports) {
+    }, { "app/libraries/ajax": 9, "app/ui": 26 }], 11: [function (require, module, exports) {
         var ajax = require('./ajax');
         var hook = require('./hook');
         var bhfansapi = require('./bhfansapi');
@@ -792,7 +865,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         function handleOtherMessages(message) {
             hook.check('world.other', message);
         }
-    }, { "./ajax": 8, "./bhfansapi": 9, "./hook": 11 }], 11: [function (require, module, exports) {
+    }, { "./ajax": 9, "./bhfansapi": 10, "./hook": 12 }], 12: [function (require, module, exports) {
         var listeners = {};
 
         function listen(key, callback) {
@@ -874,73 +947,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             fire: check,
             update: update
         };
-    }, {}], 12: [function (require, module, exports) {
-        function update(keys, operator) {
-            Object.keys(localStorage).forEach(function (item) {
-                var _iteratorNormalCompletion2 = true;
-                var _didIteratorError2 = false;
-                var _iteratorError2 = undefined;
-
-                try {
-                    for (var _iterator2 = keys[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                        var key = _step2.value;
-
-                        if (item.startsWith(key)) {
-                            localStorage.setItem(item, operator(localStorage.getItem(item)));
-                            break;
-                        }
-                    }
-                } catch (err) {
-                    _didIteratorError2 = true;
-                    _iteratorError2 = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                            _iterator2.return();
-                        }
-                    } finally {
-                        if (_didIteratorError2) {
-                            throw _iteratorError2;
-                        }
-                    }
-                }
-            });
-        }
-
-        switch (localStorage.getItem('mb_version')) {
-            case null:
-                break; 
-            case '5.2.0':
-            case '5.2.1':
-                update(['announcementArr', 'joinArr', 'leaveArr', 'triggerArr'], function (raw) {
-                    try {
-                        var parsed = JSON.parse(raw);
-                        parsed.forEach(function (msg) {
-                            if (msg.message) {
-                                msg.message = msg.message.replace(/\\n/g, '\n');
-                            }
-                        });
-                        return JSON.stringify(parsed);
-                    } catch (e) {
-                        return raw;
-                    }
-                });
-                break; 
-            case '6.0.0a':
-            case '6.0.0':
-                setTimeout(function () {
-                    window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
-                }, 1000);
-                break; 
-            case '6.0.1':
-            case '6.0.2':
-                setTimeout(function () {
-                    window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
-                }, 1000);
-            case '6.0.3':
-            case '6.0.4':
-            case '6.0.5':
-        }
     }, {}], 13: [function (require, module, exports) {
         module.exports = {
             getString: getString,
@@ -1090,11 +1096,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             command = command.toLocaleLowerCase();
 
             if (['admin', 'unadmin', 'mod', 'unmod'].includes(command)) {
-                return lists.admin.includes(name);
+                return isAdmin(name);
             }
 
             if (['whitelist', 'unwhitelist', 'ban', 'unban'].includes(command)) {
-                return lists.staff.includes(name);
+                return isStaff(name);
             }
 
             return false;
@@ -1208,7 +1214,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             storage.set(STORAGE.PLAYERS, world.players);
         });
-    }, { "./blockheads": 10, "./hook": 11, "./storage": 13 }], 15: [function (require, module, exports) {
+    }, { "./blockheads": 11, "./hook": 12, "./storage": 13 }], 15: [function (require, module, exports) {
         var ui = require('app/ui');
         var storage = require('app/libraries/storage');
         var send = require('app/bot').send;
@@ -1409,7 +1415,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 21: [function (require, module, exports) {
+    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 21: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1465,7 +1471,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 22: [function (require, module, exports) {
+    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 22: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1537,7 +1543,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/settings": 23, "app/ui": 26 }], 23: [function (require, module, exports) {
+    }, { "app/libraries/hook": 12, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/settings": 23, "app/ui": 26 }], 23: [function (require, module, exports) {
         var storage = require('app/libraries/storage');
         var STORAGE_ID = 'mb_preferences';
 
@@ -1659,7 +1665,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         document.head.appendChild(el);
 
         require('app/ui/polyfills/console');
-        require('app/libraries/migration');
+        require('app/bot/migration');
 
         window.MessageBotExtension = require('app/MessageBotExtension');
 
@@ -1676,7 +1682,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 bhfansapi.reportError(err);
             }
         });
-    }, { "app/MessageBotExtension": 1, "app/console": 6, "app/extensions": 7, "app/libraries/bhfansapi": 9, "app/libraries/migration": 12, "app/messages": 19, "app/settings/page": 24, "app/ui/polyfills/console": 31 }], 26: [function (require, module, exports) {
+    }, { "app/MessageBotExtension": 1, "app/bot/migration": 4, "app/console": 7, "app/extensions": 8, "app/libraries/bhfansapi": 10, "app/messages": 19, "app/settings/page": 24, "app/ui/polyfills/console": 31 }], 26: [function (require, module, exports) {
         require('./polyfills/details');
 
         Object.assign(module.exports, require('./layout'), require('./template'), require('./notifications'));
@@ -1689,7 +1695,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
             write(msg, name, nameClass);
         };
-    }, { "./layout": 27, "./notifications": 29, "./polyfills/details": 32, "./template": 34, "app/console/exports": 5 }], 27: [function (require, module, exports) {
+    }, { "./layout": 27, "./notifications": 29, "./polyfills/details": 32, "./template": 34, "app/console/exports": 6 }], 27: [function (require, module, exports) {
 
         document.body.innerHTML += "<div id=\"leftNav\">\r\n    <input type=\"checkbox\" id=\"leftToggle\">\r\n    <label for=\"leftToggle\">&#9776; Menu</label>\r\n\r\n    <nav data-tab-group=\"main\"></nav>\r\n    <div class=\"overlay\"></div>\r\n</div>\r\n\r\n<div id=\"container\">\r\n    <header></header>\r\n</div>\r\n";
         document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';

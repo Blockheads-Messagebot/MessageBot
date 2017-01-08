@@ -16,7 +16,7 @@ el.href = 'https://is.gd/MBvUHF';
 document.head.appendChild(el);
 
 require('app/ui/polyfills/console');
-require('app/libraries/migration');
+require('app/bot/migration');
 
 // Expose the extension API
 window.MessageBotExtension = require('app/MessageBotExtension');
