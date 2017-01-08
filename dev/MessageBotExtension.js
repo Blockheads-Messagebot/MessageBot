@@ -23,7 +23,7 @@ const STORAGE_ID = 'mb_extensions';
  */
 function MessageBotExtension(namespace) {
     loaded.push(namespace);
-    hook.fire('extension.installed', namespace);
+    hook.fire('extension.install', namespace);
 
     var extension = {
         id: namespace,
