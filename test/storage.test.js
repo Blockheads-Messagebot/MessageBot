@@ -3,23 +3,18 @@
     unused: true
 */
 
-/*globals
-    CreateStorage
-*/
+const STORAGE_NAMESPACE = window.worldId = '__testing__';
+const storage = require('app/libraries/storage');
 
 describe('storage.getString', function() {
-    var storage;
-
     beforeEach(function() {
-        storage = CreateStorage('__getString');
-
-        localStorage.setItem('test__getString', 'local');
+        localStorage.clear();
+        localStorage.setItem(`test${STORAGE_NAMESPACE}`, 'local');
         localStorage.setItem('test', 'globalTest');
-        localStorage.removeItem('noOP__getString');
     });
 
     it('Uses the provided namespace.', function() {
-        expect(storage.getString('test')).toEqual(localStorage.getItem('test__getString'));
+        expect(storage.getString('test')).toEqual(localStorage.getItem(`test${STORAGE_NAMESPACE}`));
     });
 
     it('Returns the fallback if the item does not exist.', function() {
@@ -27,49 +22,41 @@ describe('storage.getString', function() {
     });
 
     it('Can access globals', function() {
-        expect(storage.getString('test', undefined, false)).toEqual('globalTest');
+        expect(storage.getString('test', undefined, false)).toEqual(localStorage.getItem('test'));
     });
 });
 
 describe('storage.getObject', function() {
-    var storage;
     var storedLocal = {test: 123, abc: "text", a: ['a', 'r', 'r'], b: {c: 321}};
     var storedGlobal = {test: 343, abc: "aaa", a: ['b', 'd', 'n'], b: {c: 56}};
 
     beforeEach(function() {
-        storage = CreateStorage('__getObject');
-
-        localStorage.setItem('test__getObject', JSON.stringify(storedLocal));
-        localStorage.setItem('test', JSON.stringify(storedGlobal));
-        localStorage.removeItem('noOP__getObject');
+        localStorage.clear();
+        localStorage.setItem(`object${STORAGE_NAMESPACE}`, JSON.stringify(storedLocal));
+        localStorage.setItem('object', JSON.stringify(storedGlobal));
     });
 
     it('Uses the provided namespace.', function() {
-        expect(storage.getObject('test')).toEqual(storedLocal);
+        expect(storage.getObject('object')).toEqual(storedLocal);
     });
 
     it('Returns the fallback if the item does not exist.', function() {
-        expect(storage.getObject('nOP', 'fallback')).toEqual('fallback');
+        expect(storage.getObject('object_noOP', 'fallback')).toEqual('fallback');
     });
 
     it('Can access globals', function() {
-        expect(storage.getObject('test', undefined, false)).toEqual(storedGlobal);
+        expect(storage.getObject('object', undefined, false)).toEqual(storedGlobal);
     });
 });
 
 describe('storage.set', function() {
-    var storage;
-
     beforeEach(function() {
-        storage = CreateStorage('__set');
-
-        ['str', 'obj'].forEach(item => localStorage.removeItem(item));
-        ['str', 'obj'].forEach(item => localStorage.removeItem(`${item}__set`));
+        localStorage.clear();
     });
 
     it('Uses the provided namespace.', function() {
         storage.set('str', 'value');
-        expect(localStorage.getItem('str__set')).toEqual('value');
+        expect(localStorage.getItem(`str${STORAGE_NAMESPACE}`)).toEqual('value');
     });
 
     it('Uses globals.', function() {
@@ -79,21 +66,18 @@ describe('storage.set', function() {
 
     it('Can set objects', function() {
         storage.set('obj', {some: 'object'});
-        expect(localStorage.getItem('obj__set')).toEqual('{"some":"object"}');
+        expect(localStorage.getItem(`obj${STORAGE_NAMESPACE}`)).toEqual('{"some":"object"}');
     });
 
     it('Can set arrays', function() {
         storage.set('obj', [1, 2, 3]);
-        expect(localStorage.getItem('obj__set')).toEqual('[1,2,3]');
+        expect(localStorage.getItem(`obj${STORAGE_NAMESPACE}`)).toEqual('[1,2,3]');
     });
 });
 
 describe('storage.clearNamespace', function() {
-    var storage;
-
     beforeEach(function() {
-        storage = CreateStorage('__ns');
-
+        localStorage.clear();
         [
             'something',
             'str__abc',
