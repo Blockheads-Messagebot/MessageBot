@@ -1,7 +1,13 @@
-var bhfansapi = require('app/libraries/bhfansapi');
-var ui = require('app/ui');
-var hook = require('../../libs/hook');
-var MessageBotExtension = require('../../MessageBotExtension');
+const bhfansapi = require('app/libraries/bhfansapi');
+const ui = require('app/ui');
+const hook = require('app/libraries/hook');
+const MessageBotExtension = require('app/MessageBotExtension');
+
+var tab = ui.addTab('Extensions');
+tab.innerHTML = '<style>' +
+    INCLUDE_FILE('/dev/extensions/style.css') +
+    '</style>' +
+    INCLUDE_FILE('/dev/extensions/tab.html');
 
 //Create the extension store page
 bhfansapi.getStore().then(resp => {
@@ -13,70 +19,39 @@ bhfansapi.getStore().then(resp => {
         ui.buildContentFromTemplate('#extTemplate', '#exts', [
             {selector: 'h4', text: extension.title},
             {selector: 'span', html: extension.snippet},
-            {selector: '.ext', 'data-id': extension.id},
-            {selector: 'button', text: bhfansapi.extensionInstalled(extension.id) ? 'Remove' : 'Install'}
+            {selector: 'div', 'data-id': extension.id},
+            {selector: 'button', text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install'}
         ]);
     });
 }).catch(bhfansapi.reportError);
 
 // Install / uninstall extensions
-function extActions(tagName, e) {
-    if (e.target.tagName != tagName) {
-        return;
-    }
-    var el = e.target;
-    var id = el.parentElement.dataset.id;
-
-    if (el.textContent == 'Install') {
-        MessageBotExtension.install(id);
-    } else {
-        MessageBotExtension.uninstall(id);
-    }
-}
-
 document.querySelector('#exts')
-    .addEventListener('click', extActions.bind(null, 'BUTTON'));
-
-document.querySelector('#mb_ext_list')
-    .addEventListener('click', extActions.bind(null, 'A'));
-
-
-hook.on('extension.installed', function(id) {
-    //List
-    bhfansapi.getExtensionName(id).then(resp => {
-        var container = document.querySelector('#mb_ext_list ul');
-        if (resp.status != 'ok') {
-            throw new Error(resp.message);
+    .addEventListener('click', function extActions(e) {
+        if (e.target.tagName != 'BUTTON') {
+            return;
         }
+        var el = e.target;
+        var id = el.parentElement.dataset.id;
 
-        let li = document.createElement('li');
-        let span = document.createElement('span');
-        let a = document.createElement('a');
+        if (el.textContent == 'Install') {
+            MessageBotExtension.install(id);
+        } else {
+            MessageBotExtension.uninstall(id);
+        }
+    });
 
-        span.textContent = `${resp.name} (${resp.id})`;
-        a.textContent = 'Remove';
-        li.dataset.id = resp.id;
 
-        li.appendChild(span);
-        li.appendChild(a);
-        container.appendChild(li);
-    }).catch(bhfansapi.reportError);
-
-    //Store
+hook.on('extension.install', function(id) {
+    // Show remove to let users remove extensions
     var button = document.querySelector(`#mb_extensions [data-id="${id}"] button`);
     if (button) {
         button.textContent = 'Remove';
     }
 });
 
-hook.on('extension.uninstalled', function(id) {
-    //List
-    var li = document.querySelector(`#mb_ext_list [data-id="${id}"]`);
-    if (li) {
-        li.remove();
-    }
-
-    //Store
+hook.on('extension.uninstall', function(id) {
+    // Show removed for store install button
     var button = document.querySelector(`#mb_extensions [data-id="${id}"] button`);
     if (button) {
         button.textContent = 'Removed';

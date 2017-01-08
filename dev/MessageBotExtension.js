@@ -1,4 +1,4 @@
-var bot = require('./MessageBot');
+const bot = require('app/bot');
 const bot_console = require('app/console');
 const ui = require('app/ui');
 const storage = require('app/libraries/storage');
@@ -9,6 +9,7 @@ const hook = require('app/libraries/hook');
 
 // Array of IDs to autolaod at the next launch.
 var autoload = [];
+var loaded = [];
 const STORAGE_ID = 'mb_extensions';
 
 
@@ -21,6 +22,7 @@ const STORAGE_ID = 'mb_extensions';
  * @return {MessageBotExtension} - The extension variable.
  */
 function MessageBotExtension(namespace) {
+    loaded.push(namespace);
     hook.fire('extension.installed', namespace);
 
     var extension = {
@@ -90,7 +92,21 @@ MessageBotExtension.uninstall = function uninstall(id) {
         storage.set(STORAGE_ID, autoload, false);
     }
 
+    if (loaded.includes(id)) {
+        loaded.splice(loaded.indexOf(id), 1);
+    }
+
     hook.fire('extension.uninstall', id);
+};
+
+/**
+ * Used to check if an extension has been loaded.
+ *
+ * @param {string} id
+ * @return {bool}
+ */
+MessageBotExtension.isLoaded = function isLoaded(id) {
+    return loaded.includes(id);
 };
 
 // Load extensions that set themselves to autoload last launch.

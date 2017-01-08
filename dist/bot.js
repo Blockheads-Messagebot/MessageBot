@@ -19,6 +19,85 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         s(r[o]);
     }return s;
 })({ 1: [function (require, module, exports) {
+        var bot = require('app/bot');
+        var bot_console = require('app/console');
+        var ui = require('app/ui');
+        var storage = require('app/libraries/storage');
+        var ajax = require('app/libraries/ajax');
+        var api = require('app/libraries/blockheads');
+        var world = require('app/libraries/world');
+        var hook = require('app/libraries/hook');
+
+        var autoload = [];
+        var loaded = [];
+        var STORAGE_ID = 'mb_extensions';
+
+        function MessageBotExtension(namespace) {
+            loaded.push(namespace);
+            hook.fire('extension.installed', namespace);
+
+            var extension = {
+                id: namespace,
+                bot: bot,
+                console: bot_console,
+                ui: ui,
+                storage: storage,
+                ajax: ajax,
+                api: api,
+                world: world,
+                hook: hook
+            };
+
+            extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
+                if (!autoload.includes(namespace) && shouldAutoload) {
+                    autoload.push(namespace);
+                    storage.set(STORAGE_ID, autoload, false);
+                } else if (!shouldAutoload) {
+                    if (autoload.includes(namespace)) {
+                        autoload.splice(autoload.indexOf(namespace), 1);
+                        storage.set(STORAGE_ID, autoload, false);
+                    }
+                }
+            };
+
+            return extension;
+        }
+
+        MessageBotExtension.install = function install(id) {
+            var el = document.createElement('script');
+            el.src = "//blockheadsfans.com/messagebot/extension/" + id + "/code/raw";
+            el.crossOrigin = 'anonymous';
+            document.head.appendChild(el);
+        };
+
+        MessageBotExtension.uninstall = function uninstall(id) {
+            try {
+                window[id].uninstall();
+            } catch (e) {
+            }
+
+            window[id] = undefined;
+
+            if (autoload.includes(id)) {
+                autoload.splice(autoload.indexOf(id), 1);
+                storage.set(STORAGE_ID, autoload, false);
+            }
+
+            if (loaded.includes(id)) {
+                loaded.splice(loaded.indexOf(id), 1);
+            }
+
+            hook.fire('extension.uninstall', id);
+        };
+
+        MessageBotExtension.isLoaded = function isLoaded(id) {
+            return loaded.includes(id);
+        };
+
+        storage.getObject(STORAGE_ID, [], false).forEach(MessageBotExtension.install);
+
+        module.exports = MessageBotExtension;
+    }, { "app/bot": 3, "app/console": 6, "app/libraries/ajax": 8, "app/libraries/blockheads": 10, "app/libraries/hook": 11, "app/libraries/storage": 13, "app/libraries/world": 14, "app/ui": 26 }], 2: [function (require, module, exports) {
 
         module.exports = {
             checkGroup: checkGroup
@@ -45,9 +124,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     return false;
             }
         }
-    }, { "app/libraries/world": 12 }], 2: [function (require, module, exports) {
+    }, { "app/libraries/world": 14 }], 3: [function (require, module, exports) {
         Object.assign(module.exports, require('./send'), require('./checkGroup'));
-    }, { "./checkGroup": 1, "./send": 3 }], 3: [function (require, module, exports) {
+    }, { "./checkGroup": 2, "./send": 4 }], 4: [function (require, module, exports) {
         var api = require('app/libraries/blockheads');
         var settings = require('app/settings');
 
@@ -88,7 +167,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 setTimeout(checkQueue, 1000);
             });
         })();
-    }, { "app/libraries/blockheads": 8, "app/settings": 21 }], 4: [function (require, module, exports) {
+    }, { "app/libraries/blockheads": 10, "app/settings": 23 }], 5: [function (require, module, exports) {
         module.exports = {
             write: write,
             clear: clear
@@ -123,7 +202,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var chat = document.querySelector('#mb_console ul');
             chat.innerHTML = '';
         }
-    }, {}], 5: [function (require, module, exports) {
+    }, {}], 6: [function (require, module, exports) {
         var self = module.exports = require('./exports');
 
         var hook = require('app/libraries/hook');
@@ -209,7 +288,58 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         tab.querySelector('button').addEventListener('click', userSend);
-    }, { "./exports": 4, "app/bot": 2, "app/libraries/hook": 9, "app/libraries/world": 12, "app/ui": 24 }], 6: [function (require, module, exports) {
+    }, { "./exports": 5, "app/bot": 3, "app/libraries/hook": 11, "app/libraries/world": 14, "app/ui": 26 }], 7: [function (require, module, exports) {
+        var bhfansapi = require('app/libraries/bhfansapi');
+        var ui = require('app/ui');
+        var hook = require('app/libraries/hook');
+        var MessageBotExtension = require('app/MessageBotExtension');
+
+        var tab = ui.addTab('Extensions');
+        tab.innerHTML = '<style>' + "#mb_extensions .top-right-button{width:inherit;padding:0 7px}#mb_extensions h3{margin:0 0 5px 0}#exts{height:130px;display:flex;flex-flow:row wrap;border-top:1px solid #000}#exts h4,#exts p{margin:0}#exts button{position:absolute;bottom:7px;padding:5px 8px}#exts>div{position:relative;width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#exts>div:nth-child(odd){background:#ccc}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div>\r\n        <h4>Title</h4>\r\n        <span>Description</span><br>\r\n        <button class=\"button\">Install</button>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" data-tab-name=\"extensions\">\r\n    <h3>Extensions can increase the functionality of the bot.</h3>\r\n    <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    <span class=\"top-right-button\">Load By ID/URL</span>\r\n    <div id=\"exts\"></div>\r\n</div>\r\n";
+
+        bhfansapi.getStore().then(function (resp) {
+            if (resp.status != 'ok') {
+                document.getElementById('exts').innerHTML += resp.message;
+                throw new Error(resp.message);
+            }
+            resp.extensions.forEach(function (extension) {
+                ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: 'h4', text: extension.title }, { selector: 'span', html: extension.snippet }, { selector: 'div', 'data-id': extension.id }, { selector: 'button', text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install' }]);
+            });
+        }).catch(bhfansapi.reportError);
+
+        document.querySelector('#exts').addEventListener('click', function extActions(e) {
+            if (e.target.tagName != 'BUTTON') {
+                return;
+            }
+            var el = e.target;
+            var id = el.parentElement.dataset.id;
+
+            if (el.textContent == 'Install') {
+                MessageBotExtension.install(id);
+            } else {
+                MessageBotExtension.uninstall(id);
+            }
+        });
+
+        hook.on('extension.install', function (id) {
+            var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"] button");
+            if (button) {
+                button.textContent = 'Remove';
+            }
+        });
+
+        hook.on('extension.uninstall', function (id) {
+            var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"] button");
+            if (button) {
+                button.textContent = 'Removed';
+                button.disabled = true;
+                setTimeout(function () {
+                    button.textContent = 'Install';
+                    button.disabled = false;
+                }, 3000);
+            }
+        });
+    }, { "app/MessageBotExtension": 1, "app/libraries/bhfansapi": 9, "app/libraries/hook": 11, "app/ui": 26 }], 8: [function (require, module, exports) {
 
         function get() {
             var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
@@ -286,7 +416,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         module.exports = { xhr: xhr, get: get, getJSON: getJSON, post: post, postJSON: postJSON };
-    }, {}], 7: [function (require, module, exports) {
+    }, {}], 9: [function (require, module, exports) {
 
         var ui = require('app/ui');
         var ajax = require('app/libraries/ajax');
@@ -377,7 +507,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             getExtensionName: getExtensionName,
             reportError: reportError
         };
-    }, { "app/libraries/ajax": 6, "app/ui": 24 }], 8: [function (require, module, exports) {
+    }, { "app/libraries/ajax": 8, "app/ui": 26 }], 10: [function (require, module, exports) {
         var ajax = require('./ajax');
         var hook = require('./hook');
         var bhfansapi = require('./bhfansapi');
@@ -662,7 +792,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         function handleOtherMessages(message) {
             hook.check('world.other', message);
         }
-    }, { "./ajax": 6, "./bhfansapi": 7, "./hook": 9 }], 9: [function (require, module, exports) {
+    }, { "./ajax": 8, "./bhfansapi": 9, "./hook": 11 }], 11: [function (require, module, exports) {
         var listeners = {};
 
         function listen(key, callback) {
@@ -744,7 +874,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             fire: check,
             update: update
         };
-    }, {}], 10: [function (require, module, exports) {
+    }, {}], 12: [function (require, module, exports) {
         function update(keys, operator) {
             Object.keys(localStorage).forEach(function (item) {
                 var _iteratorNormalCompletion2 = true;
@@ -811,7 +941,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             case '6.0.4':
             case '6.0.5':
         }
-    }, {}], 11: [function (require, module, exports) {
+    }, {}], 13: [function (require, module, exports) {
         module.exports = {
             getString: getString,
             getObject: getObject,
@@ -877,7 +1007,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, {}], 12: [function (require, module, exports) {
+    }, {}], 14: [function (require, module, exports) {
         var api = require('./blockheads');
         var storage = require('./storage');
         var hook = require('./hook');
@@ -1078,7 +1208,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             storage.set(STORAGE.PLAYERS, world.players);
         });
-    }, { "./blockheads": 8, "./hook": 9, "./storage": 11 }], 13: [function (require, module, exports) {
+    }, { "./blockheads": 10, "./hook": 11, "./storage": 13 }], 15: [function (require, module, exports) {
         var ui = require('app/ui');
         var storage = require('app/libraries/storage');
         var send = require('app/bot').send;
@@ -1123,7 +1253,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
             setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
         })(0);
-    }, { "app/bot": 2, "app/libraries/storage": 11, "app/settings": 21, "app/ui": 24 }], 14: [function (require, module, exports) {
+    }, { "app/bot": 3, "app/libraries/storage": 13, "app/settings": 23, "app/ui": 26 }], 16: [function (require, module, exports) {
         module.exports = {
             buildAndSendMessage: buildAndSendMessage,
             buildMessage: buildMessage
@@ -1151,7 +1281,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             return message;
         }
-    }, { "app/bot": 2, "app/libraries/world": 12 }], 15: [function (require, module, exports) {
+    }, { "app/bot": 3, "app/libraries/world": 14 }], 17: [function (require, module, exports) {
         module.exports = {
             checkJoinsAndGroup: checkJoinsAndGroup,
             checkJoins: checkJoins,
@@ -1189,13 +1319,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     return false;
             }
         }
-    }, { "app/libraries/world": 12 }], 16: [function (require, module, exports) {
+    }, { "app/libraries/world": 14 }], 18: [function (require, module, exports) {
         Object.assign(module.exports, require('./buildMessage'), require('./checkJoinsAndGroup'));
-    }, { "./buildMessage": 14, "./checkJoinsAndGroup": 15 }], 17: [function (require, module, exports) {
+    }, { "./buildMessage": 16, "./checkJoinsAndGroup": 17 }], 19: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var el = document.createElement('style');
-        el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}#mb_join>div,#mb_leave>div,#mb_trigger>div{position:relative;display:flex;flex-flow:row wrap;border-top:1px solid #000}#mb_join>div>div,#mb_leave>div>div,#mb_trigger>div>div{width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#mb_join>div>div:nth-child(odd),#mb_leave>div>div:nth-child(odd),#mb_trigger>div>div:nth-child(odd){background:#ccc}\n";
+        el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}#jMsgs,#lMsgs,#tMsgs{position:relative;display:flex;flex-flow:row wrap;border-top:1px solid #000}#jMsgs>div,#lMsgs>div,#tMsgs>div{width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#jMsgs>div:nth-child(odd),#lMsgs>div:nth-child(odd),#tMsgs>div:nth-child(odd){background:#ccc}\n";
         document.head.appendChild(el);
 
         ui.addTabGroup('Messages', 'messages');
@@ -1218,7 +1348,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 return type.addMessage();
             });
         });
-    }, { "./announcements": 13, "./join": 18, "./leave": 19, "./trigger": 20, "app/ui": 24 }], 18: [function (require, module, exports) {
+    }, { "./announcements": 15, "./join": 20, "./leave": 21, "./trigger": 22, "app/ui": 26 }], 20: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1271,7 +1401,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         });
-    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 24 }], 19: [function (require, module, exports) {
+    }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 21: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1324,7 +1454,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         });
-    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/ui": 24 }], 20: [function (require, module, exports) {
+    }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/ui": 26 }], 22: [function (require, module, exports) {
         var ui = require('app/ui');
 
         var storage = require('app/libraries/storage');
@@ -1393,7 +1523,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         });
-    }, { "app/libraries/hook": 9, "app/libraries/storage": 11, "app/messages/helpers": 16, "app/settings": 21, "app/ui": 24 }], 21: [function (require, module, exports) {
+    }, { "app/libraries/hook": 11, "app/libraries/storage": 13, "app/messages/helpers": 18, "app/settings": 23, "app/ui": 26 }], 23: [function (require, module, exports) {
         var storage = require('app/libraries/storage');
         var STORAGE_ID = 'mb_preferences';
 
@@ -1425,12 +1555,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 prefs[pref.key] = pref.default;
             }
         });
-    }, { "app/libraries/storage": 11 }], 22: [function (require, module, exports) {
+    }, { "app/libraries/storage": 13 }], 24: [function (require, module, exports) {
         var ui = require('app/ui');
         var prefs = require('app/settings');
 
         var tab = ui.addTab('Settings');
-        tab.innerHTML = '<style>' + "#mb_settings h3{border-bottom:1px solid #999}\n" + '</style>' + "<div id=\"mb_settings\">\r\n    <h3>Settings</h3>\r\n    <label>Minutes between announcements:</label><br>\r\n        <input data-key=\"announcementDelay\" type=\"number\"><br>\r\n    <label>Maximum trigger responses to a message:</label><br>\r\n        <input data-key=\"maxResponses\" type=\"number\"><br>\r\n    <label>New chat notifications: </label>\r\n        <input data-key=\"notify\" type=\"checkbox\"><br>\r\n\r\n    <h3>Advanced Settings - <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/1.-Advanced-Options/\" target=\"_blank\">Read this first</a></h3>\r\n    <label>Disable whitespace trimming: </label>\r\n        <input data-key=\"disableTrim\" type=\"checkbox\"><br>\r\n    <label>Parse triggers as RegEx: </label>\r\n        <input data-key=\"regexTriggers\" type=\"checkbox\"><br>\r\n    <label>Split messages: </label>\r\n        <input data-key=\"splitMessages\" type=\"checkbox\"><br>\r\n    <label>Split token: </label><br>\r\n        <input data-key=\"splitToken\" type=\"text\">\r\n\r\n    <h3>Extensions</h3>\r\n    <div id=\"mb_ext_list\"></div>\r\n\r\n    <h3>Backup / Restore</h3>\r\n    <a id=\"mb_backup_save\">Get backup code</a><br>\r\n    <a id=\"mb_backup_load\">Load previous backup</a>\r\n    <div id=\"mb_backup\"></div>\r\n</div>\r\n";
+        tab.innerHTML = '<style>' + "#mb_settings h3{border-bottom:1px solid #999}\n" + '</style>' + "<div id=\"mb_settings\">\r\n    <h3>Settings</h3>\r\n    <label>Minutes between announcements:</label><br>\r\n        <input data-key=\"announcementDelay\" type=\"number\"><br>\r\n    <label>Maximum trigger responses to a message:</label><br>\r\n        <input data-key=\"maxResponses\" type=\"number\"><br>\r\n    <label>New chat notifications: </label>\r\n        <input data-key=\"notify\" type=\"checkbox\"><br>\r\n\r\n    <h3>Advanced Settings - <small><a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/1.-Advanced-Options/\" target=\"_blank\">Read this first</a></small></h3>\r\n    <label>Disable whitespace trimming: </label>\r\n        <input data-key=\"disableTrim\" type=\"checkbox\"><br>\r\n    <label>Parse triggers as RegEx: </label>\r\n        <input data-key=\"regexTriggers\" type=\"checkbox\"><br>\r\n    <label>Split messages: </label>\r\n        <input data-key=\"splitMessages\" type=\"checkbox\"><br>\r\n    <label>Split token: </label><br>\r\n        <input data-key=\"splitToken\" type=\"text\">\r\n\r\n    <h3>Backup / Restore</h3>\r\n    <a id=\"mb_backup_save\">Get backup code</a><br>\r\n    <a id=\"mb_backup_load\">Load previous backup</a>\r\n    <div id=\"mb_backup\"></div>\r\n</div>\r\n";
 
         Object.keys(prefs).forEach(function (key) {
             var el = tab.querySelector("[data-key=\"" + key + "\"]");
@@ -1499,19 +1629,31 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     location.reload();
                 } }, { text: 'Cancel' }]);
         });
-    }, { "app/settings": 21, "app/ui": 24 }], 23: [function (require, module, exports) {
+    }, { "app/settings": 23, "app/ui": 26 }], 25: [function (require, module, exports) {
         window.pollChat = function () {};
 
         document.body.innerHTML = '';
-        document.head.innerHTML = '';
+        document.querySelectorAll('[type="text/css"]').forEach(function (el) {
+            return el.remove();
+        });
+
+        document.querySelector('title').textContent = 'Console - MessageBot';
+
+        var el = document.createElement('link');
+        el.rel = 'icon';
+        el.href = 'https://is.gd/MBvUHF';
+        document.head.appendChild(el);
 
         require('app/ui/polyfills/console');
         require('app/libraries/migration');
+
+        window.MessageBotExtension = require('app/MessageBotExtension');
 
         var bhfansapi = require('app/libraries/bhfansapi');
 
         require('app/console');
         require('app/messages');
+        require('app/extensions');
         require('app/settings/page');
 
         window.addEventListener('error', function (err) {
@@ -1519,7 +1661,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 bhfansapi.reportError(err);
             }
         });
-    }, { "app/console": 5, "app/libraries/bhfansapi": 7, "app/libraries/migration": 10, "app/messages": 17, "app/settings/page": 22, "app/ui/polyfills/console": 29 }], 24: [function (require, module, exports) {
+    }, { "app/MessageBotExtension": 1, "app/console": 6, "app/extensions": 7, "app/libraries/bhfansapi": 9, "app/libraries/migration": 12, "app/messages": 19, "app/settings/page": 24, "app/ui/polyfills/console": 31 }], 26: [function (require, module, exports) {
         require('./polyfills/details');
 
         Object.assign(module.exports, require('./layout'), require('./template'), require('./notifications'));
@@ -1532,7 +1674,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
             write(msg, name, nameClass);
         };
-    }, { "./layout": 25, "./notifications": 27, "./polyfills/details": 30, "./template": 32, "app/console/exports": 4 }], 25: [function (require, module, exports) {
+    }, { "./layout": 27, "./notifications": 29, "./polyfills/details": 32, "./template": 34, "app/console/exports": 5 }], 27: [function (require, module, exports) {
 
         document.body.innerHTML += "<div id=\"leftNav\">\r\n    <input type=\"checkbox\" id=\"leftToggle\">\r\n    <label for=\"leftToggle\">&#9776; Menu</label>\r\n\r\n    <nav data-tab-group=\"main\"></nav>\r\n    <div class=\"overlay\"></div>\r\n</div>\r\n\r\n<div id=\"container\">\r\n    <header></header>\r\n</div>\r\n";
         document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';
@@ -1615,7 +1757,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             group.remove();
         }
-    }, {}], 26: [function (require, module, exports) {
+    }, {}], 28: [function (require, module, exports) {
         module.exports = {
             alert: alert
         };
@@ -1681,7 +1823,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }
         }
-    }, {}], 27: [function (require, module, exports) {
+    }, {}], 29: [function (require, module, exports) {
         Object.assign(module.exports, require('./alert'), require('./notify'));
 
         var el = document.createElement('style');
@@ -1693,7 +1835,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         el.innerHTML = "<div id=\"alert\">\r\n    <div id=\"alertContent\"></div>\r\n    <div class=\"buttons\"/></div>\r\n</div>\r\n<div class=\"overlay\"/></div>\r\n";
 
         document.body.appendChild(el);
-    }, { "./alert": 26, "./notify": 28 }], 28: [function (require, module, exports) {
+    }, { "./alert": 28, "./notify": 30 }], 30: [function (require, module, exports) {
         module.exports = {
             notify: notify
         };
@@ -1721,7 +1863,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }.bind(el), displayTime * 1000 + 2100);
         }
-    }, {}], 29: [function (require, module, exports) {
+    }, {}], 31: [function (require, module, exports) {
         if (!window.console) {
             window.console = {};
             window.log = window.log || [];
@@ -1738,7 +1880,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 console[method] = console.log;
             }
         });
-    }, {}], 30: [function (require, module, exports) {
+    }, {}], 32: [function (require, module, exports) {
         if (!('open' in document.createElement('details'))) {
             var style = document.createElement('style');
             style.textContent += "details:not([open]) > :not(summary) { display: none !important; } details > summary:before { content: \"▶\"; display: inline-block; font-size: .8em; width: 1.5em; font-family:\"Courier New\"; } details[open] > summary:before { transform: rotate(90deg); }";
@@ -1762,7 +1904,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, {}], 31: [function (require, module, exports) {
+    }, {}], 33: [function (require, module, exports) {
 
         module.exports = function (template) {
             if (!('content' in template)) {
@@ -1776,7 +1918,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 template.content = fragment;
             }
         };
-    }, {}], 32: [function (require, module, exports) {
+    }, {}], 34: [function (require, module, exports) {
         module.exports = {
             buildContentFromTemplate: buildContentFromTemplate
         };
@@ -1836,4 +1978,4 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
         }
-    }, { "app/ui/polyfills/template": 31 }] }, {}, [23]);
+    }, { "app/ui/polyfills/template": 33 }] }, {}, [25]);
