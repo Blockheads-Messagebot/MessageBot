@@ -1,11 +1,12 @@
 const ui = require('app/ui');
 const prefs = require('app/settings');
+const fs = require('fs');
 
 var tab = ui.addTab('Settings');
 tab.innerHTML = '<style>' +
-    INCLUDE_FILE('/dev/settings/style.css') +
+    fs.readFileSync(__dirname + '/style.css') +
     '</style>' +
-    INCLUDE_FILE('/dev/settings/tab.html');
+    fs.readFileSync(__dirname + '/tab.html');
 
 // Show prefs
 Object.keys(prefs).forEach(key => {

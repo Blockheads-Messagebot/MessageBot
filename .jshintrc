@@ -1,5 +1,5 @@
 {
-    "predef": {"INCLUDE_FILE": false, "require": false, "module": true},
+    "predef": {"__dirname": false, "require": false, "module": true, "exports": true},
     "esversion": 6,
     "browser": true,
     "devel": true,

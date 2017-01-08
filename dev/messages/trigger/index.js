@@ -4,11 +4,12 @@ const storage = require('app/libraries/storage');
 const hook = require('app/libraries/hook');
 const helpers = require('app/messages/helpers');
 const settings = require('app/settings');
+const fs = require('fs');
 
 const STORAGE_ID = 'triggerArr';
 
 var tab = ui.addTab('Trigger', 'messages');
-tab.innerHTML = INCLUDE_FILE('/dev/messages/trigger/tab.html');
+tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
 
 module.exports = {
     tab,

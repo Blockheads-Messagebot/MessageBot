@@ -1,5 +1,4 @@
 //TODO: Use fetch
-
 /**
  * Function to GET a page. Passes the response of the XHR in the resolve promise.
  *
