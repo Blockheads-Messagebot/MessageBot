@@ -24,6 +24,8 @@ window.MessageBotExtension = require('app/MessageBotExtension');
 const bhfansapi = require('app/libraries/bhfansapi');
 
 require('app/console');
+// By default no tab is selected, show the console.
+document.querySelector('#leftNav span').click();
 require('app/messages');
 require('app/extensions');
 require('app/settings/page');

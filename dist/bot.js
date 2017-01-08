@@ -1652,6 +1652,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var bhfansapi = require('app/libraries/bhfansapi');
 
         require('app/console');
+        document.querySelector('#leftNav span').click();
         require('app/messages');
         require('app/extensions');
         require('app/settings/page');
