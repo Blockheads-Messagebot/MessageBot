@@ -1,6 +1,6 @@
 "use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -131,8 +131,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         bot.version = '6.1.0a';
 
+        bot.world = require('app/libraries/world');
+
         storage.set('mb_version', bot.version);
-    }, { "./checkGroup": 2, "./send": 5, "app/libraries/storage": 13 }], 4: [function (require, module, exports) {
+    }, { "./checkGroup": 2, "./send": 5, "app/libraries/storage": 13, "app/libraries/world": 14 }], 4: [function (require, module, exports) {
         function update(keys, operator) {
             Object.keys(localStorage).forEach(function (item) {
                 var _iteratorNormalCompletion = true;
@@ -247,8 +249,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
 
         function write(msg) {
-            var name = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-            var nameClass = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+            var name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            var nameClass = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
             var msgEl = document.createElement('li');
             if (nameClass) {
@@ -415,8 +417,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     }, { "app/MessageBotExtension": 1, "app/libraries/bhfansapi": 10, "app/libraries/hook": 12, "app/ui": 26 }], 9: [function (require, module, exports) {
 
         function get() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var params = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+            var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
+            var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
             if (Object.keys(params).length) {
                 var addition = urlStringify(params);
@@ -431,29 +433,29 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function getJSON() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+            var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
+            var paramObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
             return get(url, paramObj).then(JSON.parse);
         }
 
         function post() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+            var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
+            var paramObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
             return xhr('POST', url, paramObj);
         }
 
         function postJSON() {
-            var url = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
-            var paramObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+            var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
+            var paramObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
             return post(url, paramObj).then(JSON.parse);
         }
 
         function xhr(protocol) {
-            var url = arguments.length <= 1 || arguments[1] === undefined ? '/' : arguments[1];
-            var paramObj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+            var url = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '/';
+            var paramObj = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
             var paramStr = urlStringify(paramObj);
             return new Promise(function (resolve, reject) {
@@ -536,7 +538,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }).catch(reportError);
 
         function getStore() {
-            var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.getStore) {
                 cache.getStore = ajax.getJSON(API_URLS.STORE);
@@ -614,7 +616,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
 
         function worldStarted() {
-            var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.worldStarted) {
                 cache.worldStarted = new Promise(function (resolve, reject) {
@@ -648,7 +650,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function getLogs() {
-            var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.getLogs) {
                 cache.getLogs = worldStarted().then(function () {
@@ -662,7 +664,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function getLists() {
-            var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.getLists) {
                 cache.getLists = worldStarted().then(function () {
@@ -694,7 +696,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function getHomepage() {
-            var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.getHomepage) {
                 cache.getHomepage = ajax.get("/worlds/" + worldId).catch(function () {
@@ -706,7 +708,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function getOnlinePlayers() {
-            var refresh = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (refresh || !cache.getOnlinePlayers) {
                 cache.getOnlinePlayers = getHomepage(true).then(function (html) {
@@ -773,12 +775,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             getMessages().then(function (msgs) {
                 msgs.forEach(function (message) {
                     if (message.startsWith(world.name + " - Player Connected ")) {
-                        var _message$match = message.match(/ - Player Connected (.*) \| ([\d.]+) \| ([\w]{32})\s*$/);
-
-                        var _message$match2 = _slicedToArray(_message$match, 3);
-
-                        var name = _message$match2[1];
-                        var ip = _message$match2[2];
+                        var _message$match = message.match(/ - Player Connected (.*) \| ([\d.]+) \| ([\w]{32})\s*$/),
+                            _message$match2 = _slicedToArray(_message$match, 3),
+                            name = _message$match2[1],
+                            ip = _message$match2[2];
 
                         handleJoinMessages(name, ip);
                     } else if (message.startsWith(world.name + " - Player Disconnected ")) {
@@ -958,7 +958,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var NAMESPACE = window.worldId;
 
         function getString(key, fallback) {
-            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+            var local = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
             var result;
             if (local) {
@@ -971,7 +971,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function getObject(key, fallback) {
-            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+            var local = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
             var result = getString(key, false, local);
 
@@ -993,7 +993,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         function set(key, data) {
-            var local = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+            var local = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
             if (local) {
                 key = "" + key + NAMESPACE;
@@ -1145,12 +1145,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         Promise.all([api.getLists(), api.getWorldName(), api.getOwnerName()]).then(function (values) {
-            var _values = _slicedToArray(values, 3);
-
-            var apiLists = _values[0];
-            var worldName = _values[1];
-            var owner = _values[2];
-
+            var _values = _slicedToArray(values, 3),
+                apiLists = _values[0],
+                worldName = _values[1],
+                owner = _values[2];
 
             world.lists = apiLists;
             buildStaffList();
@@ -1159,11 +1157,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }).catch(console.error);
 
         Promise.all([api.getLogs(), api.getWorldName()]).then(function (values) {
-            var _values2 = _slicedToArray(values, 2);
-
-            var lines = _values2[0];
-            var worldName = _values2[1];
-
+            var _values2 = _slicedToArray(values, 2),
+                lines = _values2[0],
+                worldName = _values2[1];
 
             var last = storage.getObject(STORAGE.LOG_LOAD, 0);
             storage.set(STORAGE.LOG_LOAD, Math.floor(Date.now().valueOf()));
@@ -1186,13 +1182,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     if (message.startsWith(worldName + " - Player Connected ")) {
                         var parts = line.substr(line.indexOf(' - Player Connected ') + 20); 
 
-                        var _parts$match = parts.match(/(.*) \| ([\w.]+) \| .{32}\s*/);
-
-                        var _parts$match2 = _slicedToArray(_parts$match, 3);
-
-                        var name = _parts$match2[1];
-                        var ip = _parts$match2[2];
-
+                        var _parts$match = parts.match(/(.*) \| ([\w.]+) \| .{32}\s*/),
+                            _parts$match2 = _slicedToArray(_parts$match, 3),
+                            name = _parts$match2[1],
+                            ip = _parts$match2[2];
 
                         checkPlayerJoin(name, ip);
                     }
@@ -1233,7 +1226,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
 
         function addMessage() {
-            var text = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+            var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 
             ui.buildContentFromTemplate('#aTemplate', '#aMsgs', [{ selector: '.m', text: text }]);
         }
@@ -1384,7 +1377,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         joinMessages.forEach(addMessage);
 
         function addMessage() {
-            var msg = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
             ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
         }
@@ -1440,7 +1433,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         leaveMessages.forEach(addMessage);
 
         function addMessage() {
-            var msg = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
             ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
         }
@@ -1497,7 +1490,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         triggerMessages.forEach(addMessage);
 
         function addMessage() {
-            var msg = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
             ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '.t', value: msg.trigger || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
         }
@@ -1689,8 +1682,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var write = require('app/console/exports').write;
         module.exports.addMessageToConsole = function (msg) {
-            var name = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-            var nameClass = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+            var name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            var nameClass = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
             console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
             write(msg, name, nameClass);
@@ -1734,7 +1727,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var tabUID = 0;
         function addTab(tabText) {
-            var groupName = arguments.length <= 1 || arguments[1] === undefined ? 'main' : arguments[1];
+            var groupName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'main';
 
             var tabName = 'botTab_' + tabUID++;
 
@@ -1784,7 +1777,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
 
         function alert(text) {
-            var buttons = arguments.length <= 1 || arguments[1] === undefined ? [{ text: 'OK' }] : arguments[1];
+            var buttons = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [{ text: 'OK' }];
 
             if (instance.active) {
                 instance.queue.push({ text: text, buttons: buttons });
@@ -1862,7 +1855,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
 
         function notify(text) {
-            var displayTime = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
+            var displayTime = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
             var el = document.createElement('div');
             el.classList.add('notification');
@@ -1904,7 +1897,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     }, {}], 32: [function (require, module, exports) {
         if (!('open' in document.createElement('details'))) {
             var style = document.createElement('style');
-            style.textContent += "details:not([open]) > :not(summary) { display: none !important; } details > summary:before { content: \"▶\"; display: inline-block; font-size: .8em; width: 1.5em; font-family:\"Courier New\"; } details[open] > summary:before { transform: rotate(90deg); }";
+            style.textContent += "details:not([open]) > :not(summary) { display: none !important; } details > summary:before { content: \"\u25B6\"; display: inline-block; font-size: .8em; width: 1.5em; font-family:\"Courier New\"; } details[open] > summary:before { transform: rotate(90deg); }";
             document.head.appendChild(style);
 
             window.addEventListener('click', function (event) {
@@ -1947,7 +1940,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var polyfill = require('app/ui/polyfills/template');
 
         function buildContentFromTemplate(templateSelector, targetSelector) {
-            var rules = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+            var rules = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
             var template = document.querySelector(templateSelector);
 
