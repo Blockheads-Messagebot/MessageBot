@@ -22,6 +22,12 @@ require('app/bot/migration');
 window.MessageBotExtension = require('app/MessageBotExtension');
 
 const bhfansapi = require('app/libraries/bhfansapi');
+const hook = require('app/libraries/hook');
+const ui = require('app/ui');
+hook.on('error_report', function(msg) {
+    ui.notify(msg);
+});
+
 
 require('app/console');
 // By default no tab is selected, show the console.

@@ -2,8 +2,8 @@
  * @file Contains functions to interact with blockheadsfans.com - cannot be used by extensions.
  */
 
-var ui = require('app/ui');
-var ajax = require('app/libraries/ajax');
+const hook = require('app/libraries/hook');
+const ajax = require('app/libraries/ajax');
 
 const API_URLS = {
     STORE: '//blockheadsfans.com/messagebot/extension/store',
@@ -15,18 +15,6 @@ var cache = {
     names: new Map(),
 };
 
-//Build the initial names map
-getStore().then(store => {
-    if (store.status != 'ok') {
-        return;
-    }
-
-    for (let ex of store.extensions) {
-        cache.names.set(ex.id, ex.title);
-    }
-}).catch(reportError);
-
-
 /**
  * Used to get public extensions
  *
@@ -37,7 +25,18 @@ getStore().then(store => {
  */
 function getStore(refresh = false) {
     if (refresh || !cache.getStore) {
-        cache.getStore = ajax.getJSON(API_URLS.STORE);
+        cache.getStore = ajax.getJSON(API_URLS.STORE)
+            .then(store => {
+                //Build the initial names map
+                if (store.status != 'ok') {
+                    return store;
+                }
+
+                for (let ex of store.extensions) {
+                    cache.names.set(ex.id, ex.title);
+                }
+                return store;
+            });
     }
 
     return cache.getStore;
@@ -85,9 +84,9 @@ function reportError(err) {
         })
         .then((resp) => {
             if (resp.status == 'ok') {
-                ui.notify('Something went wrong, it has been reported.');
+                hook.fire('error_report', 'Something went wrong, it has been reported.');
             } else {
-                ui.notify(`Error reporting exception: ${resp.message}`);
+                hook.fire('error_report', `Error reporting exception: ${resp.message}`);
             }
         })
         .catch(console.error);

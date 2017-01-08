@@ -1,11 +1,8 @@
 /*jshint
-    jasmine: true,
-    unused: true
+    jasmine: true
 */
 
-/*globals
-    hook
-*/
+const hook = require('app/libraries/hook');
 
 describe('hook.listen', function() {
     function key(value) { return 'hook.listen.' + value; }
@@ -19,6 +16,12 @@ describe('hook.listen', function() {
 
         hook.check(key('key'));
         expect(c.listener.calls.count()).toEqual(1);
+    });
+});
+
+describe('hook.on', function() {
+    it('Should be an alias of hook.listen', function() {
+        expect(hook.on).toBe(hook.listen);
     });
 });
 
@@ -70,6 +73,12 @@ describe('hook.check', function() {
         hook.check(key('key2'));
         expect(container.func2).toHaveBeenCalled();
         expect(container.func3).toHaveBeenCalled();
+    });
+});
+
+describe('hook.fire', function() {
+    it('Should be an alias of hook.check', function() {
+        expect(hook.fire).toBe(hook.check);
     });
 });
 
