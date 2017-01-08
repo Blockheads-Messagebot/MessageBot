@@ -1024,10 +1024,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             players: storage.getObject(STORAGE.PLAYERS, {}),
             lists: { admin: [], mod: [], staff: [], black: [], white: [] },
             isPlayer: isPlayer,
-            isAdmin: isAdmin,
-            isMod: isMod,
-            isStaff: isStaff,
+            isServer: isServer,
             isOwner: isOwner,
+            isAdmin: isAdmin,
+            isStaff: isStaff,
+            isMod: isMod,
             isOnline: isOnline,
             getJoins: getJoins
         };
@@ -1037,8 +1038,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return world.players.hasOwnProperty(name.toLocaleUpperCase());
         }
 
+        function isServer(name) {
+            return name.toLocaleUpperCase() == 'SERVER';
+        }
+
+        function isOwner(name) {
+            return world.owner == name.toLocaleUpperCase() || isServer(name);
+        }
+
         function isAdmin(name) {
-            return lists.admin.includes(name.toLocaleUpperCase());
+            return lists.admin.includes(name.toLocaleUpperCase()) || isOwner(name);
         }
 
         function isMod(name) {
@@ -1047,10 +1056,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         function isStaff(name) {
             return isAdmin(name) || isMod(name);
-        }
-
-        function isOwner(name) {
-            return world.owner == name.toLocaleUpperCase();
         }
 
         function isOnline(name) {
@@ -1076,7 +1081,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         function buildStaffList() {
             lists.mod = lists.mod.filter(function (name) {
-                return !lists.admin.includes(name);
+                return !lists.admin.includes(name) && name != 'SERVER' && name != world.owner;
             });
             lists.staff = lists.admin.concat(lists.mod);
         }
@@ -1129,6 +1134,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
             world.players[name].ip = ip;
 
+            storage.set(STORAGE.LOG_LOAD, Math.floor(Date.now().valueOf()));
             storage.set(STORAGE.PLAYERS, world.players);
         }
 
@@ -1139,12 +1145,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var worldName = _values[1];
             var owner = _values[2];
 
-
-            [owner, 'SERVER'].forEach(function (name) {
-                if (!apiLists.admin.includes(name)) {
-                    apiLists.admin.push(name);
-                }
-            });
 
             world.lists = apiLists;
             buildStaffList();
