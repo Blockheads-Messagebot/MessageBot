@@ -34,7 +34,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         function MessageBotExtension(namespace) {
             loaded.push(namespace);
-            hook.fire('extension.installed', namespace);
+            hook.fire('extension.install', namespace);
 
             var extension = {
                 id: namespace,
