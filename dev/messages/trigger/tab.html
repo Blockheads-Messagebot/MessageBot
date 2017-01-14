@@ -1,30 +1,29 @@
 <template id="tTemplate">
     <div>
-        <label>When </label>
-        <select data-target="group">
-            <option value="All">anyone</option>
-            <option value="Staff">a staff member</option>
-            <option value="Mod">a mod</option>
-            <option value="Admin">an admin</option>
-            <option value="Owner">the owner</option>
-        </select>
-        <label> who is not </label>
-        <select data-target="not_group">
-            <option value="Nobody">nobody</option>
-            <option value="Staff">a staff member</option>
-            <option value="Mod">a mod</option>
-            <option value="Admin">an admin</option>
-            <option value="Owner">the owner</option>
-        </select>
-        <label> says </label>
-        <input class="t">
-        <label> in chat, say </label>
-        <textarea class="m"></textarea>
-        <label> if the player has joined between </label>
-        <input type="number" value="0" data-target="joins_low">
-        <label> and </label>
-        <input type="number" value="9999" data-target="joins_high">
-        <label>times. </label><br>
+        <label>Trigger: <input class="t"></label>
+        <label>Message: <textarea class="m"></textarea></label>
+        <span class="summary"></span>
+        <details><summary>More options</summary>
+            <label>Player is: <select data-target="group">
+                <option value="All">anyone</option>
+                <option value="Staff">a staff member</option>
+                <option value="Mod">a mod</option>
+                <option value="Admin">an admin</option>
+                <option value="Owner">the owner</option>
+            </select></label>
+            <br>
+            <label>Player is not: <select data-target="not_group">
+                <option value="Nobody">nobody</option>
+                <option value="Staff">a staff member</option>
+                <option value="Mod">a mod</option>
+                <option value="Admin">an admin</option>
+                <option value="Owner">the owner</option>
+            </select></label>
+            <br>
+            <input type="number" value="0" data-target="joins_low">
+                <span> &le; player joins &le; </span>
+            <input type="number" value="9999" data-target="joins_high">
+        </details>
         <a>Delete</a>
     </div>
 </template>
