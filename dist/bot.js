@@ -101,7 +101,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         storage.getObject(STORAGE_ID, [], false).forEach(MessageBotExtension.install);
 
         module.exports = MessageBotExtension;
-    }, { "./console": 7, "bot": 3, "libraries/ajax": 9, "libraries/blockheads": 11, "libraries/hook": 12, "libraries/storage": 13, "libraries/world": 14, "ui": 26 }], 2: [function (require, module, exports) {
+    }, { "./console": 7, "bot": 3, "libraries/ajax": 9, "libraries/blockheads": 11, "libraries/hook": 12, "libraries/storage": 13, "libraries/world": 14, "ui": 27 }], 2: [function (require, module, exports) {
 
         module.exports = {
             checkGroup: checkGroup
@@ -192,18 +192,27 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 break; 
             case '6.0.0a':
             case '6.0.0':
-                setTimeout(function () {
-                    window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
-                }, 1000);
+                alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
                 break; 
             case '6.0.1':
             case '6.0.2':
-                setTimeout(function () {
-                    window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
-                }, 1000);
+                alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
             case '6.0.3':
             case '6.0.4':
             case '6.0.5':
+            case '6.1.0a':
+                update(['joinArr', 'leaveArr', 'triggerArr'], function (raw) {
+                    try {
+                        var parsed = JSON.parse(raw);
+                        parsed.forEach(function (msg) {
+                            msg.group = msg.group.toLocaleLowerCase();
+                            msg.not_group = msg.not_group.toLocaleLowerCase();
+                        });
+                        return JSON.stringify(parsed);
+                    } catch (e) {
+                        return raw;
+                    }
+                });
         }
     }, {}], 5: [function (require, module, exports) {
         var api = require('libraries/blockheads');
@@ -246,7 +255,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 setTimeout(checkQueue, 1000);
             });
         })();
-    }, { "libraries/blockheads": 11, "settings": 23 }], 6: [function (require, module, exports) {
+    }, { "libraries/blockheads": 11, "settings": 24 }], 6: [function (require, module, exports) {
         module.exports = {
             write: write,
             clear: clear
@@ -367,7 +376,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         tab.querySelector('button').addEventListener('click', userSend);
-    }, { "./exports": 6, "bot": 3, "libraries/hook": 12, "libraries/world": 14, "ui": 26 }], 8: [function (require, module, exports) {
+    }, { "./exports": 6, "bot": 3, "libraries/hook": 12, "libraries/world": 14, "ui": 27 }], 8: [function (require, module, exports) {
         var bhfansapi = require('libraries/bhfansapi');
         var ui = require('ui');
         var hook = require('libraries/hook');
@@ -418,7 +427,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }, 3000);
             }
         });
-    }, { "MessageBotExtension": 1, "libraries/bhfansapi": 10, "libraries/hook": 12, "ui": 26 }], 9: [function (require, module, exports) {
+    }, { "MessageBotExtension": 1, "libraries/bhfansapi": 10, "libraries/hook": 12, "ui": 27 }], 9: [function (require, module, exports) {
         function get() {
             var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
             var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -1258,7 +1267,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
             setTimeout(announcementCheck, preferences.announcementDelay * 60000, i + 1);
         }
-    }, { "bot": 3, "libraries/storage": 13, "settings": 23, "ui": 26 }], 16: [function (require, module, exports) {
+    }, { "bot": 3, "libraries/storage": 13, "settings": 24, "ui": 27 }], 16: [function (require, module, exports) {
         module.exports = {
             buildAndSendMessage: buildAndSendMessage,
             buildMessage: buildMessage
@@ -1325,9 +1334,41 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
         }
     }, { "libraries/world": 14 }], 18: [function (require, module, exports) {
-        Object.assign(module.exports, require('./buildMessage'), require('./checkJoinsAndGroup'));
-    }, { "./buildMessage": 16, "./checkJoinsAndGroup": 17 }], 19: [function (require, module, exports) {
+        Object.assign(module.exports, require('./buildMessage'), require('./checkJoinsAndGroup'), require('./showSummary'));
+    }, { "./buildMessage": 16, "./checkJoinsAndGroup": 17, "./showSummary": 19 }], 19: [function (require, module, exports) {
+        module.exports = {
+            showSummary: showSummary
+        };
+
+        function showSummary(container) {
+            var out = container.querySelector('.summary');
+
+            if (!out) {
+                return;
+            }
+
+            var group = container.querySelector('[data-target="group"]').value;
+            var not_group = container.querySelector('[data-target="not_group"]').value;
+            var joins_low = container.querySelector('[data-target="joins_low"]').value;
+            var joins_high = container.querySelector('[data-target="joins_high"]').value;
+
+            var groupsAltered = group != 'all' || not_group != 'nobody';
+            var joinsAltered = joins_low != "0" || joins_high != "9999";
+
+            if (groupsAltered && joinsAltered) {
+                out.textContent = group + " / not " + not_group + " and " + joins_low + " \u2264 joins \u2264 " + joins_high;
+            } else if (groupsAltered) {
+                out.textContent = group + " / not " + not_group;
+            } else if (joinsAltered) {
+                out.textContent = joins_low + " \u2264 joins \u2264 " + joins_high;
+            } else {
+                out.textContent = '';
+            }
+        }
+    }, {}], 20: [function (require, module, exports) {
         var ui = require('ui');
+
+        var helpers = require('./helpers');
 
         var el = document.createElement('style');
         el.innerHTML = "#mb_join h3,#mb_leave h3,#mb_trigger h3,#mb_announcements h3{margin:0 0 5px 0}#mb_join input,#mb_join textarea,#mb_leave input,#mb_leave textarea,#mb_trigger input,#mb_trigger textarea,#mb_announcements input,#mb_announcements textarea{border:2px solid #666;width:calc(100% - 10px)}#mb_join textarea,#mb_leave textarea,#mb_trigger textarea,#mb_announcements textarea{resize:none;overflow:hidden;padding:1px 0;height:21px;transition:height .5s}#mb_join textarea:focus,#mb_leave textarea:focus,#mb_trigger textarea:focus,#mb_announcements textarea:focus{height:5em}#mb_join input[type=\"number\"],#mb_leave input[type=\"number\"],#mb_trigger input[type=\"number\"],#mb_announcements input[type=\"number\"]{width:5em}#jMsgs,#lMsgs,#tMsgs{position:relative;display:flex;flex-flow:row wrap;border-top:1px solid #000}#jMsgs>div,#lMsgs>div,#tMsgs>div{width:calc(33% - 19px);min-width:280px;padding:5px;margin-left:5px;margin-bottom:5px;border:3px solid #999;border-radius:10px}#jMsgs>div:nth-child(odd),#lMsgs>div:nth-child(odd),#tMsgs>div:nth-child(odd){background:#ccc}\n";
@@ -1349,13 +1390,17 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             type.tab.addEventListener('change', type.save);
 
+            type.tab.addEventListener('change', function () {
+                helpers.showSummary(event.target.parentNode);
+            });
+
             type.tab.querySelector('.top-right-button').addEventListener('click', function () {
                 return type.addMessage();
             });
 
             setTimeout(type.start, 10000);
         });
-    }, { "./announcements": 15, "./join": 20, "./leave": 21, "./trigger": 22, "ui": 26 }], 20: [function (require, module, exports) {
+    }, { "./announcements": 15, "./helpers": 18, "./join": 21, "./leave": 22, "./trigger": 23, "ui": 27 }], 21: [function (require, module, exports) {
         var ui = require('ui');
 
         var storage = require('libraries/storage');
@@ -1365,7 +1410,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'joinArr';
 
         var tab = ui.addTab('Join', 'messages');
-        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div>\r\n        <label> Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"All\">anyone</option>\r\n                <option value=\"Staff\">a staff member</option>\r\n                <option value=\"Mod\">a mod</option>\r\n                <option value=\"Admin\">an admin</option>\r\n                <option value=\"Owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"Nobody\">nobody</option>\r\n                <option value=\"Staff\">a staff member</option>\r\n                <option value=\"Mod\">a mod</option>\r\n                <option value=\"Admin\">an admin</option>\r\n                <option value=\"Owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div>\r\n        <label> Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1379,10 +1424,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var joinMessages = storage.getObject(STORAGE_ID, []);
         joinMessages.forEach(addMessage);
 
+        Array.from(tab.querySelectorAll('#jMsgs > div')).forEach(helpers.showSummary);
+
         function addMessage() {
             var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-            ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+            ui.buildContentFromTemplate('#jTemplate', '#jMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'all') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'nobody') + "\"]", selected: 'selected' }]);
         }
 
         function save() {
@@ -1411,7 +1458,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, { "libraries/hook": 12, "libraries/storage": 13, "messages/helpers": 18, "ui": 26 }], 21: [function (require, module, exports) {
+    }, { "libraries/hook": 12, "libraries/storage": 13, "messages/helpers": 18, "ui": 27 }], 22: [function (require, module, exports) {
         var ui = require('ui');
 
         var storage = require('libraries/storage');
@@ -1421,7 +1468,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'leaveArr';
 
         var tab = ui.addTab('Leave', 'messages');
-        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div>\r\n        <label>Message <textarea class=\"m\"></textarea></label>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"All\">anyone</option>\r\n                <option value=\"Staff\">a staff member</option>\r\n                <option value=\"Mod\">a mod</option>\r\n                <option value=\"Admin\">an admin</option>\r\n                <option value=\"Owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"Nobody\">nobody</option>\r\n                <option value=\"Staff\">a staff member</option>\r\n                <option value=\"Mod\">a mod</option>\r\n                <option value=\"Admin\">an admin</option>\r\n                <option value=\"Owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div>\r\n        <label>Message <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1435,10 +1482,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var leaveMessages = storage.getObject(STORAGE_ID, []);
         leaveMessages.forEach(addMessage);
 
+        Array.from(tab.querySelectorAll('#lMsgs > div')).forEach(helpers.showSummary);
+
         function addMessage() {
             var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-            ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+            ui.buildContentFromTemplate('#lTemplate', '#lMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'all') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'nobody') + "\"]", selected: 'selected' }]);
         }
 
         function save() {
@@ -1467,7 +1516,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, { "libraries/hook": 12, "libraries/storage": 13, "messages/helpers": 18, "ui": 26 }], 22: [function (require, module, exports) {
+    }, { "libraries/hook": 12, "libraries/storage": 13, "messages/helpers": 18, "ui": 27 }], 23: [function (require, module, exports) {
         var ui = require('ui');
 
         var storage = require('libraries/storage');
@@ -1478,7 +1527,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'triggerArr';
 
         var tab = ui.addTab('Trigger', 'messages');
-        tab.innerHTML = "<template id=\"tTemplate\">\r\n    <div>\r\n        <label>Trigger: <input class=\"t\"></label>\r\n        <label>Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"All\">anyone</option>\r\n                <option value=\"Staff\">a staff member</option>\r\n                <option value=\"Mod\">a mod</option>\r\n                <option value=\"Admin\">an admin</option>\r\n                <option value=\"Owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"Nobody\">nobody</option>\r\n                <option value=\"Staff\">a staff member</option>\r\n                <option value=\"Mod\">a mod</option>\r\n                <option value=\"Admin\">an admin</option>\r\n                <option value=\"Owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_trigger\">\r\n    <h3>These are checked whenever someone says something.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger \"te*st\" will match \"tea stuff\" and \"test\")</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"tMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"tTemplate\">\r\n    <div>\r\n        <label>Trigger: <input class=\"t\"></label>\r\n        <label>Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_trigger\">\r\n    <h3>These are checked whenever someone says something.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger \"te*st\" will match \"tea stuff\" and \"test\")</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"tMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1491,11 +1540,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var triggerMessages = storage.getObject(STORAGE_ID, []);
         triggerMessages.forEach(addMessage);
+        Array.from(tab.querySelectorAll('#tMsgs > div')).forEach(helpers.showSummary);
 
         function addMessage() {
             var msg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-            ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '.t', value: msg.trigger || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'All') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'Nobody') + "\"]", selected: 'selected' }]);
+            ui.buildContentFromTemplate('#tTemplate', '#tMsgs', [{ selector: 'option', remove: ['selected'], multiple: true }, { selector: '.m', text: msg.message || '' }, { selector: '.t', value: msg.trigger || '' }, { selector: '[data-target="joins_low"]', value: msg.joins_low || 0 }, { selector: '[data-target="joins_high"]', value: msg.joins_high || 9999 }, { selector: "[data-target=\"group\"] [value=\"" + (msg.group || 'all') + "\"]", selected: 'selected' }, { selector: "[data-target=\"not_group\"] [value=\"" + (msg.not_group || 'nobody') + "\"]", selected: 'selected' }]);
         }
 
         function save() {
@@ -1539,7 +1589,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, { "libraries/hook": 12, "libraries/storage": 13, "messages/helpers": 18, "settings": 23, "ui": 26 }], 23: [function (require, module, exports) {
+    }, { "libraries/hook": 12, "libraries/storage": 13, "messages/helpers": 18, "settings": 24, "ui": 27 }], 24: [function (require, module, exports) {
         var storage = require('libraries/storage');
         var STORAGE_ID = 'mb_preferences';
 
@@ -1571,7 +1621,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 prefs[pref.key] = pref.default;
             }
         });
-    }, { "libraries/storage": 13 }], 24: [function (require, module, exports) {
+    }, { "libraries/storage": 13 }], 25: [function (require, module, exports) {
         var ui = require('ui');
         var prefs = require('settings');
 
@@ -1645,7 +1695,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     location.reload();
                 } }, { text: 'Cancel' }]);
         });
-    }, { "settings": 23, "ui": 26 }], 25: [function (require, module, exports) {
+    }, { "settings": 24, "ui": 27 }], 26: [function (require, module, exports) {
         window.pollChat = function () {};
 
         document.body.innerHTML = '';
@@ -1683,7 +1733,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 bhfansapi.reportError(err);
             }
         });
-    }, { "./console": 7, "MessageBotExtension": 1, "bot/migration": 4, "extensions": 8, "libraries/bhfansapi": 10, "libraries/hook": 12, "messages": 19, "settings/page": 24, "ui": 26, "ui/polyfills/console": 31 }], 26: [function (require, module, exports) {
+    }, { "./console": 7, "MessageBotExtension": 1, "bot/migration": 4, "extensions": 8, "libraries/bhfansapi": 10, "libraries/hook": 12, "messages": 20, "settings/page": 25, "ui": 27, "ui/polyfills/console": 32 }], 27: [function (require, module, exports) {
         require('./polyfills/details');
 
         Object.assign(module.exports, require('./layout'), require('./template'), require('./notifications'));
@@ -1696,7 +1746,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             console.warn('ui.addMessageToConsole has been depricated. Use ex.console.write instead.');
             write(msg, name, nameClass);
         };
-    }, { "../console/exports": 6, "./layout": 27, "./notifications": 29, "./polyfills/details": 32, "./template": 34 }], 27: [function (require, module, exports) {
+    }, { "../console/exports": 6, "./layout": 28, "./notifications": 30, "./polyfills/details": 33, "./template": 35 }], 28: [function (require, module, exports) {
 
         var hook = require('libraries/hook');
 
@@ -1784,7 +1834,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             group.remove();
         }
-    }, { "libraries/hook": 12 }], 28: [function (require, module, exports) {
+    }, { "libraries/hook": 12 }], 29: [function (require, module, exports) {
         module.exports = {
             alert: alert
         };
@@ -1850,7 +1900,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }
         }
-    }, {}], 29: [function (require, module, exports) {
+    }, {}], 30: [function (require, module, exports) {
 
         Object.assign(module.exports, require('./alert'), require('./notify'));
 
@@ -1863,7 +1913,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         el.innerHTML = "<div id=\"alert\">\r\n    <div id=\"alertContent\"></div>\r\n    <div class=\"buttons\"/></div>\r\n</div>\r\n<div class=\"overlay\"/></div>\r\n";
 
         document.body.appendChild(el);
-    }, { "./alert": 28, "./notify": 30 }], 30: [function (require, module, exports) {
+    }, { "./alert": 29, "./notify": 31 }], 31: [function (require, module, exports) {
         module.exports = {
             notify: notify
         };
@@ -1891,7 +1941,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }.bind(el), displayTime * 1000 + 2100);
         }
-    }, {}], 31: [function (require, module, exports) {
+    }, {}], 32: [function (require, module, exports) {
         if (!window.console) {
             window.console = {};
             window.log = window.log || [];
@@ -1908,7 +1958,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 console[method] = console.log;
             }
         });
-    }, {}], 32: [function (require, module, exports) {
+    }, {}], 33: [function (require, module, exports) {
         if (!('open' in document.createElement('details'))) {
             var style = document.createElement('style');
             style.textContent += "details:not([open]) > :not(summary) { display: none !important; } details > summary:before { content: \"\u25B6\"; display: inline-block; font-size: .8em; width: 1.5em; font-family:\"Courier New\"; } details[open] > summary:before { transform: rotate(90deg); }";
@@ -1932,7 +1982,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-    }, {}], 33: [function (require, module, exports) {
+    }, {}], 34: [function (require, module, exports) {
 
         module.exports = function (template) {
             if (!('content' in template)) {
@@ -1946,7 +1996,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 template.content = fragment;
             }
         };
-    }, {}], 34: [function (require, module, exports) {
+    }, {}], 35: [function (require, module, exports) {
         module.exports = {
             buildContentFromTemplate: buildContentFromTemplate
         };
@@ -2006,4 +2056,4 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
         }
-    }, { "ui/polyfills/template": 33 }] }, {}, [25]);
+    }, { "ui/polyfills/template": 34 }] }, {}, [26]);
