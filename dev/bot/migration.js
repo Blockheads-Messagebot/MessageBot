@@ -10,7 +10,7 @@ function update(keys, operator) {
 }
 
 //jshint -W086
-//No break statements as we want to execute all updates after matched version.
+//No break statements as we want to execute all updates after matched version unless otherwise noted.
 switch (localStorage.getItem('mb_version')) {
     case null:
         break; //Nothing to migrate
@@ -33,17 +33,27 @@ switch (localStorage.getItem('mb_version')) {
         break; //Next bugfix only relates to 6.0 bot.
     case '6.0.0a':
     case '6.0.0':
-        setTimeout(function() {
-            window.botui.alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
-        }, 1000);
+        alert("Due to a bug in the 6.0.0 version of the bot, your join and leave messages may be swapped. Sorry! This cannot be fixed automatically. This message will not be shown again.");
         break; //Next bugfix only relates to 6.0.1 / 6.0.2.
     case '6.0.1':
     case '6.0.2':
-        setTimeout(function() {
-            window.botui.alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
-        }, 1000);
+        alert("Due to a bug in 6.0.1 / 6.0.2, groups may have been mixed up on Join, Leave, and Trigger messages. Sorry! This cannot be fixed automatically if it occured on your bot. Announcements have also been fixed.");
     case '6.0.3':
     case '6.0.4':
     case '6.0.5':
+    case '6.1.0a':
+        //Normalize groups to lower case.
+        update(['joinArr', 'leaveArr', 'triggerArr'], function(raw) {
+            try {
+                let parsed = JSON.parse(raw);
+                parsed.forEach(msg => {
+                    msg.group = msg.group.toLocaleLowerCase();
+                    msg.not_group = msg.not_group.toLocaleLowerCase();
+                });
+                return JSON.stringify(parsed);
+            } catch (e) {
+                return raw;
+            }
+        });
 }
 //jshint +W086

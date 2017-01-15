@@ -1,5 +1,6 @@
 const ui = require('ui');
 const fs = require('fs');
+const helpers = require('./helpers');
 
 var el = document.createElement('style');
 el.innerHTML = fs.readFileSync(__dirname + '/style.css', 'utf8');
@@ -28,6 +29,10 @@ ui.addTabGroup('Messages', 'messages');
     });
 
     type.tab.addEventListener('change', type.save);
+
+    type.tab.addEventListener('change', function() {
+        helpers.showSummary(event.target.parentNode);
+    });
 
     type.tab.querySelector('.top-right-button')
         .addEventListener('click', () => type.addMessage());

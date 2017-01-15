@@ -20,6 +20,9 @@ module.exports = {
 var leaveMessages = storage.getObject(STORAGE_ID, []);
 leaveMessages.forEach(addMessage);
 
+Array.from(tab.querySelectorAll('#lMsgs > div'))
+    .forEach(helpers.showSummary);
+
 /**
  * Adds a leave message to the page.
  */
@@ -29,8 +32,8 @@ function addMessage(msg = {}) {
         {selector: '.m', text: msg.message || ''},
         {selector: '[data-target="joins_low"]', value: msg.joins_low || 0},
         {selector: '[data-target="joins_high"]', value: msg.joins_high || 9999},
-        {selector: `[data-target="group"] [value="${msg.group || 'All'}"]`, selected: 'selected'},
-        {selector: `[data-target="not_group"] [value="${msg.not_group || 'Nobody'}"]`, selected: 'selected'}
+        {selector: `[data-target="group"] [value="${msg.group || 'all'}"]`, selected: 'selected'},
+        {selector: `[data-target="not_group"] [value="${msg.not_group || 'nobody'}"]`, selected: 'selected'}
     ]);
 }
 

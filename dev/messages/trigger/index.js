@@ -20,6 +20,8 @@ module.exports = {
 
 var triggerMessages = storage.getObject(STORAGE_ID, []);
 triggerMessages.forEach(addMessage);
+Array.from(tab.querySelectorAll('#tMsgs > div'))
+    .forEach(helpers.showSummary);
 
 /**
  * Adds a trigger message to the page.
@@ -31,8 +33,8 @@ function addMessage(msg = {}) {
         {selector: '.t', value: msg.trigger || ''},
         {selector: '[data-target="joins_low"]', value: msg.joins_low || 0},
         {selector: '[data-target="joins_high"]', value: msg.joins_high || 9999},
-        {selector: `[data-target="group"] [value="${msg.group || 'All'}"]`, selected: 'selected'},
-        {selector: `[data-target="not_group"] [value="${msg.not_group || 'Nobody'}"]`, selected: 'selected'}
+        {selector: `[data-target="group"] [value="${msg.group || 'all'}"]`, selected: 'selected'},
+        {selector: `[data-target="not_group"] [value="${msg.not_group || 'nobody'}"]`, selected: 'selected'}
     ]);
 }
 
