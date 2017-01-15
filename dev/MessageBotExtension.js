@@ -1,5 +1,5 @@
 const bot = require('bot');
-const bot_console = require('console');
+const bot_console = require('./console');
 const ui = require('ui');
 const storage = require('libraries/storage');
 const ajax = require('libraries/ajax');
