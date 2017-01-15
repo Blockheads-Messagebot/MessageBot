@@ -1,8 +1,8 @@
-const ui = require('app/ui');
+const ui = require('ui');
 const fs = require('fs');
 
 var el = document.createElement('style');
-el.innerHTML = fs.readFileSync(__dirname + '/style.css');
+el.innerHTML = fs.readFileSync(__dirname + '/style.css', 'utf8');
 document.head.appendChild(el);
 
 ui.addTabGroup('Messages', 'messages');

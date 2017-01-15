@@ -5,8 +5,8 @@
 const fs = require('fs');
 
 // Build page - only case in which body.innerHTML should be used.
-document.body.innerHTML += fs.readFileSync(__dirname + '/layout.html');
-document.head.innerHTML += '<style>' + fs.readFileSync(__dirname + '/style.css') + '</style>';
+document.body.innerHTML += fs.readFileSync(__dirname + '/layout.html', 'utf8');
+document.head.innerHTML += '<style>' + fs.readFileSync(__dirname + '/style.css', 'utf8') + '</style>';
 
 // Hide the menu when clicking the overlay
 document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);

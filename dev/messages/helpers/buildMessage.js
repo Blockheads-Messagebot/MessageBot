@@ -3,8 +3,8 @@ module.exports = {
     buildMessage,
 };
 
-const world = require('app/libraries/world');
-const send = require('app/bot').send;
+const world = require('libraries/world');
+const send = require('bot').send;
 
 function buildAndSendMessage(message, name) {
     send(buildMessage(message, name));

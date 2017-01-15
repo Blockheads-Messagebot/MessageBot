@@ -1,14 +1,14 @@
-const ui = require('app/ui');
+const ui = require('ui');
 
-const storage = require('app/libraries/storage');
-const hook = require('app/libraries/hook');
-const helpers = require('app/messages/helpers');
+const storage = require('libraries/storage');
+const hook = require('libraries/hook');
+const helpers = require('messages/helpers');
 const fs = require('fs');
 
 const STORAGE_ID = 'leaveArr';
 
 var tab = ui.addTab('Leave', 'messages');
-tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
+tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
 module.exports = {
     tab,

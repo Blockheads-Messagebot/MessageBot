@@ -2,7 +2,7 @@
     jasmine: true
 */
 
-var ajax = require('app/libraries/ajax');
+var ajax = require('libraries/ajax');
 
 describe('ajax.xhr', function() {
     beforeEach(function() {

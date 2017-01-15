@@ -15,26 +15,26 @@ el.rel = 'icon';
 el.href = 'https://is.gd/MBvUHF';
 document.head.appendChild(el);
 
-require('app/ui/polyfills/console');
-require('app/bot/migration');
+require('ui/polyfills/console');
+require('bot/migration');
 
 // Expose the extension API
-window.MessageBotExtension = require('app/MessageBotExtension');
+window.MessageBotExtension = require('MessageBotExtension');
 
-const bhfansapi = require('app/libraries/bhfansapi');
-const hook = require('app/libraries/hook');
-const ui = require('app/ui');
+const bhfansapi = require('libraries/bhfansapi');
+const hook = require('libraries/hook');
+const ui = require('ui');
 hook.on('error_report', function(msg) {
     ui.notify(msg);
 });
 
 
-require('app/console');
+require('console');
 // By default no tab is selected, show the console.
 document.querySelector('#leftNav span').click();
-require('app/messages');
-require('app/extensions');
-require('app/settings/page');
+require('messages');
+require('extensions');
+require('settings/page');
 
 // Error reporting
 window.addEventListener('error', (err) => {

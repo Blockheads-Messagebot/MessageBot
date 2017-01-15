@@ -1,4 +1,4 @@
-const storage = require('app/libraries/storage');
+const storage = require('libraries/storage');
 const STORAGE_ID = 'mb_preferences';
 
 var prefs = storage.getObject(STORAGE_ID, {}, false);

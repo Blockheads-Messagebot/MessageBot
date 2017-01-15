@@ -3,7 +3,7 @@
     unused: true
 */
 
-const api = require('app/libraries/bhfansapi');
+const api = require('libraries/bhfansapi');
 
 describe('bhfansapi.getStore', function() {
     beforeEach(function() {

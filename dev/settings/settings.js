@@ -1,4 +1,4 @@
-var ui = require('app/ui');
+var ui = require('ui');
 var MessageBotExtension = require('../../MessageBotExtension');
 
 

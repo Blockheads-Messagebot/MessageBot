@@ -6,7 +6,7 @@ module.exports = {
     checkGroup
 };
 
-const world = require('app/libraries/world');
+const world = require('libraries/world');
 
 
 /**

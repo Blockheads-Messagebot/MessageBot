@@ -1,5 +1,5 @@
-var api = require('app/libraries/blockheads');
-var settings = require('app/settings');
+var api = require('libraries/blockheads');
+var settings = require('settings');
 
 var queue = [];
 

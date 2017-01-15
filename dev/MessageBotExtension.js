@@ -1,11 +1,11 @@
-const bot = require('app/bot');
-const bot_console = require('app/console');
-const ui = require('app/ui');
-const storage = require('app/libraries/storage');
-const ajax = require('app/libraries/ajax');
-const api = require('app/libraries/blockheads');
-const world = require('app/libraries/world');
-const hook = require('app/libraries/hook');
+const bot = require('bot');
+const bot_console = require('console');
+const ui = require('ui');
+const storage = require('libraries/storage');
+const ajax = require('libraries/ajax');
+const api = require('libraries/blockheads');
+const world = require('libraries/world');
+const hook = require('libraries/hook');
 
 // Array of IDs to autoload at the next launch.
 var autoload = [];

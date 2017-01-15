@@ -10,6 +10,7 @@ var sass = require('gulp-sass');
 var del = require('del');
 
 var browserify = require('browserify');
+var brfs = require('brfs');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 
@@ -20,10 +21,10 @@ gulp.task('_sass', function() {
 });
 
 gulp.task('bundle', ['_sass'], function() {
-    var b = browserify({
-      entries: './dev/start.js',
+    var b = browserify('./dev/start.js', {
       debug: true,
-      transform: ['brfs'],
+      paths: ['./dev'],
+      transform: [brfs]
     });
 
     return b.bundle()
