@@ -2,7 +2,7 @@
     jasmine: true
 */
 
-const hook = require('app/libraries/hook');
+const hook = require('libraries/hook');
 
 describe('hook.listen', function() {
     function key(value) { return 'hook.listen.' + value; }

@@ -1,9 +1,9 @@
 const self = module.exports = require('./exports');
 
-const hook = require('app/libraries/hook');
-const world = require('app/libraries/world');
-const send = require('app/bot').send;
-const ui = require('app/ui');
+const hook = require('libraries/hook');
+const world = require('libraries/world');
+const send = require('bot').send;
+const ui = require('ui');
 const fs = require('fs');
 
 
@@ -53,9 +53,9 @@ var tab = ui.addTab('Console');
 // Order is important here.
 
 tab.innerHTML = '<style>' +
-    fs.readFileSync(__dirname + '/style.css') +
+    fs.readFileSync(__dirname + '/style.css', 'utf8') +
     '</style>' +
-    fs.readFileSync(__dirname + '/tab.html');
+    fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
 
 // Auto scroll when new messages are added to the page, unless the owner is reading old chat.

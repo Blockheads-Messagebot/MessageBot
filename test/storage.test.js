@@ -4,7 +4,7 @@
 */
 
 const STORAGE_NAMESPACE = window.worldId = '__testing__';
-const storage = require('app/libraries/storage');
+const storage = require('libraries/storage');
 
 describe('storage.getString', function() {
     beforeEach(function() {

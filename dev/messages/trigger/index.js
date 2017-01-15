@@ -1,15 +1,15 @@
-const ui = require('app/ui');
+const ui = require('ui');
 
-const storage = require('app/libraries/storage');
-const hook = require('app/libraries/hook');
-const helpers = require('app/messages/helpers');
-const settings = require('app/settings');
+const storage = require('libraries/storage');
+const hook = require('libraries/hook');
+const helpers = require('messages/helpers');
+const settings = require('settings');
 const fs = require('fs');
 
 const STORAGE_ID = 'triggerArr';
 
 var tab = ui.addTab('Trigger', 'messages');
-tab.innerHTML = fs.readFileSync(__dirname + '/tab.html');
+tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
 module.exports = {
     tab,

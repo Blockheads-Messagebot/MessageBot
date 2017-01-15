@@ -2,7 +2,7 @@ module.exports = {
     buildContentFromTemplate,
 };
 
-var polyfill = require('app/ui/polyfills/template');
+var polyfill = require('ui/polyfills/template');
 
 /**
  * Function used to clone a template after altering the provided rules.

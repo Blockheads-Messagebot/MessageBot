@@ -1,14 +1,14 @@
-const bhfansapi = require('app/libraries/bhfansapi');
-const ui = require('app/ui');
-const hook = require('app/libraries/hook');
-const MessageBotExtension = require('app/MessageBotExtension');
+const bhfansapi = require('libraries/bhfansapi');
+const ui = require('ui');
+const hook = require('libraries/hook');
+const MessageBotExtension = require('MessageBotExtension');
 const fs = require('fs');
 
 var tab = ui.addTab('Extensions');
 tab.innerHTML = '<style>' +
-    fs.readFileSync(__dirname + '/style.css') +
+    fs.readFileSync(__dirname + '/style.css', 'utf8') +
     '</style>' +
-    fs.readFileSync(__dirname + '/tab.html');
+    fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
 //Create the extension store page
 bhfansapi.getStore().then(resp => {
