@@ -3,6 +3,7 @@
  */
 
 const fs = require('fs');
+const hook = require('libraries/hook');
 
 // Build page - only case in which body.innerHTML should be used.
 document.body.innerHTML += fs.readFileSync(__dirname + '/layout.html', 'utf8');
@@ -14,7 +15,8 @@ document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu
 // Change tabs
 document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
     var tabName = event.target.dataset.tabName;
-    if(!tabName) {
+    var tab = document.querySelector(`#container > [data-tab-name=${tabName}]`);
+    if(!tabName || !tab) {
         return;
     }
 
@@ -22,12 +24,14 @@ document.querySelector('#leftNav').addEventListener('click', function globalTabC
     //We can't just remove the first due to browser lag
     Array.from(document.querySelectorAll('#container > .visible'))
         .forEach(el => el.classList.remove('visible'));
-    document.querySelector(`#container > [data-tab-name=${tabName}]`).classList.add('visible');
+    tab.classList.add('visible');
 
     //Tabs
     Array.from(document.querySelectorAll('#leftNav .selected'))
         .forEach(el => el.classList.remove('selected'));
     event.target.classList.add('selected');
+
+    hook.fire('ui.tabShown', tab);
 });
 
 
