@@ -32,7 +32,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var loaded = [];
         var STORAGE_ID = 'mb_extensions';
 
-        function MessageBotExtension(namespace) {
+        function MessageBotExtension(namespace, uninstall) {
             loaded.push(namespace);
             hook.fire('extension.install', namespace);
 
@@ -47,6 +47,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 world: world,
                 hook: hook
             };
+
+            if (typeof uninstall == 'function') {
+                extension.uninstall = uninstall.bind(extension);
+            }
 
             extension.setAutoLaunch = function setAutoLaunch(shouldAutoload) {
                 if (!autoload.includes(namespace) && shouldAutoload) {
@@ -1608,6 +1612,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
     }, { "./layout": 26, "./notifications": 28, "./polyfills/details": 31, "./template": 33, "console/exports": 6 }], 26: [function (require, module, exports) {
 
+        var hook = require('libraries/hook');
+
         document.body.innerHTML += "<div id=\"leftNav\">\r\n    <input type=\"checkbox\" id=\"leftToggle\">\r\n    <label for=\"leftToggle\">&#9776; Menu</label>\r\n\r\n    <nav data-tab-group=\"main\"></nav>\r\n    <div class=\"overlay\"></div>\r\n</div>\r\n\r\n<div id=\"container\">\r\n    <header></header>\r\n</div>\r\n";
         document.head.innerHTML += '<style>' + "html,body{min-height:100vh;position:relative;width:100%;margin:0;font-family:\"Lucida Grande\",\"Lucida Sans Unicode\",Verdana,sans-serif;color:#000}textarea,input,button,select{font-family:inherit}a{cursor:pointer;color:#182b73}#leftNav{text-transform:uppercase}#leftNav nav{width:250px;background:#182b73;color:#fff;position:fixed;left:-250px;z-index:100;top:0;bottom:0;transition:left .5s}#leftNav details,#leftNav span{display:block;text-align:center;padding:5px 7px;border-bottom:1px solid white}#leftNav .selected{background:radial-gradient(#9fafeb, #182b73)}#leftNav summary ~ span{background:rgba(159,175,235,0.4)}#leftNav summary+span{border-top-left-radius:20px;border-top-right-radius:20px}#leftNav summary ~ span:last-of-type{border:0;border-bottom-left-radius:20px;border-bottom-right-radius:20px}#leftNav input{display:none}#leftNav label{color:#fff;background:#213b9d;padding:5px;position:fixed;top:5px;z-index:100;left:5px;opacity:1;transition:left .5s,opacity .5s}#leftNav input:checked ~ nav{left:0;transition:left .5s}#leftNav input:checked ~ label{left:255px;opacity:0;transition:left .5s,opacity .5s}#leftNav input:checked ~ .overlay{visibility:visible;opacity:1;transition:opacity .5s}header{background:#182b73 url(\"http://portal.theblockheads.net/static/images/portalHeader.png\") no-repeat;background-position:80px;height:80px}#container>div{height:calc(100vh - 100px);padding:10px;position:absolute;top:80px;left:0;right:0;overflow:auto}#container>div:not(.visible){display:none}.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,0.7);visibility:hidden;opacity:0;transition:opacity .5s}.overlay.visible{visibility:visible;opacity:1;transition:opacity .5s}.top-right-button{position:absolute;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;top:10px;right:12px;width:30px;height:30px;background:#182B73;border:0;color:#FFF}\n" + '</style>';
 
@@ -1615,19 +1621,22 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
             var tabName = event.target.dataset.tabName;
-            if (!tabName) {
+            var tab = document.querySelector("#container > [data-tab-name=" + tabName + "]");
+            if (!tabName || !tab) {
                 return;
             }
 
             Array.from(document.querySelectorAll('#container > .visible')).forEach(function (el) {
                 return el.classList.remove('visible');
             });
-            document.querySelector("#container > [data-tab-name=" + tabName + "]").classList.add('visible');
+            tab.classList.add('visible');
 
             Array.from(document.querySelectorAll('#leftNav .selected')).forEach(function (el) {
                 return el.classList.remove('selected');
             });
             event.target.classList.add('selected');
+
+            hook.fire('ui.tabShown', tab);
         });
 
         module.exports = {
@@ -1689,7 +1698,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             group.remove();
         }
-    }, {}], 27: [function (require, module, exports) {
+    }, { "libraries/hook": 11 }], 27: [function (require, module, exports) {
         module.exports = {
             alert: alert
         };
