@@ -19,9 +19,10 @@ const STORAGE_ID = 'mb_extensions';
  * @example
  * var test = MessageBotExtension('test');
  * @param {string} namespace - Should be the same as your variable name.
+ * @param {Function} [uninstall = undefined] - Optional, specify the uninstall function while creating the extension, instead of later. If specified here, this will be bound to the extension.
  * @return {MessageBotExtension} - The extension variable.
  */
-function MessageBotExtension(namespace) {
+function MessageBotExtension(namespace, uninstall) {
     loaded.push(namespace);
     hook.fire('extension.install', namespace);
 
@@ -36,6 +37,10 @@ function MessageBotExtension(namespace) {
         world,
         hook,
     };
+
+    if (typeof uninstall == 'function') {
+        extension.uninstall = uninstall.bind(extension);
+    }
 
     /**
      * Used to change whether or not the extension will be

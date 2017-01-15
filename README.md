@@ -41,3 +41,6 @@ Each level is separated by a period (`.`). There should be no spaces in the hook
 - extension
     - install(id)
     - uninstall(id)
+
+- ui
+    - tabShown (tab) - called when a tab is shown.
