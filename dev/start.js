@@ -38,7 +38,7 @@ require('settings/page');
 
 // Error reporting
 window.addEventListener('error', (err) => {
-    if (err.message != 'Script error') {
+    if (['Script error', 'World not running'].includes(err.message)) {
         bhfansapi.reportError(err);
     }
 });

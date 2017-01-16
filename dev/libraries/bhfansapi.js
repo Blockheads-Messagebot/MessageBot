@@ -6,9 +6,9 @@ const hook = require('libraries/hook');
 const ajax = require('libraries/ajax');
 
 const API_URLS = {
-    STORE: '//blockheadsfans.com/messagebot/extension/store',
-    NAME: '//blockheadsfans.com/messagebot/extension/name',
-    ERROR: '//blockheadsfans.com/messagebot/bot/error',
+    STORE: '//blockheadsfans.com/messagebot/api/extension/store',
+    NAME: '//blockheadsfans.com/messagebot/api/extension/name',
+    ERROR: '//blockheadsfans.com/messagebot/api/error',
 };
 
 var cache = {
@@ -57,7 +57,7 @@ function getExtensionName(id) {
         return Promise.resolve(cache.names.get(id));
     }
 
-    return ajax.postJSON(API_URLS.NAME, {id}).then(name => {
+    return ajax.postJSON(API_URLS.NAME, {id}).then(({name}) => {
         cache.names.set(id, name);
         return name;
     }, err => {
