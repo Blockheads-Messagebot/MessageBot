@@ -509,9 +509,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var ajax = require('libraries/ajax');
 
         var API_URLS = {
-            STORE: '//blockheadsfans.com/messagebot/extension/store',
-            NAME: '//blockheadsfans.com/messagebot/extension/name',
-            ERROR: '//blockheadsfans.com/messagebot/bot/error'
+            STORE: '//blockheadsfans.com/messagebot/api/extension/store',
+            NAME: '//blockheadsfans.com/messagebot/api/extension/name',
+            ERROR: '//blockheadsfans.com/messagebot/api/error'
         };
 
         var cache = {
@@ -564,7 +564,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 return Promise.resolve(cache.names.get(id));
             }
 
-            return ajax.postJSON(API_URLS.NAME, { id: id }).then(function (name) {
+            return ajax.postJSON(API_URLS.NAME, { id: id }).then(function (_ref) {
+                var name = _ref.name;
+
                 cache.names.set(id, name);
                 return name;
             }, function (err) {
@@ -1376,29 +1378,41 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         ui.addTabGroup('Messages', 'messages');
 
-        [require('./join'), require('./leave'), require('./trigger'), require('./announcements')].forEach(function (type) {
-            type.tab.addEventListener('click', function checkDelete(event) {
+        [require('./join'), require('./leave'), require('./trigger'), require('./announcements')].forEach(function (_ref2) {
+            var tab = _ref2.tab,
+                save = _ref2.save,
+                addMessage = _ref2.addMessage,
+                start = _ref2.start;
+
+            tab.addEventListener('click', function checkDelete(event) {
                 if (event.target.tagName != 'A') {
                     return;
                 }
 
                 ui.alert('Really delete this message?', [{ text: 'Yes', style: 'danger', action: function action() {
                         event.target.parentNode.remove();
-                        type.save();
+                        save();
                     } }, { text: 'Cancel' }]);
             });
 
-            type.tab.addEventListener('change', type.save);
+            tab.addEventListener('change', save);
 
-            type.tab.addEventListener('change', function () {
-                helpers.showSummary(event.target.parentNode);
+            tab.querySelector('.top-right-button').addEventListener('click', function () {
+                return addMessage();
             });
 
-            type.tab.querySelector('.top-right-button').addEventListener('click', function () {
-                return type.addMessage();
-            });
+            setTimeout(start, 10000);
+        });
 
-            setTimeout(type.start, 10000);
+        [require('./join'), require('./leave'), require('./announcements')].forEach(function (_ref3) {
+            var tab = _ref3.tab;
+
+            tab.addEventListener('change', function (event) {
+                var el = event.target;
+                while ((el = el.parentElement) && !el.classList.contains('msg')) {}
+
+                helpers.showSummary(el);
+            });
         });
     }, { "./announcements": 15, "./helpers": 18, "./join": 21, "./leave": 22, "./trigger": 23, "ui": 27 }], 21: [function (require, module, exports) {
         var ui = require('ui');
@@ -1410,7 +1424,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'joinArr';
 
         var tab = ui.addTab('Join', 'messages');
-        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div>\r\n        <label> Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"jTemplate\">\r\n    <div class=\"msg\">\r\n        <label> Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_join\" data-tab-name=\"join\">\r\n    <h3>These are checked when a player joins the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"jMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1468,7 +1482,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'leaveArr';
 
         var tab = ui.addTab('Leave', 'messages');
-        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div>\r\n        <label>Message <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"lTemplate\">\r\n    <div class=\"msg\">\r\n        <label>Message <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_leave\">\r\n    <h3>These are checked when a player leaves the server.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"lMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1527,7 +1541,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var STORAGE_ID = 'triggerArr';
 
         var tab = ui.addTab('Trigger', 'messages');
-        tab.innerHTML = "<template id=\"tTemplate\">\r\n    <div>\r\n        <label>Trigger: <input class=\"t\"></label>\r\n        <label>Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_trigger\">\r\n    <h3>These are checked whenever someone says something.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger \"te*st\" will match \"tea stuff\" and \"test\")</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"tMsgs\"></div>\r\n</div>\r\n";
+        tab.innerHTML = "<template id=\"tTemplate\">\r\n    <div class=\"msg\">\r\n        <label>Trigger: <input class=\"t\"></label>\r\n        <label>Message: <textarea class=\"m\"></textarea></label>\r\n        <span class=\"summary\"></span>\r\n        <details><summary>More options</summary>\r\n            <label>Player is: <select data-target=\"group\">\r\n                <option value=\"all\">anyone</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <label>Player is not: <select data-target=\"not_group\">\r\n                <option value=\"nobody\">nobody</option>\r\n                <option value=\"staff\">a staff member</option>\r\n                <option value=\"mod\">a mod</option>\r\n                <option value=\"admin\">an admin</option>\r\n                <option value=\"owner\">the owner</option>\r\n            </select></label>\r\n            <br>\r\n            <input type=\"number\" value=\"0\" data-target=\"joins_low\">\r\n                <span> &le; player joins &le; </span>\r\n            <input type=\"number\" value=\"9999\" data-target=\"joins_high\">\r\n        </details>\r\n        <a>Delete</a>\r\n    </div>\r\n</template>\r\n<div id=\"mb_trigger\">\r\n    <h3>These are checked whenever someone says something.</h3>\r\n    <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message. If you put an asterisk (*) in your trigger, it will be treated as a wildcard. (Trigger \"te*st\" will match \"tea stuff\" and \"test\")</span>\r\n    <span class=\"top-right-button\">+</span>\r\n    <div id=\"tMsgs\"></div>\r\n</div>\r\n";
 
         module.exports = {
             tab: tab,
@@ -1729,7 +1743,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         require('settings/page');
 
         window.addEventListener('error', function (err) {
-            if (err.message != 'Script error') {
+            if (['Script error', 'World not running'].includes(err.message)) {
                 bhfansapi.reportError(err);
             }
         });

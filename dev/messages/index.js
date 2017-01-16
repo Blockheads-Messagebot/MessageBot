@@ -13,8 +13,8 @@ ui.addTabGroup('Messages', 'messages');
     require('./leave'),
     require('./trigger'),
     require('./announcements')
-].forEach(type => {
-    type.tab.addEventListener('click', function checkDelete(event) {
+].forEach(({tab, save, addMessage, start}) => {
+    tab.addEventListener('click', function checkDelete(event) {
         if (event.target.tagName != 'A') {
             return;
         }
@@ -22,21 +22,31 @@ ui.addTabGroup('Messages', 'messages');
         ui.alert('Really delete this message?', [
             {text: 'Yes', style: 'danger', action: function() {
                 event.target.parentNode.remove();
-                type.save();
+                save();
             }},
             {text: 'Cancel'}
         ]);
     });
 
-    type.tab.addEventListener('change', type.save);
+    tab.addEventListener('change', save);
 
-    type.tab.addEventListener('change', function() {
-        helpers.showSummary(event.target.parentNode);
-    });
-
-    type.tab.querySelector('.top-right-button')
-        .addEventListener('click', () => type.addMessage());
+    tab.querySelector('.top-right-button')
+        .addEventListener('click', () => addMessage());
 
     // Don't start responding to chat for 10 seconds
-    setTimeout(type.start, 10000);
+    setTimeout(start, 10000);
+});
+
+[
+    require('./join'),
+    require('./leave'),
+    require('./announcements')
+].forEach(({tab}) => {
+    tab.addEventListener('change', function(event) {
+        var el = event.target;
+        while ((el = el.parentElement) && !el.classList.contains('msg'))
+            ;
+
+        helpers.showSummary(el);
+    });
 });
