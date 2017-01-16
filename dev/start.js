@@ -15,7 +15,7 @@ el.rel = 'icon';
 el.href = 'https://is.gd/MBvUHF';
 document.head.appendChild(el);
 
-require('ui/polyfills/console');
+require('console-browserify');
 require('bot/migration');
 
 // Expose the extension API
