@@ -40,7 +40,7 @@ ui.addTabGroup('Messages', 'messages');
 [
     require('./join'),
     require('./leave'),
-    require('./announcements')
+    require('./trigger')
 ].forEach(({tab}) => {
     tab.addEventListener('change', function(event) {
         var el = event.target;
