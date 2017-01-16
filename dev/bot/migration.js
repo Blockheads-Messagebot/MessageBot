@@ -41,6 +41,7 @@ switch (localStorage.getItem('mb_version')) {
     case '6.0.3':
     case '6.0.4':
     case '6.0.5':
+    case '6.0.6':
     case '6.1.0a':
         //Normalize groups to lower case.
         update(['joinArr', 'leaveArr', 'triggerArr'], function(raw) {
