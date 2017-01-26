@@ -68,10 +68,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         MessageBotExtension.install = function install(id) {
-            var el = document.createElement('script');
-            el.src = "//blockheadsfans.com/messagebot/extension/" + id + "/code/raw";
-            el.crossOrigin = 'anonymous';
-            document.head.appendChild(el);
+            if (!loaded.includes(id)) {
+                var el = document.createElement('script');
+                el.src = "//blockheadsfans.com/messagebot/extension/" + id + "/code/raw";
+                el.crossOrigin = 'anonymous';
+                document.head.appendChild(el);
+            }
         };
 
         MessageBotExtension.uninstall = function uninstall(id) {

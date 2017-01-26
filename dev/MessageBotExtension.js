@@ -72,10 +72,12 @@ function MessageBotExtension(namespace, uninstall) {
  * @param {string} id
  */
 MessageBotExtension.install = function install(id) {
-    var el = document.createElement('script');
-    el.src = `//blockheadsfans.com/messagebot/extension/${id}/code/raw`;
-    el.crossOrigin = 'anonymous';
-    document.head.appendChild(el);
+    if (!loaded.includes(id)) {
+        var el = document.createElement('script');
+        el.src = `//blockheadsfans.com/messagebot/extension/${id}/code/raw`;
+        el.crossOrigin = 'anonymous';
+        document.head.appendChild(el);
+    }
 };
 
 /**
