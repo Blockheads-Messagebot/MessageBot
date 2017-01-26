@@ -1,8 +1,8 @@
-@import 'config'
-
 #mb_join, #mb_leave, #mb_trigger, #mb_announcements
-    h3
-        margin: 0 0 5px 0
+    > h3
+        margin: 0 0 5px 6em
+    > span
+        margin-left: 6em
 
     input, textarea
         border: 2px solid #666
@@ -13,7 +13,7 @@
         overflow: hidden
         padding: 1px 0
         height: 21px
-        transition: height $animation-time
+        transition: height 0.25s
         &:focus
             height: 5em
 

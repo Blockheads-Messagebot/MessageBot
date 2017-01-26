@@ -1,37 +1,8 @@
-#mb_extensions
-    .top-right-button
-        width: inherit
-        padding: 0 7px
-
-    h3
-        margin: 0 0 5px 0
+@import "bulma/sass/utilities/mixins"
 
 #exts
-    display: flex
-    flex-flow: row wrap
     border-top: 1px solid #000
 
-    h4, p
-        margin: 0
-
-    button
-        position: absolute
-        bottom: 7px
-        padding: 4px 8px
-        border-radius: 8px
-        background: #fff
-
-    > div
-        position: relative
-        height: 130px
-        width: calc(33% - 19px)
-        min-width: 280px
-
-        padding: 5px
-        margin-left: 5px
-        margin-bottom: 5px
-
-        border: 3px solid #999
-        border-radius: 10px
-        &:nth-child(odd)
-            background: darken(#fff, 20%)
+    +tablet
+        .card-content
+            height: 105px

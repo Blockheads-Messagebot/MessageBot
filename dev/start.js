@@ -31,7 +31,7 @@ hook.on('error_report', function(msg) {
 
 require('./console');
 // By default no tab is selected, show the console.
-document.querySelector('#leftNav span').click();
+document.querySelector('.nav-slider-container span').click();
 require('messages');
 require('extensions');
 require('settings/page');
