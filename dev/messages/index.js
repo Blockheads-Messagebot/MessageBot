@@ -21,7 +21,10 @@ ui.addTabGroup('Messages', 'messages');
 
         ui.alert('Really delete this message?', [
             {text: 'Yes', style: 'danger', action: function() {
-                event.target.parentNode.remove();
+                var el = event.target;
+                while ((el = el.parentElement) && !el.classList.contains('column'))
+                    ;
+                el.remove();
                 save();
             }},
             {text: 'Cancel'}
@@ -30,7 +33,7 @@ ui.addTabGroup('Messages', 'messages');
 
     tab.addEventListener('change', save);
 
-    tab.querySelector('.top-right-button')
+    tab.querySelector('.button.is-primary')
         .addEventListener('click', () => addMessage());
 
     // Don't start responding to chat for 10 seconds
@@ -44,7 +47,7 @@ ui.addTabGroup('Messages', 'messages');
 ].forEach(({tab}) => {
     tab.addEventListener('change', function(event) {
         var el = event.target;
-        while ((el = el.parentElement) && !el.classList.contains('msg'))
+        while ((el = el.parentElement) && !el.classList.contains('column'))
             ;
 
         helpers.showSummary(el);
