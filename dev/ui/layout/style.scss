@@ -1,0 +1,115 @@
+@import 'reset';
+@import 'config';
+@import 'bulma/bulma';
+
+// Allow fixed headers with an offset
+.header.is-fixed-top {
+    z-index: 1030;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.has-fixed-nav {
+    margin-top: 50px;
+}
+
+// Bulma provides is-medium and is-large -- this is 1/3rd the default size.
+.section.is-small {
+    padding: 1rem 1.5rem;
+}
+
+// Allow an inverse navigation with light text and a dark background
+.nav-inverse {
+    background: $primary;
+
+    a.nav-item {
+            color: darken($primary-inverse, 5%);
+        &:hover {
+            color: mix($primary, $primary-inverse, 20%);
+        }
+        &.is-active {
+            color: $primary-inverse;
+        }
+        &.is-tab:hover {
+            border-bottom-color: $primary-inverse;
+        }
+        &.is-tab.is-active {
+            border-bottom: 3px solid $primary-inverse;
+            color: $primary-inverse;
+        }
+    }
+}
+
+.nav-slider-container {
+    // The left navigation slide out menu
+    .nav-slider {
+        // Take up the full height of the screen, and always be in view
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        z-index: 1040;
+
+        overflow-y: auto;
+        text-align: center;
+        background: $primary;
+        color: $primary-inverse;
+
+        // Hidden if the active class is not applied
+        left: -$left-slider-size;
+        width: $left-slider-size;
+        &.is-active {
+            left: 0;
+        }
+        // Animate into view
+        transition: left 0.5s;
+
+        // Anything the user can click
+        .nav-item {
+            // iOS bugs out if this is left out.
+            cursor: pointer;
+
+            display: block;
+            padding-top: 10px;
+            padding-bottom: 9px;
+            background: rgba(#fff, 0.1);
+
+            // Show a bar to the left indicating that this is the current tab if selected.
+            &.is-active {
+                background: linear-gradient(to right, rgba(#fff, 0.4), rgba(#fff, 0.1) 5%);
+            }
+        }
+
+        // Fix spacing with groups
+        .nav-item[open] > summary {
+            margin-bottom: 9px;
+        }
+
+        .nav-item:not(:last-child) {
+            border-bottom: 1px solid #fff;
+        }
+    }
+
+    // Overlay that can be clicked to hide the menu
+    .nav-slider ~ .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        visibility: hidden;
+        opacity: 0;
+        z-index: 1035;
+        transition: opacity 0.75s;
+    }
+
+    // Show overlay when menu is open
+    .nav-slider.is-active ~ .overlay {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+#container > div:not(.visible) {
+    display: none;
+}

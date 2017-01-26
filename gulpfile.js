@@ -15,7 +15,7 @@ var buffer = require('vinyl-buffer');
 
 gulp.task('_sass', function() {
     return gulp.src(['./dev/**/*.scss', './dev/**/*.sass'], {base: './dev/'})
-        .pipe(sass({outputStyle: 'compressed', includePaths: ['./dev/ui/layout']}).on('error', sass.logError))
+        .pipe(sass({outputStyle: 'compressed', includePaths: ['./dev/ui/layout', './node_modules']}).on('error', sass.logError))
         .pipe(gulp.dest('./dev'));
 });
 

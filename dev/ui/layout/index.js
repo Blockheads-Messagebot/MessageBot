@@ -7,13 +7,19 @@ const hook = require('libraries/hook');
 
 // Build page - only case in which body.innerHTML should be used.
 document.body.innerHTML += fs.readFileSync(__dirname + '/layout.html', 'utf8');
-document.head.innerHTML += '<style>' + fs.readFileSync(__dirname + '/style.css', 'utf8') + '</style>';
+document.head.innerHTML += '<style>' +
+    fs.readFileSync(__dirname + '/style.css', 'utf8') +
+    '</style>';
+
+// Show the menu when clicking on the menu button
+Array.from(document.querySelectorAll('.nav-slider-toggle'))
+    .forEach(el => el.addEventListener('click', toggleMenu));
 
 // Hide the menu when clicking the overlay
-document.querySelector('#leftNav .overlay').addEventListener('click', toggleMenu);
+document.querySelector('.nav-slider-container .overlay').addEventListener('click', toggleMenu);
 
 // Change tabs
-document.querySelector('#leftNav').addEventListener('click', function globalTabChange(event) {
+document.querySelector('.nav-slider-container .nav-slider').addEventListener('click', function globalTabChange(event) {
     var tabName = event.target.dataset.tabName;
     var tab = document.querySelector(`#container > [data-tab-name=${tabName}]`);
     if(!tabName || !tab) {
@@ -27,9 +33,9 @@ document.querySelector('#leftNav').addEventListener('click', function globalTabC
     tab.classList.add('visible');
 
     //Tabs
-    Array.from(document.querySelectorAll('#leftNav .selected'))
-        .forEach(el => el.classList.remove('selected'));
-    event.target.classList.add('selected');
+    Array.from(document.querySelectorAll('.nav-slider-container .nav-slider .is-active'))
+        .forEach(el => el.classList.remove('is-active'));
+    event.target.classList.add('is-active');
 
     hook.fire('ui.tabShown', tab);
 });
@@ -51,8 +57,7 @@ module.exports = {
  * toggleMenu();
  */
 function toggleMenu() {
-    var mainToggle = document.querySelector('#leftNav input');
-    mainToggle.checked = !mainToggle.checked;
+    document.querySelector('.nav-slider-container .nav-slider').classList.toggle('is-active');
 }
 
 var tabUID = 0;
@@ -71,13 +76,13 @@ function addTab(tabText, groupName = 'main') {
 
     var tab = document.createElement('span');
     tab.textContent = tabText;
-    tab.classList.add('tab');
+    tab.classList.add('nav-item');
     tab.dataset.tabName = tabName;
 
     var tabContent = document.createElement('div');
     tabContent.dataset.tabName = tabName;
 
-    document.querySelector(`#leftNav [data-tab-group=${groupName}]`).appendChild(tab);
+    document.querySelector(`.nav-slider-container [data-tab-group=${groupName}]`).appendChild(tab);
     document.querySelector('#container').appendChild(tabContent);
 
     return tabContent;
@@ -93,7 +98,7 @@ function addTab(tabText, groupName = 'main') {
  * @param {Node} tabContent The div returned by the addTab function.
  */
 function removeTab(tabContent) {
-    document.querySelector(`#leftNav [data-tab-name=${tabContent.dataset.tabName}]`).remove();
+    document.querySelector(`.nav-slider-container [data-tab-name=${tabContent.dataset.tabName}]`).remove();
     tabContent.remove();
 }
 
@@ -106,16 +111,18 @@ function removeTab(tabContent) {
  * ui.addTab('Within group', 'some_group');
  * @param {string} text - The text the user will see
  * @param {string} groupName - The name of the group which can be used to add tabs within the group.
+ * @param {string} [parent = main] - The name of the parent group.
  */
-function addTabGroup(text, groupName) {
+function addTabGroup(text, groupName, parent = 'main') {
     var details = document.createElement('details');
+    details.classList.add('nav-item');
     details.dataset.tabGroup = groupName;
 
     var summary = document.createElement('summary');
     summary.textContent = text;
     details.appendChild(summary);
 
-    document.querySelector('#leftNav [data-tab-group=main]').appendChild(details);
+    document.querySelector(`.nav-slider-container [data-tab-group="${parent}"]`).appendChild(details);
 }
 
 
@@ -129,7 +136,7 @@ function addTabGroup(text, groupName) {
  * @param string groupName the name of the group that was used in ui.addTabGroup.
  */
 function removeTabGroup(groupName) {
-    var group = document.querySelector(`#leftNav [data-tab-group="${groupName}"]`);
+    var group = document.querySelector(`.nav-slider-container [data-tab-group="${groupName}"]`);
     var items = Array.from(group.querySelectorAll('span'));
 
     items.forEach(item => {

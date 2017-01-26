@@ -58,6 +58,7 @@ function worldStarted(refresh = false) {
                             return reject(new Error('World unavailible.'));
                         case 'startup':
                         case 'shutdown':
+                        case 'storing':
                             setTimeout(check, 3000);
                             if (++fails > 10) {
                                 return reject(new Error('World took too long to start.'));

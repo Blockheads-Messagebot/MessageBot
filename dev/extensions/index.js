@@ -18,10 +18,13 @@ bhfansapi.getStore().then(resp => {
     }
     resp.extensions.forEach(extension => {
         ui.buildContentFromTemplate('#extTemplate', '#exts', [
-            {selector: 'h4', text: extension.title},
-            {selector: 'span', html: extension.snippet},
-            {selector: 'div', 'data-id': extension.id},
-            {selector: 'button', text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install'}
+            {selector: '.card-header-title', text: extension.title},
+            {selector: '.content', html: extension.snippet},
+            {
+                selector: '.card-footer-item',
+                text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
+                'data-id': extension.id
+            }
         ]);
     });
 }).catch(bhfansapi.reportError);
@@ -29,11 +32,12 @@ bhfansapi.getStore().then(resp => {
 // Install / uninstall extensions
 document.querySelector('#exts')
     .addEventListener('click', function extActions(e) {
-        if (e.target.tagName != 'BUTTON') {
+        var el = e.target;
+        var id = el.dataset.id;
+
+        if (!id) {
             return;
         }
-        var el = e.target;
-        var id = el.parentElement.dataset.id;
 
         if (el.textContent == 'Install') {
             MessageBotExtension.install(id);
@@ -45,7 +49,7 @@ document.querySelector('#exts')
 
 hook.on('extension.install', function(id) {
     // Show remove to let users remove extensions
-    var button = document.querySelector(`#mb_extensions [data-id="${id}"] button`);
+    var button = document.querySelector(`#mb_extensions [data-id="${id}"]`);
     if (button) {
         button.textContent = 'Remove';
     }
@@ -53,7 +57,7 @@ hook.on('extension.install', function(id) {
 
 hook.on('extension.uninstall', function(id) {
     // Show removed for store install button
-    var button = document.querySelector(`#mb_extensions [data-id="${id}"] button`);
+    var button = document.querySelector(`#mb_extensions [data-id="${id}"]`);
     if (button) {
         button.textContent = 'Removed';
         button.disabled = true;
