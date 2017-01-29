@@ -4,7 +4,7 @@ const hook = require('libraries/hook');
 const MessageBotExtension = require('MessageBotExtension');
 const fs = require('fs');
 
-var tab = ui.addTab('Extensions');
+var tab = ui.addTab('Extensions', 'settings');
 tab.innerHTML = '<style>' +
     fs.readFileSync(__dirname + '/style.css', 'utf8') +
     '</style>' +

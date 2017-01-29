@@ -3,7 +3,7 @@ const ui = require('ui');
 const storage = require('libraries/storage');
 const hook = require('libraries/hook');
 const helpers = require('messages/helpers');
-const settings = require('settings');
+const settings = require('settings/bot');
 const fs = require('fs');
 
 const STORAGE_ID = 'triggerArr';

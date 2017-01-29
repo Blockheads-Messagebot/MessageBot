@@ -16,7 +16,7 @@ Array.from(document.querySelectorAll('.nav-slider-toggle'))
     .forEach(el => el.addEventListener('click', toggleMenu));
 
 // Hide the menu when clicking the overlay
-document.querySelector('.nav-slider-container .overlay').addEventListener('click', toggleMenu);
+document.querySelector('.nav-slider-container .is-overlay').addEventListener('click', toggleMenu);
 
 // Change tabs
 document.querySelector('.nav-slider-container .nav-slider').addEventListener('click', function globalTabChange(event) {
@@ -39,16 +39,6 @@ document.querySelector('.nav-slider-container .nav-slider').addEventListener('cl
 
     hook.fire('ui.tabShown', tab);
 });
-
-
-module.exports = {
-    toggleMenu,
-    addTab,
-    removeTab,
-    addTabGroup,
-    removeTabGroup,
-};
-
 
 /**
  * Function used to show/hide the menu.
@@ -146,3 +136,11 @@ function removeTabGroup(groupName) {
 
     group.remove();
 }
+
+module.exports = {
+    toggleMenu,
+    addTab,
+    removeTab,
+    addTabGroup,
+    removeTabGroup,
+};
