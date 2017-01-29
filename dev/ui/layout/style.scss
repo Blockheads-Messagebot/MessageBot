@@ -91,21 +91,17 @@
     }
 
     // Overlay that can be clicked to hide the menu
-    .nav-slider ~ .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+    .nav-slider ~ .is-overlay {
         background: rgba(0, 0, 0, 0.5);
-        visibility: hidden;
-        opacity: 0;
         z-index: 1035;
+        visibility: hidden;
+        position: fixed;
+        opacity: 0;
         transition: opacity 0.75s;
     }
 
     // Show overlay when menu is open
-    .nav-slider.is-active ~ .overlay {
+    .nav-slider.is-active ~ .is-overlay {
         visibility: visible;
         opacity: 1;
     }

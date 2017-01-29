@@ -4,7 +4,7 @@ window.pollChat = function() {};
 // Overwrite the old page
 document.body.innerHTML = '';
 // Style reset
-document.querySelectorAll('[type="text/css"]')
+Array.from(document.querySelectorAll('[type="text/css"]'))
     .forEach(el => el.remove());
 
 document.querySelector('title').textContent = 'Console - MessageBot';
@@ -18,9 +18,6 @@ document.head.appendChild(el);
 require('console-browserify');
 require('bot/migration');
 
-// Expose the extension API
-window.MessageBotExtension = require('MessageBotExtension');
-
 const bhfansapi = require('libraries/bhfansapi');
 const hook = require('libraries/hook');
 const ui = require('ui');
@@ -28,17 +25,19 @@ hook.on('error_report', function(msg) {
     ui.notify(msg);
 });
 
-
+// just require(console) doesn't work as console is a browserify module.
 require('./console');
 // By default no tab is selected, show the console.
 document.querySelector('.nav-slider-container span').click();
 require('messages');
-require('extensions');
-require('settings/page');
+require('settings');
 
 // Error reporting
 window.addEventListener('error', (err) => {
-    if (['Script error', 'World not running'].includes(err.message)) {
+    if (!['Script error', 'World not running'].includes(err.message)) {
         bhfansapi.reportError(err);
     }
 });
+
+// Expose the extension API
+window.MessageBotExtension = require('MessageBotExtension');

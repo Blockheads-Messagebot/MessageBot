@@ -1,7 +1,7 @@
 const ui = require('ui');
 const storage = require('libraries/storage');
 const send = require('bot').send;
-const preferences = require('settings');
+const preferences = require('settings/bot');
 const fs = require('fs');
 
 var tab = ui.addTab('Announcements', 'messages');

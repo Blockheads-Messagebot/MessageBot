@@ -1,8 +1,8 @@
 const ui = require('ui');
-const prefs = require('settings');
+const prefs = require('settings/bot');
 const fs = require('fs');
 
-var tab = ui.addTab('Settings');
+var tab = ui.addTab('Bot', 'settings');
 tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
 // Show prefs
@@ -46,13 +46,13 @@ tab.addEventListener('change', function save() {
 // Get backup
 tab.querySelector('#mb_backup_save').addEventListener('click', function showBackup() {
     var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
-    ui.alert(`Copy this to a safe place:<br><textarea style="width: calc(100% - 7px);height:160px;">${backup}</textarea>`);
+    ui.alert(`Copy this to a safe place:<br><textarea class="textarea">${backup}</textarea>`);
 });
 
 
 // Load backup
 tab.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
-    ui.alert('Enter the backup code:<textarea style="width:calc(100% - 7px);height:160px;"></textarea>',
+    ui.alert('Enter the backup code:<textarea class="textarea"></textarea>',
                 [
                     { text: 'Load & refresh page', style: 'success', action: function() {
                         var code = document.querySelector('#alert textarea').value;
