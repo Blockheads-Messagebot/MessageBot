@@ -1571,13 +1571,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var prefs = storage.getObject(STORAGE_ID, {}, false);
 
+        [{ type: 'number', key: 'announcementDelay', default: 10 }, { type: 'number', key: 'maxResponses', default: 2 }, { type: 'boolean', key: 'notify', default: true },
+        { type: 'boolean', key: 'disableTrim', default: false }, { type: 'boolean', key: 'regexTriggers', default: false }, { type: 'boolean', key: 'splitMessages', default: false }, { type: 'text', key: 'splitToken', default: '<split>' }].forEach(function (pref) {
+            if (_typeof(prefs[pref.key]) != pref.type) {
+                prefs[pref.key] = pref.default;
+            }
+        });
+
         if (typeof Proxy == 'undefined') {
             module.exports = prefs;
             setInterval(function () {
                 storage.set(STORAGE_ID, prefs, false);
             }, 30 * 1000);
         } else {
-            module.exports = prefs = new Proxy(prefs, {
+            module.exports = new Proxy(prefs, {
                 set: function set(obj, prop, val) {
                     if (obj.hasOwnProperty(prop)) {
                         obj[prop] = val;
@@ -1588,13 +1595,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             });
         }
-
-        [{ type: 'number', key: 'announcementDelay', default: 10 }, { type: 'number', key: 'maxResponses', default: 2 }, { type: 'boolean', key: 'notify', default: true },
-        { type: 'boolean', key: 'disableTrim', default: false }, { type: 'boolean', key: 'regexTriggers', default: false }, { type: 'boolean', key: 'splitMessages', default: false }, { type: 'text', key: 'splitToken', default: '<split>' }].forEach(function (pref) {
-            if (_typeof(prefs[pref.key]) != pref.type) {
-                prefs[pref.key] = pref.default;
-            }
-        });
     }, { "libraries/storage": 12 }], 24: [function (require, module, exports) {
         var ui = require('ui');
         var prefs = require('settings/bot');
@@ -1783,7 +1783,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         require('settings');
 
         window.addEventListener('error', function (err) {
-            if (!['Script error', 'World not running'].includes(err.message)) {
+            if (!['Script error.', 'World not running', 'Network Error'].includes(err.message)) {
                 bhfansapi.reportError(err);
             }
         });
