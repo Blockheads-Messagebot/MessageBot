@@ -6,11 +6,11 @@ const bot = Object.assign(
     require('./checkGroup')
 );
 
-bot.version = '6.1.0a';
+bot.version = '6.1.0';
 
 /**
  * @depricated since 6.1.0. Use ex.world instead.
  */
 bot.world = require('libraries/world');
 
-storage.set('mb_version', bot.version);
+storage.set('mb_version', bot.version, false);

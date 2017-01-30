@@ -135,11 +135,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var bot = Object.assign(module.exports, require('./send'), require('./checkGroup'));
 
-        bot.version = '6.1.0a';
+        bot.version = '6.1.0';
 
         bot.world = require('libraries/world');
 
-        storage.set('mb_version', bot.version);
+        storage.set('mb_version', bot.version, false);
     }, { "./checkGroup": 2, "./send": 5, "libraries/storage": 12, "libraries/world": 13 }], 4: [function (require, module, exports) {
         function update(keys, operator) {
             Object.keys(localStorage).forEach(function (item) {
