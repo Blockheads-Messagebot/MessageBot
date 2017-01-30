@@ -1342,7 +1342,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     return;
                 }
 
-                ui.alert('Really delete this message?', [{ text: 'Yes', style: 'danger', action: function action() {
+                ui.alert('Really delete this message?', [{ text: 'Yes', style: 'is-danger', action: function action() {
                         var el = event.target;
                         while ((el = el.parentElement) && !el.classList.contains('column')) {}
                         el.remove();
@@ -1641,7 +1641,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         tab.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
-            ui.alert('Enter the backup code:<textarea class="textarea"></textarea>', [{ text: 'Load & refresh page', style: 'success', action: function action() {
+            ui.alert('Enter the backup code:<textarea class="textarea"></textarea>', [{ text: 'Load & refresh page', style: 'is-success', action: function action() {
                     var code = document.querySelector('#alert textarea').value;
                     try {
                         code = JSON.parse(code);
@@ -1873,11 +1873,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             alert: alert
         };
 
-        function alert(text) {
+        var modal = document.querySelector('#alert');
+
+        function alert(html) {
             var buttons = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [{ text: 'OK' }];
 
             if (instance.active) {
-                instance.queue.push({ text: text, buttons: buttons });
+                instance.queue.push({ html: html, buttons: buttons });
                 return;
             }
             instance.active = true;
@@ -1892,10 +1894,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 button.id = 'button_' + i;
                 buildButton(button);
             });
-            document.querySelector('#alertContent').innerHTML = text;
+            modal.querySelector('.modal-card-body').innerHTML = html;
 
-            document.querySelector('#alert ~ .overlay').classList.add('visible');
-            document.querySelector('#alert').classList.add('visible');
+            modal.classList.add('is-active');
         }
 
         var instance = {
@@ -1905,14 +1906,21 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
 
         function buildButton(button) {
-            var el = document.createElement('span');
+            var el = document.createElement('a');
             el.innerHTML = button.text;
-            if (button.style) {
+
+            el.classList.add('button');
+            if (Array.isArray(button.style)) {
+                button.style.forEach(function (style) {
+                    return el.classList.add(style);
+                });
+            } else if (button.style) {
                 el.classList.add(button.style);
             }
+
             el.id = button.id;
             el.addEventListener('click', buttonHandler);
-            document.querySelector('#alert .buttons').appendChild(el);
+            modal.querySelector('.modal-card-foot').appendChild(el);
         }
 
         function buttonHandler(event) {
@@ -1922,31 +1930,28 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
 
             if (button.dismiss || typeof button.action != 'function') {
-                document.querySelector('#alert').classList.remove('visible');
-                document.querySelector('#alert ~ .overlay').classList.remove('visible');
-                document.querySelector('#alert .buttons').innerHTML = '';
+                modal.classList.remove('is-active');
+                modal.querySelector('.modal-card-foot').innerHTML = '';
                 instance.buttons = {};
                 instance.active = false;
 
                 if (instance.queue.length) {
                     var next = instance.queue.shift();
-                    alert(next.text, next.buttons);
+                    alert(next.html, next.buttons);
                 }
             }
         }
     }, {}], 31: [function (require, module, exports) {
 
-        Object.assign(module.exports, require('./alert'), require('./notify'));
+        var el = document.createElement('div');
+        el.innerHTML = "<div id=\"alert\" class=\"modal\">\r\n    <div class=\"modal-background\"></div>\r\n    <div class=\"modal-card\">\r\n        <header class=\"modal-card-head\"></header>\r\n        <section class=\"modal-card-body\"></section>\r\n        <footer class=\"modal-card-foot\"></footer>\r\n    </div>\r\n</div>\r\n";
+        document.body.appendChild(el);
 
-        var el = document.createElement('style');
-        el.innerHTML = "";
+        el = document.createElement('style');
+        el.innerHTML = ".bot-notification{position:fixed;top:0.6em;right:1em;z-index:1035;min-width:200px;border-radius:5px;padding:5px;background:#fff;color:#182b73;opacity:0;transition:opacity 1s}.bot-notification.is-active{opacity:1}\n";
         document.head.appendChild(el);
 
-        el = document.createElement('div');
-        el.id = 'alertWrapper';
-        el.innerHTML = "<div id=\"alert\">\r\n    <div id=\"alertContent\"></div>\r\n    <div class=\"buttons\"/></div>\r\n</div>\r\n<div class=\"overlay\"/></div>\r\n";
-
-        document.body.appendChild(el);
+        Object.assign(module.exports, require('./alert'), require('./notify'));
     }, { "./alert": 30, "./notify": 32 }], 32: [function (require, module, exports) {
         module.exports = {
             notify: notify
@@ -1956,24 +1961,21 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var displayTime = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
             var el = document.createElement('div');
-            el.classList.add('notification');
-            el.classList.add('visible');
+            el.classList.add('bot-notification', 'is-active');
             el.textContent = text;
             document.body.appendChild(el);
+            var timeouts = [
+            setTimeout(function () {
+                this.classList.remove('is-active');
+            }.bind(el), displayTime * 1000),
+            setTimeout(function () {
+                this.remove();
+            }.bind(el), displayTime * 1000 + 2100)];
 
             el.addEventListener('click', function () {
+                timeouts.forEach(clearTimeout);
                 this.remove();
             });
-
-            setTimeout(function () {
-                this.classList.remove('visible');
-            }.bind(el), displayTime * 1000);
-
-            setTimeout(function () {
-                if (this.parentNode) {
-                    this.remove();
-                }
-            }.bind(el), displayTime * 1000 + 2100);
         }
     }, {}], 33: [function (require, module, exports) {
         if (!('open' in document.createElement('details'))) {
