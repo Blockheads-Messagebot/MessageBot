@@ -296,6 +296,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     }, {}], 7: [function (require, module, exports) {
         var self = module.exports = require('./exports');
 
+        var settings = require('settings/bot');
         var hook = require('libraries/hook');
         var world = require('libraries/world');
         var send = require('bot').send;
@@ -340,8 +341,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         var tab = ui.addTab('Console');
-
         tab.innerHTML = '<style>' + "#mb_console{height:calc(100% - 50px)}#mb_console .mod>span:first-child{color:#05f529}#mb_console .admin>span:first-child{color:#2b26bd}#mb_console .chat{margin:1em;max-height:calc(100vh - 3em - 55px);width:calc(100vw - 2em);overflow-y:auto}#mb_console .chat-control{position:fixed;bottom:0;width:100vw}#mb_console .chat-control .control{margin:1em}\n" + '</style>' + "<div id=\"mb_console\">\r\n    <div class=\"chat\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"chat-control\">\r\n        <div class=\"control has-addons\">\r\n            <input type=\"text\" class=\"input is-expanded\"/>\r\n            <button class=\"input button is-primary\">SEND</button>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
+
+        hook.on('world.chat', function (name, message) {
+            if (settings.notify && !tab.classList.contains('visible')) {
+                ui.notify(name + ": " + message, 1.5);
+            }
+        });
 
         new MutationObserver(function showNewChat() {
             var container = tab.querySelector('ul');
@@ -379,7 +385,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         tab.querySelector('button').addEventListener('click', userSend);
-    }, { "./exports": 6, "bot": 3, "libraries/hook": 11, "libraries/world": 13, "ui": 28 }], 8: [function (require, module, exports) {
+    }, { "./exports": 6, "bot": 3, "libraries/hook": 11, "libraries/world": 13, "settings/bot": 23, "ui": 28 }], 8: [function (require, module, exports) {
         function get() {
             var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '/';
             var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -462,12 +468,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var API_URLS = {
             STORE: '//blockheadsfans.com/messagebot/api/extension/store',
-            NAME: '//blockheadsfans.com/messagebot/api/extension/name',
+            NAME: '//blockheadsfans.com/messagebot/api/extension/info',
             ERROR: '//blockheadsfans.com/messagebot/api/error'
         };
 
         var cache = {
-            names: new Map()
+            info: new Map()
         };
 
         function getStore() {
@@ -487,7 +493,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                         for (var _iterator2 = store.extensions[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                             var ex = _step2.value;
 
-                            cache.names.set(ex.id, ex.title);
+                            cache.info.set(ex.id, ex);
                         }
                     } catch (err) {
                         _didIteratorError2 = true;
@@ -511,19 +517,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return cache.getStore;
         }
 
-        function getExtensionName(id) {
-            if (cache.names.has(id)) {
-                return Promise.resolve(cache.names.get(id));
+        function getExtensionInfo(id) {
+            if (cache.info.has(id)) {
+                return Promise.resolve(cache.info.get(id));
             }
 
-            return ajax.postJSON(API_URLS.NAME, { id: id }).then(function (_ref) {
-                var name = _ref.name;
+            return ajax.getJSON(API_URLS.NAME, { id: id }).then(function (_ref) {
+                var id = _ref.id,
+                    title = _ref.title,
+                    snippet = _ref.snippet;
 
-                cache.names.set(id, name);
-                return name;
+                return cache.info.set(id, { id: id, title: title, snippet: snippet }).get(id);
             }, function (err) {
                 reportError(err);
-                return id;
+                return { name: id, id: id, snippet: 'No description.' };
             });
         }
 
@@ -545,7 +552,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         module.exports = {
             getStore: getStore,
-            getExtensionName: getExtensionName,
+            getExtensionInfo: getExtensionInfo,
             reportError: reportError
         };
     }, { "libraries/ajax": 8, "libraries/hook": 11 }], 10: [function (require, module, exports) {
@@ -1671,21 +1678,23 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var tab = ui.addTab('Extensions', 'settings');
         tab.innerHTML = '<style>' + "@keyframes spinAround{from{transform:rotate(0deg)}to{transform:rotate(359deg)}}#exts{border-top:1px solid #000}@media screen and (min-width: 769px){#exts .card-content{height:105px}}\n" + '</style>' + "<template id=\"extTemplate\">\r\n    <div class=\"column is-one-third-desktop is-half-tablet\">\r\n        <div class=\"card\">\r\n            <header class=\"card-header\">\r\n                <p class=\"card-header-title\"></p>\r\n            </header>\r\n            <div class=\"card-content\">\r\n                <span class=\"content\"></span>\r\n            </div>\r\n            <div class=\"card-footer\">\r\n                <a class=\"card-footer-item\">Install</a>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</template>\r\n<div id=\"mb_extensions\" class=\"container is-fluid\">\r\n    <section class=\"section is-small\">\r\n        <span class=\"button is-primary is-pulled-right\">Load By ID/URL</span>\r\n        <h3>Extensions can increase the functionality of the bot.</h3>\r\n        <span>Interested in creating one? <a href=\"https://github.com/Bibliofile/Blockheads-MessageBot/wiki/2.-Development:-Start-Here\" target=\"_blank\">Start here.</a></span>\r\n    </section>\r\n    <div id=\"exts\" class=\"columns is-multiline\"></div>\r\n</div>\r\n";
 
+        function addExtensionCard(extension) {
+            ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: '.card-header-title', text: extension.title }, { selector: '.content', html: extension.snippet }, {
+                selector: '.card-footer-item',
+                text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
+                'data-id': extension.id
+            }]);
+        }
+
         bhfansapi.getStore().then(function (resp) {
             if (resp.status != 'ok') {
                 document.getElementById('exts').innerHTML += resp.message;
                 throw new Error(resp.message);
             }
-            resp.extensions.forEach(function (extension) {
-                ui.buildContentFromTemplate('#extTemplate', '#exts', [{ selector: '.card-header-title', text: extension.title }, { selector: '.content', html: extension.snippet }, {
-                    selector: '.card-footer-item',
-                    text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
-                    'data-id': extension.id
-                }]);
-            });
+            resp.extensions.forEach(addExtensionCard);
         }).catch(bhfansapi.reportError);
 
-        document.querySelector('#exts').addEventListener('click', function extActions(e) {
+        tab.querySelector('#exts').addEventListener('click', function extActions(e) {
             var el = e.target;
             var id = el.dataset.id;
 
@@ -1700,10 +1709,27 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
         });
 
+        tab.querySelector('.button').addEventListener('click', function loadExtension() {
+            ui.alert('Enter the ID or URL of an extension:<br><input class="input"/>', [{ text: 'Load', style: 'is-success', action: function action() {
+                    var extRef = document.querySelector('#alert input').value;
+                    if (extRef.length) {
+                        if (extRef.startsWith('http')) {
+                            var el = document.createElement('script');
+                            el.src = extRef;
+                            document.head.appendChild(el);
+                        } else {
+                            MessageBotExtension.install(extRef);
+                        }
+                    }
+                } }, { text: 'Cancel' }]);
+        });
+
         hook.on('extension.install', function (id) {
             var button = document.querySelector("#mb_extensions [data-id=\"" + id + "\"]");
             if (button) {
                 button.textContent = 'Remove';
+            } else {
+                bhfansapi.getExtensionInfo(id).then(addExtensionCard);
             }
         });
 

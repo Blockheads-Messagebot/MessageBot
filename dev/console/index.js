@@ -1,11 +1,11 @@
 const self = module.exports = require('./exports');
 
+const settings = require('settings/bot');
 const hook = require('libraries/hook');
 const world = require('libraries/world');
 const send = require('bot').send;
 const ui = require('ui');
 const fs = require('fs');
-
 
 // TODO: Parse these and provide options to show/hide different ones.
 hook.on('world.other', function(message) {
@@ -50,12 +50,17 @@ hook.on('world.leave', function handlePlayerLeave(name) {
 
 
 var tab = ui.addTab('Console');
-// Order is important here.
-
 tab.innerHTML = '<style>' +
     fs.readFileSync(__dirname + '/style.css', 'utf8') +
     '</style>' +
     fs.readFileSync(__dirname + '/tab.html', 'utf8');
+
+// If enabled, show messages for new chat when not on the console page
+hook.on('world.chat', function(name, message) {
+    if (settings.notify && !tab.classList.contains('visible')) {
+        ui.notify(`${name}: ${message}`, 1.5);
+    }
+});
 
 
 // Auto scroll when new messages are added to the page, unless the owner is reading old chat.

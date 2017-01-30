@@ -10,27 +10,34 @@ tab.innerHTML = '<style>' +
     '</style>' +
     fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
+/**
+ * Internal function used to add a card for an extension.
+ *
+ * extension is expected to contain a title, snippet, and id
+ */
+function addExtensionCard(extension) {
+    ui.buildContentFromTemplate('#extTemplate', '#exts', [
+        {selector: '.card-header-title', text: extension.title},
+        {selector: '.content', html: extension.snippet},
+        {
+            selector: '.card-footer-item',
+            text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
+            'data-id': extension.id
+        }
+    ]);
+}
+
 //Create the extension store page
 bhfansapi.getStore().then(resp => {
     if (resp.status != 'ok') {
         document.getElementById('exts').innerHTML += resp.message;
         throw new Error(resp.message);
     }
-    resp.extensions.forEach(extension => {
-        ui.buildContentFromTemplate('#extTemplate', '#exts', [
-            {selector: '.card-header-title', text: extension.title},
-            {selector: '.content', html: extension.snippet},
-            {
-                selector: '.card-footer-item',
-                text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
-                'data-id': extension.id
-            }
-        ]);
-    });
+    resp.extensions.forEach(addExtensionCard);
 }).catch(bhfansapi.reportError);
 
 // Install / uninstall extensions
-document.querySelector('#exts')
+tab.querySelector('#exts')
     .addEventListener('click', function extActions(e) {
         var el = e.target;
         var id = el.dataset.id;
@@ -46,12 +53,35 @@ document.querySelector('#exts')
         }
     });
 
+tab.querySelector('.button').addEventListener('click', function loadExtension() {
+    ui.alert('Enter the ID or URL of an extension:<br><input class="input"/>',
+        [
+            {text: 'Load', style: 'is-success', action: function() {
+                let extRef = document.querySelector('#alert input').value;
+                if (extRef.length) {
+                    if (extRef.startsWith('http')) {
+                        let el = document.createElement('script');
+                        el.src = extRef;
+                        document.head.appendChild(el);
+                    } else {
+                        MessageBotExtension.install(extRef);
+                    }
+                }
+            }},
+            {text: 'Cancel'}
+        ]);
+});
+
+
 
 hook.on('extension.install', function(id) {
     // Show remove to let users remove extensions
     var button = document.querySelector(`#mb_extensions [data-id="${id}"]`);
     if (button) {
         button.textContent = 'Remove';
+    } else {
+        bhfansapi.getExtensionInfo(id)
+            .then(addExtensionCard);
     }
 });
 
