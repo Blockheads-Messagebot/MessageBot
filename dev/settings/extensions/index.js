@@ -16,15 +16,17 @@ tab.innerHTML = '<style>' +
  * extension is expected to contain a title, snippet, and id
  */
 function addExtensionCard(extension) {
-    ui.buildContentFromTemplate('#extTemplate', '#exts', [
-        {selector: '.card-header-title', text: extension.title},
-        {selector: '.content', html: extension.snippet},
-        {
-            selector: '.card-footer-item',
-            text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
-            'data-id': extension.id
-        }
-    ]);
+    if (!tab.querySelector(`#mb_extensions [data-id="${extension.id}"]`)) {
+        ui.buildContentFromTemplate('#extTemplate', '#exts', [
+            {selector: '.card-header-title', text: extension.title},
+            {selector: '.content', html: extension.snippet},
+            {
+                selector: '.card-footer-item',
+                text: MessageBotExtension.isLoaded(extension.id) ? 'Remove' : 'Install',
+                'data-id': extension.id
+            }
+        ]);
+    }
 }
 
 //Create the extension store page
