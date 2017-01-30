@@ -54,7 +54,7 @@ tab.querySelector('#mb_backup_save').addEventListener('click', function showBack
 tab.querySelector('#mb_backup_load').addEventListener('click', function loadBackup() {
     ui.alert('Enter the backup code:<textarea class="textarea"></textarea>',
                 [
-                    { text: 'Load & refresh page', style: 'success', action: function() {
+                    { text: 'Load & refresh page', style: 'is-success', action: function() {
                         var code = document.querySelector('#alert textarea').value;
                         try {
                             code = JSON.parse(code);

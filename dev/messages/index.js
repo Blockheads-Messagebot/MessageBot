@@ -20,7 +20,7 @@ ui.addTabGroup('Messages', 'messages');
         }
 
         ui.alert('Really delete this message?', [
-            {text: 'Yes', style: 'danger', action: function() {
+            {text: 'Yes', style: 'is-danger', action: function() {
                 var el = event.target;
                 while ((el = el.parentElement) && !el.classList.contains('column'))
                     ;

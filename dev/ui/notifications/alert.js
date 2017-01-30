@@ -2,20 +2,22 @@ module.exports = {
     alert
 };
 
+var modal = document.querySelector('#alert');
+
 /**
 * Function used to require action from the user.
 *
-* @param {string} text the text to display in the alert
+* @param {String} html the html to display in the alert
 * @param {Array} buttons an array of buttons to add to the alert.
-*        Format: [{text: 'Test', style:'success', action: function(){}, thisArg: window, dismiss: false}]
+*        Format: [{text: 'Test', style:'is-success', action: function(){}, thisArg: window, dismiss: false}]
 *        Note: text is the only required paramater. If no button array is specified
 *        then a single OK button will be shown.
-*         Provided styles: success, danger, warning, info
+*        style can also be an array of classes to add.
 *        Defaults: style: '', action: undefined, thisArg: undefined, dismiss: true
 */
-function alert(text, buttons = [{text: 'OK'}]) {
+function alert(html, buttons = [{text: 'OK'}]) {
     if (instance.active) {
-        instance.queue.push({text, buttons});
+        instance.queue.push({html, buttons});
         return;
     }
     instance.active = true;
@@ -30,10 +32,9 @@ function alert(text, buttons = [{text: 'OK'}]) {
         button.id = 'button_' + i;
         buildButton(button);
     });
-    document.querySelector('#alertContent').innerHTML = text;
+    modal.querySelector('.modal-card-body').innerHTML = html;
 
-    document.querySelector('#alert ~ .overlay').classList.add('visible');
-    document.querySelector('#alert').classList.add('visible');
+    modal.classList.add('is-active');
 }
 
 /**
@@ -51,14 +52,19 @@ var instance = {
  * @param {Object} button
  */
 function buildButton(button) {
-    var el = document.createElement('span');
+    var el = document.createElement('a');
     el.innerHTML = button.text;
-    if (button.style) {
+
+    el.classList.add('button');
+    if (Array.isArray(button.style)) {
+        button.style.forEach(style => el.classList.add(style));
+    } else if (button.style) {
         el.classList.add(button.style);
     }
+
     el.id = button.id;
     el.addEventListener('click', buttonHandler);
-    document.querySelector('#alert .buttons').appendChild(el);
+    modal.querySelector('.modal-card-foot').appendChild(el);
 }
 
 /**
@@ -74,16 +80,15 @@ function buttonHandler(event) {
 
     //Require that there be an action asociated with no-dismiss buttons.
     if (button.dismiss || typeof button.action != 'function') {
-        document.querySelector('#alert').classList.remove('visible');
-        document.querySelector('#alert ~ .overlay').classList.remove('visible');
-        document.querySelector('#alert .buttons').innerHTML = '';
+        modal.classList.remove('is-active');
+        modal.querySelector('.modal-card-foot').innerHTML = '';
         instance.buttons = {};
         instance.active = false;
 
         // Are more alerts waiting to be shown?
         if (instance.queue.length) {
             let next = instance.queue.shift();
-            alert(next.text, next.buttons);
+            alert(next.html, next.buttons);
         }
     }
 }
