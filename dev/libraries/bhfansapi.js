@@ -7,12 +7,12 @@ const ajax = require('libraries/ajax');
 
 const API_URLS = {
     STORE: '//blockheadsfans.com/messagebot/api/extension/store',
-    NAME: '//blockheadsfans.com/messagebot/api/extension/name',
+    NAME: '//blockheadsfans.com/messagebot/api/extension/info',
     ERROR: '//blockheadsfans.com/messagebot/api/error',
 };
 
 var cache = {
-    names: new Map(),
+    info: new Map(),
 };
 
 /**
@@ -33,7 +33,7 @@ function getStore(refresh = false) {
                 }
 
                 for (let ex of store.extensions) {
-                    cache.names.set(ex.id, ex.title);
+                    cache.info.set(ex.id, ex);
                 }
                 return store;
             });
@@ -48,21 +48,22 @@ function getStore(refresh = false) {
  * If the extension was not found, resolves with the original passed ID.
  *
  * @example
- * getExtensionName('test').then(name => console.log(name));
+ * getExtensionInfo('test').then(info => console.log(info));
  * @param {string} id the id to search for.
- * @return {Promise} resolves with the extension name.
+ * @return {Promise} resolves with the extension's name, snippet, and ID.
  */
-function getExtensionName(id) {
-    if (cache.names.has(id)) {
-        return Promise.resolve(cache.names.get(id));
+function getExtensionInfo(id) {
+    if (cache.info.has(id)) {
+        return Promise.resolve(cache.info.get(id));
     }
 
-    return ajax.postJSON(API_URLS.NAME, {id}).then(({name}) => {
-        cache.names.set(id, name);
-        return name;
+    return ajax.getJSON(API_URLS.NAME, {id}).then(({id, title, snippet}) => {
+        return cache.info
+            .set(id, {id, title, snippet})
+            .get(id);
     }, err => {
         reportError(err);
-        return id;
+        return {name: id, id: id, snippet: 'No description.'};
     });
 }
 
@@ -94,6 +95,6 @@ function reportError(err) {
 
 module.exports = {
     getStore,
-    getExtensionName,
+    getExtensionInfo,
     reportError,
 };

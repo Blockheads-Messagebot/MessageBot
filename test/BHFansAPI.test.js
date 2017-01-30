@@ -54,7 +54,7 @@ describe('bhfansapi.getStore', function() {
     });
 });
 
-describe('bhfansapi.getExtensionName', function() {
+describe('bhfansapi.getExtensionInfo', function() {
     beforeEach(function() {
         jasmine.Ajax.install();
     });
@@ -64,11 +64,11 @@ describe('bhfansapi.getExtensionName', function() {
     });
 
     it('Should return a promise', function() {
-        expect(api.getExtensionName('id')).toEqual(jasmine.any(Promise));
+        expect(api.getExtensionInfo('id')).toEqual(jasmine.any(Promise));
     });
 
-    it('Should send the extension name', function() {
-        api.getExtensionName('id2');
+    it('Should send the extension id', function() {
+        api.getExtensionInfo('id2');
 
         expect(jasmine.Ajax.requests.mostRecent().params).toContain('id2');
     });
