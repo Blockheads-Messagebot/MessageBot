@@ -2,16 +2,11 @@
     node: true
 */
 
-var gulp = require('gulp');
-var rename = require('gulp-rename');
-var babel = require('gulp-babel');
-var comments = require('gulp-strip-comments');
-var sass = require('gulp-sass');
-var del = require('del');
-
-var browserify = require('browserify');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
+const fs = require('fs');
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const del = require('del');
+const browserify = require('browserify');
 
 gulp.task('_sass', function() {
     return gulp.src(['./dev/**/*.scss', './dev/**/*.sass'], {base: './dev/'})
@@ -20,23 +15,14 @@ gulp.task('_sass', function() {
 });
 
 gulp.task('bundle', ['_sass'], function() {
-    var b = browserify('./dev/start.js', {
-      debug: true,
-      paths: ['./dev'],
-      transform: ['brfs']
-    });
-
-    return b.bundle()
-        .pipe(source('app.js')) //Can app.js be removed?
-        .pipe(buffer())
-        .pipe(rename('dev.js'))
-        .pipe(gulp.dest('dist'))
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(comments())
-        .pipe(rename('bot.js'))
-        .pipe(gulp.dest('dist'));
+    return browserify('./dev/start.js', {
+            debug: true,
+            paths: ['./dev'],
+        })
+        .transform('brfs')
+        .transform('babelify', {presets: ['es2015']})
+        .bundle()
+        .pipe(fs.createWriteStream('dist/bot.js'));
 });
 
 gulp.task('clean', ['bundle'], function() {
