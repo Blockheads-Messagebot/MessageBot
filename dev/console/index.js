@@ -65,17 +65,17 @@ hook.on('world.chat', function(name, message) {
 
 // Auto scroll when new messages are added to the page, unless the owner is reading old chat.
 (new MutationObserver(function showNewChat() {
-    let container = tab.querySelector('ul');
+    let container = tab.querySelector('.chat');
     let lastLine = tab.querySelector('li:last-child');
 
     if (!container || !lastLine) {
         return;
     }
 
-    if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 2) {
+    if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 10) {
         lastLine.scrollIntoView(false);
     }
-})).observe(tab.querySelector('.chat'), {childList: true});
+})).observe(tab.querySelector('.chat'), {childList: true, subtree: true});
 
 
 // Remove old chat to reduce memory usage
@@ -85,7 +85,7 @@ hook.on('world.chat', function(name, message) {
     while (chat.children.length > 500) {
         chat.children[0].remove();
     }
-})).observe(tab.querySelector('.chat'), {childList: true});
+})).observe(tab.querySelector('.chat'), {childList: true, subtree: true});
 
 // Listen for the user to send messages
 function userSend() {

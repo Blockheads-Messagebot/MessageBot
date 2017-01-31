@@ -350,17 +350,17 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         });
 
         new MutationObserver(function showNewChat() {
-            var container = tab.querySelector('ul');
+            var container = tab.querySelector('.chat');
             var lastLine = tab.querySelector('li:last-child');
 
             if (!container || !lastLine) {
                 return;
             }
 
-            if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 2) {
+            if (container.scrollHeight - container.clientHeight - container.scrollTop <= lastLine.clientHeight * 10) {
                 lastLine.scrollIntoView(false);
             }
-        }).observe(tab.querySelector('.chat'), { childList: true });
+        }).observe(tab.querySelector('.chat'), { childList: true, subtree: true });
 
         new MutationObserver(function removeOldChat() {
             var chat = tab.querySelector('ul');
@@ -368,7 +368,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             while (chat.children.length > 500) {
                 chat.children[0].remove();
             }
-        }).observe(tab.querySelector('.chat'), { childList: true });
+        }).observe(tab.querySelector('.chat'), { childList: true, subtree: true });
 
         function userSend() {
             var input = tab.querySelector('input');
