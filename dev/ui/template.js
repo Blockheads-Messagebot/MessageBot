@@ -10,9 +10,9 @@ var polyfill = require('ui/polyfills/template');
  * @example
  * ui.buildContentFromTemplate('#template', '#target', [{selector: 'input', value: 'Value'}]);
  * ui.buildContentFromTemplate('template', 'div', [{selector: 'a', remove: ['href'], multiple: true}]);
- * @param {string} templateSelector
- * @param {string} targetSelector
- * @param {array} rules format: array of objects
+ * @param {String|Node} template
+ * @param {String|Node} target
+ * @param {Array} rules format: array of objects
  *      each object must have "selector".
  *      each object can have "multiple" set to update all matching elements.
  *      each object can have "remove" - an array of attributes to remove.
@@ -20,8 +20,13 @@ var polyfill = require('ui/polyfills/template');
  *      if both text and html are set, text will take precendence.
  *      rules will be parsed in the order that they are present in the array.
  */
-function buildContentFromTemplate(templateSelector, targetSelector, rules = []) {
-    var template = document.querySelector(templateSelector);
+function buildContentFromTemplate(template, target, rules = []) {
+    if (typeof template == 'string') {
+        template = document.querySelector(template);
+    }
+    if (typeof target == 'string') {
+        target = document.querySelector(target);
+    }
 
     polyfill(template);
 
@@ -29,7 +34,7 @@ function buildContentFromTemplate(templateSelector, targetSelector, rules = []) 
 
     rules.forEach(rule => handleRule(content, rule));
 
-    document.querySelector(targetSelector).appendChild(document.importNode(content, true));
+    target.appendChild(document.importNode(content, true));
 }
 
 /**
