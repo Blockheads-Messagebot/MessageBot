@@ -12,7 +12,7 @@ var prefs = storage.getObject(STORAGE_ID, {}, false);
     {type: 'boolean', key: 'disableTrim', default: false},
     {type: 'boolean', key: 'regexTriggers', default: false},
     {type: 'boolean', key: 'splitMessages', default: false},
-    {type: 'text', key: 'splitToken', default: '<split>'},
+    {type: 'string', key: 'splitToken', default: '<split>'},
 ].forEach(pref => {
     // Set defaults if not set
     if (typeof prefs[pref.key] !=  pref.type) {

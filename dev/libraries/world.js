@@ -22,7 +22,6 @@ var world = module.exports = {
     isOnline,
     getJoins,
 };
-var lists = world.lists;
 
 /**
  * Checks if a player has joined the server.
@@ -61,7 +60,7 @@ function isOwner(name) {
  * @return {bool}
  */
 function isAdmin(name) {
-    return lists.admin.includes(name.toLocaleUpperCase()) || isOwner(name);
+    return world.lists.admin.includes(name.toLocaleUpperCase()) || isOwner(name);
 }
 
 /**
@@ -71,7 +70,7 @@ function isAdmin(name) {
  * @return {bool}
  */
 function isMod(name) {
-    return lists.mod.includes(name.toLocaleUpperCase());
+    return world.lists.mod.includes(name.toLocaleUpperCase());
 }
 
 /**
@@ -124,8 +123,8 @@ hook.on('world.join', checkPlayerJoin);
  * Removes admins from the mod list and creates the staff list.
  */
 function buildStaffList() {
-    lists.mod = lists.mod.filter((name) => !lists.admin.includes(name) && name != 'SERVER' && name != world.owner);
-    lists.staff = lists.admin.concat(lists.mod);
+    world.lists.mod = world.lists.mod.filter(name => !isAdmin(name));
+    world.lists.staff = world.lists.admin.concat(world.lists.mod);
 }
 
 /**
@@ -164,11 +163,11 @@ hook.on('world.command', function(name, command, target) {
         ban: 'black',
     }[un ? command.substr(2) : command];
 
-    if (un && lists[group].includes(target)) {
-        lists[group].splice(lists[group].indexOf(target), 1);
+    if (un && world.lists[group].includes(target)) {
+        world.lists[group].splice(world.lists[group].indexOf(target), 1);
         buildStaffList();
-    } else if (!un && !lists[group].includes(target)) {
-        lists[group].push(target);
+    } else if (!un && !world.lists[group].includes(target)) {
+        world.lists[group].push(target);
         buildStaffList();
     }
 });
