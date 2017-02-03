@@ -70,7 +70,7 @@ describe('bhfansapi.getExtensionInfo', function() {
     it('Should send the extension id', function() {
         api.getExtensionInfo('id2');
 
-        expect(jasmine.Ajax.requests.mostRecent().params).toContain('id2');
+        expect(jasmine.Ajax.requests.mostRecent().url).toContain('id2');
     });
 });
 

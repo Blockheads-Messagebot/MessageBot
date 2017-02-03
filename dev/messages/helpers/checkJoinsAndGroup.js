@@ -20,7 +20,6 @@ function checkGroup(name, group, not_group) {
 }
 
 function isInGroup(name, group) {
-    name = name.toLocaleUpperCase();
     switch (group.toLocaleLowerCase()) {
         case 'all':
             return world.isPlayer(name);
