@@ -19,6 +19,19 @@
     padding: 1rem 1.5rem;
 }
 
+// For those times you want a textarea to expand only when focused, staying small if possible
+.textarea.is-fluid {
+    min-height: 1em;
+    overflow: hidden;
+    resize: none;
+    transition: min-height 0.3s;
+
+    &:focus {
+        min-height: 6em;
+        overflow: auto;
+    }
+}
+
 // Allow an inverse navigation with light text and a dark background
 .nav-inverse {
     background: $primary;
@@ -108,4 +121,11 @@
 }
 #container > div:not(.visible) {
     display: none;
+}
+
+#container > div {
+    position: relative;
+    height: calc(100vh - 50px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
