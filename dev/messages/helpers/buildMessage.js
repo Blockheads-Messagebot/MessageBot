@@ -20,7 +20,7 @@ function buildMessage(message, name) {
     });
 
     if (message.startsWith('/')) {
-        message = message.replace(/{{ip}}/gi, world.players.getIP(name));
+        message = message.replace(/{{ip}}/gi, world.getIP(name));
     }
 
     return message;

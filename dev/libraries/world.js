@@ -21,6 +21,7 @@ var world = module.exports = {
     isMod,
     isOnline,
     getJoins,
+    getIP,
 };
 
 /**
@@ -101,6 +102,16 @@ function isOnline(name) {
  */
 function getJoins(name) {
     return isPlayer(name) ? world.players[name.toLocaleUpperCase()].joins : 0;
+}
+
+/**
+ * Gets the latest IP used by a player
+ * 
+ * @param {String} name
+ * @return {String}
+ */
+function getIP(name) {
+    return isPlayer(name) ? world.players[name.toLocaleUpperCase()].ip : '';
 }
 
 // Keep the online list up to date
