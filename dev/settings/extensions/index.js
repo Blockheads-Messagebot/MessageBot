@@ -49,6 +49,7 @@ tab.querySelector('#exts')
         }
 
         if (el.textContent == 'Install') {
+            el.classList.add('is-loading');
             MessageBotExtension.install(id);
         } else {
             MessageBotExtension.uninstall(id);
@@ -81,6 +82,7 @@ hook.on('extension.install', function(id) {
     var button = document.querySelector(`#mb_extensions [data-id="${id}"]`);
     if (button) {
         button.textContent = 'Remove';
+        button.classList.remove('is-loading');
     } else {
         bhfansapi.getExtensionInfo(id)
             .then(addExtensionCard);
@@ -92,10 +94,10 @@ hook.on('extension.uninstall', function(id) {
     var button = document.querySelector(`#mb_extensions [data-id="${id}"]`);
     if (button) {
         button.textContent = 'Removed';
-        button.disabled = true;
+        button.classList.add('is-disabled');
         setTimeout(() => {
             button.textContent = 'Install';
-            button.disabled = false;
+            button.classList.remove('is-disabled');
         }, 3000);
     }
 });

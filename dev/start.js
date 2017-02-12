@@ -1,6 +1,9 @@
 // Overwrite the pollChat function to kill the default chat function
 window.pollChat = function() {};
 
+// First time the bot has been loaded?
+var firstLoad = localStorage.length == 0;
+
 // Overwrite the old page
 document.body.innerHTML = '';
 // Style reset
@@ -41,3 +44,6 @@ window.addEventListener('error', (err) => {
 
 // Expose the extension API
 window.MessageBotExtension = require('MessageBotExtension');
+if (firstLoad) {
+    window.MessageBotExtension.install('tutorial');
+}
