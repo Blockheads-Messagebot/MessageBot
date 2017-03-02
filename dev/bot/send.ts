@@ -1,11 +1,7 @@
-var api = require('libraries/blockheads');
-var settings = require('settings/bot');
+import * as api from 'libraries/blockheads';
+import * as settings from 'settings/bot';
 
-var queue = [];
-
-module.exports = {
-    send,
-};
+var queue: string[] = [];
 
 /**
  * Function used to queue a message to be sent.
@@ -14,7 +10,7 @@ module.exports = {
  * send('Hello!');
  * @param {string} message the message to be sent.
  */
-function send(message) {
+export function send(message: string) {
     if (settings.splitMessages) {
         //FIXME: If the backslash before the token is escaped by another backslash the token should still split the message.
         let str = message.split(settings.splitToken);

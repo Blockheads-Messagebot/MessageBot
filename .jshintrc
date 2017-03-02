@@ -1,9 +1,0 @@
-{
-    "predef": {"__dirname": false, "require": false, "module": true, "exports": true},
-    "esversion": 6,
-    "browser": true,
-    "devel": true,
-    "unused": "strict",
-    "undef": true,
-    "strict": "implied"
-}

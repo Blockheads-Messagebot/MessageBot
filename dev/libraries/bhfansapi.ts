@@ -2,8 +2,7 @@
  * @file Contains functions to interact with blockheadsfans.com - cannot be used by extensions.
  */
 
-const hook = require('libraries/hook');
-const ajax = require('libraries/ajax');
+import * as ajax from 'libraries/ajax';
 
 const API_URLS = {
     STORE: '//blockheadsfans.com/messagebot/api/extension/store',
@@ -11,8 +10,24 @@ const API_URLS = {
     ERROR: '//blockheadsfans.com/messagebot/api/error',
 };
 
-var cache = {
-    info: new Map(),
+interface ExtensionInfo {
+    id: string;
+    title: string;
+    snippet: string;
+};
+
+interface StoreResponse {
+    status: string;
+    extensions: [ExtensionInfo];
+};
+
+interface ErrorResponse {
+    status: string;
+    message?: string;
+};
+
+var cache: {info: Map<string, ExtensionInfo>, getStore?: Promise<StoreResponse>} = {
+    info: new Map<string, ExtensionInfo>()
 };
 
 /**
@@ -20,13 +35,11 @@ var cache = {
  *
  * @example
  * getStore().then(store => console.log(store));
- * @param {bool} [refresh=false] whether or not to use the cached response should be cleared.
- * @return {Promise} resolves with the response
  */
-function getStore(refresh = false) {
+export function getStore(refresh: boolean = false): Promise<StoreResponse> {
     if (refresh || !cache.getStore) {
         cache.getStore = ajax.getJSON(API_URLS.STORE)
-            .then(store => {
+            .then((store: StoreResponse) => {
                 //Build the initial names map
                 if (store.status != 'ok') {
                     return store;
@@ -49,19 +62,17 @@ function getStore(refresh = false) {
  *
  * @example
  * getExtensionInfo('test').then(info => console.log(info));
- * @param {string} id the id to search for.
- * @return {Promise} resolves with the extension's name, snippet, and ID.
  */
-function getExtensionInfo(id) {
+export function getExtensionInfo(id: string): Promise<ExtensionInfo> {
     if (cache.info.has(id)) {
         return Promise.resolve(cache.info.get(id));
     }
 
-    return ajax.getJSON(API_URLS.NAME, {id}).then(({id, title, snippet}) => {
+    return ajax.getJSON(API_URLS.NAME, {id}).then(({id, title, snippet}: ExtensionInfo) => {
         return cache.info
             .set(id, {id, title, snippet})
             .get(id);
-    }, err => {
+    }, (err: Error) => {
         reportError(err);
         return {name: id, id: id, snippet: 'No description.'};
     });
@@ -73,17 +84,16 @@ function getExtensionInfo(id) {
  *
  * @example
  * reportError(Error("Report me"));
- * @param {Error} err the error to report
  */
-function reportError(err) {
+export function reportError(err: ErrorEvent): void {
     ajax.postJSON(API_URLS.ERROR, {
             error_text: err.message,
             error_file: err.filename,
-            error_row: err.lineno || 0,
-            error_column: err.colno || 0,
-            error_stack: err.stack || '',
+            error_row: err.lineno,
+            error_column: err.colno,
+            error_stack: (<{stack?: string}>err).stack || '', // Might not be there in some browsers
         })
-        .then((resp) => {
+        .then((resp: ErrorResponse) => {
             if (resp.status == 'ok') {
                 hook.fire('error_report', 'Something went wrong, it has been reported.');
             } else {
@@ -92,9 +102,3 @@ function reportError(err) {
         })
         .catch(console.error);
 }
-
-module.exports = {
-    getStore,
-    getExtensionInfo,
-    reportError,
-};

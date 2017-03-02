@@ -1,15 +1,16 @@
 //TODO: Use fetch
+
+// no-any must be disabled for getJSON, postJSON
+// tslint:disable:no-any
+
 /**
  * Function to GET a page. Passes the response of the XHR in the resolve promise.
  *
  * @example
  * //sends a GET request to /some/url.php?a=test
  * get('/some/url.php', {a: 'test'}).then(console.log)
- * @param {string} url
- * @param {object} paramsStr
- * @return {Promise}
  */
-function get(url = '/', params = {}) {
+export function get(url: string = '/', params: {[key: string]: string|number} = {}): Promise<string> {
     if (Object.keys(params).length) {
         var addition = urlStringify(params);
         if (url.includes('?')) {
@@ -24,53 +25,41 @@ function get(url = '/', params = {}) {
 
 
 /**
- * Returns a JSON object in the promise resolve method.
- *
- * @param {string} url
- * @param {object} paramObj
- * @return {Promise}
+ * Returns a JSON object from the response.
+ * @example
+ * getJSON('/', {id: '123'}).then(console.log);
  */
-function getJSON(url = '/', paramObj = {}) {
+export function getJSON(url: string = '/', paramObj: {[key: string]: string|number} = {}): Promise<{[key: string]: any}> {
     return get(url, paramObj).then(JSON.parse);
 }
 
 
 /**
  * Function to make a post request
- *
- * @param {string} url
- * @param {object} paramObj
- * @return {Promise}
+ * @example
+ * post('/', {id: '123'}).then(console.log);
  */
-function post(url = '/', paramObj = {}) {
+export function post(url: string = '/', paramObj: {[key: string]: string|number} = {}): Promise<string> {
     return xhr('POST', url, paramObj);
 }
 
 
 /**
  * Function to fetch JSON from a page through post.
- *
- * @param string url
- * @param string paramObj
- * @return Promise
+ * @example
+ * postJSON('/', {id: 'test'}).then(console.log);
  */
-function postJSON(url = '/', paramObj = {}) {
+export function postJSON(url: string = '/', paramObj: {[key: string]: string|number} = {}): Promise<{[key: string]: any}> {
     return post(url, paramObj).then(JSON.parse);
 }
 
 
 /**
-* Helper function to make XHR requests, if possible use the get and post functions instead.
-*
-* @depricated since version 6.1
-* @param string protocol
-* @param string url
-* @param object paramObj -- WARNING. Only accepts shallow objects.
-* @return Promise
-*/
-function xhr(protocol, url = '/', paramObj = {}) {
+ * Helper function to make XHR requests.
+ */
+function xhr(protocol: string, url: string = '/', paramObj: {[key: string]: string|number} = {}): Promise<string> {
     var paramStr = urlStringify(paramObj);
-    return new Promise(function(resolve, reject) {
+    return new Promise<string>(function(resolve, reject) {
         var req = new XMLHttpRequest();
         req.open(protocol, url);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -101,11 +90,8 @@ function xhr(protocol, url = '/', paramObj = {}) {
 /**
  * Internal function used to stringify url parameters
  */
-function urlStringify(obj) {
+function urlStringify(obj: {[key: string]: string|number}): string {
     return Object.keys(obj)
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
-    .join('&');
+        .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k].toString())}`)
+        .join('&');
 }
-
-
-module.exports = {xhr, get, getJSON, post, postJSON};

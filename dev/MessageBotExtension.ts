@@ -22,7 +22,7 @@ const STORAGE_ID = 'mb_extensions';
  * @param {Function} [uninstall = undefined] - Optional, specify the uninstall function while creating the extension, instead of later. If specified here, this will be bound to the extension.
  * @return {MessageBotExtension} - The extension variable.
  */
-function MessageBotExtension(namespace, uninstall) {
+export default function MessageBotExtension(namespace, uninstall) {
     loaded.push(namespace);
     hook.fire('extension.install', namespace);
 

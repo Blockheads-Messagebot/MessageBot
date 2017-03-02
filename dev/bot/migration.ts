@@ -1,4 +1,4 @@
-function update(keys, operator) {
+function update(keys: string[], operator: Function) {
     Object.keys(localStorage).forEach(item => {
         for (let key of keys) {
             if (item.startsWith(key)) {
@@ -9,18 +9,17 @@ function update(keys, operator) {
     });
 }
 
-//jshint -W086
 //No break statements as we want to execute all updates after matched version unless otherwise noted.
 switch (localStorage.getItem('mb_version')) {
     case null:
-        break; //Nothing to migrate
+        break; //Nothing to migrate, new install
     case '5.2.0':
     case '5.2.1':
         //With 6.0, newlines are directly supported in messages by the bot.
-        update(['announcementArr', 'joinArr', 'leaveArr', 'triggerArr'], function(raw) {
+        update(['announcementArr', 'joinArr', 'leaveArr', 'triggerArr'], function(raw: string): string {
             try {
                 var parsed = JSON.parse(raw);
-                parsed.forEach(msg => {
+                parsed.forEach((msg: {message?: string}) => {
                     if (msg.message) {
                         msg.message = msg.message.replace(/\\n/g, '\n');
                     }
@@ -44,10 +43,10 @@ switch (localStorage.getItem('mb_version')) {
     case '6.0.6':
     case '6.1.0a':
         //Normalize groups to lower case.
-        update(['joinArr', 'leaveArr', 'triggerArr'], function(raw) {
+        update(['joinArr', 'leaveArr', 'triggerArr'], function(raw: string): string {
             try {
                 let parsed = JSON.parse(raw);
-                parsed.forEach(msg => {
+                parsed.forEach((msg: {group: string, not_group: string}) => {
                     msg.group = msg.group.toLocaleLowerCase();
                     msg.not_group = msg.not_group.toLocaleLowerCase();
                 });
@@ -57,4 +56,3 @@ switch (localStorage.getItem('mb_version')) {
             }
         });
 }
-//jshint +W086
