@@ -11,15 +11,15 @@ const tsify = require('tsify');
 const typedoc = require('gulp-typedoc');
 
 gulp.task('_sass', function() {
-    return gulp.src(['./dev/**/*.scss', './dev/**/*.sass'], {base: './dev/'})
-        .pipe(sass({outputStyle: 'compressed', includePaths: ['./dev/ui/layout', './node_modules']}).on('error', sass.logError))
-        .pipe(gulp.dest('./dev'));
+    return gulp.src(['./src/**/*.scss', './src/**/*.sass'], {base: './src/'})
+        .pipe(sass({outputStyle: 'compressed', includePaths: ['./src/ui/layout', './node_modules']}).on('error', sass.logError))
+        .pipe(gulp.dest('./src'));
 });
 
 gulp.task('build', ['_sass'], function() {
-    return browserify('./dev/start.ts', {
+    return browserify('./src/start.ts', {
             debug: true,
-            paths: ['./dev'],
+            paths: ['./src'],
         })
         .plugin(tsify, { noImplicitAny: true })
         .transform('brfs')
@@ -29,12 +29,12 @@ gulp.task('build', ['_sass'], function() {
 });
 
 gulp.task('clean', function() {
-    return del(['dev/**/*.css', 'dev/**/*.js']);
+    return del(['src/**/*.css', 'src/**/*.js']);
 });
 
 gulp.task('typedoc', function() {
     return gulp
-        .src(['./dev/libraries/*.ts'])
+        .src(['./src/libraries/*.ts'])
         .pipe(typedoc({
             module: 'commonjs',
             target: 'es5',
@@ -51,7 +51,7 @@ gulp.task('typedoc', function() {
 });
 
 gulp.task('watch', ['build'], function() {
-    gulp.watch(['./dev/**', '!./dev/**/*.css'], ['build']);
+    gulp.watch(['./src/**', '!./src/**/*.css'], ['build']);
 });
 
 gulp.task('default', ['watch']);
