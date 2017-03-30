@@ -2,9 +2,9 @@
     "compilerOptions": {
         "target": "es6",
         "moduleResolution": "node",
-        "lib": ["es2016", "dom"],
-        "baseUrl": ".",
-        "paths": {"*": ["dev/*"]},
-        "noImplicitAny": true
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "removeComments": false,
+        "strictNullChecks": true
     }
 }

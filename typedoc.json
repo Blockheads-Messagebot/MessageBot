@@ -1,0 +1,6 @@
+{
+    "out": "docs",
+    "mode": "file",
+    "name": "MessageBot",
+    "toc": ["Ajax", "Hook", "Player", "SimpleEvent", "Storage", "World"]
+}
