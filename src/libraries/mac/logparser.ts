@@ -3,12 +3,12 @@ import {LogEntry} from '../blockheads/types/logs';
 /**
  * Parses logs from the portal into a standard format. This is only used by the [[PortalAPI]] class.
  */
-export class PortalLogParser {
+export class MacLogParser {
     /** @hidden */
     private entries: LogEntry[];
 
     /**
-     * Creates a new instance of the PortalLogParser class.
+     * Creates a new instance of the class.
      */
     constructor() {
         this.entries = [];
@@ -47,14 +47,14 @@ export class PortalLogParser {
 
     /** @hidden */
     private isValidLine(line: string): boolean {
-        return /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d blockheads_server/.test(line);
+        return /^\w\w\w \d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
     }
 
     /** @hidden */
     private addLine(line: string): void {
-        let ts = line.substr(0, 24)
-            .replace(' ', 'T')
-            .replace(' ', 'Z');
+        let year = (new Date()).getFullYear();
+        let ts = line.substr(0, 15);
+        ts = ts.substr(0, 7) + year + ' ' + line.substr(7);
 
         this.entries.push({
             raw: line,

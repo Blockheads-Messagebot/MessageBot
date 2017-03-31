@@ -69,11 +69,11 @@ export interface WorldOverview {
      */
     pvp: boolean;
     /**
-     * The privacy of the world.
+     * The privacy of the world. Always private for mac servers.
      */
     privacy: WorldPrivacy;
     /**
-     * Whether or not a password is set for the world.
+     * Whether or not a password is set for the world. Always false for mac servers.
      */
     password: boolean;
     /**
@@ -110,7 +110,7 @@ export interface WorldOptions {
 }
 
 /**
- * The API used to interact with the portal or mac server. For cloud servers, this is implemented by the [[PortalApi]] class.
+ * The API used to interact with the portal or mac server. For cloud servers, this is implemented by the [[PortalApi]] class. For mac servers, this is implemented by the [[MacApi]] class.
  */
 export interface WorldApi {
     /**
