@@ -13,6 +13,9 @@
 0. Edit the config in `./src/bot/config.ts`
 0. Run: `npm start`
 
+##### Importing configs
+If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named `import.json` in the `src/bot` directory.
+
 # Development
 To run tests:
 `npm run test`
