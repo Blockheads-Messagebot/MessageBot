@@ -79,6 +79,8 @@
 								<li class="tsd-kind-class"><a href="classes/ajax.html" class="tsd-kind-icon">Ajax</a></li>
 								<li class="tsd-kind-class"><a href="classes/commandwatcher.html" class="tsd-kind-icon">Command<wbr>Watcher</a></li>
 								<li class="tsd-kind-class"><a href="classes/hook.html" class="tsd-kind-icon">Hook</a></li>
+								<li class="tsd-kind-class tsd-is-not-exported"><a href="classes/macapi.html" class="tsd-kind-icon">Mac<wbr>Api</a></li>
+								<li class="tsd-kind-class"><a href="classes/maclogparser.html" class="tsd-kind-icon">Mac<wbr>Log<wbr>Parser</a></li>
 								<li class="tsd-kind-class"><a href="classes/player.html" class="tsd-kind-icon">Player</a></li>
 								<li class="tsd-kind-class"><a href="classes/portalapi.html" class="tsd-kind-icon">Portal<wbr>Api</a></li>
 								<li class="tsd-kind-class"><a href="classes/portalauth.html" class="tsd-kind-icon">Portal<wbr>Auth</a></li>
@@ -116,6 +118,7 @@
 								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#localstorage" class="tsd-kind-icon">Local<wbr>Storage</a></li>
 								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#auth" class="tsd-kind-icon">auth</a></li>
 								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#baserequest" class="tsd-kind-icon">base<wbr>Request</a></li>
+								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#plist" class="tsd-kind-icon">plist</a></li>
 								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#sha1" class="tsd-kind-icon">sha1</a></li>
 								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#world" class="tsd-kind-icon">world</a></li>
 								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#worldid" class="tsd-kind-icon">world<wbr>Id</a></li>
@@ -138,7 +141,7 @@
 					<div class="tsd-signature tsd-kind-icon">World<wbr>Privacy<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"public"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"searchable"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"private"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in libraries/blockheads/types/world.ts:35</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/blockheads/types/world.ts#L35">libraries/blockheads/types/world.ts:35</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -153,7 +156,7 @@
 					<div class="tsd-signature tsd-kind-icon">World<wbr>Sizes<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"1/16x"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"1/4x"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"1x"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"4x"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"16x"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in libraries/blockheads/types/world.ts:30</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/blockheads/types/world.ts#L30">libraries/blockheads/types/world.ts:30</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -171,7 +174,7 @@
 					<div class="tsd-signature tsd-kind-icon">Local<wbr>Storage<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in index-cli.ts:2</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/index-cli.ts#L2">index-cli.ts:2</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -181,7 +184,7 @@
 					<div class="tsd-signature tsd-kind-icon">auth<span class="tsd-signature-symbol">:</span> <a href="classes/portalauth.html" class="tsd-signature-type">PortalAuth</a><span class="tsd-signature-symbol"> =&nbsp;new PortalAuth(config.username, config.password)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in index-cli.ts:12</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/index-cli.ts#L12">index-cli.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -191,9 +194,45 @@
 					<div class="tsd-signature tsd-kind-icon">base<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestAPI</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">CoreOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">UriOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">UrlOptions</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;request.defaults({headers: {&#x27;x-requested-with&#x27;: &#x27;XMLHttpRequest&#x27;,},jar: true,baseUrl: &#x27;http://portal.theblockheads.net/&#x27;})</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in libraries/ajax.ts:4</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/ajax.ts#L4">libraries/ajax.ts:4</a></li>
 						</ul>
 					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
+					<a name="plist" class="tsd-anchor"></a>
+					<h3>plist</h3>
+					<div class="tsd-signature tsd-kind-icon">plist<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;plist&#x27;) as {parse: (s: string) &#x3D;&gt; object}</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/mac/api.ts#L7">libraries/mac/api.ts:7</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>parse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span></h5>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter-siganture">
+										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-is-not-exported">
+											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span></li>
+										</ul>
+										<ul class="tsd-descriptions">
+											<li class="tsd-description">
+												<h4 class="tsd-parameters-title">Parameters</h4>
+												<ul class="tsd-parameters">
+													<li>
+														<h5>s: <span class="tsd-signature-type">string</span></h5>
+													</li>
+												</ul>
+												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">object</span></h4>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
 					<a name="sha1" class="tsd-anchor"></a>
@@ -201,7 +240,7 @@
 					<div class="tsd-signature tsd-kind-icon">sha1<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;sha1&#x27;) as (input: string) &#x3D;&gt; string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in libraries/portal/auth.ts:2</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/portal/auth.ts#L2">libraries/portal/auth.ts:2</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -232,7 +271,7 @@
 					<div class="tsd-signature tsd-kind-icon">world<span class="tsd-signature-symbol">:</span> <a href="classes/world.html" class="tsd-signature-type">World</a><span class="tsd-signature-symbol"> =&nbsp;new World({api: new PortalApi(worldId),chatWatcher: new PortalChatWatcher({worldId,firstId: (&lt;any&gt;window).firstId - 50 || 0,}),storage: new Storage(worldId)})</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in index.ts:8</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/index.ts#L8">index.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -242,7 +281,7 @@
 					<div class="tsd-signature tsd-kind-icon">world<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in index.ts:6</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/index.ts#L6">index.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -255,7 +294,7 @@
 					<div class="tsd-signature tsd-kind-icon">config<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in bot/config.ts:1</li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/bot/config.ts#L1">bot/config.ts:1</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -264,7 +303,7 @@
 						<div class="tsd-signature tsd-kind-icon">password<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;PASSWORD&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in bot/config.ts:3</li>
+								<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/bot/config.ts#L3">bot/config.ts:3</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -274,7 +313,7 @@
 						<div class="tsd-signature tsd-kind-icon">username<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;USER&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in bot/config.ts:2</li>
+								<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/bot/config.ts#L2">bot/config.ts:2</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -284,7 +323,7 @@
 						<div class="tsd-signature tsd-kind-icon">world<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;123456</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in bot/config.ts:4</li>
+								<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/bot/config.ts#L4">bot/config.ts:4</a></li>
 							</ul>
 						</aside>
 					</section>

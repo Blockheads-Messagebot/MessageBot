@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>PortalChatParser | MessageBot</title>
+	<title>MacLogParser | MessageBot</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="portalchatparser.html">PortalChatParser</a>
+					<a href="maclogparser.html">MacLogParser</a>
 				</li>
 			</ul>
-			<h1>Class PortalChatParser</h1>
+			<h1>Class MacLogParser</h1>
 		</div>
 	</div>
 </header>
@@ -69,16 +69,15 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Parses chat in the format recieved from the portal API.</p>
+						<p>Parses logs from the portal into a standard format. This is only used by the [[PortalAPI]] class.</p>
 					</div>
-					<p>This is only used by the <a href="portalchatwatcher.html">PortalChatWatcher</a> class.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">PortalChatParser</span>
+						<span class="target">MacLogParser</span>
 					</li>
 				</ul>
 			</section>
@@ -89,13 +88,13 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="portalchatparser.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="maclogparser.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="portalchatparser.html#parse" class="tsd-kind-icon">parse</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="maclogparser.html#parse" class="tsd-kind-icon">parse</a></li>
 							</ul>
 						</section>
 					</div>
@@ -107,40 +106,21 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Portal<wbr>Chat<wbr>Parser<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, online<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="portalchatparser.html" class="tsd-signature-type">PortalChatParser</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Mac<wbr>Log<wbr>Parser<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="maclogparser.html" class="tsd-signature-type">MacLogParser</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/portal/chatparser.ts#L28">libraries/portal/chatparser.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/mac/logparser.ts#L8">libraries/mac/logparser.ts:8</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Creates a new instance of the ChatParser class.</p>
+									<p>Creates a new instance of the class.</p>
 								</div>
 							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>name: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>the name of the world</p>
-										</div>
-									</div>
-								</li>
-								<li>
-									<h5>online: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>currently online players.</p>
-										</div>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="portalchatparser.html" class="tsd-signature-type">PortalChatParser</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="maclogparser.html" class="tsd-signature-type">MacLogParser</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -151,30 +131,30 @@
 					<a name="parse" class="tsd-anchor"></a>
 					<h3>parse</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">parse<span class="tsd-signature-symbol">(</span>messages<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/chatmessage.html" class="tsd-signature-type">ChatMessage</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">parse<span class="tsd-signature-symbol">(</span>lines<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/logentry.html" class="tsd-signature-type">LogEntry</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/portal/chatparser.ts#L48">libraries/portal/chatparser.ts:48</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/dcde0ae/src/libraries/mac/logparser.ts#L22">libraries/mac/logparser.ts:22</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Parses a string as a chat message and emits an event for the message.</p>
+									<p>Parses the logs into a standard format.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>messages: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+									<h5>lines: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>the messages to parse.</p>
+										<p>the raw log lines.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/chatmessage.html" class="tsd-signature-type">ChatMessage</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/logentry.html" class="tsd-signature-type">LogEntry</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
