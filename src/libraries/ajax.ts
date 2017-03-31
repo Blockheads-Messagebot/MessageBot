@@ -1,6 +1,13 @@
-import * as http from 'http';
+import * as request from 'request';
 import {stringify} from 'querystring';
-import {parse, resolve} from 'url';
+
+const baseRequest = request.defaults({
+    headers: {
+        'x-requested-with': 'XMLHttpRequest',
+    },
+    jar: true,
+    baseUrl: 'http://portal.theblockheads.net/'
+});
 
 /**
  * System generic class for making http requests. Extensions can use through ex.ajax.
@@ -18,22 +25,16 @@ export class Ajax {
      * //sends a GET request to /some/url.php?a=test
      */
     static get(url: string = '/', params: {[key: string]: string|number} = {}): Promise<string> {
-        let to = parse(resolve('http://portal.theblockheads.net/', url));
+        url = (url.includes('?') ? url + '&' : url + '?') + stringify(params);
 
-        return new Promise(resolve => {
-            let req = http.get({
-                hostname: to.hostname,
-                path: to.pathname + (to.search ? to.search : '?') + stringify(params),
-                headers: {
-                    'x-requested-with': 'XMLHttpRequest',
-                },
-            }, res => {
-                let data = '';
-                res.on('data', (chunk: string) => data += chunk);
-                res.on('end', () => resolve(data));
+        return new Promise((resolve, reject) => {
+            baseRequest.get(url, {}, (err, req, body) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(body);
             });
-
-            req.end();
         });
     }
 
@@ -66,25 +67,19 @@ export class Ajax {
      * post('/', {id: '123'}).then(console.log);
      */
     static post(url: string = '/', params: {[key: string]: string|number} = {}): Promise<string> {
-        let to = parse(resolve('http://portal.theblockheads.net/', url));
-
-        return new Promise(resolve => {
-            let req = http.request({
-                hostname: to.hostname,
-                path: to.path,
-                method: 'POST',
+        return new Promise((resolve, reject) => {
+            baseRequest.post(url, {
                 headers: {
                     'content-type': 'application/x-www-form-urlencoded',
-                    'x-requested-with': 'XMLHttpRequest'
+                },
+                body: stringify(params),
+            }, (err, req, body) => {
+                if (err) {
+                    return reject(err);
                 }
-            }, res => {
-                let data = '';
-                res.on('data', (chunk: string) => data += chunk);
-                res.on('end', () => resolve(data));
-            });
 
-            req.write(stringify(params));
-            req.end();
+                resolve(body);
+            });
         });
     }
 

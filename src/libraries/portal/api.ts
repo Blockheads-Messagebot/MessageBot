@@ -38,12 +38,21 @@ export class PortalApi implements WorldApi {
         return this.worldOnline()
             .then(() => ajax.get(`/worlds/lists/${this.worldId}`))
             .then((html: string) => {
-                let doc = (new DOMParser()).parseFromString(html, 'text/html');
-
                 function getList(name: string): string[] {
-                    let list = (<HTMLTextAreaElement>doc.querySelector(`textarea[name="${name}"]`));
+                    let list = html.match(new RegExp(`<textarea name="${name}">([\s\S]*?)<\/textarea>`));
                     if (list) {
-                        let names = list.value.toLocaleUpperCase().split('\n');
+                        let temp = list[0].replace(/(&.*?;)/g, function(match, first: string) {
+                            let map: {[key: string]: string} = {
+                                '&lt;': '<',
+                                '&gt;': '>',
+                                '&amp;': '&',
+                                '&#39;': '\''
+                            }; //It seems these are the only escaped characters.
+
+                            return map[first] || '';
+                        });
+
+                        let names = temp.toLocaleUpperCase().split('\n');
                         return [...new Set(names)]; // Remove duplicates
                     }
 
@@ -77,13 +86,12 @@ export class PortalApi implements WorldApi {
     getOverview(): Promise<WorldOverview> {
         return ajax.get(`/worlds/${this.worldId}`)
             .then(html => {
-                let doc = (new DOMParser()).parseFromString(html, 'text/html');
-                let text = (selector: string): string => {
-                    let el = doc.querySelector(selector);
-                    return el && el.textContent ? el.textContent : '';
+                let firstMatch = (r: RegExp): string => {
+                    let m = html.match(r);
+                    return m ? m[1] : '';
                 };
 
-                let temp = text('#main > div > script:last-child').match(/\$\('#privacy'\)\.val\('(.*)'\)/);
+                let temp = html.match(/^\$\('#privacy'\).val\('(.*?)'\)/m);
                 let privacy: WorldPrivacy;
                 if (temp) {
                     privacy = (<WorldPrivacy>temp[1]);
@@ -93,19 +101,19 @@ export class PortalApi implements WorldApi {
 
                 // This is very messy, refactoring welcome.
                 return {
-                    name: text('#title'),
+                    name: firstMatch(/^\t<title>(.*?) Manager \| Portal<\/title>$/m),
 
-                    owner: text('.details.manager > tbody > tr:nth-of-type(3) > td:nth-of-type(2)'),
-                    created: new Date(text('.details.manager > tbody > tr:nth-of-type(4) > td:nth-of-type(2)') + ' GMT-0000'),
-                    last_activity: new Date(text('.details.manager > tbody > tr:nth-of-type(6) > td:nth-of-type(2)') + ' GMT-0000'),
-                    credit_until: new Date(text('.details.manager > tbody > tr:nth-of-type(7) > td:nth-of-type(2)') + ' GMT-0000'),
-                    link: text('.details.manager > tbody > tr:nth-of-type(8) > td:nth-of-type(2)'),
+                    owner: firstMatch(/^\t\t<td class="right">Owner:<\/td>\r?\n\t\t<td>(.*?)<\/td>$/m),
+                    created: new Date(firstMatch(/^\t\t<td>Created:<\/td><td>(.*?)<\/td>$/m) + ' GMT-0000'),
+                    last_activity: new Date(firstMatch(/^\t\t<td>Last Activity:<\/td><td>(.*?)<\/td>$/m) + ' GMT-0000'),
+                    credit_until: new Date(firstMatch(/^\t\t<td>Credit Until:<\/td><td>(.*?)<\/td>$/m) + ' GMT-0000'),
+                    link: firstMatch(/^\t<tr><td>Link:<\/td><td><a href="(.*)">\1<\/a>/m),
 
-                    pvp: text('#main > div > script:last-child').includes('#pvp'),
+                    pvp: !!firstMatch(/^\$\('#pvp'\)\./m),
                     privacy,
-                    password: text('tr:nth-of-type(6) > td:nth-of-type(4)') == 'Yes',
-                    size: (<WorldSizes>text('tr:nth-of-type(7) > td:nth-of-type(4)')),
-                    whitelist: text('tr:nth-of-type(8) > td:nth-of-type(4)') == 'Yes',
+                    password: firstMatch(/^\t\t<td>Password:<\/td><td>(Yes|No)<\/td><\/tr>$/m) == 'Yes',
+                    size: (<WorldSizes>firstMatch(/^\t\t<td>Size:<\/td><td>(.*?)<\/td>$/m)),
+                    whitelist: firstMatch(/<td>Whitelist:<\/td><td>(Yes|No)<\/td>/m) == 'Yes',
 
                     online: [],
                 };

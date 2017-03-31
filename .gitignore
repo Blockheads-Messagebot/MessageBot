@@ -5,5 +5,9 @@ node_modules/*
 .vscode
 .tags
 
-#System files
+# System files
 .DS_Store
+
+# Stored config
+localStorage
+test-localStorage

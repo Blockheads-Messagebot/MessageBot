@@ -2,26 +2,21 @@ const fs = require('fs');
 const gulp = require('gulp');
 const del = require('del');
 const browserify = require('browserify');
-const ts = require('gulp-typescript');
+const tsify = require('tsify');
 
-gulp.task('typescript', ['clean'], function() {
-    return gulp.src(['src/index.ts', 'src/**/*.ts'])
-        .pipe(ts.createProject('./tsconfig.json')())
-        .pipe(gulp.dest('build'));
-});
-
-gulp.task('build', ['typescript'], function() {
-    return browserify('build/index.js', {
+gulp.task('build', ['clean'], function() {
+    return browserify('src/index.ts', {
             debug: false
         })
+        .plugin(tsify)
         .transform('brfs')
         .transform('babelify', {presets: ['es2015']})
         .bundle()
-        .pipe(fs.createWriteStream('build/compiled/bot.js'));
+        .pipe(fs.createWriteStream('build/bot.js'));
 });
 
 gulp.task('clean', function() {
-    return del(['build/*', '!build/compiled', 'build/compiled/*', 'test-localStorage']);
+    return del(['build/*', 'test-localStorage']);
 });
 
 gulp.task('watch', ['build'], function() {
