@@ -101,9 +101,9 @@ export class MacApi implements WorldApi {
                 request.get('https://api.ipify.org?format=json', {}, (err, req, body) => {
                     try {
                         let {ip} = JSON.parse(body);
-                        return ip ? ip : '0.0.0.0';
+                        resolve(ip ? ip : '0.0.0.0');
                     } catch(e) {
-                        return '0.0.0.0';
+                        resolve('0.0.0.0');
                     }
                 });
             })
