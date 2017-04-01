@@ -1,5 +1,3 @@
-#!/usr/bin/env osascript -l JavaScript
-
 'use strict';
 
 ObjC.import('stdlib');

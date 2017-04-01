@@ -1,23 +1,22 @@
-export const config: BotConfig = {
-    username: 'USER',
-    password: 'PASSWORD',
-    worldId: 123456,
-};
-
 /**
- * The configuration interface to ensure that all required fields are provided.
+ * Configuration for running the bot
  */
-interface BotConfig {
+export const config = {
     /**
-     * The username to log into the portal with.
+     * The username to log into the cloud portal with. Cloud servers only.
      */
-    username: string;
+    username: 'USER',
     /**
-     * The password to log into the portal with.
+     * The password to log into the cloud portal with. Cloud servers only.
      */
-    password: string;
+    password: 'PASSWORD',
     /**
-     * The worldId of the world to watch chat for, get this from the URL.
+     * For cloud servers, use the world ID in the URL when viewing the overview page.
+     * For mac servers, choose a unique ID for each server.
      */
-    worldId: number;
-}
+    worldId: 123456,
+    /**
+     * The path to the world you want to watch chat for. Mac servers only.
+     */
+    path: '~/Library/Containers/com.majicjungle.BlockheadsServer/Data/Library/Application Support/TheBlockheads/saves/YOUR_SAVE_ID'
+};

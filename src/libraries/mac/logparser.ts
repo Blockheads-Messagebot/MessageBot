@@ -47,14 +47,12 @@ export class MacLogParser {
 
     /** @hidden */
     private isValidLine(line: string): boolean {
-        return /^\w\w\w \d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
+        return /^\w\w\w (?:\d| )\d \d\d\d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
     }
 
     /** @hidden */
     private addLine(line: string): void {
-        let year = (new Date()).getFullYear();
-        let ts = line.substr(0, 15);
-        ts = ts.substr(0, 7) + year + ' ' + line.substr(7);
+        let ts = line.substr(0, 20);
 
         this.entries.push({
             raw: line,

@@ -3,8 +3,10 @@ import {LogEntry} from '../blockheads/types/logs';
 
 import {MacLogParser as LogParser} from './logparser';
 
-
-const plist = require('plist') as {parse: (s: string) => object};
+const plist = require('simple-plist') as {
+    readFile: (file: string, callback: (err: Error, data: Object) => void) => void,
+    readFileSync: (file: string) => Object,
+};
 
 import {spawn} from 'child_process';
 import * as fs from 'fs';
@@ -22,9 +24,9 @@ interface WorldV2 {
 }
 
 /**
- * This class is only used by the [[World]] class. You probably don't need to know anything about it unless you are creating new instances of the [[World]] class.
+ * This class is only used by the [[World]] class. You don't need to know anything about it unless you are creating new instances of the [[World]] class.
  */
-class MacApi implements WorldApi {
+export class MacApi implements WorldApi {
     /** @hidden */
     private path: string;
     /** @hidden */
@@ -41,18 +43,18 @@ class MacApi implements WorldApi {
         // Strip trailing slash if present
         this.path = path.replace(/\/$/, '');
 
-
         if ([
-            fs.existsSync(path + '/whitelist.txt'),
             fs.existsSync(path + '/worldv2'),
-            fs.existsSync(path + '/blacklist.txt'),
-            fs.existsSync(path + '/adminlist.txt'),
-            fs.existsSync(path + '/modlist.txt'),
         ].some(exists => !exists)) {
-            throw new Error("Invalid world path, missing list files.");
+            throw new Error("Invalid world path, missing worldv2 file.");
         }
 
-        this.worldv2 = <WorldV2>plist.parse(fs.readFileSync(this.path + '/worldv2', 'utf8'));
+        try {
+            this.worldv2 = <WorldV2>plist.readFileSync(this.path + '/worldv2');
+        } catch(err) {
+            throw new Error("Unable to read worldv2 file. Likely not a world folder.");
+        }
+
         this.parser = new LogParser();
     }
 
@@ -128,14 +130,18 @@ class MacApi implements WorldApi {
      */
     getLogs(): Promise<LogEntry[]> {
         return this.readText('logs')
-            .catch(() => [] as string[])
             .then(this.parser.parse);
     }
     /**
      * @inheritdoc
      */
     send(message: string): void {
-
+        spawn("osascript", [
+            '-l', 'JavaScript',
+            './send.scpt',
+            this.worldv2.worldName,
+            message
+        ]);
     }
 
     /**
@@ -155,5 +161,4 @@ class MacApi implements WorldApi {
             });
         });
     }
-
 }
