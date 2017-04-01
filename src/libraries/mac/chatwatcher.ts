@@ -35,7 +35,7 @@ export class MacChatWatcher implements ChatWatcher {
      * @inheritdoc
      */
     setup(name: string, online: string[]): void {
-        let re = new RegExp(`^\w\w\w \d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[\d+]: ${name.toUpperCase()}`);
+        let re = new RegExp(String.raw`^\w\w\w ( |\d)\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[\d+]: ${name.toUpperCase()}`);
         this.parser = new ChatParser(online);
 
         this.logs = fs.createWriteStream(this.path + '/logs', {flags: 'a'});
@@ -54,13 +54,13 @@ export class MacChatWatcher implements ChatWatcher {
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i];
-                if (re.test(line)) {
-                    // Get multiline messages
-                    while (lines[++i] && lines[i].startsWith('\t')) {
-                        line += lines[i];
-                    }
-                    i--;
+                // Get multiline messages
+                while (lines[++i] && lines[i].startsWith('\t')) {
+                    line += lines[i];
+                }
+                i--;
 
+                if (re.test(line)) {
                     this.parser.parse(line.substr(line.indexOf(']: ') + 6 + name.length))
                         .forEach(message => this.onMessage.dispatch(message));
 

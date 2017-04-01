@@ -138,7 +138,7 @@ export class MacApi implements WorldApi {
     send(message: string): void {
         spawn("osascript", [
             '-l', 'JavaScript',
-            './send.scpt',
+            __dirname + '/send.scpt',
             this.worldv2.worldName,
             message
         ]);

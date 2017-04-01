@@ -20,9 +20,11 @@ function run([world, text]) {
     var appse = se.processes.byName('BlockheadsServer');
     var win = appse.windows.byName("Blockheads Server");
 
-    // Show the app, and wait a moment for it to activate.
+    // Check if BH is the active application, if not, hide it after sending the message.
+    var isVisible = appse.frontmost();
+
+    // Show the app.
     app.activate();
-    delay(0.1);
 
     // Open the correct world
     var rows = win.scrollAreas.at(0).tables.at(0).rows;
@@ -36,4 +38,9 @@ function run([world, text]) {
     // Set the message field to the text and send the message.
     win.textFields.at(2).value = text;
     win.textFields.at(2).confirm();
+
+    // Hide the app if it was hidden before.
+    if (!isVisible) {
+        appse.visible = false;
+    }
 }
