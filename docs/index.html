@@ -73,16 +73,16 @@
 					<li>Edit the bookmark, look for the URL of this page and change it to the code you copied. Be sure to remove all the previous text!</li>
 					<li>Install complete!</li>
 				</ol>
-				<h5 id="installation-node-for-cloud-servers">Installation - Node for Cloud Servers</h5>
+				<h5 id="installation-node">Installation - Node</h5>
 				<ol>
 					<li>Clone the repo, <code>git clone http://github.com/Bibliofile/Blockheads-MessageBot</code></li>
 					<li>Enter the directory, <code>cd Blockheads-MessageBot</code></li>
 					<li>Install dependencies, <code>npm install --production</code></li>
 					<li>Edit the config in <code>./src/bot/config.ts</code></li>
-					<li>Run: <code>npm start</code></li>
+					<li>Run: <code>npm start:cloud</code> or <code>npm start:mac</code>.</li>
 				</ol>
 				<h5 id="importing-configs">Importing configs</h5>
-				<p>If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named <code>import.json</code> in the <code>src/bot</code> directory.</p>
+				<p>If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named <code>import.json</code> in the <code>./src/bot</code> directory. Not yet implemented.</p>
 				<h1 id="development">Development</h1>
 				<p>To run tests:
 				<code>npm run test</code></p>
