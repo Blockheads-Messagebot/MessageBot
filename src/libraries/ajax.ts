@@ -28,7 +28,7 @@ export class Ajax {
         url = (url.includes('?') ? url + '&' : url + '?') + stringify(params);
 
         return new Promise((resolve, reject) => {
-            baseRequest.get(url, {}, (err, req, body) => {
+            baseRequest.get(url, {}, (err, _req, body) => {
                 if (err) {
                     return reject(err);
                 }
@@ -73,7 +73,7 @@ export class Ajax {
                     'content-type': 'application/x-www-form-urlencoded',
                 },
                 body: stringify(params),
-            }, (err, req, body) => {
+            }, (err, _req, body) => {
                 if (err) {
                     return reject(err);
                 }

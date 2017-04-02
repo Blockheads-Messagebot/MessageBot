@@ -3,8 +3,8 @@
         "indent": [true, "spaces"],
         "no-duplicate-variable": true,
         "semicolon": [true, "always"],
-        "no-unused-variable": [true],
         "cyclomatic-complexity": [true, 10],
-        "no-invalid-this": [true, "check-function-in-method"]
+        "no-invalid-this": [true, "check-function-in-method"],
+        "no-unused-variable": [true]
     }
 }

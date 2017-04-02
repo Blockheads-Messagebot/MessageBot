@@ -692,7 +692,7 @@ class PortalApi {
             function getList(name) {
                 let list = html.match(new RegExp(`<textarea name="${name}">([\s\S]*?)<\/textarea>`));
                 if (list) {
-                    let temp = list[0].replace(/(&.*?;)/g, function (match, first) {
+                    let temp = list[0].replace(/(&.*?;)/g, function (_match, first) {
                         let map = {
                             '&lt;': '<',
                             '&gt;': '>',
@@ -801,8 +801,12 @@ class PortalApi {
      */
     postMessage() {
         if (this.messageQueue.length) {
-            ajax_1.Ajax.postJSON(`/api`, { command: 'send', worldId: this.worldId, message: this.messageQueue.shift() })
-                .then(response => {
+            ajax_1.Ajax.postJSON(`/api`, {
+                command: 'send',
+                worldId: this.worldId,
+                message: this.messageQueue.shift()
+            })
+                .then(() => {
                 setTimeout(this.postMessage, 500);
             }, () => {
                 setTimeout(this.postMessage, 1000);

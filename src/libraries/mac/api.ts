@@ -10,7 +10,6 @@ const plist = require('simple-plist') as {
 
 import {spawn} from 'child_process';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as request from 'request';
 
 /** @hidden */
@@ -98,7 +97,7 @@ export class MacApi implements WorldApi {
         return Promise.all([
             this.readText('whitelist'),
             new Promise(resolve => {
-                request.get('https://api.ipify.org?format=json', {}, (err, req, body) => {
+                request.get('https://api.ipify.org?format=json', {}, (_err, _req, body) => {
                     try {
                         let {ip} = JSON.parse(body);
                         resolve(ip ? ip : '0.0.0.0');

@@ -41,7 +41,7 @@ export class PortalApi implements WorldApi {
                 function getList(name: string): string[] {
                     let list = html.match(new RegExp(`<textarea name="${name}">([\s\S]*?)<\/textarea>`));
                     if (list) {
-                        let temp = list[0].replace(/(&.*?;)/g, function(match, first: string) {
+                        let temp = list[0].replace(/(&.*?;)/g, function(_match, first: string) {
                             let map: {[key: string]: string} = {
                                 '&lt;': '<',
                                 '&gt;': '>',
@@ -166,12 +166,16 @@ export class PortalApi implements WorldApi {
      */
     private postMessage(): void {
         if (this.messageQueue.length) {
-            ajax.postJSON(`/api`, {command: 'send', worldId: this.worldId, message: <string>this.messageQueue.shift()})
-                .then(response => {
-                    setTimeout(this.postMessage, 500);
-                }, () => {
-                    setTimeout(this.postMessage, 1000);
-                });
+            ajax.postJSON(`/api`, {
+                command: 'send',
+                worldId: this.worldId,
+                message: <string>this.messageQueue.shift()
+            })
+            .then(() => {
+                setTimeout(this.postMessage, 500);
+            }, () => {
+                setTimeout(this.postMessage, 1000);
+            });
         } else {
             setTimeout(this.postMessage, 500);
         }

@@ -16,7 +16,7 @@ describe('MacLogParser#parse', function() {
         parser.parse(messages);
 
         expect(messages).to.deep.equal(clone);
-    })
+    });
 
     it('Should handle chat', function() {
         let message = 'Apr  1 2017 14:49:24 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Hi';

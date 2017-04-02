@@ -16,7 +16,7 @@ describe('PortalLogParser#parse', function() {
         parser.parse(messages);
 
         expect(messages).to.deep.equal(clone);
-    })
+    });
 
     it('Should handle chat', function() {
         let message = '2016-11-27 19:28:49.280 blockheads_server161p1[11900] SERVER: Hi';
