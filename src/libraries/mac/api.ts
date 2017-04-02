@@ -55,7 +55,7 @@ export class MacApi implements WorldApi {
             throw new Error("Unable to read worldv2 file. Likely not a world folder.");
         }
 
-        this.parser = new LogParser();
+        this.parser = new LogParser(this.worldv2.worldName);
     }
 
     /**
@@ -157,7 +157,7 @@ export class MacApi implements WorldApi {
                     resolve([]);
                 }
 
-                resolve(data.split('\n').splice(2));
+                resolve(data.split('\n'));
             });
         });
     }

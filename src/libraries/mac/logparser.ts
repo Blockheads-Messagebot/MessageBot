@@ -6,11 +6,16 @@ import {LogEntry} from '../blockheads/types/logs';
 export class MacLogParser {
     /** @hidden */
     private entries: LogEntry[];
+    /** @hidden */
+    private name: string;
 
     /**
      * Creates a new instance of the class.
+     *
+     * @param name the name of the world.
      */
-    constructor() {
+    constructor(name: string) {
+        this.name = name;
         this.entries = [];
     }
 
@@ -21,10 +26,10 @@ export class MacLogParser {
      */
     parse(lines: string[]): LogEntry[] {
         // Copy the lines array
-        lines = lines.splice(0);
+        lines = lines.slice(0);
 
         // Assume first line is valid, if it isn't it will be dropped.
-        for (let i = lines.length; i > 0; i--) {
+        for (let i = lines.length - 1; i > 0; i--) {
             let line = lines[i];
 
             if (!this.isValidLine(line)) {
@@ -57,7 +62,7 @@ export class MacLogParser {
         this.entries.push({
             raw: line,
             timestamp: new Date(ts),
-            message: line.substr(line.indexOf(']') + 2)
+            message: line.substr(line.indexOf(']') + 6 + this.name.length)
         });
     }
 }

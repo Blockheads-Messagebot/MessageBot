@@ -14,7 +14,7 @@
   "homepage": "https://github.com/Bibliofile/Blockheads-MessageBot#readme",
   "scripts": {
     "test": "./node_modules/.bin/mocha --watch-extensions ts --watch -r ts-node/register src/**/*.test.ts",
-    "start:portal": "node -r ts-node/register src/index-cli.ts",
+    "start:cloud": "node -r ts-node/register src/index-cli.ts",
     "start:mac": "node -r ts-node/register src/index-mac.ts",
     "build": "./node_modules/.bin/gulp build",
     "docs": "./node_modules/.bin/typedoc --options ./typedoc.json",

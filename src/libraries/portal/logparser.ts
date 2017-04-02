@@ -21,10 +21,10 @@ export class PortalLogParser {
      */
     parse(lines: string[]): LogEntry[] {
         // Copy the lines array
-        lines = lines.splice(0);
+        lines = lines.slice(0);
 
         // Assume first line is valid, if it isn't it will be dropped.
-        for (let i = lines.length; i > 0; i--) {
+        for (let i = lines.length - 1; i > 0; i--) {
             let line = lines[i];
 
             if (!this.isValidLine(line)) {

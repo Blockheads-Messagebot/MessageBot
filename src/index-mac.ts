@@ -9,11 +9,17 @@ import {Storage} from './libraries/storage';
 import {config} from './bot/config';
 
 (async function main() {
-    let world = new World({
-        api: new MacApi(config.path),
-        chatWatcher: new MacChatWatcher(config.path),
-        storage: new Storage(config.worldId)
-    });
+    let world: World;
+    try {
+        world = new World({
+            api: new MacApi(config.path),
+            chatWatcher: new MacChatWatcher(config.path),
+            storage: new Storage(config.worldId)
+        });
+    } catch (e) {
+        console.error(e);
+        return;
+    }
 
     world.onMessage.sub(({player, message}) => {
         console.log(player.getName(), message);
