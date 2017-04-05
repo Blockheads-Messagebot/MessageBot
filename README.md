@@ -17,11 +17,22 @@
 If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named `import.json` in the `./src/bot` directory. Not yet implemented.
 
 # Development
-To run tests:
+### To run tests:
+Continually:
 `npm run test`
+Once:
+`npm run gulp -- test`
 
-To build:
-`npm run build`
+### To build
+The current code will always be linted to check for problems.
 
-To build docs:
-`npm run docs`
+Node:
+`npm run gulp -- build`
+Node + Browser:
+`npm run gulp -- browserify`
+Node + Browser continually:
+`npm run gulp -- watch`
+Node + Browser + Docs + run tests:
+`npm run gulp -- all`
+Docs only:
+`npm run gulp -- docs`

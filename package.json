@@ -13,16 +13,11 @@
   },
   "homepage": "https://github.com/Bibliofile/Blockheads-MessageBot#readme",
   "scripts": {
-    "build": "tsc",
-    "prebuild": "tslint -c tslint.json src/**/*.ts",
-    "build:docs": "typedoc --options ./typedoc.json",
-    "build:browser": "gulp build",
-    "build:watch": "gulp watch",
+    "gulp": "gulp",
     "clean": "gulp clean",
     "start:cloud": "node build/index-cli.ts",
     "start:mac": "node build/index-mac.ts",
-    "test": "mocha -r ts-node/register src/**/*.test.ts",
-    "test:watch": "mocha --watch-extensions ts --watch -r ts-node/register src/**/*.test.ts"
+    "test": "mocha --watch-extensions ts --watch -r ts-node/register src/**/*.test.ts"
   },
   "browser": {
     "./build/libraries/ajax.js": "./build/libraries/ajax-browser.js"
