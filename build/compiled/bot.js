@@ -1,11 +1,300 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var extension_1 = require("./extension");
+var settings_1 = require("./settings");
+/**
+ * The MessageBot class, this is used to send messages and register extensions.
+ */
+
+var MessageBot = function () {
+    /**
+     * Creates a new instance of the class.
+     *
+     * @param world the world to use for sending messages.
+     */
+    function MessageBot(world) {
+        _classCallCheck(this, MessageBot);
+
+        this.world = world;
+        this.settings = new settings_1.Settings(world.storage);
+        this.botSettings = this.settings.prefix('mb_');
+        this.extensions = new Map();
+    }
+    /**
+     * Adds an extension to the bot, this is the entry point for all extensions.
+     *
+     * @param id the unique name/extension ID for this extension.
+     * @param creator the function to call in order to initialize the extension.
+     */
+
+
+    _createClass(MessageBot, [{
+        key: "registerExtension",
+        value: function registerExtension(id, creator) {
+            if (this.extensions.has(id)) {
+                console.log("Extension " + id + " was already registered. Abort.");
+                return;
+            }
+            var ex = new extension_1.MessageBotExtension(this);
+            ex.settings = this.settings.prefix(id);
+            this.extensions.set(id, ex);
+            creator.call(ex, ex, this.world);
+        }
+        /**
+         * Removes an extension and calls it's uninstall function.
+         *
+         * @param id the extension to remove.
+         */
+
+    }, {
+        key: "deregisterExtension",
+        value: function deregisterExtension(id) {
+            var ex = this.extensions.get(id);
+            if (!ex) {
+                return;
+            }
+            try {
+                ex.uninstall();
+            } catch (err) {
+                console.log("Uninstall error:", err);
+            }
+            this.extensions.delete(id);
+        }
+        /**
+         * Gets an extension's exports, if it has been registered. Otherwise returns undefined.
+         *
+         * @param extensionId the id of the extension to get the exports for.
+         */
+
+    }, {
+        key: "getExports",
+        value: function getExports(extensionId) {
+            var ex = this.extensions.get(extensionId);
+            if (ex) {
+                return ex.exports;
+            }
+        }
+        /**
+         * Sends a message to the world for this bot, should usually be used in place of world.send.
+         *
+         * @param message the message to send
+         * @param params any variables to inject into the message.
+         */
+
+    }, {
+        key: "send",
+        value: function send(message) {
+            var _this = this;
+
+            var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            var messages = void 0;
+            // Split the message if splitting is enabled.
+            if (this.botSettings.get('splitMessages', false)) {
+                messages = message.split(this.botSettings.get('splitToken', '<split>'));
+            } else {
+                messages = [message];
+            }
+            // Common enough to be done here, set the name of the player up right.
+            if (params['name'] && params['name'].length) {
+                var player = params['name'];
+                params['name'] = player.toLocaleLowerCase();
+                params['Name'] = player[0].toLocaleUpperCase() + player.substr(1).toLocaleLowerCase();
+                params['NAME'] = player.toLocaleUpperCase();
+            }
+            // Loop through messages, replacing varibles, then send the message
+            messages.forEach(function (msg) {
+                Object.keys(params).forEach(function (key) {
+                    // Escape RegExp special characters in key
+                    var safeKey = key.replace(/([.+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+                    msg = msg.replace(new RegExp("{{" + safeKey + "}}", 'g'), params[key]);
+                });
+                _this.world.send(msg);
+            });
+        }
+    }]);
+
+    return MessageBot;
+}();
+
+exports.MessageBot = MessageBot;
+
+},{"./extension":2,"./settings":3}],2:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Extension class, created by the bot with bot.registerExtension. Should not be created directly.
+ */
+
+var MessageBotExtension = function () {
+  /**
+   * Creates a new instance of the class.
+   *
+   * @param bot the bot to attach this extension to.
+   */
+  function MessageBotExtension(bot) {
+    _classCallCheck(this, MessageBotExtension);
+
+    this.world = bot.world;
+    this.bot = bot;
+    this.exports = {};
+  }
+  /**
+   * Removes the extension. All listeners should be removed here.
+   */
+
+
+  _createClass(MessageBotExtension, [{
+    key: "uninstall",
+    value: function uninstall() {}
+    /**
+     * Convenience method to export a property for other extensions to use.
+     *
+     * @param key the export name
+     * @param prop the property to export
+     */
+
+  }, {
+    key: "export",
+    value: function _export(key, prop) {
+      return this.exports[key] = prop;
+    }
+  }]);
+
+  return MessageBotExtension;
+}();
+
+exports.MessageBotExtension = MessageBotExtension;
+
+},{}],3:[function(require,module,exports){
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Convenience class to make saving settings easier.
+ */
+
+var Settings = function () {
+    /**
+     * Creates a new instance of the Settings class.
+     *
+     * @param storage the storage instance to save settings in.
+     * @param prefix the prefix to save settings with.
+     */
+    function Settings(storage, prefix) {
+        _classCallCheck(this, Settings);
+
+        /** @hidden */
+        this.STORAGE_ID = 'mb_preferences';
+        this.storage = storage;
+        this._prefix = prefix || '';
+    }
+    /**
+     * Gets a setting from storage, returns the fallback if the setting has not been saved.
+     *
+     * @param key the setting name
+     * @param fallback what to return if the key wasn't found or was the wrong type.
+     */
+
+
+    _createClass(Settings, [{
+        key: "get",
+        value: function get(key, fallback) {
+            var items = this.storage.getObject(this.STORAGE_ID, {});
+            if ((typeof fallback === "undefined" ? "undefined" : _typeof(fallback)) == _typeof(items[this._prefix + key])) {
+                return items[key];
+            }
+            return fallback;
+        }
+        /**
+         * Saves a setting for future use.
+         *
+         * @param key the setting name to save
+         * @param pref what to save.
+         */
+
+    }, {
+        key: "set",
+        value: function set(key, pref) {
+            var items = this.storage.getObject(this.STORAGE_ID, {});
+            items[this._prefix + key] = pref;
+            this.storage.set(this.STORAGE_ID, items);
+        }
+        /**
+         * Removes a setting key, if it exists.
+         *
+         * @param key the setting name to remove.
+         */
+
+    }, {
+        key: "remove",
+        value: function remove(key) {
+            var items = this.storage.getObject(this.STORAGE_ID, {});
+            delete items[this._prefix + key];
+            this.storage.set(this.STORAGE_ID, items);
+        }
+        /**
+         * Removes all settings under a prefix, if set, or all settings.
+         */
+
+    }, {
+        key: "removeAll",
+        value: function removeAll() {
+            var _this = this;
+
+            var items = this.storage.getObject(this.STORAGE_ID, {});
+            Object.keys(items).forEach(function (key) {
+                if (key.startsWith(_this._prefix)) {
+                    delete items[key];
+                }
+            });
+            this.storage.set(this.STORAGE_ID, items);
+        }
+        /**
+         * Creates a new instance of the class, with a prefixed name.
+         *
+         * @param prefix the prefix to save settings with.
+         */
+
+    }, {
+        key: "prefix",
+        value: function prefix(_prefix) {
+            return new Settings(this.storage, this._prefix + _prefix);
+        }
+    }]);
+
+    return Settings;
+}();
+
+exports.Settings = Settings;
+
+},{}],4:[function(require,module,exports){
+(function (global){
+"use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 var chatwatcher_1 = require("./libraries/portal/chatwatcher");
 var api_1 = require("./libraries/portal/api");
 var world_1 = require("./libraries/blockheads/world");
 var storage_1 = require("./libraries/storage");
+var bot_1 = require("./bot/bot");
 var world = new world_1.World({
     api: new api_1.PortalApi(worldId),
     chatWatcher: new chatwatcher_1.PortalChatWatcher({
@@ -14,6 +303,7 @@ var world = new world_1.World({
     }),
     storage: new storage_1.Storage(worldId)
 });
+global.MessageBot = new bot_1.MessageBot(world);
 world.onMessage.sub(function (_ref) {
     var player = _ref.player,
         message = _ref.message;
@@ -27,7 +317,8 @@ world.onLeave.sub(function (player) {
     console.log(player.getName(), 'left');
 });
 
-},{"./libraries/blockheads/world":6,"./libraries/portal/api":7,"./libraries/portal/chatwatcher":9,"./libraries/storage":12}],2:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./bot/bot":1,"./libraries/blockheads/world":9,"./libraries/portal/api":10,"./libraries/portal/chatwatcher":12,"./libraries/storage":15}],5:[function(require,module,exports){
 // See ajax.ts for documentation.
 "use strict";
 
@@ -146,7 +437,7 @@ function urlStringify(obj) {
     }).join('&');
 }
 
-},{}],3:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -408,7 +699,7 @@ var CommandWatcher = function () {
 
 exports.CommandWatcher = CommandWatcher;
 
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -563,7 +854,7 @@ var Player = function () {
 
 exports.Player = Player;
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -594,13 +885,37 @@ var ChatType;
   ChatType[ChatType["other"] = 4] = "other";
 })(ChatType = exports.ChatType || (exports.ChatType = {}));
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var chat_1 = require("./types/chat");
 var simpleevent_1 = require("../simpleevent");
@@ -651,16 +966,49 @@ var World = function () {
         this.storage = storage;
         this.api = api;
         this.players = this.storage.getObject(this.STORAGE_ID, {});
-        if (chatWatcher) {
-            this.api.getOverview().then(function (overview) {
-                chatWatcher.setup(overview.name, overview.online);
-            });
-            chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
-            this.getLists().then(function (lists) {
-                var watcher = new commandwatcher_1.CommandWatcher(lists, _this.getPlayer);
-                _this.onCommand.subscribe(watcher.listener);
-            });
-        }
+        (function () {
+            return __awaiter(_this, void 0, void 0, regeneratorRuntime.mark(function _callee() {
+                var overview, lists, watcher;
+                return regeneratorRuntime.wrap(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                if (chatWatcher) {
+                                    _context.next = 2;
+                                    break;
+                                }
+
+                                return _context.abrupt("return");
+
+                            case 2:
+                                _context.next = 4;
+                                return this.getOverview();
+
+                            case 4:
+                                overview = _context.sent;
+
+                                if (this.players[overview.owner]) {
+                                    this.players[overview.owner].owner = true;
+                                }
+                                chatWatcher.setup(overview.name, overview.online);
+                                chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
+                                _context.next = 10;
+                                return this.getLists();
+
+                            case 10:
+                                lists = _context.sent;
+                                watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer);
+
+                                this.onCommand.subscribe(watcher.listener);
+
+                            case 13:
+                            case "end":
+                                return _context.stop();
+                        }
+                    }
+                }, _callee, this);
+            }));
+        })();
     }
     //Methods
     /**
@@ -815,7 +1163,7 @@ var World = function () {
                 case chat_1.ChatType.message:
                     return this.onMessage.dispatch({ player: player, message: message.message });
                 case chat_1.ChatType.other:
-                    return this.onOther.dispatch({ message: message.message });
+                    return this.onOther.dispatch(message.message);
             }
         }
         /**
@@ -850,7 +1198,7 @@ var World = function () {
 
 exports.World = World;
 
-},{"../simpleevent":11,"./commandwatcher":3,"./player":4,"./types/chat":5}],7:[function(require,module,exports){
+},{"../simpleevent":14,"./commandwatcher":6,"./player":7,"./types/chat":8}],10:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -896,9 +1244,9 @@ var PortalApi = function () {
                 return ajax_1.Ajax.get("/worlds/lists/" + _this.worldId);
             }).then(function (html) {
                 function getList(name) {
-                    var list = html.match(new RegExp("<textarea name=\"" + name + "\">([sS]*?)</textarea>"));
+                    var list = html.match(new RegExp("<textarea name=\"" + name + "\">([\\s\\S]*?)</textarea>"));
                     if (list) {
-                        var temp = list[0].replace(/(&.*?;)/g, function (_match, first) {
+                        var temp = list[1].replace(/(&.*?;)/g, function (_match, first) {
                             var map = {
                                 '&lt;': '<',
                                 '&gt;': '>',
@@ -1046,7 +1394,7 @@ var PortalApi = function () {
 
 exports.PortalApi = PortalApi;
 
-},{"../ajax":2,"./logparser":10}],8:[function(require,module,exports){
+},{"../ajax":5,"./logparser":13}],11:[function(require,module,exports){
 "use strict";
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -1202,7 +1550,7 @@ var PortalChatParser = function () {
 
 exports.PortalChatParser = PortalChatParser;
 
-},{"../blockheads/types/chat":5}],9:[function(require,module,exports){
+},{"../blockheads/types/chat":8}],12:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1310,7 +1658,7 @@ var PortalChatWatcher = function () {
 
 exports.PortalChatWatcher = PortalChatWatcher;
 
-},{"../ajax":2,"../simpleevent":11,"./chatparser":8}],10:[function(require,module,exports){
+},{"../ajax":5,"../simpleevent":14,"./chatparser":11}],13:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1386,7 +1734,7 @@ var PortalLogParser = function () {
 
 exports.PortalLogParser = PortalLogParser;
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1518,7 +1866,7 @@ var SimpleEvent = function () {
 
 exports.SimpleEvent = SimpleEvent;
 
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1552,9 +1900,7 @@ var Storage = function () {
 
     _createClass(Storage, [{
         key: "getString",
-        value: function getString(key, fallback) {
-            var local = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
+        value: function getString(key, fallback, local) {
             var result;
             if (local) {
                 result = localStorage.getItem("" + key + this.namespace);
@@ -1576,9 +1922,7 @@ var Storage = function () {
 
     }, {
         key: "getObject",
-        value: function getObject(key, fallback) {
-            var local = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
+        value: function getObject(key, fallback, local) {
             var result = this.getString(key, '', local);
             if (!result) {
                 return fallback;
@@ -1608,9 +1952,7 @@ var Storage = function () {
 
     }, {
         key: "set",
-        value: function set(key, data) {
-            var local = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
+        value: function set(key, data, local) {
             if (local) {
                 key = "" + key + this.namespace;
             }
@@ -1654,4 +1996,4 @@ var Storage = function () {
 
 exports.Storage = Storage;
 
-},{}]},{},[1]);
+},{}]},{},[4]);

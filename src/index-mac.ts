@@ -2,11 +2,17 @@
 const {LocalStorage} = require('node-localstorage');
 (<any>global).localStorage = new LocalStorage('./localStorage');
 
+// Import config.
+const config = require('../config/bot') as {path: string, worldId: number | string};
+config.path = config.path || '';
+if (config.worldId == undefined) {
+    console.log("No world ID specified in config/bot.js");
+}
+
 import {MacChatWatcher} from './libraries/mac/chatwatcher';
 import {MacApi} from './libraries/mac/api';
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
-import {config} from './bot/config';
 
 (async function main() {
     let world: World;
@@ -21,17 +27,7 @@ import {config} from './bot/config';
         return;
     }
 
-    world.onMessage.sub(({player, message}) => {
-        console.log(player.getName(), message);
-    });
-
-    world.onJoin.sub(player => {
-        console.log(player.getName(), 'joined');
-    });
-
-    world.onLeave.sub(player => {
-        console.log(player.getName(), 'left');
-    });
+    require('./extensions/console');
 }());
 
 

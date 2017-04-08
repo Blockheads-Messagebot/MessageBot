@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>CommandWatcher | MessageBot</title>
+	<title>MessageBotExtension | MessageBot</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="commandwatcher.html">CommandWatcher</a>
+					<a href="messagebotextension.html">MessageBotExtension</a>
 				</li>
 			</ul>
-			<h1>Class CommandWatcher</h1>
+			<h1>Class MessageBotExtension</h1>
 		</div>
 	</div>
 </header>
@@ -69,7 +69,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Class to watch chat for commands and update the stored lists as needed. You don&#39;t need to know anything about this class. It is only used by the <a href="world.html">World</a> class internally to keep lists up to date.</p>
+						<p>Extension class, created by the bot with bot.registerExtension. Should not be created directly.</p>
 					</div>
 				</div>
 			</section>
@@ -77,7 +77,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">CommandWatcher</span>
+						<span class="target">MessageBotExtension</span>
 					</li>
 				</ul>
 			</section>
@@ -88,13 +88,23 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="commandwatcher.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="messagebotextension.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#bot" class="tsd-kind-icon">bot</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#exports" class="tsd-kind-icon">exports</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#settings" class="tsd-kind-icon">settings</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#world" class="tsd-kind-icon">world</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="commandwatcher.html#listener" class="tsd-kind-icon">listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="messagebotextension.html#export" class="tsd-kind-icon">export</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="messagebotextension.html#uninstall" class="tsd-kind-icon">uninstall</a></li>
 							</ul>
 						</section>
 					</div>
@@ -106,13 +116,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Command<wbr>Watcher<span class="tsd-signature-symbol">(</span>lists<span class="tsd-signature-symbol">: </span><a href="../interfaces/worldlists.html" class="tsd-signature-type">WorldLists</a>, getPlayer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="commandwatcher.html" class="tsd-signature-type">CommandWatcher</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Message<wbr>Bot<wbr>Extension<span class="tsd-signature-symbol">(</span>bot<span class="tsd-signature-symbol">: </span><a href="messagebot.html" class="tsd-signature-type">MessageBot</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="messagebotextension.html" class="tsd-signature-type">MessageBotExtension</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/libraries/blockheads/commandwatcher.ts#L11">libraries/blockheads/commandwatcher.ts:11</a></li>
+									<li>Defined in bot/extension.ts:32</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -123,91 +133,153 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>lists: <a href="../interfaces/worldlists.html" class="tsd-signature-type">WorldLists</a></h5>
+									<h5>bot: <a href="messagebot.html" class="tsd-signature-type">MessageBot</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
-											<p>the lists to keep up to date.</p>
+											<p>the bot to attach this extension to.</p>
 										</div>
 									</div>
-								</li>
-								<li>
-									<h5>getPlayer: <span class="tsd-signature-type">function</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>a callback to be used for getting player info. Must return an instance of Player</p>
-										</div>
-									</div>
-									<ul class="tsd-parameters">
-										<li class="tsd-parameter-siganture">
-											<ul class="tsd-signatures tsd-kind-type-literal tsd-is-not-exported">
-												<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="player.html" class="tsd-signature-type">Player</a></li>
-											</ul>
-											<ul class="tsd-descriptions">
-												<li class="tsd-description">
-													<h4 class="tsd-parameters-title">Parameters</h4>
-													<ul class="tsd-parameters">
-														<li>
-															<h5>name: <span class="tsd-signature-type">string</span></h5>
-														</li>
-													</ul>
-													<h4 class="tsd-returns-title">Returns <a href="player.html" class="tsd-signature-type">Player</a></h4>
-												</li>
-											</ul>
-										</li>
-									</ul>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="commandwatcher.html" class="tsd-signature-type">CommandWatcher</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="messagebotextension.html" class="tsd-signature-type">MessageBotExtension</a></h4>
 						</li>
 					</ul>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="bot" class="tsd-anchor"></a>
+					<h3>bot</h3>
+					<div class="tsd-signature tsd-kind-icon">bot<span class="tsd-signature-symbol">:</span> <a href="messagebot.html" class="tsd-signature-type">MessageBot</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in bot/extension.ts:22</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The bot which can be used to send messages.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="exports" class="tsd-anchor"></a>
+					<h3>exports</h3>
+					<div class="tsd-signature tsd-kind-icon">exports<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in bot/extension.ts:27</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Any exports which are availible to other extensions.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-index-signature">
+								<h5><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">any</span></h5>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="settings" class="tsd-anchor"></a>
+					<h3>settings</h3>
+					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <a href="settings.html" class="tsd-signature-type">Settings</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in bot/extension.ts:32</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A convenience class to store extension settings</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="world" class="tsd-anchor"></a>
+					<h3>world</h3>
+					<div class="tsd-signature tsd-kind-icon">world<span class="tsd-signature-symbol">:</span> <a href="world.html" class="tsd-signature-type">World</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in bot/extension.ts:17</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The world that this extension is watching.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="listener" class="tsd-anchor"></a>
-					<h3>listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">listener<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+					<a name="export" class="tsd-anchor"></a>
+					<h3>export</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">export&lt;T&gt;<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, prop<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/libraries/blockheads/commandwatcher.ts#L35">libraries/blockheads/commandwatcher.ts:35</a></li>
+									<li>Defined in bot/extension.ts:56</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Function called whenever new commands come in.</p>
+									<p>Convenience method to export a property for other extensions to use.</p>
 								</div>
 							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>__namedParameters: <span class="tsd-signature-type">object</span></h5>
-									<ul class="tsd-parameters">
-										<li class="tsd-parameter">
-											<h5>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
-											<div class="tsd-comment tsd-typography">
-												<p>any arguments supplied</p>
-											</div>
-										</li>
-										<li class="tsd-parameter">
-											<h5>command<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
-											<div class="tsd-comment tsd-typography">
-												<p>the command used</p>
-											</div>
-										</li>
-										<li class="tsd-parameter">
-											<h5>player<span class="tsd-signature-symbol">: </span><a href="player.html" class="tsd-signature-type">Player</a></h5>
-											<div class="tsd-comment tsd-typography">
-												<p>the player doing the command</p>
-											</div>
-										</li>
-									</ul>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the export name</p>
+									</div>
+								</li>
+								<li>
+									<h5>prop: <span class="tsd-signature-type">T</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the property to export</p>
+									</div>
 								</li>
 							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="uninstall" class="tsd-anchor"></a>
+					<h3>uninstall</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">uninstall<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in bot/extension.ts:48</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Removes the extension. All listeners should be removed here.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -233,9 +305,36 @@
 					<li class=" tsd-kind-class">
 						<a href="messagebot.html" class="tsd-kind-icon">Message<wbr>Bot</a>
 					</li>
-					<li class=" tsd-kind-class">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class">
 						<a href="messagebotextension.html" class="tsd-kind-icon">Message<wbr>Bot<wbr>Extension</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="messagebotextension.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebotextension.html#bot" class="tsd-kind-icon">bot</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebotextension.html#exports" class="tsd-kind-icon">exports</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebotextension.html#settings" class="tsd-kind-icon">settings</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebotextension.html#world" class="tsd-kind-icon">world</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+								<a href="messagebotextension.html#export" class="tsd-kind-icon">export</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="messagebotextension.html#uninstall" class="tsd-kind-icon">uninstall</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-class">
 						<a href="player.html" class="tsd-kind-icon">Player</a>
 					</li>

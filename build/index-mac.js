@@ -11,33 +11,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Polyfill localStorage
 const { LocalStorage } = require('node-localstorage');
 global.localStorage = new LocalStorage('./localStorage');
+// Import config.
+const config = require('../config/bot');
+config.path = config.path || '';
+if (config.worldId == undefined) {
+    console.log("No world ID specified in config/bot.js");
+}
 const chatwatcher_1 = require("./libraries/mac/chatwatcher");
 const api_1 = require("./libraries/mac/api");
 const world_1 = require("./libraries/blockheads/world");
 const storage_1 = require("./libraries/storage");
-const config_1 = require("./bot/config");
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {
         let world;
         try {
             world = new world_1.World({
-                api: new api_1.MacApi(config_1.config.path),
-                chatWatcher: new chatwatcher_1.MacChatWatcher(config_1.config.path),
-                storage: new storage_1.Storage(config_1.config.worldId)
+                api: new api_1.MacApi(config.path),
+                chatWatcher: new chatwatcher_1.MacChatWatcher(config.path),
+                storage: new storage_1.Storage(config.worldId)
             });
         }
         catch (e) {
             console.error(e);
             return;
         }
-        world.onMessage.sub(({ player, message }) => {
-            console.log(player.getName(), message);
-        });
-        world.onJoin.sub(player => {
-            console.log(player.getName(), 'joined');
-        });
-        world.onLeave.sub(player => {
-            console.log(player.getName(), 'left');
-        });
+        require('./extensions/console');
     });
 }());

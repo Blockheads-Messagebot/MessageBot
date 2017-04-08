@@ -66,6 +66,13 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>The MessageBot class, this is used to send messages and register extensions.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -84,6 +91,22 @@
 								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="messagebot.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebot.html#settings" class="tsd-kind-icon">settings</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebot.html#world" class="tsd-kind-icon">world</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="messagebot.html#deregisterextension" class="tsd-kind-icon">deregister<wbr>Extension</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="messagebot.html#getexports" class="tsd-kind-icon">get<wbr>Exports</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="messagebot.html#registerextension" class="tsd-kind-icon">register<wbr>Extension</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="messagebot.html#send" class="tsd-kind-icon">send</a></li>
+							</ul>
+						</section>
 					</div>
 				</section>
 			</section>
@@ -93,16 +116,213 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Message<wbr>Bot<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="messagebot.html" class="tsd-signature-type">MessageBot</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Message<wbr>Bot<span class="tsd-signature-symbol">(</span>world<span class="tsd-signature-symbol">: </span><a href="world.html" class="tsd-signature-type">World</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="messagebot.html" class="tsd-signature-type">MessageBot</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in bot/bot.ts:1</li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L23">bot/bot.ts:23</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates a new instance of the class.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>world: <a href="world.html" class="tsd-signature-type">World</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>the world to use for sending messages.</p>
+										</div>
+									</div>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="messagebot.html" class="tsd-signature-type">MessageBot</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="settings" class="tsd-anchor"></a>
+					<h3>settings</h3>
+					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <a href="settings.html" class="tsd-signature-type">Settings</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L18">bot/bot.ts:18</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The settings used by this bot, based off the world used when creating this instance of the class.
+							Extension settings should be stored using ex.settings not ex.bot.settings.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="world" class="tsd-anchor"></a>
+					<h3>world</h3>
+					<div class="tsd-signature tsd-kind-icon">world<span class="tsd-signature-symbol">:</span> <a href="world.html" class="tsd-signature-type">World</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L12">bot/bot.ts:12</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The world that this bot is for.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="deregisterextension" class="tsd-anchor"></a>
+					<h3>deregister<wbr>Extension</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">deregister<wbr>Extension<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L64">bot/bot.ts:64</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Removes an extension and calls it&#39;s uninstall function.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the extension to remove.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getexports" class="tsd-anchor"></a>
+					<h3>get<wbr>Exports</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Exports<span class="tsd-signature-symbol">(</span>extensionId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L84">bot/bot.ts:84</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets an extension&#39;s exports, if it has been registered. Otherwise returns undefined.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>extensionId: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the id of the extension to get the exports for.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">object</span>
+								<span class="tsd-signature-symbol"> | </span>
+								<span class="tsd-signature-type">undefined</span>
+							</h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="registerextension" class="tsd-anchor"></a>
+					<h3>register<wbr>Extension</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">register<wbr>Extension<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, creator<span class="tsd-signature-symbol">: </span><a href="../globals.html#extensioninitializer" class="tsd-signature-type">ExtensionInitializer</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L44">bot/bot.ts:44</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Adds an extension to the bot, this is the entry point for all extensions.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the unique name/extension ID for this extension.</p>
+									</div>
+								</li>
+								<li>
+									<h5>creator: <a href="../globals.html#extensioninitializer" class="tsd-signature-type">ExtensionInitializer</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the function to call in order to initialize the extension.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="send" class="tsd-anchor"></a>
+					<h3>send</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">send<span class="tsd-signature-symbol">(</span>message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, params<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/6d99989/src/bot/bot.ts#L97">bot/bot.ts:97</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sends a message to the world for this bot, should usually be used in place of world.send.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>message: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the message to send</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> params: <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>any variables to inject into the message.</p>
+									</div>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-index-signature">
+											<h5><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">string</span></h5>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -124,8 +344,44 @@
 					<li class=" tsd-kind-class">
 						<a href="hook.html" class="tsd-kind-icon">Hook</a>
 					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class">
+						<a href="messagebot.html" class="tsd-kind-icon">Message<wbr>Bot</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="messagebot.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebot.html#settings" class="tsd-kind-icon">settings</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebot.html#world" class="tsd-kind-icon">world</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="messagebot.html#deregisterextension" class="tsd-kind-icon">deregister<wbr>Extension</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="messagebot.html#getexports" class="tsd-kind-icon">get<wbr>Exports</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="messagebot.html#registerextension" class="tsd-kind-icon">register<wbr>Extension</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="messagebot.html#send" class="tsd-kind-icon">send</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class">
+						<a href="messagebotextension.html" class="tsd-kind-icon">Message<wbr>Bot<wbr>Extension</a>
+					</li>
 					<li class=" tsd-kind-class">
 						<a href="player.html" class="tsd-kind-icon">Player</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="settings.html" class="tsd-kind-icon">Settings</a>
 					</li>
 					<li class=" tsd-kind-class tsd-has-type-parameter">
 						<a href="simpleevent.html" class="tsd-kind-icon">Simple<wbr>Event</a>

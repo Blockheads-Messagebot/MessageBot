@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const chat_1 = require("./types/chat");
 const simpleevent_1 = require("../simpleevent");
@@ -40,16 +48,20 @@ class World {
         this.storage = storage;
         this.api = api;
         this.players = this.storage.getObject(this.STORAGE_ID, {});
-        if (chatWatcher) {
-            this.api.getOverview().then(overview => {
-                chatWatcher.setup(overview.name, overview.online);
-            });
+        (() => __awaiter(this, void 0, void 0, function* () {
+            if (!chatWatcher) {
+                return;
+            }
+            let overview = yield this.getOverview();
+            if (this.players[overview.owner]) {
+                this.players[overview.owner].owner = true;
+            }
+            chatWatcher.setup(overview.name, overview.online);
             chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
-            this.getLists().then(lists => {
-                let watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer);
-                this.onCommand.subscribe(watcher.listener);
-            });
-        }
+            let lists = yield this.getLists();
+            let watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer);
+            this.onCommand.subscribe(watcher.listener);
+        }))();
     }
     //Methods
     /**
@@ -170,7 +182,7 @@ class World {
             case chat_1.ChatType.message:
                 return this.onMessage.dispatch({ player, message: message.message });
             case chat_1.ChatType.other:
-                return this.onOther.dispatch({ message: message.message });
+                return this.onOther.dispatch(message.message);
         }
     }
     /**

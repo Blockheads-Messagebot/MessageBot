@@ -37,7 +37,6 @@ describe('PortalLogParser#parse', function () {
 /HELP - display this message.
 /PLAYERS - list currently active players.`.split('\n');
         let result = parser.parse(lines);
-        console.log(lines);
         chai_1.expect(result).to.deep.equal([{
                 raw: lines.join('\n'),
                 timestamp: new Date('2016-07-18T18:28:23.603Z'),

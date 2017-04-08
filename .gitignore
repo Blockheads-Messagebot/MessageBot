@@ -11,3 +11,6 @@ node_modules/*
 # Stored config
 localStorage
 test-localStorage
+
+# Bot settings
+config/bot.js

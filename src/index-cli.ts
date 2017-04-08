@@ -2,12 +2,19 @@
 const {LocalStorage} = require('node-localstorage');
 (<any>global).localStorage = new LocalStorage('./localStorage');
 
+// Import config, making it as hard as possible to fail with a bad error.
+const config = require('../config/bot') as {username: string, password: string, worldId: number};
+config.username = config.username || '';
+config.password = config.password || '';
+config.worldId = config.worldId || 0;
+
+
 import {PortalChatWatcher} from './libraries/portal/chatwatcher';
 import {PortalApi} from './libraries/portal/api';
 import {PortalAuth} from './libraries/portal/auth';
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
-import {config} from './bot/config';
+import {MessageBot} from './bot/bot';
 
 let auth = new PortalAuth(config.username, config.password);
 
@@ -15,8 +22,7 @@ let auth = new PortalAuth(config.username, config.password);
     try {
         await auth.login();
     } catch(err) {
-        console.log("Unable to log in. Bad username / password?");
-
+        console.log("Unable to log in. Bad or missing username / password?");
         console.log('Details: ', err);
 
         return;
@@ -33,17 +39,9 @@ let auth = new PortalAuth(config.username, config.password);
         storage: new Storage(config.worldId)
     });
 
-    world.onMessage.sub(({player, message}) => {
-        console.log(player.getName(), message);
-    });
+    (global as any).bot = new MessageBot(world);
 
-    world.onJoin.sub(player => {
-        console.log(player.getName(), 'joined');
-    });
-
-    world.onLeave.sub(player => {
-        console.log(player.getName(), 'left');
-    });
+    require('./extensions/console');
 }());
 
 

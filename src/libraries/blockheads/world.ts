@@ -56,7 +56,7 @@ export class World {
     /**
      * Event fired for all messages which failed to be parsed.
      */
-    public onOther = new SimpleEvent<{message: string}>();
+    public onOther = new SimpleEvent<string>();
 
     /**
      * Storage class for this world.
@@ -74,16 +74,23 @@ export class World {
 
         this.players = this.storage.getObject(this.STORAGE_ID, {});
 
-        if (chatWatcher) {
-            this.api.getOverview().then(overview => {
-                chatWatcher.setup(overview.name, overview.online);
-            });
+        (async () => {
+            if (!chatWatcher) {
+                return;
+            }
+
+            let overview = await this.getOverview();
+            if (this.players[overview.owner]) {
+                this.players[overview.owner].owner = true;
+            }
+
+            chatWatcher.setup(overview.name, overview.online);
             chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
-            this.getLists().then(lists => {
-                let watcher = new CommandWatcher(lists, this.getPlayer);
-                this.onCommand.subscribe(watcher.listener);
-            });
-        }
+
+            let lists = await this.getLists();
+            let watcher = new CommandWatcher(lists, this.getPlayer);
+            this.onCommand.subscribe(watcher.listener);
+        })();
     }
 
     //Methods
@@ -221,7 +228,7 @@ export class World {
             case ChatType.message:
                 return this.onMessage.dispatch({player, message: <string>message.message});
             case ChatType.other:
-                return this.onOther.dispatch({message: <string>message.message});
+                return this.onOther.dispatch(<string>message.message);
         }
     }
 

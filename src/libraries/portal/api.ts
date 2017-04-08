@@ -39,9 +39,9 @@ export class PortalApi implements WorldApi {
             .then(() => ajax.get(`/worlds/lists/${this.worldId}`))
             .then((html: string) => {
                 function getList(name: string): string[] {
-                    let list = html.match(new RegExp(`<textarea name="${name}">([\s\S]*?)<\/textarea>`));
+                    let list = html.match(new RegExp(`<textarea name="${name}">([\\s\\S]*?)</textarea>`));
                     if (list) {
-                        let temp = list[0].replace(/(&.*?;)/g, function(_match, first: string) {
+                        let temp = list[1].replace(/(&.*?;)/g, function(_match, first: string) {
                             let map: {[key: string]: string} = {
                                 '&lt;': '<',
                                 '&gt;': '>',

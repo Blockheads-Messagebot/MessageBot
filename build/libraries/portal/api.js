@@ -27,9 +27,9 @@ class PortalApi {
             .then(() => ajax_1.Ajax.get(`/worlds/lists/${this.worldId}`))
             .then((html) => {
             function getList(name) {
-                let list = html.match(new RegExp(`<textarea name="${name}">([\s\S]*?)<\/textarea>`));
+                let list = html.match(new RegExp(`<textarea name="${name}">([\\s\\S]*?)</textarea>`));
                 if (list) {
-                    let temp = list[0].replace(/(&.*?;)/g, function (_match, first) {
+                    let temp = list[1].replace(/(&.*?;)/g, function (_match, first) {
                         let map = {
                             '&lt;': '<',
                             '&gt;': '>',

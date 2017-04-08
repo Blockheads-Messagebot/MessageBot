@@ -2,6 +2,7 @@ import {PortalChatWatcher} from './libraries/portal/chatwatcher';
 import {PortalApi} from './libraries/portal/api';
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
+import {MessageBot} from './bot/bot';
 
 declare var worldId: number;
 
@@ -13,6 +14,8 @@ let world = new World({
     }),
     storage: new Storage(worldId)
 });
+
+(<any>global).MessageBot = new MessageBot(world);
 
 world.onMessage.sub(({player, message}) => {
     console.log(player.getName(), message);

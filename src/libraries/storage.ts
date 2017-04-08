@@ -23,7 +23,7 @@ export class Storage {
      * @param fallback what to return if the key was not found.
      * @param local whether or not to use a namespace when checking for the key.
      */
-    getString(key: string, fallback: string, local = true): string {
+    getString(key: string, fallback: string, local?: boolean): string {
         var result;
         if (local) {
             result = localStorage.getItem(`${key}${this.namespace}`);
@@ -44,7 +44,7 @@ export class Storage {
      * @param fallback what to return if the item does not exist or fails to parse correctly.
      * @param local whether or not a namespace should be used.
      */
-    getObject(key: string, fallback: any, local = true): any {
+    getObject(key: string, fallback: any, local?: boolean): any {
         var result = this.getString(key, '', local);
 
         if (!result) {
@@ -75,7 +75,7 @@ export class Storage {
      * @param data any stringifyable type.
      * @param local whether to save the item with a namespace.
      */
-    set(key: string, data: any, local = true): void {
+    set(key: string, data: any, local?: boolean): void {
         if (local) {
             key = `${key}${this.namespace}`;
         }

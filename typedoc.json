@@ -2,5 +2,5 @@
     "out": "docs",
     "mode": "file",
     "name": "MessageBot",
-    "toc": ["Ajax", "Hook", "Player", "SimpleEvent", "Storage", "World"]
+    "toc": ["Ajax", "Hook", "MessageBot", "MessageBotExtension", "Player", "Settings", "SimpleEvent", "Storage", "World"]
 }

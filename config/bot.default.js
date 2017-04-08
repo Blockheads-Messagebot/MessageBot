@@ -1,9 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * Configuration for running the bot
+ * Copy this file into bot.js in the same directory and modify as necesary for the bot type you are running.
  */
-exports.config = {
+module.exports = {
     /**
      * The username to log into the cloud portal with. Cloud servers only.
      */
@@ -15,8 +13,9 @@ exports.config = {
     /**
      * For cloud servers, use the world ID in the URL when viewing the overview page.
      * For mac servers, choose a unique ID for each server.
+     * For mac servers, this can also be a string.
      */
-    worldId: 123456,
+    worldId: 0,
     /**
      * The path to the world you want to watch chat for. Mac servers only.
      */
