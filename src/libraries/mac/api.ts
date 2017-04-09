@@ -96,11 +96,11 @@ export class MacApi implements WorldApi {
 
         return Promise.all([
             this.readText('whitelist'),
-            new Promise(resolve => {
+            new Promise<string>(resolve => {
                 request.get('https://api.ipify.org?format=json', {}, (_err, _req, body) => {
                     try {
                         let {ip} = JSON.parse(body);
-                        resolve(ip ? ip : '0.0.0.0');
+                        resolve(ip ? ip as string : '0.0.0.0');
                     } catch(e) {
                         resolve('0.0.0.0');
                     }

@@ -673,7 +673,7 @@ var CommandWatcher = function () {
     }, {
         key: "add",
         value: function add(list, player) {
-            if (!~this.lists[list].indexOf(player.getName())) {
+            if (!this.lists[list].includes(player.getName())) {
                 this.lists[list].push(player.getName());
             }
         }
@@ -688,7 +688,7 @@ var CommandWatcher = function () {
     }, {
         key: "remove",
         value: function remove(list, player) {
-            if (~this.lists[list].indexOf(player.getName())) {
+            if (this.lists[list].includes(player.getName())) {
                 this.lists[list].splice(this.lists[list].indexOf(player.getName()), 1);
             }
         }
@@ -801,7 +801,7 @@ var Player = function () {
   }, {
     key: "isAdmin",
     value: function isAdmin() {
-      return !!~this.lists.adminlist.indexOf(this.name) || this.isOwner();
+      return this.lists.adminlist.includes(this.name) || this.isOwner();
     }
     /**
      * Checks if the player is a mod without admin permissions.
@@ -812,7 +812,7 @@ var Player = function () {
   }, {
     key: "isMod",
     value: function isMod() {
-      return !!~this.lists.modlist.indexOf(this.name) && !this.isAdmin();
+      return this.lists.modlist.includes(this.name) && !this.isAdmin();
     }
     /**
      * Checks if the player is an admin or a mod.
@@ -834,7 +834,7 @@ var Player = function () {
   }, {
     key: "isWhitelisted",
     value: function isWhitelisted() {
-      return !!~this.lists.whitelist.indexOf(this.name) || this.isStaff();
+      return this.lists.whitelist.includes(this.name) || this.isStaff();
     }
     /**
      * Checks if the player is banned.
@@ -845,7 +845,7 @@ var Player = function () {
   }, {
     key: "isBanned",
     value: function isBanned() {
-      return !!~this.lists.blacklist.indexOf(this.name);
+      return this.lists.blacklist.includes(this.name);
     }
   }]);
 
@@ -1083,7 +1083,7 @@ var World = function () {
             var online = this.overview ? this.overview.online : [];
             return this.api.getOverview().then(function (overview) {
                 overview.online.forEach(function (name) {
-                    if (!~online.indexOf(name)) {
+                    if (!online.includes(name)) {
                         online.push(name);
                     }
                 });
@@ -1185,7 +1185,7 @@ var World = function () {
             };
             player.joins++;
             player.ip = ip;
-            if (!~player.ips.indexOf(ip)) {
+            if (!player.ips.includes(ip)) {
                 player.ips.push(ip);
             }
             this.storage.set(this.STORAGE_ID, this.players);
@@ -1274,7 +1274,7 @@ var PortalApi = function () {
                 });
                 // Remove blacklisted staff
                 lists.blacklist = lists.blacklist.filter(function (name) {
-                    return lists.adminlist.indexOf(name) == -1 && lists.modlist.indexOf(name) == -1;
+                    return !lists.adminlist.includes(name) && lists.modlist.includes(name);
                 });
                 return lists;
             });
@@ -1478,7 +1478,7 @@ var PortalChatParser = function () {
     }, {
         key: "handleJoin",
         value: function handleJoin(name, ip) {
-            if (this.online.indexOf(name) == -1) {
+            if (!this.online.includes(name)) {
                 this.online.push(name);
             }
             this.messages.push({ type: chat_1.ChatType.join, name: name, ip: ip });
@@ -1493,7 +1493,7 @@ var PortalChatParser = function () {
     }, {
         key: "handleLeave",
         value: function handleLeave(name) {
-            if (this.online.indexOf(name) != -1) {
+            if (this.online.includes(name)) {
                 this.online.splice(this.online.indexOf(name), 1);
                 this.messages.push({ type: chat_1.ChatType.leave, name: name });
             }
@@ -1536,7 +1536,7 @@ var PortalChatParser = function () {
         value: function getUsername(message) {
             for (var i = 18; i > 4; i--) {
                 var possibleName = message.substring(0, message.lastIndexOf(': ', i));
-                if (~this.online.indexOf(possibleName) || possibleName == 'SERVER') {
+                if (this.online.includes(possibleName) || possibleName == 'SERVER') {
                     return possibleName;
                 }
             }

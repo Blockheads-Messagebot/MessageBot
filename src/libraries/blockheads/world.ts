@@ -151,7 +151,7 @@ export class World {
 
         return this.api.getOverview().then(overview => {
             overview.online.forEach(name => {
-                if (!~online.indexOf(name)) {
+                if (!online.includes(name)) {
                     online.push(name);
                 }
             });
@@ -250,7 +250,7 @@ export class World {
 
         player.joins++;
         player.ip = ip;
-        if (!~player.ips.indexOf(ip)) {
+        if (!player.ips.includes(ip)) {
             player.ips.push(ip);
         }
 

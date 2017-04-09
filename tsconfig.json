@@ -2,6 +2,7 @@
     "compilerOptions": {
         "outDir": "./build",
         "target": "es6",
+        "lib": ["dom", "es7", "dom.iterable", "scripthost"],
         "moduleResolution": "node",
         "module": "commonjs",
         "removeComments": false,

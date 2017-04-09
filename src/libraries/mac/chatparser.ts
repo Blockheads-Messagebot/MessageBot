@@ -78,7 +78,7 @@ export class MacChatParser {
      * @param ip the ip of the player who is joining.
      */
     private handleJoin(name: string, ip: string): void {
-        if (this.online.indexOf(name) == -1) {
+        if (!this.online.includes(name)) {
             this.online.push(name);
         }
 
@@ -92,7 +92,7 @@ export class MacChatParser {
      * @param name the name of the player leaving.
      */
     private handleLeave(name: string): void {
-        if (this.online.indexOf(name) != -1) {
+        if (this.online.includes(name)) {
             this.online.splice(this.online.indexOf(name), 1);
             this.messages.push({type: ChatType.leave, name});
         }
@@ -135,7 +135,7 @@ export class MacChatParser {
     private getUsername(message: string): string {
         for (let i = 18; i > 4; i--) {
             let possibleName = message.substring(0, message.lastIndexOf(': ', i));
-            if (~this.online.indexOf(possibleName) || possibleName == 'SERVER') {
+            if (this.online.includes(possibleName) || possibleName == 'SERVER') {
                 return possibleName;
             }
         }

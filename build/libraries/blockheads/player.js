@@ -69,7 +69,7 @@ class Player {
      * @return true if the player is an admin.
      */
     isAdmin() {
-        return !!~this.lists.adminlist.indexOf(this.name) || this.isOwner();
+        return this.lists.adminlist.includes(this.name) || this.isOwner();
     }
     /**
      * Checks if the player is a mod without admin permissions.
@@ -77,7 +77,7 @@ class Player {
      * @return true if the player is an admin and not a mod.
      */
     isMod() {
-        return !!~this.lists.modlist.indexOf(this.name) && !this.isAdmin();
+        return this.lists.modlist.includes(this.name) && !this.isAdmin();
     }
     /**
      * Checks if the player is an admin or a mod.
@@ -93,7 +93,7 @@ class Player {
      * @return true if the player can join the server when it is whitelisted.
      */
     isWhitelisted() {
-        return !!~this.lists.whitelist.indexOf(this.name) || this.isStaff();
+        return this.lists.whitelist.includes(this.name) || this.isStaff();
     }
     /**
      * Checks if the player is banned.
@@ -101,7 +101,7 @@ class Player {
      * @return true if the player is on the blacklist.
      */
     isBanned() {
-        return !!~this.lists.blacklist.indexOf(this.name);
+        return this.lists.blacklist.includes(this.name);
     }
 }
 exports.Player = Player;

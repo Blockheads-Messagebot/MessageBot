@@ -114,7 +114,7 @@ class World {
         let online = this.overview ? this.overview.online : [];
         return this.api.getOverview().then(overview => {
             overview.online.forEach(name => {
-                if (!~online.indexOf(name)) {
+                if (!online.includes(name)) {
                     online.push(name);
                 }
             });
@@ -201,7 +201,7 @@ class World {
         };
         player.joins++;
         player.ip = ip;
-        if (!~player.ips.indexOf(ip)) {
+        if (!player.ips.includes(ip)) {
             player.ips.push(ip);
         }
         this.storage.set(this.STORAGE_ID, this.players);

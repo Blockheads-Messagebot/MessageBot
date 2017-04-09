@@ -207,7 +207,7 @@ export class CommandWatcher {
      * @param player the player to add to the list.
      */
     private add(list: keyof WorldLists, player: Player) {
-        if (!~this.lists[list].indexOf(player.getName())) {
+        if (!this.lists[list].includes(player.getName())) {
             this.lists[list].push(player.getName());
         }
     }
@@ -220,7 +220,7 @@ export class CommandWatcher {
      * @param player the player to remove.
      */
     private remove(list: keyof WorldLists, player: Player) {
-        if (~this.lists[list].indexOf(player.getName())) {
+        if (this.lists[list].includes(player.getName())) {
             this.lists[list].splice(this.lists[list].indexOf(player.getName()), 1);
         }
     }

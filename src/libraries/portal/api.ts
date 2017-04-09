@@ -74,7 +74,7 @@ export class PortalApi implements WorldApi {
                 });
                 // Remove blacklisted staff
                 lists.blacklist = lists.blacklist
-                    .filter(name => lists.adminlist.indexOf(name) == -1 && lists.modlist.indexOf(name) == -1);
+                    .filter(name => !lists.adminlist.includes(name) && lists.modlist.includes(name));
 
                 return lists;
             });
