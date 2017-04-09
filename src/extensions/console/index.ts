@@ -1,8 +1,6 @@
 // Mac / Terminal version, for browser version see the console-browser folder.
 
-// bot is a global.
 import {MessageBot} from '../../bot/bot';
-declare const bot: MessageBot;
 
 import {Player} from '../../libraries/blockheads/player';
 const colors = require('colors/safe') as {
@@ -11,7 +9,7 @@ const colors = require('colors/safe') as {
 };
 import * as readline from 'readline';
 
-bot.registerExtension('default/console', function(ex, world) {
+MessageBot.registerExtension('default/console', function(ex, world) {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

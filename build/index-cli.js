@@ -22,6 +22,8 @@ const auth_1 = require("./libraries/portal/auth");
 const world_1 = require("./libraries/blockheads/world");
 const storage_1 = require("./libraries/storage");
 const bot_1 = require("./bot/bot");
+global.MessageBot = bot_1.MessageBot;
+require("./extensions/console");
 let auth = new auth_1.PortalAuth(config.username, config.password);
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -42,7 +44,6 @@ let auth = new auth_1.PortalAuth(config.username, config.password);
             }),
             storage: new storage_1.Storage(config.worldId)
         });
-        global.bot = new bot_1.MessageBot(world);
-        require('./extensions/console');
+        new bot_1.MessageBot(world);
     });
 }());

@@ -1,6 +1,6 @@
 // Polyfill localStorage
 const {LocalStorage} = require('node-localstorage');
-(<any>global).localStorage = new LocalStorage('./localStorage');
+(global as any).localStorage = new LocalStorage('./localStorage');
 
 // Import config, making it as hard as possible to fail with a bad error.
 const config = require('../config/bot') as {username: string, password: string, worldId: number};
@@ -15,6 +15,9 @@ import {PortalAuth} from './libraries/portal/auth';
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
 import {MessageBot} from './bot/bot';
+(global as any).MessageBot = MessageBot;
+
+import './extensions/console';
 
 let auth = new PortalAuth(config.username, config.password);
 
@@ -39,9 +42,7 @@ let auth = new PortalAuth(config.username, config.password);
         storage: new Storage(config.worldId)
     });
 
-    (global as any).bot = new MessageBot(world);
-
-    require('./extensions/console');
+    new MessageBot(world);
 }());
 
 

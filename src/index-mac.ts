@@ -10,6 +10,7 @@ if (config.worldId == undefined) {
 }
 
 import {MessageBot} from './bot/bot';
+(global as any).MessageBot = MessageBot;
 import {MacChatWatcher} from './libraries/mac/chatwatcher';
 import {MacApi} from './libraries/mac/api';
 import {World} from './libraries/blockheads/world';

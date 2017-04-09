@@ -1,9 +1,10 @@
 // Mac / Terminal version, for browser version see the console-browser folder.
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const bot_1 = require("../../bot/bot");
 const colors = require('colors/safe');
 const readline = require("readline");
-bot.registerExtension('default/console', function (ex, world) {
+bot_1.MessageBot.registerExtension('default/console', function (ex, world) {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

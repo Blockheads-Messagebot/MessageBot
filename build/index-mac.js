@@ -18,6 +18,7 @@ if (config.worldId == undefined) {
     console.log("No world ID specified in config/bot.js");
 }
 const bot_1 = require("./bot/bot");
+global.MessageBot = bot_1.MessageBot;
 const chatwatcher_1 = require("./libraries/mac/chatwatcher");
 const api_1 = require("./libraries/mac/api");
 const world_1 = require("./libraries/blockheads/world");

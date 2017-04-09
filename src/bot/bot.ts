@@ -1,6 +1,11 @@
 import {MessageBotExtension, ExtensionInitializer} from './extension';
 import {Settings} from './settings';
 import {World} from '../libraries/blockheads/world';
+import {SimpleEvent} from '../libraries/simpleevent';
+
+const extensions: Map<string, ExtensionInitializer> = new Map();
+const extensionRegistered = new SimpleEvent<string>();
+const extensionDeregistered = new SimpleEvent<string>();
 
 /**
  * The MessageBot class, this is used to send messages and register extensions.
@@ -33,6 +38,13 @@ export class MessageBot {
         this.botSettings = this.settings.prefix('mb_');
 
         this.extensions = new Map();
+
+        extensionRegistered.sub(this.registerExtension.bind(this));
+        extensionDeregistered.sub(this.deregisterExtension.bind(this));
+
+        for (let key of extensions.keys()) {
+            this.registerExtension(key);
+        }
     }
 
     /**
@@ -41,19 +53,18 @@ export class MessageBot {
      * @param id the unique name/extension ID for this extension.
      * @param creator the function to call in order to initialize the extension.
      */
-    registerExtension(
+    static registerExtension(
         id: string,
         creator: ExtensionInitializer,
     ) {
-        if (this.extensions.has(id)) {
+        // Note: No this.
+        if (extensions.has(id)) {
             console.log(`Extension ${id} was already registered. Abort.`);
             return;
         }
 
-        let ex = new MessageBotExtension(this);
-        ex.settings = this.settings.prefix(id);
-        this.extensions.set(id, ex);
-        creator.call(ex, ex, this.world);
+        extensions.set(id, creator);
+        extensionRegistered.dispatch(id);
     }
 
     /**
@@ -61,7 +72,32 @@ export class MessageBot {
      *
      * @param id the extension to remove.
      */
-    deregisterExtension(id: string) {
+    static deregisterExtension(id: string) {
+        if (extensions.has(id)) {
+            extensions.delete(id);
+            extensionDeregistered.dispatch(id);
+        }
+    }
+
+    private registerExtension(id: string) {
+        if (this.extensions.has(id)) {
+            return;
+        }
+
+        let creator = extensions.get(id);
+        if (creator) {
+            try {
+                let ex = new MessageBotExtension(this);
+                ex.settings = this.settings.prefix(id);
+                this.extensions.set(id, ex);
+                creator.call(ex, ex, ex.world);
+            } catch (err) {
+                console.log('Error creating extension:', err);
+            }
+        }
+    }
+
+    private deregisterExtension(id: string) {
         let ex = this.extensions.get(id);
         if (!ex) {
             return;
@@ -70,10 +106,10 @@ export class MessageBot {
         try {
             ex.uninstall();
         } catch (err) {
-            console.log("Uninstall error:", err);
+            console.log('Error uninstalling:', err);
+        } finally {
+            this.extensions.delete(id);
         }
-
-        this.extensions.delete(id);
     }
 
     /**

@@ -2,6 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const extension_1 = require("./extension");
 const settings_1 = require("./settings");
+const simpleevent_1 = require("../libraries/simpleevent");
+const extensions = new Map();
+const extensionRegistered = new simpleevent_1.SimpleEvent();
+const extensionDeregistered = new simpleevent_1.SimpleEvent();
 /**
  * The MessageBot class, this is used to send messages and register extensions.
  */
@@ -16,6 +20,11 @@ class MessageBot {
         this.settings = new settings_1.Settings(world.storage);
         this.botSettings = this.settings.prefix('mb_');
         this.extensions = new Map();
+        extensionRegistered.sub(this.registerExtension.bind(this));
+        extensionDeregistered.sub(this.deregisterExtension.bind(this));
+        for (let key of extensions.keys()) {
+            this.registerExtension(key);
+        }
     }
     /**
      * Adds an extension to the bot, this is the entry point for all extensions.
@@ -23,21 +32,43 @@ class MessageBot {
      * @param id the unique name/extension ID for this extension.
      * @param creator the function to call in order to initialize the extension.
      */
-    registerExtension(id, creator) {
-        if (this.extensions.has(id)) {
+    static registerExtension(id, creator) {
+        // Note: No this.
+        if (extensions.has(id)) {
             console.log(`Extension ${id} was already registered. Abort.`);
             return;
         }
-        let ex = new extension_1.MessageBotExtension(this);
-        ex.settings = this.settings.prefix(id);
-        this.extensions.set(id, ex);
-        creator.call(ex, ex, this.world);
+        extensions.set(id, creator);
+        extensionRegistered.dispatch(id);
     }
     /**
      * Removes an extension and calls it's uninstall function.
      *
      * @param id the extension to remove.
      */
+    static deregisterExtension(id) {
+        if (extensions.has(id)) {
+            extensions.delete(id);
+            extensionDeregistered.dispatch(id);
+        }
+    }
+    registerExtension(id) {
+        if (this.extensions.has(id)) {
+            return;
+        }
+        let creator = extensions.get(id);
+        if (creator) {
+            try {
+                let ex = new extension_1.MessageBotExtension(this);
+                ex.settings = this.settings.prefix(id);
+                this.extensions.set(id, ex);
+                creator.call(ex, ex, ex.world);
+            }
+            catch (err) {
+                console.log('Error creating extension:', err);
+            }
+        }
+    }
     deregisterExtension(id) {
         let ex = this.extensions.get(id);
         if (!ex) {
@@ -47,9 +78,11 @@ class MessageBot {
             ex.uninstall();
         }
         catch (err) {
-            console.log("Uninstall error:", err);
+            console.log('Error uninstalling:', err);
         }
-        this.extensions.delete(id);
+        finally {
+            this.extensions.delete(id);
+        }
     }
     /**
      * Gets an extension's exports, if it has been registered. Otherwise returns undefined.

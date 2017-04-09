@@ -8,6 +8,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 Object.defineProperty(exports, "__esModule", { value: true });
 var extension_1 = require("./extension");
 var settings_1 = require("./settings");
+var simpleevent_1 = require("../libraries/simpleevent");
+var extensions = new Map();
+var extensionRegistered = new simpleevent_1.SimpleEvent();
+var extensionDeregistered = new simpleevent_1.SimpleEvent();
 /**
  * The MessageBot class, this is used to send messages and register extensions.
  */
@@ -25,6 +29,32 @@ var MessageBot = function () {
         this.settings = new settings_1.Settings(world.storage);
         this.botSettings = this.settings.prefix('mb_');
         this.extensions = new Map();
+        extensionRegistered.sub(this.registerExtension.bind(this));
+        extensionDeregistered.sub(this.deregisterExtension.bind(this));
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = extensions.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var key = _step.value;
+
+                this.registerExtension(key);
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
     }
     /**
      * Adds an extension to the bot, this is the entry point for all extensions.
@@ -36,22 +66,22 @@ var MessageBot = function () {
 
     _createClass(MessageBot, [{
         key: "registerExtension",
-        value: function registerExtension(id, creator) {
+        value: function registerExtension(id) {
             if (this.extensions.has(id)) {
-                console.log("Extension " + id + " was already registered. Abort.");
                 return;
             }
-            var ex = new extension_1.MessageBotExtension(this);
-            ex.settings = this.settings.prefix(id);
-            this.extensions.set(id, ex);
-            creator.call(ex, ex, this.world);
+            var creator = extensions.get(id);
+            if (creator) {
+                try {
+                    var ex = new extension_1.MessageBotExtension(this);
+                    ex.settings = this.settings.prefix(id);
+                    this.extensions.set(id, ex);
+                    creator.call(ex, ex, ex.world);
+                } catch (err) {
+                    console.log('Error creating extension:', err);
+                }
+            }
         }
-        /**
-         * Removes an extension and calls it's uninstall function.
-         *
-         * @param id the extension to remove.
-         */
-
     }, {
         key: "deregisterExtension",
         value: function deregisterExtension(id) {
@@ -62,9 +92,10 @@ var MessageBot = function () {
             try {
                 ex.uninstall();
             } catch (err) {
-                console.log("Uninstall error:", err);
+                console.log('Error uninstalling:', err);
+            } finally {
+                this.extensions.delete(id);
             }
-            this.extensions.delete(id);
         }
         /**
          * Gets an extension's exports, if it has been registered. Otherwise returns undefined.
@@ -118,6 +149,31 @@ var MessageBot = function () {
                 _this.world.send(msg);
             });
         }
+    }], [{
+        key: "registerExtension",
+        value: function registerExtension(id, creator) {
+            // Note: No this.
+            if (extensions.has(id)) {
+                console.log("Extension " + id + " was already registered. Abort.");
+                return;
+            }
+            extensions.set(id, creator);
+            extensionRegistered.dispatch(id);
+        }
+        /**
+         * Removes an extension and calls it's uninstall function.
+         *
+         * @param id the extension to remove.
+         */
+
+    }, {
+        key: "deregisterExtension",
+        value: function deregisterExtension(id) {
+            if (extensions.has(id)) {
+                extensions.delete(id);
+                extensionDeregistered.dispatch(id);
+            }
+        }
     }]);
 
     return MessageBot;
@@ -125,7 +181,7 @@ var MessageBot = function () {
 
 exports.MessageBot = MessageBot;
 
-},{"./extension":2,"./settings":3}],2:[function(require,module,exports){
+},{"../libraries/simpleevent":14,"./extension":2,"./settings":3}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -295,6 +351,7 @@ var api_1 = require("./libraries/portal/api");
 var world_1 = require("./libraries/blockheads/world");
 var storage_1 = require("./libraries/storage");
 var bot_1 = require("./bot/bot");
+global.MessageBot = bot_1.MessageBot;
 var world = new world_1.World({
     api: new api_1.PortalApi(worldId),
     chatWatcher: new chatwatcher_1.PortalChatWatcher({
@@ -303,7 +360,7 @@ var world = new world_1.World({
     }),
     storage: new storage_1.Storage(worldId)
 });
-global.MessageBot = new bot_1.MessageBot(world);
+new bot_1.MessageBot(world);
 world.onMessage.sub(function (_ref) {
     var player = _ref.player,
         message = _ref.message;
