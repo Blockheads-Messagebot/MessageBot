@@ -33,6 +33,7 @@
   "devDependencies": {
     "@types/chai": "^3.4.35",
     "@types/mocha": "^2.2.39",
+    "@types/nock": "^8.2.1",
     "@types/node": "^7.0.8",
     "@types/request": "0.0.42",
     "@types/stacktrace-js": "0.0.30",
@@ -44,6 +45,7 @@
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "mocha": "^3.2.0",
+    "nock": "^9.0.11",
     "ts-node": "^3.0.2",
     "tslint": "^5.0.0",
     "typedoc": "^0.5.10",

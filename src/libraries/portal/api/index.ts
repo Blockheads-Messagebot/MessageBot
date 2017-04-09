@@ -1,7 +1,7 @@
-import {Ajax as ajax} from '../ajax';
-import {WorldLists, WorldOverview, WorldPrivacy, WorldSizes, WorldApi} from '../blockheads/types/world';
-import {LogEntry} from '../blockheads/types/logs';
-import {PortalLogParser as LogParser} from './logparser';
+import {Ajax as ajax} from '../../ajax';
+import {WorldLists, WorldOverview, WorldPrivacy, WorldSizes, WorldApi} from '../../blockheads/types/world';
+import {LogEntry} from '../../blockheads/types/logs';
+import {PortalLogParser as LogParser} from '../logparser';
 
 
 /**
@@ -53,7 +53,7 @@ export class PortalApi implements WorldApi {
                         });
 
                         let names = temp.toLocaleUpperCase().split('\n');
-                        return [...new Set(names)]; // Remove duplicates
+                        return [...new Set(names)].filter(Boolean); // Remove duplicates
                     }
 
                     return []; // World offline, just to be safe.
@@ -74,7 +74,7 @@ export class PortalApi implements WorldApi {
                 });
                 // Remove blacklisted staff
                 lists.blacklist = lists.blacklist
-                    .filter(name => !lists.adminlist.includes(name) && lists.modlist.includes(name));
+                    .filter(name => !lists.adminlist.includes(name) && !lists.modlist.includes(name));
 
                 return lists;
             });
@@ -99,6 +99,12 @@ export class PortalApi implements WorldApi {
                     privacy = 'public';
                 }
 
+                let online: string[] = [];
+                let match = html.match(/^\t<tr><td class="left">(.*?)(?=<\/td>)/gm);
+                if (match) {
+                    online = online.concat(match.map(s => s.substr(22)));
+                }
+
                 // This is very messy, refactoring welcome.
                 return {
                     name: firstMatch(/^\t<title>(.*?) Manager \| Portal<\/title>$/m),
@@ -115,7 +121,7 @@ export class PortalApi implements WorldApi {
                     size: (<WorldSizes>firstMatch(/^\t\t<td>Size:<\/td><td>(.*?)<\/td>$/m)),
                     whitelist: firstMatch(/<td>Whitelist:<\/td><td>(Yes|No)<\/td>/m) == 'Yes',
 
-                    online: [],
+                    online: online,
                 };
             });
     }

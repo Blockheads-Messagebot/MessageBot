@@ -12,6 +12,7 @@ export class PortalLogParser {
      */
     constructor() {
         this.entries = [];
+        this.parse = this.parse.bind(this);
     }
 
     /**
