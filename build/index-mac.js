@@ -17,6 +17,7 @@ config.path = config.path || '';
 if (config.worldId == undefined) {
     console.log("No world ID specified in config/bot.js");
 }
+const bot_1 = require("./bot/bot");
 const chatwatcher_1 = require("./libraries/mac/chatwatcher");
 const api_1 = require("./libraries/mac/api");
 const world_1 = require("./libraries/blockheads/world");
@@ -35,6 +36,7 @@ const storage_1 = require("./libraries/storage");
             console.error(e);
             return;
         }
+        global.bot = new bot_1.MessageBot(world);
         require('./extensions/console');
     });
 }());

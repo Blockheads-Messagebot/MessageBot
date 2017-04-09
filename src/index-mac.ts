@@ -9,6 +9,7 @@ if (config.worldId == undefined) {
     console.log("No world ID specified in config/bot.js");
 }
 
+import {MessageBot} from './bot/bot';
 import {MacChatWatcher} from './libraries/mac/chatwatcher';
 import {MacApi} from './libraries/mac/api';
 import {World} from './libraries/blockheads/world';
@@ -26,6 +27,8 @@ import {Storage} from './libraries/storage';
         console.error(e);
         return;
     }
+
+    (global as any).bot = new MessageBot(world);
 
     require('./extensions/console');
 }());
