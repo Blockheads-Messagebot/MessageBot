@@ -1735,6 +1735,7 @@ var PortalLogParser = function () {
         _classCallCheck(this, PortalLogParser);
 
         this.entries = [];
+        this.parse = this.parse.bind(this);
     }
     /**
      * Parses the logs into a standard format.

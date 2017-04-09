@@ -41,7 +41,7 @@ gulp.task('lint', function() {
     ]);
 });
 
-gulp.task('build', ['lint'], function(done)  {
+gulp.task('build', ['lint'], function()  {
     return run('tsc');
 });
 

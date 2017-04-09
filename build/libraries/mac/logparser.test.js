@@ -39,7 +39,6 @@ describe('MacLogParser#parse', function () {
             `\t/PLAYERS - list currently active players.`
         ];
         let result = parser.parse(lines);
-        console.log(lines);
         chai_1.expect(result).to.deep.equal([{
                 raw: lines.join('\n'),
                 timestamp: new Date('Apr  1 2017 18:06:06'),

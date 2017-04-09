@@ -24,7 +24,10 @@ class Ajax {
      * //sends a GET request to /some/url.php?a=test
      */
     static get(url = '/', params = {}) {
-        url = (url.includes('?') ? url + '&' : url + '?') + querystring_1.stringify(params);
+        let paramstr = querystring_1.stringify(params);
+        if (paramstr.length) {
+            url = (url.includes('?') ? url + '&' : url + '?') + paramstr;
+        }
         return new Promise((resolve, reject) => {
             baseRequest.get(url, {}, (err, _req, body) => {
                 if (err) {
