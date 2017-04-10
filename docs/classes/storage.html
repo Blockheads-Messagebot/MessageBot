@@ -96,7 +96,7 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="storage.html#clearnamespace" class="tsd-kind-icon">clear<wbr>Namespace</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="storage.html#getobject" class="tsd-kind-icon">get<wbr>Object</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="storage.html#getobject" class="tsd-kind-icon">get<wbr>Object</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="storage.html#getstring" class="tsd-kind-icon">get<wbr>String</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="storage.html#set" class="tsd-kind-icon">set</a></li>
 							</ul>
@@ -116,7 +116,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/c7d853a/src/libraries/storage.ts#L9">libraries/storage.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/3a1c421/src/libraries/storage.ts#L9">libraries/storage.ts:9</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -142,7 +142,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/c7d853a/src/libraries/storage.ts#L102">libraries/storage.ts:102</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/3a1c421/src/libraries/storage.ts#L103">libraries/storage.ts:103</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -171,17 +171,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="getobject" class="tsd-anchor"></a>
 					<h3>get<wbr>Object</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Object<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Object&lt;T&gt;<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/c7d853a/src/libraries/storage.ts#L47">libraries/storage.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/3a1c421/src/libraries/storage.ts#L47">libraries/storage.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -194,6 +194,12 @@
 									</dd>
 								</dl>
 							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -203,7 +209,7 @@
 									</div>
 								</li>
 								<li>
-									<h5>fallback: <span class="tsd-signature-type">any</span></h5>
+									<h5>fallback: <span class="tsd-signature-type">T</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>what to return if the item does not exist or fails to parse correctly.</p>
 									</div>
@@ -215,7 +221,7 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -229,7 +235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/c7d853a/src/libraries/storage.ts#L26">libraries/storage.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/3a1c421/src/libraries/storage.ts#L26">libraries/storage.ts:26</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -278,7 +284,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/c7d853a/src/libraries/storage.ts#L78">libraries/storage.ts:78</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/3a1c421/src/libraries/storage.ts#L79">libraries/storage.ts:79</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -341,7 +347,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="storage.html#clearnamespace" class="tsd-kind-icon">clear<wbr>Namespace</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="storage.html#getobject" class="tsd-kind-icon">get<wbr>Object</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
