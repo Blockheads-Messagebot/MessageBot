@@ -40,20 +40,19 @@ class Storage {
      * @param local whether or not a namespace should be used.
      */
     getObject(key, fallback, local) {
-        var result = this.getString(key, '', local);
-        if (!result) {
+        let raw = this.getString(key, '', local);
+        if (!raw) {
             return fallback;
         }
+        let result;
         try {
-            result = JSON.parse(result);
+            result = JSON.parse(raw);
         }
         catch (e) {
             result = fallback;
         }
-        finally {
-            if (!result) {
-                result = fallback;
-            }
+        if (!result) {
+            result = fallback;
         }
         return result;
     }

@@ -24,6 +24,7 @@ const storage_1 = require("./libraries/storage");
 const bot_1 = require("./bot/bot");
 global.MessageBot = bot_1.MessageBot;
 require("./extensions/console");
+require("./extensions/messages");
 let auth = new auth_1.PortalAuth(config.username, config.password);
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {

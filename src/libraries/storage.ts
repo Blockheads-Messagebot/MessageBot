@@ -44,21 +44,22 @@ export class Storage {
      * @param fallback what to return if the item does not exist or fails to parse correctly.
      * @param local whether or not a namespace should be used.
      */
-    getObject(key: string, fallback: any, local?: boolean): any {
-        var result = this.getString(key, '', local);
+    getObject<T>(key: string, fallback: T, local?: boolean): T {
+        let raw = this.getString(key, '', local);
 
-        if (!result) {
+        if (!raw) {
             return fallback;
         }
 
+        let result: T;
         try {
-            result = JSON.parse(result);
+            result = JSON.parse(raw);
         } catch(e) {
             result = fallback;
-        } finally {
-            if (!result) {
-                result = fallback;
-            }
+        }
+
+        if (!result) {
+            result = fallback;
         }
 
         return result;

@@ -124,6 +124,10 @@ class MessageBot {
                 let safeKey = key.replace(/([.+?^=!:${}()|\[\]\/\\])/g, '\\$1');
                 msg = msg.replace(new RegExp(`{{${safeKey}}}`, 'g'), params[key]);
             });
+            // Allow {{ip}} if {{name}} exists and the message is "private"
+            if (msg.startsWith('/') && params['name']) {
+                msg = msg.replace(/{{ip}}/gi, this.world.getPlayer(params['name']).getIP());
+            }
             this.world.send(msg);
         });
     }

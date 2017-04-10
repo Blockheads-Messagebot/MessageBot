@@ -18,6 +18,7 @@ import {MessageBot} from './bot/bot';
 (global as any).MessageBot = MessageBot;
 
 import './extensions/console';
+import './extensions/messages';
 
 let auth = new PortalAuth(config.username, config.password);
 

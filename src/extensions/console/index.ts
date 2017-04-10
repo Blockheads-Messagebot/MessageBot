@@ -9,7 +9,7 @@ const colors = require('colors/safe') as {
 };
 import * as readline from 'readline';
 
-MessageBot.registerExtension('default/console', function(ex, world) {
+MessageBot.registerExtension('console', function(ex, world) {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

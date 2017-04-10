@@ -23,6 +23,8 @@ const chatwatcher_1 = require("./libraries/mac/chatwatcher");
 const api_1 = require("./libraries/mac/api");
 const world_1 = require("./libraries/blockheads/world");
 const storage_1 = require("./libraries/storage");
+require("./extensions/console");
+require("./extensions/messages");
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {
         let world;
@@ -37,7 +39,6 @@ const storage_1 = require("./libraries/storage");
             console.error(e);
             return;
         }
-        global.bot = new bot_1.MessageBot(world);
-        require('./extensions/console');
+        new bot_1.MessageBot(world);
     });
 }());

@@ -16,6 +16,9 @@ import {MacApi} from './libraries/mac/api';
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
 
+import './extensions/console';
+import './extensions/messages';
+
 (async function main() {
     let world: World;
     try {
@@ -29,9 +32,7 @@ import {Storage} from './libraries/storage';
         return;
     }
 
-    (global as any).bot = new MessageBot(world);
-
-    require('./extensions/console');
+    new MessageBot(world);
 }());
 
 

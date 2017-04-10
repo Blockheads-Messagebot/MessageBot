@@ -146,6 +146,10 @@ var MessageBot = function () {
                     var safeKey = key.replace(/([.+?^=!:${}()|\[\]\/\\])/g, '\\$1');
                     msg = msg.replace(new RegExp("{{" + safeKey + "}}", 'g'), params[key]);
                 });
+                // Allow {{ip}} if {{name}} exists and the message is "private"
+                if (msg.startsWith('/') && params['name']) {
+                    msg = msg.replace(/{{ip}}/gi, _this.world.getPlayer(params['name']).getIP());
+                }
                 _this.world.send(msg);
             });
         }
@@ -1981,18 +1985,18 @@ var Storage = function () {
     }, {
         key: "getObject",
         value: function getObject(key, fallback, local) {
-            var result = this.getString(key, '', local);
-            if (!result) {
+            var raw = this.getString(key, '', local);
+            if (!raw) {
                 return fallback;
             }
+            var result = void 0;
             try {
-                result = JSON.parse(result);
+                result = JSON.parse(raw);
             } catch (e) {
                 result = fallback;
-            } finally {
-                if (!result) {
-                    result = fallback;
-                }
+            }
+            if (!result) {
+                result = fallback;
             }
             return result;
         }

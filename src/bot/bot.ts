@@ -158,6 +158,11 @@ export class MessageBot {
                 );
             });
 
+            // Allow {{ip}} if {{name}} exists and the message is "private"
+            if (msg.startsWith('/') && params['name']) {
+                msg = msg.replace(/{{ip}}/gi, this.world.getPlayer(params['name']).getIP());
+            }
+
             this.world.send(msg);
         });
     }
