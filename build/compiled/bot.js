@@ -66,6 +66,12 @@ var MessageBot = function () {
 
     _createClass(MessageBot, [{
         key: "registerExtension",
+
+        /**
+         * Loads an extension into this bot.
+         *
+         * @param id the extension to load
+         */
         value: function registerExtension(id) {
             if (this.extensions.has(id)) {
                 return;
@@ -82,6 +88,12 @@ var MessageBot = function () {
                 }
             }
         }
+        /**
+         * Removes an extension from this bot
+         *
+         * @param id the extension to remove.
+         */
+
     }, {
         key: "deregisterExtension",
         value: function deregisterExtension(id) {
@@ -193,6 +205,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var ajax_1 = require("../libraries/ajax");
 /**
  * Extension class, created by the bot with bot.registerExtension. Should not be created directly.
  */
@@ -208,6 +221,7 @@ var MessageBotExtension = function () {
 
     this.world = bot.world;
     this.bot = bot;
+    this.ajax = ajax_1.Ajax;
     this.exports = {};
   }
   /**
@@ -237,7 +251,7 @@ var MessageBotExtension = function () {
 
 exports.MessageBotExtension = MessageBotExtension;
 
-},{}],3:[function(require,module,exports){
+},{"../libraries/ajax":5}],3:[function(require,module,exports){
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -253,7 +267,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 
 var Settings = function () {
     /**
-     * Creates a new instance of the Settings class.
+     * Creates a new instance of the Settings class. Extensions shouldn't need to use this as it is provided through ex.storage.
      *
      * @param storage the storage instance to save settings in.
      * @param prefix the prefix to save settings with.
@@ -261,7 +275,6 @@ var Settings = function () {
     function Settings(storage, prefix) {
         _classCallCheck(this, Settings);
 
-        /** @hidden */
         this.STORAGE_ID = 'mb_preferences';
         this.storage = storage;
         this._prefix = prefix || '';
@@ -454,8 +467,6 @@ var Ajax = function () {
 exports.Ajax = Ajax;
 /**
  * Helper function to make XHR requests.
- *
- * @hidden
  */
 function xhr(protocol) {
     var url = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '/';
@@ -489,8 +500,6 @@ function xhr(protocol) {
 }
 /**
  * Internal function used to stringify url parameters
- *
- * @hidden
  */
 function urlStringify(obj) {
     return Object.keys(obj).map(function (k) {
@@ -580,7 +589,6 @@ var CommandWatcher = function () {
         /**
          * Handles /ban and /ban-no-device commands
          *
-         * @hidden
          * @param player the player sending the message
          * @param target the player to ban
          */
@@ -603,7 +611,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /unban command.
          *
-         * @hidden
          * @param player the player sending the command
          * @param target the player to unban.
          */
@@ -618,7 +625,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /whitelist command.
          *
-         * @hidden
          * @param player the player sending the command.
          * @param target the player to whitelist.
          */
@@ -634,7 +640,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /unwhitelist command.
          *
-         * @hidden
          * @param player the player sending the command.
          * @param target the player to remove from the whitelist.
          */
@@ -649,7 +654,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /mod command.
          *
-         * @hidden
          * @param player the player sending the command.
          * @param target the player to mod.
          */
@@ -665,7 +669,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /unmod command.
          *
-         * @hidden
          * @param player the player sending the command
          * @param target the player to remove from the modlist.
          */
@@ -680,7 +683,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /admin command.
          *
-         * @hidden
          * @param player the player sending the command.
          * @param target the player to admin.
          */
@@ -696,7 +698,6 @@ var CommandWatcher = function () {
         /**
          * Handles the /unadmin command.
          *
-         * @hidden
          * @param player the player sending the command.
          * @param target the player to remove from the adminlist.
          */
@@ -711,7 +712,6 @@ var CommandWatcher = function () {
         /**
          * Handles /clear-list commands.
          *
-         * @hidden
          * @param list the list to clear.
          * @param player the payer sending the command.
          */
@@ -726,7 +726,6 @@ var CommandWatcher = function () {
         /**
          * Handles adding a player to a list.
          *
-         * @hidden
          * @param list the list to add the player to.
          * @param player the player to add to the list.
          */
@@ -741,7 +740,6 @@ var CommandWatcher = function () {
         /**
          * Handles removing players from a list.
          *
-         * @hidden
          * @param list the list to remove the player from.
          * @param player the player to remove.
          */
@@ -1001,7 +999,6 @@ var World = function () {
 
         _classCallCheck(this, World);
 
-        /** @hidden */
         this.STORAGE_ID = 'mb_players';
         // Events
         /**
@@ -1206,7 +1203,6 @@ var World = function () {
         /**
          * Continually watches chat for new messages and emits events when new messages come in.
          *
-         * @hidden
          * @param message the message to emit events for.
          */
 
@@ -1230,7 +1226,6 @@ var World = function () {
         /**
          * Increments a player's joins and saves their IP.
          *
-         * @hidden
          * @param name the player's name
          * @param ip the player's IP
          */
@@ -1531,7 +1526,6 @@ var PortalChatParser = function () {
         /**
          * Keeps the online list up to date and emits join events.
          *
-         * @hidden
          * @param name the name of the player who is joining.
          * @param ip the ip of the player who is joining.
          */
@@ -1547,7 +1541,6 @@ var PortalChatParser = function () {
         /**
          * Keeps the online list up to date and emits leave events.
          *
-         * @hidden
          * @param name the name of the player leaving.
          */
 
@@ -1562,7 +1555,6 @@ var PortalChatParser = function () {
         /**
          * Checks the chat type and parses accordingly.
          *
-         * @hidden
          * @param name the name of the player chatting.
          * @param message the message sent.
          */
@@ -1588,7 +1580,6 @@ var PortalChatParser = function () {
         /**
          * Tries to guess a player's name from chat.
          *
-         * @hidden
          * @param message the message to extract a username from.
          */
 
@@ -1660,8 +1651,6 @@ var PortalChatWatcher = function () {
         }
         /**
          * Continually checks chat for new messages.
-         *
-         * @hidden
          */
 
     }, {
@@ -1677,8 +1666,6 @@ var PortalChatWatcher = function () {
         }
         /**
          * Queues checking for new chat to parse.
-         *
-         * @hidden
          */
 
     }, {
@@ -1692,8 +1679,6 @@ var PortalChatWatcher = function () {
         }
         /**
          * Gets the unread messages from the server queue.
-         *
-         * @hidden
          */
 
     }, {
@@ -1769,16 +1754,12 @@ var PortalLogParser = function () {
             this.entries = [];
             return entries;
         }
-        /** @hidden */
-
     }, {
         key: "isValidLine",
         value: function isValidLine(line) {
             return (/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d blockheads_server/.test(line)
             );
         }
-        /** @hidden */
-
     }, {
         key: "addLine",
         value: function addLine(line) {

@@ -15,6 +15,7 @@
   "scripts": {
     "gulp": "gulp",
     "clean": "gulp clean",
+    "import": "node build/import.js",
     "start:cloud": "node build/index-cli.js",
     "start:mac": "node build/index-mac.js",
     "test": "mocha --watch-extensions ts --watch -r ts-node/register src/**/*.test.ts"

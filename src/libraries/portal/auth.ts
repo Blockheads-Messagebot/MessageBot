@@ -5,9 +5,7 @@ const sha1 = require('sha1') as (input: string) => string;
  * Class used to connect to the portal.
  */
 export class PortalAuth {
-    /** @hidden */
     private username: string;
-    /** @hidden */
     private password: string;
 
     /**

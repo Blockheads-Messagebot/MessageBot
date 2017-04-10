@@ -12,7 +12,6 @@ import {spawn} from 'child_process';
 import * as fs from 'fs';
 import * as request from 'request';
 
-/** @hidden */
 interface WorldV2 {
     creationDate: Date;
     saveDate: Date;
@@ -26,11 +25,8 @@ interface WorldV2 {
  * This class is only used by the [[World]] class. You don't need to know anything about it unless you are creating new instances of the [[World]] class.
  */
 export class MacApi implements WorldApi {
-    /** @hidden */
     private path: string;
-    /** @hidden */
     private worldv2: WorldV2;
-    /** @hidden */
     private parser: LogParser;
 
     /**
@@ -146,7 +142,6 @@ export class MacApi implements WorldApi {
     /**
      * Gets the specified list for the world.
      *
-     * @hidden
      * @param file the file to read
      */
     private readText(file: string): Promise<string[]> {

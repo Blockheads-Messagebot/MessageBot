@@ -22,9 +22,7 @@ export class MessageBot {
      */
     public settings: Settings;
 
-    /** @hidden */
     private botSettings: Settings;
-    /** @hidden */
     private extensions: Map<string, MessageBotExtension>;
 
     /**
@@ -79,6 +77,11 @@ export class MessageBot {
         }
     }
 
+    /**
+     * Loads an extension into this bot.
+     *
+     * @param id the extension to load
+     */
     private registerExtension(id: string) {
         if (this.extensions.has(id)) {
             return;
@@ -97,6 +100,11 @@ export class MessageBot {
         }
     }
 
+    /**
+     * Removes an extension from this bot
+     *
+     * @param id the extension to remove.
+     */
     private deregisterExtension(id: string) {
         let ex = this.extensions.get(id);
         if (!ex) {

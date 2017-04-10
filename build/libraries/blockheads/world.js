@@ -22,7 +22,6 @@ class World {
      * @param options the options to use when creating the class.
      */
     constructor({ api, storage, chatWatcher }) {
-        /** @hidden */
         this.STORAGE_ID = 'mb_players';
         // Events
         /**
@@ -167,7 +166,6 @@ class World {
     /**
      * Continually watches chat for new messages and emits events when new messages come in.
      *
-     * @hidden
      * @param message the message to emit events for.
      */
     messageWatcher(message) {
@@ -188,7 +186,6 @@ class World {
     /**
      * Increments a player's joins and saves their IP.
      *
-     * @hidden
      * @param name the player's name
      * @param ip the player's IP
      */

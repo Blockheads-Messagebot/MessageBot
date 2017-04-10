@@ -9,11 +9,8 @@ import {PortalLogParser as LogParser} from '../logparser';
  *
  */
 export class PortalApi implements WorldApi {
-    /** @hidden */
     private worldId: number;
-    /** @hidden */
     private messageQueue: string[];
-    /** @hidden */
     private logParser: LogParser;
 
     /**
@@ -145,8 +142,6 @@ export class PortalApi implements WorldApi {
 
     /**
      * Waits until the world is online before resolving.
-     *
-     * @hidden
      */
     private worldOnline(): Promise<void> {
         return ajax.postJSON(`/api`, {command: 'status', worldId: this.worldId})
@@ -167,8 +162,6 @@ export class PortalApi implements WorldApi {
 
     /**
      * Sends the oldest queued message if possible.
-     *
-     * @hidden
      */
     private postMessage(): void {
         if (this.messageQueue.length) {

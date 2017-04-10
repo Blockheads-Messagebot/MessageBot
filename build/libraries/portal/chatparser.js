@@ -59,7 +59,6 @@ class PortalChatParser {
     /**
      * Keeps the online list up to date and emits join events.
      *
-     * @hidden
      * @param name the name of the player who is joining.
      * @param ip the ip of the player who is joining.
      */
@@ -72,7 +71,6 @@ class PortalChatParser {
     /**
      * Keeps the online list up to date and emits leave events.
      *
-     * @hidden
      * @param name the name of the player leaving.
      */
     handleLeave(name) {
@@ -84,7 +82,6 @@ class PortalChatParser {
     /**
      * Checks the chat type and parses accordingly.
      *
-     * @hidden
      * @param name the name of the player chatting.
      * @param message the message sent.
      */
@@ -107,7 +104,6 @@ class PortalChatParser {
     /**
      * Tries to guess a player's name from chat.
      *
-     * @hidden
      * @param message the message to extract a username from.
      */
     getUsername(message) {

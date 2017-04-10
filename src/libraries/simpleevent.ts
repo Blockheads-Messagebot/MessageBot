@@ -2,9 +2,6 @@
  * Generic class which emits events.
  */
 export class SimpleEvent<TEvent> {
-    /**
-     * @hidden
-     */
     protected listeners: {cb: (e: TEvent) => void, once: boolean}[];
 
     /**

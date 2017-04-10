@@ -2,5 +2,8 @@
     "out": "docs",
     "mode": "file",
     "name": "MessageBot",
+    "excludePrivate": true,
+    "excludeNotExported": true,
+    "listInvalidSymbolLinks": true,
     "toc": ["Ajax", "Hook", "MessageBot", "MessageBotExtension", "Player", "Settings", "SimpleEvent", "Storage", "World"]
 }

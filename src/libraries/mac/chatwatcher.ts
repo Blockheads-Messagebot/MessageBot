@@ -5,16 +5,12 @@ import * as fs from 'fs';
 import {MacChatParser as ChatParser} from './chatparser';
 
 export class MacChatWatcher implements ChatWatcher {
-    /** @hidden */
     private tail: ChildProcess;
 
-    /** @hidden */
     private logs: fs.WriteStream;
 
-    /** @hidden */
     private path: string;
 
-    /** @hidden */
     private parser: ChatParser;
 
     /**

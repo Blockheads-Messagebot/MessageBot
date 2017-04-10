@@ -5,9 +5,7 @@ import {WorldLists} from './types/world';
  * Class to watch chat for commands and update the stored lists as needed. You don't need to know anything about this class. It is only used by the [[World]] class internally to keep lists up to date.
  */
 export class CommandWatcher {
-    /** @hidden */
     private lists: WorldLists;
-    /** @hidden */
     private getPlayer: (name: string) => Player;
 
     /**
@@ -73,7 +71,6 @@ export class CommandWatcher {
     /**
      * Handles /ban and /ban-no-device commands
      *
-     * @hidden
      * @param player the player sending the message
      * @param target the player to ban
      */
@@ -95,7 +92,6 @@ export class CommandWatcher {
     /**
      * Handles the /unban command.
      *
-     * @hidden
      * @param player the player sending the command
      * @param target the player to unban.
      */
@@ -108,7 +104,6 @@ export class CommandWatcher {
     /**
      * Handles the /whitelist command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to whitelist.
      */
@@ -122,7 +117,6 @@ export class CommandWatcher {
     /**
      * Handles the /unwhitelist command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to remove from the whitelist.
      */
@@ -135,7 +129,6 @@ export class CommandWatcher {
     /**
      * Handles the /mod command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to mod.
      */
@@ -149,7 +142,6 @@ export class CommandWatcher {
     /**
      * Handles the /unmod command.
      *
-     * @hidden
      * @param player the player sending the command
      * @param target the player to remove from the modlist.
      */
@@ -162,7 +154,6 @@ export class CommandWatcher {
     /**
      * Handles the /admin command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to admin.
      */
@@ -176,7 +167,6 @@ export class CommandWatcher {
     /**
      * Handles the /unadmin command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to remove from the adminlist.
      */
@@ -189,7 +179,6 @@ export class CommandWatcher {
     /**
      * Handles /clear-list commands.
      *
-     * @hidden
      * @param list the list to clear.
      * @param player the payer sending the command.
      */
@@ -202,7 +191,6 @@ export class CommandWatcher {
     /**
      * Handles adding a player to a list.
      *
-     * @hidden
      * @param list the list to add the player to.
      * @param player the player to add to the list.
      */
@@ -215,7 +203,6 @@ export class CommandWatcher {
     /**
      * Handles removing players from a list.
      *
-     * @hidden
      * @param list the list to remove the player from.
      * @param player the player to remove.
      */

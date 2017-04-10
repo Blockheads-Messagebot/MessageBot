@@ -5,13 +5,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 class Settings {
     /**
-     * Creates a new instance of the Settings class.
+     * Creates a new instance of the Settings class. Extensions shouldn't need to use this as it is provided through ex.storage.
      *
      * @param storage the storage instance to save settings in.
      * @param prefix the prefix to save settings with.
      */
     constructor(storage, prefix) {
-        /** @hidden */
         this.STORAGE_ID = 'mb_preferences';
         this.storage = storage;
         this._prefix = prefix || '';

@@ -8,22 +8,16 @@ import {ChatMessage, ChatType} from '../blockheads/types/chat';
 export class PortalChatParser {
     /**
      * A list of currently online players, kept up to date by this class.
-     *
-     * @hidden
      */
     private online: string[];
 
     /**
      * The name of the world.
-     *
-     * @hidden
      */
     private name: string;
 
     /**
      * The last parsed messages.
-     *
-     * @hidden
      */
     private messages: ChatMessage[];
 
@@ -82,7 +76,6 @@ export class PortalChatParser {
     /**
      * Keeps the online list up to date and emits join events.
      *
-     * @hidden
      * @param name the name of the player who is joining.
      * @param ip the ip of the player who is joining.
      */
@@ -97,7 +90,6 @@ export class PortalChatParser {
     /**
      * Keeps the online list up to date and emits leave events.
      *
-     * @hidden
      * @param name the name of the player leaving.
      */
     private handleLeave(name: string): void {
@@ -110,7 +102,6 @@ export class PortalChatParser {
     /**
      * Checks the chat type and parses accordingly.
      *
-     * @hidden
      * @param name the name of the player chatting.
      * @param message the message sent.
      */
@@ -138,7 +129,6 @@ export class PortalChatParser {
     /**
      * Tries to guess a player's name from chat.
      *
-     * @hidden
      * @param message the message to extract a username from.
      */
     private getUsername(message: string): string {

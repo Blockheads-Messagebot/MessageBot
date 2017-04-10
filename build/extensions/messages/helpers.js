@@ -1,13 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/** @hidden */
 function checkJoins(player, message) {
     return player.getJoins() >= message.joins_low && player.getJoins() <= message.join_high;
 }
 exports.checkJoins = checkJoins;
+/** @hidden */
 function checkGroups(player, message) {
     return isInGroup(player, message.group) && !isInGroup(player, message.not_group);
 }
 exports.checkGroups = checkGroups;
+/** @hidden */
 function isInGroup(player, group) {
     switch (group) {
         case 'all':

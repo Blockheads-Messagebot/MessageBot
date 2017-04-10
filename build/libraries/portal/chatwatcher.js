@@ -31,8 +31,6 @@ class PortalChatWatcher {
     }
     /**
      * Continually checks chat for new messages.
-     *
-     * @hidden
      */
     checkChat() {
         this.getMessages()
@@ -42,16 +40,12 @@ class PortalChatWatcher {
     }
     /**
      * Queues checking for new chat to parse.
-     *
-     * @hidden
      */
     queueChatCheck() {
         setTimeout(() => this.checkChat(), 5000);
     }
     /**
      * Gets the unread messages from the server queue.
-     *
-     * @hidden
      */
     getMessages() {
         return ajax_1.Ajax.postJSON('/api', { command: 'getchat', worldId: this.worldId, firstId: this.firstId })

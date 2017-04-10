@@ -3,9 +3,6 @@
  * Extensions can access this class through ex.world.storage.
  */
 export class Storage {
-    /**
-     * @hidden
-     */
     private namespace: string;
 
     constructor(namespace: string | number) {

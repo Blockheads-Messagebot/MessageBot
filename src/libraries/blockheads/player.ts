@@ -4,11 +4,8 @@ import {WorldLists} from './types/world';
  * Player class which is returned by the [[World.getPlayer]] method. Should not be created by any other method.
  */
 export class Player {
-    /** @hidden */
     private name: string;
-    /** @hidden */
     private info: {ip: string, ips: string[], joins: number, owner?: boolean};
-    /** @hidden */
     private lists: WorldLists;
 
     /**

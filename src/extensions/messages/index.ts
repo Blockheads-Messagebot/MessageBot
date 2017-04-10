@@ -33,10 +33,8 @@ MessageBot.registerExtension('messages', function(ex, world) {
 });
 
 
-/** @hidden */
 type JoinMessageConfig = MessageConfig;
 
-/** @hidden */
 function joinModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'joinArr';
     let storage = world.storage;
@@ -61,10 +59,8 @@ function joinModule(ex: MessageBotExtension, world: World) {
 }
 
 
-/** @hidden */
 type LeaveMessageConfig = MessageConfig;
 
-/** @hidden */
 function leaveModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'leaveArr';
     let storage = world.storage;
@@ -89,12 +85,10 @@ function leaveModule(ex: MessageBotExtension, world: World) {
 }
 
 
-/** @hidden */
 type TriggerMessageConfig = MessageConfig & {
     trigger: string
 };
 
-/** @hidden */
 function triggerModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'triggerArr';
     let storage = world.storage;
@@ -139,10 +133,8 @@ function triggerModule(ex: MessageBotExtension, world: World) {
 }
 
 
-/** @hidden */
 type AnnouncementMessageConfig = {message: string};
 
-/** @hidden */
 function announcementModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'announcementArr';
     let index = 0;

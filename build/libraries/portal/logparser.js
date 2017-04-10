@@ -35,11 +35,9 @@ class PortalLogParser {
         this.entries = [];
         return entries;
     }
-    /** @hidden */
     isValidLine(line) {
         return /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d blockheads_server/.test(line);
     }
-    /** @hidden */
     addLine(line) {
         let ts = line.substr(0, 24)
             .replace(' ', 'T')

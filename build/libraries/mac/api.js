@@ -116,7 +116,6 @@ class MacApi {
     /**
      * Gets the specified list for the world.
      *
-     * @hidden
      * @param file the file to read
      */
     readText(file) {

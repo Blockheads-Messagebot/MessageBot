@@ -4,17 +4,14 @@ import {Storage} from '../libraries/storage';
  * Convenience class to make saving settings easier.
  */
 export class Settings {
-    /** @hidden */
     private STORAGE_ID = 'mb_preferences';
 
-    /** @hidden */
     private storage: Storage;
 
-    /** @hidden */
     private _prefix: string;
 
     /**
-     * Creates a new instance of the Settings class.
+     * Creates a new instance of the Settings class. Extensions shouldn't need to use this as it is provided through ex.storage.
      *
      * @param storage the storage instance to save settings in.
      * @param prefix the prefix to save settings with.

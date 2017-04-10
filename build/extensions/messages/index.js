@@ -14,7 +14,6 @@ bot_1.MessageBot.registerExtension('messages', function (ex, world) {
         ex.settings.removeAll();
     };
 });
-/** @hidden */
 function joinModule(ex, world) {
     let STORAGE_ID = 'joinArr';
     let storage = world.storage;
@@ -33,7 +32,6 @@ function joinModule(ex, world) {
         world.storage.clearNamespace(STORAGE_ID);
     };
 }
-/** @hidden */
 function leaveModule(ex, world) {
     let STORAGE_ID = 'leaveArr';
     let storage = world.storage;
@@ -52,7 +50,6 @@ function leaveModule(ex, world) {
         world.storage.clearNamespace(STORAGE_ID);
     };
 }
-/** @hidden */
 function triggerModule(ex, world) {
     let STORAGE_ID = 'triggerArr';
     let storage = world.storage;
@@ -90,7 +87,6 @@ function triggerModule(ex, world) {
         world.storage.clearNamespace(STORAGE_ID);
     };
 }
-/** @hidden */
 function announcementModule(ex, world) {
     let STORAGE_ID = 'announcementArr';
     let index = 0;

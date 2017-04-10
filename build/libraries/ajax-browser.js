@@ -41,8 +41,6 @@ class Ajax {
 exports.Ajax = Ajax;
 /**
  * Helper function to make XHR requests.
- *
- * @hidden
  */
 function xhr(protocol, url = '/', params = {}) {
     var paramStr = urlStringify(params);
@@ -75,8 +73,6 @@ function xhr(protocol, url = '/', params = {}) {
 }
 /**
  * Internal function used to stringify url parameters
- *
- * @hidden
  */
 function urlStringify(obj) {
     return Object.keys(obj)

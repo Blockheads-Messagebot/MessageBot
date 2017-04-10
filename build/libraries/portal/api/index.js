@@ -119,8 +119,6 @@ class PortalApi {
     }
     /**
      * Waits until the world is online before resolving.
-     *
-     * @hidden
      */
     worldOnline() {
         return ajax_1.Ajax.postJSON(`/api`, { command: 'status', worldId: this.worldId })
@@ -138,8 +136,6 @@ class PortalApi {
     }
     /**
      * Sends the oldest queued message if possible.
-     *
-     * @hidden
      */
     postMessage() {
         if (this.messageQueue.length) {

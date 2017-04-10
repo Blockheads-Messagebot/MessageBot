@@ -1,4 +1,5 @@
 import {World} from '../libraries/blockheads/world';
+import {Ajax} from '../libraries/ajax';
 import {MessageBot} from './bot';
 import {Settings} from './settings';
 
@@ -32,6 +33,11 @@ export class MessageBotExtension {
     public settings: Settings;
 
     /**
+     * Utility class which can be used to send http requests with a promise based API.
+     */
+    public ajax: Ajax;
+
+    /**
      * Creates a new instance of the class.
      *
      * @param bot the bot to attach this extension to.
@@ -39,6 +45,7 @@ export class MessageBotExtension {
     constructor(bot: MessageBot) {
         this.world = bot.world;
         this.bot = bot;
+        this.ajax = Ajax;
         this.exports = {};
     }
 

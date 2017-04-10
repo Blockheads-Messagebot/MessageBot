@@ -9,11 +9,8 @@ import {Ajax} from '../ajax';
  * Unless you are creating instances of the World class, you don't need to know anything about this class.
  */
 export class PortalChatWatcher implements ChatWatcher {
-    /** @hidden */
     private parser: ChatParser;
-    /** @hidden */
     private firstId: number;
-    /** @hidden */
     private worldId: number;
 
     /**
@@ -42,8 +39,6 @@ export class PortalChatWatcher implements ChatWatcher {
 
     /**
      * Continually checks chat for new messages.
-     *
-     * @hidden
      */
     private checkChat() {
         this.getMessages()
@@ -54,8 +49,6 @@ export class PortalChatWatcher implements ChatWatcher {
 
     /**
      * Queues checking for new chat to parse.
-     *
-     * @hidden
      */
     private queueChatCheck() {
         setTimeout(() => this.checkChat(), 5000);
@@ -63,8 +56,6 @@ export class PortalChatWatcher implements ChatWatcher {
 
     /**
      * Gets the unread messages from the server queue.
-     *
-     * @hidden
      */
     private getMessages(): Promise<string[]> {
         return Ajax.postJSON('/api', {command: 'getchat', worldId: this.worldId, firstId: this.firstId})

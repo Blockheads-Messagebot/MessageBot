@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const ajax_1 = require("../libraries/ajax");
 /**
  * Extension class, created by the bot with bot.registerExtension. Should not be created directly.
  */
@@ -12,6 +13,7 @@ class MessageBotExtension {
     constructor(bot) {
         this.world = bot.world;
         this.bot = bot;
+        this.ajax = ajax_1.Ajax;
         this.exports = {};
     }
     /**

@@ -41,8 +41,6 @@ export class Ajax {
 
 /**
  * Helper function to make XHR requests.
- *
- * @hidden
  */
 function xhr(protocol: string, url: string = '/', params: {[key: string]: string|number} = {}): Promise<string> {
     var paramStr = urlStringify(params);
@@ -76,8 +74,6 @@ function xhr(protocol: string, url: string = '/', params: {[key: string]: string
 
 /**
  * Internal function used to stringify url parameters
- *
- * @hidden
  */
 function urlStringify(obj: {[key: string]: string|number}): string {
     return Object.keys(obj)

@@ -37,11 +37,9 @@ class MacLogParser {
         this.entries = [];
         return entries;
     }
-    /** @hidden */
     isValidLine(line) {
         return /^\w\w\w (?:\d| )\d \d\d\d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
     }
-    /** @hidden */
     addLine(line) {
         let ts = line.substr(0, 20);
         this.entries.push({

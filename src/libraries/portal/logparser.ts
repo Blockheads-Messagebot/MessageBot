@@ -4,7 +4,6 @@ import {LogEntry} from '../blockheads/types/logs';
  * Parses logs from the portal into a standard format. This is only used by the [[PortalAPI]] class.
  */
 export class PortalLogParser {
-    /** @hidden */
     private entries: LogEntry[];
 
     /**
@@ -46,12 +45,10 @@ export class PortalLogParser {
         return entries;
     }
 
-    /** @hidden */
     private isValidLine(line: string): boolean {
         return /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d blockheads_server/.test(line);
     }
 
-    /** @hidden */
     private addLine(line: string): void {
         let ts = line.substr(0, 24)
             .replace(' ', 'T')

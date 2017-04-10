@@ -12,22 +12,16 @@ import {CommandWatcher} from './commandwatcher';
  * Class which contains functions for interacting with a world. Extensions can access this through ex.world.
  */
 export class World {
-    /** @hidden */
     private readonly STORAGE_ID = 'mb_players';
 
     // Caches
-    /** @hidden */
     private logs?: LogEntry[];
-    /** @hidden */
     private players: {[key: string]: {ip: string, ips: string[], joins: number, owner?: boolean}};
-    /** @hidden */
     private lists?: WorldLists;
-    /** @hidden */
     private overview?: WorldOverview;
 
     /**
      * For interacting with the world.
-     * @hidden
      */
     private api: WorldApi;
 
@@ -213,7 +207,6 @@ export class World {
     /**
      * Continually watches chat for new messages and emits events when new messages come in.
      *
-     * @hidden
      * @param message the message to emit events for.
      */
     private messageWatcher(message: ChatMessage) {
@@ -235,7 +228,6 @@ export class World {
     /**
      * Increments a player's joins and saves their IP.
      *
-     * @hidden
      * @param name the player's name
      * @param ip the player's IP
      */

@@ -52,6 +52,11 @@ class MessageBot {
             extensionDeregistered.dispatch(id);
         }
     }
+    /**
+     * Loads an extension into this bot.
+     *
+     * @param id the extension to load
+     */
     registerExtension(id) {
         if (this.extensions.has(id)) {
             return;
@@ -69,6 +74,11 @@ class MessageBot {
             }
         }
     }
+    /**
+     * Removes an extension from this bot
+     *
+     * @param id the extension to remove.
+     */
     deregisterExtension(id) {
         let ex = this.extensions.get(id);
         if (!ex) {

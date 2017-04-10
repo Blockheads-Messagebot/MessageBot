@@ -63,7 +63,6 @@ class CommandWatcher {
     /**
      * Handles /ban and /ban-no-device commands
      *
-     * @hidden
      * @param player the player sending the message
      * @param target the player to ban
      */
@@ -84,7 +83,6 @@ class CommandWatcher {
     /**
      * Handles the /unban command.
      *
-     * @hidden
      * @param player the player sending the command
      * @param target the player to unban.
      */
@@ -96,7 +94,6 @@ class CommandWatcher {
     /**
      * Handles the /whitelist command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to whitelist.
      */
@@ -109,7 +106,6 @@ class CommandWatcher {
     /**
      * Handles the /unwhitelist command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to remove from the whitelist.
      */
@@ -121,7 +117,6 @@ class CommandWatcher {
     /**
      * Handles the /mod command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to mod.
      */
@@ -134,7 +129,6 @@ class CommandWatcher {
     /**
      * Handles the /unmod command.
      *
-     * @hidden
      * @param player the player sending the command
      * @param target the player to remove from the modlist.
      */
@@ -146,7 +140,6 @@ class CommandWatcher {
     /**
      * Handles the /admin command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to admin.
      */
@@ -159,7 +152,6 @@ class CommandWatcher {
     /**
      * Handles the /unadmin command.
      *
-     * @hidden
      * @param player the player sending the command.
      * @param target the player to remove from the adminlist.
      */
@@ -171,7 +163,6 @@ class CommandWatcher {
     /**
      * Handles /clear-list commands.
      *
-     * @hidden
      * @param list the list to clear.
      * @param player the payer sending the command.
      */
@@ -183,7 +174,6 @@ class CommandWatcher {
     /**
      * Handles adding a player to a list.
      *
-     * @hidden
      * @param list the list to add the player to.
      * @param player the player to add to the list.
      */
@@ -195,7 +185,6 @@ class CommandWatcher {
     /**
      * Handles removing players from a list.
      *
-     * @hidden
      * @param list the list to remove the player from.
      * @param player the player to remove.
      */
