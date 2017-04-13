@@ -14,3 +14,4 @@ test-localStorage
 
 # Bot settings
 config/bot.js
+config/import.json
