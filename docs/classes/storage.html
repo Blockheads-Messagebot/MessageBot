@@ -67,7 +67,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Storage class which manages saving and retriving data between bot launches.
+						<p>Storage class which manages saving and retrieving data between bot launches.
 						Extensions can access this class through ex.world.storage.</p>
 					</div>
 				</div>
@@ -114,7 +114,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/libraries/storage.ts#L6">libraries/storage.ts:6</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9083986/src/libraries/storage.ts#L6">libraries/storage.ts:6</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -140,7 +140,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/libraries/storage.ts#L100">libraries/storage.ts:100</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9083986/src/libraries/storage.ts#L100">libraries/storage.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -179,7 +179,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/libraries/storage.ts#L44">libraries/storage.ts:44</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9083986/src/libraries/storage.ts#L44">libraries/storage.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -215,7 +215,7 @@
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> local: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>whether or not a namespace should be used.</p>
+										<p>whether or not a namespace should be used. Default: true</p>
 									</div>
 								</li>
 							</ul>
@@ -227,13 +227,13 @@
 					<a name="getstring" class="tsd-anchor"></a>
 					<h3>get<wbr>String</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>String<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>String<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/libraries/storage.ts#L23">libraries/storage.ts:23</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9083986/src/libraries/storage.ts#L23">libraries/storage.ts:23</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -262,7 +262,7 @@
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> local: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> local: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>whether or not to use a namespace when checking for the key.</p>
 									</div>
@@ -276,18 +276,18 @@
 					<a name="set" class="tsd-anchor"></a>
 					<h3>set</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/libraries/storage.ts#L76">libraries/storage.ts:76</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9083986/src/libraries/storage.ts#L76">libraries/storage.ts:76</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Sets an object in the storage, stringifying it first if neccessary.</p>
+									<p>Sets an object in the storage, stringifying it first if necessary.</p>
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt>example</dt>
@@ -312,7 +312,7 @@
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> local: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> local: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>whether to save the item with a namespace.</p>
 									</div>
