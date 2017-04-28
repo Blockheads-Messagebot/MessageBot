@@ -1,5 +1,9 @@
 import { SimpleEvent } from "../../libraries/simpleevent";
 
+interface HTMLDetailsElement extends HTMLElement {
+    open: boolean;
+}
+
 /**
  * Class which manages a set of tabs, exported by the UI extension.
  * Extensions may use this class to manage tabs internally.
@@ -50,15 +54,6 @@ export class TabManager {
     }
 
     /**
-     * Removes all tabs in the collection. Does not remove tab groups.
-     */
-    removeAll() {
-        for (let i = this.contentRoot.children.length; i >= 0; i--) {
-            this.removeTab(this.contentRoot.children[i] as HTMLDivElement);
-        }
-    }
-
-    /**
      * Adds a tab to the content root, the children of the returned <div> may be modified however you like.
      *
      * @param text the text which should appear in the menu for the tab
@@ -82,7 +77,7 @@ export class TabManager {
                 throw new Error(`Tab group ${groupName} does not exist.`);
             }
         } else {
-            navParent = this.contentRoot;
+            navParent = this.navigationRoot;
         }
 
         navParent.appendChild(tab);
@@ -107,25 +102,30 @@ export class TabManager {
     }
 
     /**
-     * Adds a new tab group to the tab content, if it does not already exist. If it exists, the text of the group will be updated. Supplying a new parent name will not update the parent. (TODO)
+     * Adds a new tab group to the tab content, if it does not already exist. If it exists, this function will throw.
      *
      * @param text the text to display in group dropdown
      * @param groupName the name of the group to create or update
      * @param parent the parent of this group, if not provided the group will be added to the root of the navigation tree.
      */
     addTabGroup(text: string, groupName: string, parent?: string): void {
-        let group = this.navigationRoot.querySelector(`[data-tab-group="${groupName}"]`);
-        if (group) {
-            (group.querySelector('summary') as Element).textContent = text;
-            return;
+        if (this.navigationRoot.querySelector(`[data-tab-group="${groupName}"]`)) {
+            throw new Error('Group already exists.');
         }
 
-        group = document.createElement('details');
+        let group = document.createElement('details') as HTMLDetailsElement;
         let summary = document.createElement('summary');
         summary.textContent = text;
         group.appendChild(summary);
+        group.dataset.tabGroup = groupName;
 
-        let parentNav = this.navigationRoot.querySelector(`[data-tab-group="${parent}"]`);
+        let parentNav: HTMLElement;
+        if (parent) {
+            parentNav = this.navigationRoot.querySelector(`[data-tab-group="${parent}"]`) as HTMLElement;
+        } else {
+            parentNav = this.navigationRoot;
+        }
+
         if (parentNav) {
             parentNav.appendChild(group);
         } else {

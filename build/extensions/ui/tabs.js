@@ -73,14 +73,6 @@ var TabManager = (function () {
         });
     }
     /**
-     * Removes all tabs in the collection. Does not remove tab groups.
-     */
-    TabManager.prototype.removeAll = function () {
-        for (var i = this.contentRoot.children.length; i >= 0; i--) {
-            this.removeTab(this.contentRoot.children[i]);
-        }
-    };
-    /**
      * Adds a tab to the content root, the children of the returned <div> may be modified however you like.
      *
      * @param text the text which should appear in the menu for the tab
@@ -102,7 +94,7 @@ var TabManager = (function () {
             }
         }
         else {
-            navParent = this.contentRoot;
+            navParent = this.navigationRoot;
         }
         navParent.appendChild(tab);
         this.contentRoot.appendChild(content);
@@ -123,23 +115,28 @@ var TabManager = (function () {
         return false;
     };
     /**
-     * Adds a new tab group to the tab content, if it does not already exist. If it exists, the text of the group will be updated. Supplying a new parent name will not update the parent. (TODO)
+     * Adds a new tab group to the tab content, if it does not already exist. If it exists, this function will throw.
      *
      * @param text the text to display in group dropdown
      * @param groupName the name of the group to create or update
      * @param parent the parent of this group, if not provided the group will be added to the root of the navigation tree.
      */
     TabManager.prototype.addTabGroup = function (text, groupName, parent) {
-        var group = this.navigationRoot.querySelector("[data-tab-group=\"" + groupName + "\"]");
-        if (group) {
-            group.querySelector('summary').textContent = text;
-            return;
+        if (this.navigationRoot.querySelector("[data-tab-group=\"" + groupName + "\"]")) {
+            throw new Error('Group already exists.');
         }
-        group = document.createElement('details');
+        var group = document.createElement('details');
         var summary = document.createElement('summary');
         summary.textContent = text;
         group.appendChild(summary);
-        var parentNav = this.navigationRoot.querySelector("[data-tab-group=\"" + parent + "\"]");
+        group.dataset.tabGroup = groupName;
+        var parentNav;
+        if (parent) {
+            parentNav = this.navigationRoot.querySelector("[data-tab-group=\"" + parent + "\"]");
+        }
+        else {
+            parentNav = this.navigationRoot;
+        }
         if (parentNav) {
             parentNav.appendChild(group);
         }

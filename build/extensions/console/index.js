@@ -9,15 +9,17 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
         input: process.stdin,
         output: process.stdout,
     });
-    var log = ex.export('log', function (message) {
-        var columns = process.stdout.columns;
-        // Set cursor to beginning of current line.
-        readline.moveCursor(process.stdout, -200, 0);
-        // Pad message to avoid long typed messages showing up.
-        console.log(message + ' '.repeat(columns - message.length % columns));
-        // Re-prompt for input.
-        rl.prompt(true);
-    });
+    var consoleExports = {
+        log: function (message) {
+            var columns = process.stdout.columns;
+            // Set cursor to beginning of current line.
+            readline.moveCursor(process.stdout, -200, 0);
+            // Pad message to avoid long typed messages showing up.
+            console.log(message + ' '.repeat(columns - message.length % columns));
+            // Re-prompt for input.
+            rl.prompt(true);
+        }
+    };
     function handleInput(message) {
         if (message.startsWith('//eval')) {
             console.log(eval(message.substr(6)));
@@ -35,13 +37,13 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
     function logChat(_a) {
         var player = _a.player, message = _a.message;
         if (player.isAdmin()) {
-            log(colors.blue(player.getName()) + ': ' + message);
+            consoleExports.log(colors.blue(player.getName()) + ': ' + message);
         }
         else if (player.isMod()) {
-            log(colors.green(player.getName()) + ': ' + message);
+            consoleExports.log(colors.green(player.getName()) + ': ' + message);
         }
         else {
-            log(player.getName() + ': ' + message);
+            consoleExports.log(player.getName() + ': ' + message);
         }
     }
     world.onMessage.sub(logChat);
@@ -53,15 +55,15 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
         else {
             message = player.getName() + " joined the server.";
         }
-        log(message);
+        consoleExports.log(message);
     }
     world.onJoin.sub(logJoins);
     function logLeaves(player) {
-        log(player.getName() + ' left');
+        consoleExports.log(player.getName() + ' left');
     }
     world.onLeave.sub(logLeaves);
     function logOther(message) {
-        log(message);
+        consoleExports.log(message);
     }
     world.onOther.sub(logOther);
     ex.uninstall = function () {

@@ -16,6 +16,7 @@
         "Storage",
         "TabManager",
         "World",
+        "ConsoleExtensionExports",
         "UIExtensionExports"
     ]
 }

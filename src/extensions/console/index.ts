@@ -1,6 +1,6 @@
 // Mac / Terminal version, for browser version see the console-browser folder. The exports are the same for both extensions.
 
-export interface ConsoleExports {
+export interface ConsoleExtensionExports {
     log: (message: string) => void;
 }
 
@@ -19,18 +19,21 @@ MessageBot.registerExtension('console', function(ex, world) {
         output: process.stdout,
     });
 
-    const log = ex.export('log', (message: string) => {
-        var columns = (process.stdout as any).columns as number;
+    let consoleExports: ConsoleExtensionExports = {
+        log: (message: string) => {
+            var columns = (process.stdout as any).columns as number;
 
-        // Set cursor to beginning of current line.
-        readline.moveCursor(process.stdout, -200, 0);
+            // Set cursor to beginning of current line.
+            readline.moveCursor(process.stdout, -200, 0);
 
-        // Pad message to avoid long typed messages showing up.
-        console.log(message + ' '.repeat(columns - message.length % columns));
+            // Pad message to avoid long typed messages showing up.
+            console.log(message + ' '.repeat(columns - message.length % columns));
 
-        // Re-prompt for input.
-        rl.prompt(true);
-    });
+            // Re-prompt for input.
+            rl.prompt(true);
+        }
+    };
+
 
     function handleInput(message: string) {
         if (message.startsWith('//eval')) {
@@ -51,11 +54,11 @@ MessageBot.registerExtension('console', function(ex, world) {
 
     function logChat({player, message}: {player: Player, message: string}): void {
         if (player.isAdmin()) {
-            log(colors.blue(player.getName()) + ': ' + message);
+            consoleExports.log(colors.blue(player.getName()) + ': ' + message);
         } else if (player.isMod()) {
-            log(colors.green(player.getName()) + ': ' + message);
+            consoleExports.log(colors.green(player.getName()) + ': ' + message);
         } else {
-            log(player.getName() + ': ' + message);
+            consoleExports.log(player.getName() + ': ' + message);
         }
     }
     world.onMessage.sub(logChat);
@@ -69,17 +72,17 @@ MessageBot.registerExtension('console', function(ex, world) {
             message = `${player.getName()} joined the server.`;
         }
 
-        log(message);
+        consoleExports.log(message);
     }
     world.onJoin.sub(logJoins);
 
     function logLeaves(player: Player): void {
-        log(player.getName() + ' left');
+        consoleExports.log(player.getName() + ' left');
     }
     world.onLeave.sub(logLeaves);
 
     function logOther(message: string): void {
-        log(message);
+        consoleExports.log(message);
     }
     world.onOther.sub(logOther);
 

@@ -203,7 +203,7 @@ var World = (function () {
         name = name.toLocaleUpperCase();
         var info = this.players[name] || { ip: '', ips: [], joins: 0 };
         if (this.overview && this.overview.owner == name) {
-            this.players[name].owner = true;
+            info.owner = true;
         }
         return new player_1.Player(name, info, this.lists || { adminlist: [], modlist: [], whitelist: [], blacklist: [] });
     };
