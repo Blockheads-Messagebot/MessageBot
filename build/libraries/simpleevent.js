@@ -74,13 +74,17 @@ var SimpleEvent = (function () {
                     len--;
                     this.listeners.splice(i--, 1)[0].cb(event);
                 }
-                catch (e) { }
+                catch (e) {
+                    console.error(e);
+                }
             }
             else {
                 try {
                     this.listeners[i].cb(event);
                 }
-                catch (e) { }
+                catch (e) {
+                    console.error(e);
+                }
             }
         }
     };

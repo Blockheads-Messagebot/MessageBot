@@ -2030,13 +2030,17 @@ var SimpleEvent = (function () {
                     len--;
                     this.listeners.splice(i--, 1)[0].cb(event);
                 }
-                catch (e) { }
+                catch (e) {
+                    console.error(e);
+                }
             }
             else {
                 try {
                     this.listeners[i].cb(event);
                 }
-                catch (e) { }
+                catch (e) {
+                    console.error(e);
+                }
             }
         }
     };
@@ -2059,7 +2063,7 @@ exports.SimpleEvent = SimpleEvent;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * Storage class which manages saving and retriving data between bot launches.
+ * Storage class which manages saving and retrieving data between bot launches.
  * Extensions can access this class through ex.world.storage.
  */
 var Storage = (function () {
@@ -2078,6 +2082,7 @@ var Storage = (function () {
      * @param local whether or not to use a namespace when checking for the key.
      */
     Storage.prototype.getString = function (key, fallback, local) {
+        if (local === void 0) { local = true; }
         var result;
         if (local) {
             result = localStorage.getItem("" + key + this.namespace);
@@ -2095,7 +2100,7 @@ var Storage = (function () {
      *
      * @param key the item to retrieve.
      * @param fallback what to return if the item does not exist or fails to parse correctly.
-     * @param local whether or not a namespace should be used.
+     * @param local whether or not a namespace should be used. Default: true
      */
     Storage.prototype.getObject = function (key, fallback, local) {
         var raw = this.getString(key, '', local);
@@ -2115,7 +2120,7 @@ var Storage = (function () {
         return result;
     };
     /**
-     * Sets an object in the storage, stringifying it first if neccessary.
+     * Sets an object in the storage, stringifying it first if necessary.
      *
      * @example
      * set('some_key', {a: [1, 2, 3], b: 'test'});
@@ -2126,6 +2131,7 @@ var Storage = (function () {
      * @param local whether to save the item with a namespace.
      */
     Storage.prototype.set = function (key, data, local) {
+        if (local === void 0) { local = true; }
         if (local) {
             key = "" + key + this.namespace;
         }
