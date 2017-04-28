@@ -2,10 +2,16 @@ import {PortalChatWatcher} from './libraries/portal/chatwatcher';
 import {PortalApi} from './libraries/portal/api';
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
-import {MessageBot} from './bot/bot';
+
+import {MessageBot} from './bot';
 (global as any).MessageBot = MessageBot;
+import {SimpleEvent} from './libraries/simpleevent';
+(global as any).SimpleEvent = SimpleEvent;
 
 declare var worldId: number;
+
+import './extensions/ui';
+import './extensions/console-browser';
 
 let world = new World({
     api: new PortalApi(worldId),
@@ -17,15 +23,3 @@ let world = new World({
 });
 
 new MessageBot(world);
-
-world.onMessage.sub(({player, message}) => {
-    console.log(player.getName(), message);
-});
-
-world.onJoin.sub(player => {
-    console.log(player.getName(), 'joined');
-});
-
-world.onLeave.sub(player => {
-    console.log(player.getName(), 'left');
-});

@@ -1,4 +1,8 @@
-// Mac / Terminal version, for browser version see the console-browser folder.
+// Mac / Terminal version, for browser version see the console-browser folder. The exports are the same for both extensions.
+
+export interface ConsoleExports {
+    log: (message: string) => void;
+}
 
 import {MessageBot} from '../../bot/bot';
 
@@ -56,18 +60,26 @@ MessageBot.registerExtension('console', function(ex, world) {
     }
     world.onMessage.sub(logChat);
 
-    function logJoins(player: Player): void {
-        console.log(player.getName(), 'joined the server.');
+    function logJoins(player: Player) {
+        let message: string;
+
+        if (ex.settings.get('logJoinIps', true)) {
+            message = `${player.getName()} (${player.getIP()}) joined the server.`;
+        } else {
+            message = `${player.getName()} joined the server.`;
+        }
+
+        log(message);
     }
     world.onJoin.sub(logJoins);
 
     function logLeaves(player: Player): void {
-        console.log(player.getName(), 'left');
+        log(player.getName() + ' left');
     }
     world.onLeave.sub(logLeaves);
 
     function logOther(message: string): void {
-        console.log(message);
+        log(message);
     }
     world.onOther.sub(logOther);
 

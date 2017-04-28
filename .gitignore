@@ -15,3 +15,9 @@ test-localStorage
 # Bot settings
 config/bot.js
 config/import.json
+
+# Test builds
+test/tests.js
+
+# Built CSS files
+*.css

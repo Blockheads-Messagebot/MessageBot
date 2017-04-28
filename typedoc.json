@@ -5,5 +5,17 @@
     "excludePrivate": true,
     "excludeNotExported": true,
     "listInvalidSymbolLinks": true,
-    "toc": ["Ajax", "Hook", "MessageBot", "MessageBotExtension", "Player", "Settings", "SimpleEvent", "Storage", "World"]
+    "toc": [
+        "Ajax",
+        "Hook",
+        "MessageBot",
+        "MessageBotExtension",
+        "Player",
+        "Settings",
+        "SimpleEvent",
+        "Storage",
+        "TabManager",
+        "World",
+        "UIExtensionExports"
+    ]
 }

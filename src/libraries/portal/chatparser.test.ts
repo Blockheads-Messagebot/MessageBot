@@ -96,10 +96,10 @@ describe('PortalChatParser#parse', function() {
             expect(parsed).to.deep.include({type: ChatType.message, name: 'BIB', message: '/help'});
         });
 
-        it('Should not return message events for server chat', function() {
+        it('Should return message events for server chat', function() {
             let parsed = parser.parse([messages.serverchat1]);
 
-            expect(parsed).not.to.deep.include({type: ChatType.message, name: 'SERVER', message: 'Hello!'});
+            expect(parsed).to.deep.include({type: ChatType.message, name: 'SERVER', message: 'Hello!'});
         });
     });
 

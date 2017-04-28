@@ -106,11 +106,6 @@ export class PortalChatParser {
      * @param message the message sent.
      */
     private handleChat(name: string, message: string): void {
-        if (name == 'SERVER') {
-            // Handled by the world class
-            return;
-        }
-
         this.messages.push({type: ChatType.message, name, message});
 
         if (message.startsWith('/') && !message.startsWith('/ ')) {

@@ -4,6 +4,8 @@ const del = require('del');
 const browserify = require('browserify');
 const {spawn} = require('child_process');
 const path = require('path');
+const tsify = require('tsify');
+const sass = require('gulp-sass');
 
 function run(command, args, alwaysLog = false) {
     if (process.platform == 'win32') {
@@ -45,37 +47,48 @@ gulp.task('build', ['lint'], function()  {
     return run('tsc');
 });
 
-gulp.task('browserify', ['build'], function() {
-    return browserify('build/index.js', {
+gulp.task('scss', function() {
+    return gulp.src('./src/**/*.scss')
+        .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
+        .pipe(gulp.dest('./src'));
+});
+
+gulp.task('browserify', ['scss'], function() {
+    return browserify(['src/index.ts'], {
             debug: false
         })
+        .plugin(tsify)
         .transform('brfs')
-        .transform('babelify', {presets: ['es2015']})
         .bundle()
         .pipe(fs.createWriteStream('build/compiled/bot.js'));
 });
 
 gulp.task('docs', function() {
     return run('typedoc', [
-        '--options',
-        './typedoc.json'
+        '--options', './typedoc.json',
+        '--target', 'es6' //NOTE: This is a hack to let typedoc work until it updates to Typescript 2.3.
     ]);
 });
 
-gulp.task('test', function() {
-    return run('mocha', [
-        '-r', 'ts-node/register',
-        'src/**/*.test.ts'
-    ]);
+gulp.task('build:test', function() {
+    let testFiles = require('glob').sync('src/**/*.test.ts');
+    return browserify({
+            debug: false,
+            entries: testFiles,
+        })
+        .plugin(tsify)
+        .transform('brfs')
+        .bundle()
+        .pipe(fs.createWriteStream('test/tests.js'));
 });
 
 gulp.task('clean', function() {
-    return del(['build/**/*', '!build/compiled', 'test-localStorage']);
+    return del(['build/**/*', '!build/compiled', 'src/**/*.css']);
 });
 
 gulp.task('watch', ['browserify'], function() {
     gulp.watch(['src/**/*'], ['browserify']);
 });
 
-gulp.task('all', ['browserify', 'docs', 'test']);
+gulp.task('all', ['browserify', 'build', 'docs']);
 gulp.task('default', ['browserify']);

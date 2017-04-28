@@ -23,7 +23,7 @@ export class MessageBotExtension {
     public bot: MessageBot;
 
     /**
-     * Any exports which are availible to other extensions.
+     * Any exports which are available to other extensions.
      */
     public exports: {[key: string]: any};
 
@@ -36,6 +36,11 @@ export class MessageBotExtension {
      * Utility class which can be used to send http requests with a promise based API.
      */
     public ajax: Ajax;
+
+    /**
+     * Used to check if the bot is loaded in a browser or in a node environment.
+     */
+    public isNode: boolean = !!global.process;
 
     /**
      * Creates a new instance of the class.

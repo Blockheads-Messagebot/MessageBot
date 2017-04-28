@@ -55,7 +55,7 @@ export class MessageBot {
         id: string,
         creator: ExtensionInitializer,
     ) {
-        // Note: No this.
+        console.log('Launching extension', id);
         if (extensions.has(id)) {
             console.log(`Extension ${id} was already registered. Abort.`);
             return;
@@ -155,7 +155,7 @@ export class MessageBot {
             params['NAME'] = player.toLocaleUpperCase();
         }
 
-        // Loop through messages, replacing varibles, then send the message
+        // Loop through messages, replacing variables, then send the message
         messages.forEach(msg => {
             Object.keys(params).forEach(key => {
                 // Escape RegExp special characters in key
