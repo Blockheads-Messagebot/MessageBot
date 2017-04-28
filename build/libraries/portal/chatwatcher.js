@@ -1,20 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const simpleevent_1 = require("../simpleevent");
-const chatparser_1 = require("./chatparser");
-const ajax_1 = require("../ajax");
+var simpleevent_1 = require("../simpleevent");
+var chatparser_1 = require("./chatparser");
+var ajax_1 = require("../ajax");
 /**
  * This class watches a world for new chat and reports any events through the 'message' event.
  *
  * Unless you are creating instances of the World class, you don't need to know anything about this class.
  */
-class PortalChatWatcher {
+var PortalChatWatcher = (function () {
     /**
      * Creates a new instance of the PortalChatWatcher class.
      *
      * @param options the configuration for this chat watcher.
      */
-    constructor({ worldId, firstId }) {
+    function PortalChatWatcher(_a) {
+        var worldId = _a.worldId, firstId = _a.firstId;
         /**
          * Event fired whenever new chat comes in.
          */
@@ -25,38 +26,42 @@ class PortalChatWatcher {
     /**
      * @inheritdoc
      */
-    setup(name, online) {
+    PortalChatWatcher.prototype.setup = function (name, online) {
         this.parser = new chatparser_1.PortalChatParser(name, online);
         this.queueChatCheck();
-    }
+    };
     /**
      * Continually checks chat for new messages.
      */
-    checkChat() {
+    PortalChatWatcher.prototype.checkChat = function () {
+        var _this = this;
         this.getMessages()
             .then(this.parser.parse)
-            .then(msgs => msgs.forEach(this.onMessage.dispatch))
-            .then(() => this.queueChatCheck());
-    }
+            .then(function (msgs) { return msgs.forEach(_this.onMessage.dispatch); })
+            .then(function () { return _this.queueChatCheck(); });
+    };
     /**
      * Queues checking for new chat to parse.
      */
-    queueChatCheck() {
-        setTimeout(() => this.checkChat(), 5000);
-    }
+    PortalChatWatcher.prototype.queueChatCheck = function () {
+        var _this = this;
+        setTimeout(function () { return _this.checkChat(); }, 5000);
+    };
     /**
      * Gets the unread messages from the server queue.
      */
-    getMessages() {
+    PortalChatWatcher.prototype.getMessages = function () {
+        var _this = this;
         return ajax_1.Ajax.postJSON('/api', { command: 'getchat', worldId: this.worldId, firstId: this.firstId })
-            .then((data) => {
-            if (data.status == 'ok' && data.nextId != this.firstId) {
-                this.firstId = data.nextId;
+            .then(function (data) {
+            if (data.status == 'ok' && data.nextId != _this.firstId) {
+                _this.firstId = data.nextId;
                 return data.log;
             }
             // Expected to have error status sometimes, just return an empty array.
             return [];
-        }, () => []); // Even if the request fails, this method should not throw.
-    }
-}
+        }, function () { return []; }); // Even if the request fails, this method should not throw.
+    };
+    return PortalChatWatcher;
+}());
 exports.PortalChatWatcher = PortalChatWatcher;

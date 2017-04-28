@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Polyfill localStorage
-const { LocalStorage } = require('node-localstorage');
+var LocalStorage = require('node-localstorage').LocalStorage;
 global.localStorage = new LocalStorage('./localStorage');
-const fs = require("fs");
+var fs = require("fs");
 fs.readFile('./config/import.json', 'utf8', function (err, data) {
     if (err) {
         console.log('Unable to open config/import.json');
         return;
     }
-    let parsed;
+    var parsed;
     try {
         parsed = JSON.parse(data);
     }
@@ -21,7 +21,7 @@ fs.readFile('./config/import.json', 'utf8', function (err, data) {
         parsed = {};
     }
     console.log('Importing config...');
-    Object.keys(parsed).forEach(key => {
+    Object.keys(parsed).forEach(function (key) {
         localStorage.setItem(key, JSON.stringify(parsed[key]));
     });
     console.log('Config imported successfully!');

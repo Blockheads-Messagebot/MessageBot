@@ -3,14 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Class to watch chat for commands and update the stored lists as needed. You don't need to know anything about this class. It is only used by the [[World]] class internally to keep lists up to date.
  */
-class CommandWatcher {
+var CommandWatcher = (function () {
     /**
      * Creates a new instance of the class.
      *
      * @param lists the lists to keep up to date.
      * @param getPlayer a callback to be used for getting player info. Must return an instance of Player
      */
-    constructor(lists, getPlayer) {
+    function CommandWatcher(lists, getPlayer) {
         this.lists = lists;
         this.getPlayer = getPlayer;
         this.listener = this.listener.bind(this);
@@ -24,8 +24,9 @@ class CommandWatcher {
      * @param args any arguments supplied
      */
     //tslint:disable-next-line:cyclomatic-complexity
-    listener({ player, command, args }) {
-        let target = this.getPlayer(args);
+    CommandWatcher.prototype.listener = function (_a) {
+        var player = _a.player, command = _a.command, args = _a.args;
+        var target = this.getPlayer(args);
         switch (command.toLocaleLowerCase()) {
             case 'ban':
             case 'ban-no-device':
@@ -59,14 +60,14 @@ class CommandWatcher {
                 this.clear(command.substr(6), player);
                 break;
         }
-    }
+    };
     /**
      * Handles /ban and /ban-no-device commands
      *
      * @param player the player sending the message
      * @param target the player to ban
      */
-    ban(player, target) {
+    CommandWatcher.prototype.ban = function (player, target) {
         if (player.isStaff()) {
             if (player.isMod() && target.isStaff()) {
                 return;
@@ -79,119 +80,120 @@ class CommandWatcher {
             this.remove('modlist', target);
             this.remove('whitelist', target);
         }
-    }
+    };
     /**
      * Handles the /unban command.
      *
      * @param player the player sending the command
      * @param target the player to unban.
      */
-    unban(player, target) {
+    CommandWatcher.prototype.unban = function (player, target) {
         if (player.isStaff()) {
             this.remove('blacklist', target);
         }
-    }
+    };
     /**
      * Handles the /whitelist command.
      *
      * @param player the player sending the command.
      * @param target the player to whitelist.
      */
-    whitelist(player, target) {
+    CommandWatcher.prototype.whitelist = function (player, target) {
         if (player.isStaff()) {
             this.add('whitelist', target);
             this.remove('blacklist', target);
         }
-    }
+    };
     /**
      * Handles the /unwhitelist command.
      *
      * @param player the player sending the command.
      * @param target the player to remove from the whitelist.
      */
-    unwhitelist(player, target) {
+    CommandWatcher.prototype.unwhitelist = function (player, target) {
         if (player.isStaff()) {
             this.remove('whitelist', target);
         }
-    }
+    };
     /**
      * Handles the /mod command.
      *
      * @param player the player sending the command.
      * @param target the player to mod.
      */
-    mod(player, target) {
+    CommandWatcher.prototype.mod = function (player, target) {
         if (player.isAdmin()) {
             this.add('modlist', target);
             this.remove('blacklist', target);
         }
-    }
+    };
     /**
      * Handles the /unmod command.
      *
      * @param player the player sending the command
      * @param target the player to remove from the modlist.
      */
-    unmod(player, target) {
+    CommandWatcher.prototype.unmod = function (player, target) {
         if (player.isAdmin()) {
             this.remove('modlist', target);
         }
-    }
+    };
     /**
      * Handles the /admin command.
      *
      * @param player the player sending the command.
      * @param target the player to admin.
      */
-    admin(player, target) {
+    CommandWatcher.prototype.admin = function (player, target) {
         if (player.isAdmin()) {
             this.add('adminlist', target);
             this.remove('blacklist', target);
         }
-    }
+    };
     /**
      * Handles the /unadmin command.
      *
      * @param player the player sending the command.
      * @param target the player to remove from the adminlist.
      */
-    unadmin(player, target) {
+    CommandWatcher.prototype.unadmin = function (player, target) {
         if (player.isAdmin() && !target.isOwner()) {
             this.remove('adminlist', target);
         }
-    }
+    };
     /**
      * Handles /clear-list commands.
      *
      * @param list the list to clear.
      * @param player the payer sending the command.
      */
-    clear(list, player) {
+    CommandWatcher.prototype.clear = function (list, player) {
         if (player.isAdmin()) {
             this.lists[list].length = 0;
         }
-    }
+    };
     /**
      * Handles adding a player to a list.
      *
      * @param list the list to add the player to.
      * @param player the player to add to the list.
      */
-    add(list, player) {
+    CommandWatcher.prototype.add = function (list, player) {
         if (!this.lists[list].includes(player.getName())) {
             this.lists[list].push(player.getName());
         }
-    }
+    };
     /**
      * Handles removing players from a list.
      *
      * @param list the list to remove the player from.
      * @param player the player to remove.
      */
-    remove(list, player) {
+    CommandWatcher.prototype.remove = function (list, player) {
         if (this.lists[list].includes(player.getName())) {
             this.lists[list].splice(this.lists[list].indexOf(player.getName()), 1);
         }
-    }
-}
+    };
+    return CommandWatcher;
+}());
 exports.CommandWatcher = CommandWatcher;

@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const player_1 = require("./player");
-const commandwatcher_1 = require("./commandwatcher");
-const chai_1 = require("chai");
+var player_1 = require("./player");
+var commandwatcher_1 = require("./commandwatcher");
+var chai_1 = require("chai");
 require("mocha");
 describe('CommandWatcher#listener', function () {
-    let info = { ip: '', ips: [], joins: 0 };
-    let lists;
-    let players;
-    let watcher;
+    var info = { ip: '', ips: [], joins: 0 };
+    var lists;
+    var players;
+    var watcher;
     function getPlayer(name) {
         name = name.toLocaleLowerCase();
         if (players.has(name)) {
@@ -36,240 +36,240 @@ describe('CommandWatcher#listener', function () {
         watcher = new commandwatcher_1.CommandWatcher(lists, getPlayer);
     });
     describe('/ban & /ban-no-device', function () {
-        let command = 'ban';
+        var command = 'ban';
         it('Should be usable by admins on players', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'player' });
             chai_1.expect(lists.blacklist).to.contain('PLAYER');
         });
         it('Should be usable by admins on mods', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'mod' });
             chai_1.expect(lists.blacklist).to.contain('MOD');
         });
         it('Should remove banned players from the modlist', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'mod' });
             chai_1.expect(lists.modlist).not.to.contain('MOD');
         });
         it('Should remove banned players from the adminlist', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'admin' });
             chai_1.expect(lists.adminlist).not.to.contain('ADMIN');
         });
         it('Should remove banned players from the whitelist', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'white' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'white' });
             chai_1.expect(lists.whitelist).not.to.contain('WHITE');
         });
         it('Should not be usable by mods on admins', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'admin' });
             chai_1.expect(lists.blacklist).not.to.contain('ADMIN');
         });
         it('Should not be usable by mods on mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'mod' });
             chai_1.expect(lists.blacklist).not.to.contain('MOD');
         });
         it('Should not be usable by mods on players', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'player' });
             chai_1.expect(lists.blacklist).to.contain('PLAYER');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'player' });
             chai_1.expect(lists.blacklist).not.to.contain('PLAYER');
         });
         it('Should not ban the owner', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'owner' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'owner' });
             chai_1.expect(lists.blacklist).not.to.contain('OWNER');
         });
     });
     describe('/unban', function () {
-        let command = 'unban';
+        var command = 'unban';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'black' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'black' });
             chai_1.expect(lists.blacklist).not.to.contain('BLACK');
         });
         it('Should be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'black' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'black' });
             chai_1.expect(lists.blacklist).not.to.contain('BLACK');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'black' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'black' });
             chai_1.expect(lists.blacklist).to.contain('BLACK');
         });
     });
     describe('/whitelist', function () {
-        let command = 'whitelist';
+        var command = 'whitelist';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'player' });
             chai_1.expect(lists.whitelist).to.contain('PLAYER');
         });
         it('Should be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'player' });
             chai_1.expect(lists.whitelist).to.contain('PLAYER');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'player' });
             chai_1.expect(lists.whitelist).not.to.contain('PLAYER');
         });
         it('Should remove players from the blacklist', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'black' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'black' });
             chai_1.expect(lists.blacklist).not.to.contain('BLACK');
         });
     });
     describe('/unwhitelist', function () {
-        let command = 'unwhitelist';
+        var command = 'unwhitelist';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'WHITE' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'WHITE' });
             chai_1.expect(lists.whitelist).not.to.contain('WHITE');
         });
         it('Should be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'WHITE' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'WHITE' });
             chai_1.expect(lists.whitelist).not.to.contain('WHITE');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'WHITE' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'WHITE' });
             chai_1.expect(lists.whitelist).to.contain('WHITE');
         });
     });
     describe('/mod', function () {
-        let command = 'mod';
+        var command = 'mod';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'player' });
             chai_1.expect(lists.modlist).to.contain('PLAYER');
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'player' });
             chai_1.expect(lists.modlist).not.to.contain('PLAYER');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'player' });
             chai_1.expect(lists.modlist).not.to.contain('PLAYER');
         });
         it('Should work on admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'admin' });
             chai_1.expect(lists.modlist).to.contain('MOD');
         });
         it('Should remove players from the blacklist', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'black' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'black' });
             chai_1.expect(lists.blacklist).not.to.contain('BLACK');
         });
     });
     describe('/unmod', function () {
-        let command = 'unmod';
+        var command = 'unmod';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'mod' });
             chai_1.expect(lists.modlist).not.to.contain('MOD');
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'mod' });
             chai_1.expect(lists.modlist).to.contain('MOD');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'mod' });
             chai_1.expect(lists.modlist).to.contain('MOD');
         });
         it('Should not remove the name from the admin list', function () {
             lists.modlist.push('ADMIN');
-            watcher.listener({ player: getPlayer('admin'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'admin' });
             chai_1.expect(lists.adminlist).to.contain('ADMIN');
         });
     });
     describe('/admin', function () {
-        let command = 'admin';
+        var command = 'admin';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'player' });
             chai_1.expect(lists.adminlist).to.contain('PLAYER');
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'player' });
             chai_1.expect(lists.adminlist).not.to.contain('PLAYER');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'player' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'player' });
             chai_1.expect(lists.adminlist).not.to.contain('PLAYER');
         });
         it('Should not remove mods who were promoted to admin', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'mod' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'mod' });
             chai_1.expect(lists.modlist).to.contain('MOD');
         });
         it('Should remove players from the blacklist', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'black' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'black' });
             chai_1.expect(lists.blacklist).not.to.contain('BLACK');
         });
     });
     describe('/unadmin', function () {
-        let command = 'unadmin';
+        var command = 'unadmin';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'admin' });
             chai_1.expect(lists.adminlist).not.to.contain('ADMIN');
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: 'admin' });
             chai_1.expect(lists.adminlist).to.contain('ADMIN');
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: 'admin' });
             chai_1.expect(lists.adminlist).to.contain('ADMIN');
         });
         it('Should not remove the name from the mod list', function () {
             lists.modlist.push('ADMIN');
-            watcher.listener({ player: getPlayer('admin'), command, args: 'admin' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: 'admin' });
             chai_1.expect(lists.modlist).to.contain('ADMIN');
         });
     });
     describe('/clear-blacklist', function () {
-        let command = 'clear-blacklist';
+        var command = 'clear-blacklist';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: '' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: '' });
             chai_1.expect(lists.blacklist).to.be.empty;
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: '' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: '' });
             chai_1.expect(lists.blacklist).not.to.be.empty;
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: '' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: '' });
             chai_1.expect(lists.blacklist).not.to.be.empty;
         });
     });
     describe('/clear-whitelist', function () {
-        let command = 'clear-whitelist';
+        var command = 'clear-whitelist';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: '' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: '' });
             chai_1.expect(lists.whitelist).to.be.empty;
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: '' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: '' });
             chai_1.expect(lists.whitelist).not.to.be.empty;
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: '' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: '' });
             chai_1.expect(lists.whitelist).not.to.be.empty;
         });
     });
     describe('/clear-modlist', function () {
-        let command = 'clear-modlist';
+        var command = 'clear-modlist';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: '' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: '' });
             chai_1.expect(lists.modlist).to.be.empty;
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: '' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: '' });
             chai_1.expect(lists.modlist).not.to.be.empty;
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: '' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: '' });
             chai_1.expect(lists.modlist).not.to.be.empty;
         });
     });
     describe('/clear-adminlist', function () {
-        let command = 'clear-adminlist';
+        var command = 'clear-adminlist';
         it('Should be usable by admins', function () {
-            watcher.listener({ player: getPlayer('admin'), command, args: '' });
+            watcher.listener({ player: getPlayer('admin'), command: command, args: '' });
             chai_1.expect(lists.adminlist).to.be.empty;
         });
         it('Should not be usable by mods', function () {
-            watcher.listener({ player: getPlayer('mod'), command, args: '' });
+            watcher.listener({ player: getPlayer('mod'), command: command, args: '' });
             chai_1.expect(lists.adminlist).not.to.be.empty;
         });
         it('Should not be usable by players', function () {
-            watcher.listener({ player: getPlayer('player'), command, args: '' });
+            watcher.listener({ player: getPlayer('player'), command: command, args: '' });
             chai_1.expect(lists.adminlist).not.to.be.empty;
         });
     });

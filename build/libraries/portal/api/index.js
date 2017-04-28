@@ -1,18 +1,38 @@
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const ajax_1 = require("../../ajax");
-const logparser_1 = require("../logparser");
+var ajax_1 = require("../../ajax");
+var logparser_1 = require("../logparser");
 /**
  * This class is only used by the [[World]] class. Unless you are creating new instances of the [[World]] class, you probably don't need to know anything about this class.
  *
  */
-class PortalApi {
+var PortalApi = (function () {
     /**
      * Creates a new instance of the class.
      *
      * @param worldId the worldId to use when communicating with the server.
      */
-    constructor(worldId) {
+    function PortalApi(worldId) {
         this.worldId = worldId;
         this.messageQueue = [];
         this.logParser = new logparser_1.PortalLogParser();
@@ -22,15 +42,16 @@ class PortalApi {
     /**
      * @inheritdoc
      */
-    getLists() {
+    PortalApi.prototype.getLists = function () {
+        var _this = this;
         return this.worldOnline()
-            .then(() => ajax_1.Ajax.get(`/worlds/lists/${this.worldId}`))
-            .then((html) => {
+            .then(function () { return ajax_1.Ajax.get("/worlds/lists/" + _this.worldId); })
+            .then(function (html) {
             function getList(name) {
-                let list = html.match(new RegExp(`<textarea name="${name}">([\\s\\S]*?)</textarea>`));
+                var list = html.match(new RegExp("<textarea name=\"" + name + "\">([\\s\\S]*?)</textarea>"));
                 if (list) {
-                    let temp = list[1].replace(/(&.*?;)/g, function (_match, first) {
-                        let map = {
+                    var temp = list[1].replace(/(&.*?;)/g, function (_match, first) {
+                        var map = {
                             '&lt;': '<',
                             '&gt;': '>',
                             '&amp;': '&',
@@ -38,52 +59,52 @@ class PortalApi {
                         }; //It seems these are the only escaped characters.
                         return map[first] || '';
                     });
-                    let names = temp.toLocaleUpperCase().split('\n');
-                    return [...new Set(names)].filter(Boolean); // Remove duplicates
+                    var names = temp.toLocaleUpperCase().split('\n');
+                    return __spread(new Set(names)).filter(Boolean); // Remove duplicates
                 }
                 return []; // World offline, just to be safe.
             }
-            let lists = {
+            var lists = {
                 adminlist: getList('admins'),
                 modlist: getList('modlist'),
                 whitelist: getList('whitelist'),
                 blacklist: getList('blacklist'),
             };
             // Remove device IDs
-            lists.blacklist = lists.blacklist.map(name => {
-                let match = name.match(/(.*)(?:\\.{32})/);
+            lists.blacklist = lists.blacklist.map(function (name) {
+                var match = name.match(/(.*)(?:\\.{32})/);
                 if (match)
                     return match[1];
                 return name;
             });
             // Remove blacklisted staff
             lists.blacklist = lists.blacklist
-                .filter(name => !lists.adminlist.includes(name) && !lists.modlist.includes(name));
+                .filter(function (name) { return !lists.adminlist.includes(name) && !lists.modlist.includes(name); });
             return lists;
         });
-    }
+    };
     /**
      * @inheritdoc
      */
-    getOverview() {
-        return ajax_1.Ajax.get(`/worlds/${this.worldId}`)
-            .then(html => {
-            let firstMatch = (r) => {
-                let m = html.match(r);
+    PortalApi.prototype.getOverview = function () {
+        return ajax_1.Ajax.get("/worlds/" + this.worldId)
+            .then(function (html) {
+            var firstMatch = function (r) {
+                var m = html.match(r);
                 return m ? m[1] : '';
             };
-            let temp = html.match(/^\$\('#privacy'\).val\('(.*?)'\)/m);
-            let privacy;
+            var temp = html.match(/^\$\('#privacy'\).val\('(.*?)'\)/m);
+            var privacy;
             if (temp) {
                 privacy = temp[1];
             }
             else {
                 privacy = 'public';
             }
-            let online = [];
-            let match = html.match(/^\t<tr><td class="left">(.*?)(?=<\/td>)/gm);
+            var online = [];
+            var match = html.match(/^\t<tr><td class="left">(.*?)(?=<\/td>)/gm);
             if (match) {
-                online = online.concat(match.map(s => s.substr(22)));
+                online = online.concat(match.map(function (s) { return s.substr(22); }));
             }
             // This is very messy, refactoring welcome.
             return {
@@ -94,65 +115,69 @@ class PortalApi {
                 credit_until: new Date(firstMatch(/^\t\t<td>Credit Until:<\/td><td>(.*?)<\/td>$/m) + ' GMT-0000'),
                 link: firstMatch(/^\t<tr><td>Link:<\/td><td><a href="(.*)">\1<\/a>/m),
                 pvp: !!firstMatch(/^\$\('#pvp'\)\./m),
-                privacy,
+                privacy: privacy,
                 password: firstMatch(/^\t\t<td>Password:<\/td><td>(Yes|No)<\/td><\/tr>$/m) == 'Yes',
                 size: firstMatch(/^\t\t<td>Size:<\/td><td>(.*?)<\/td>$/m),
                 whitelist: firstMatch(/<td>Whitelist:<\/td><td>(Yes|No)<\/td>/m) == 'Yes',
                 online: online,
             };
         });
-    }
+    };
     /**
      * @inheritdoc
      */
-    getLogs() {
+    PortalApi.prototype.getLogs = function () {
+        var _this = this;
         return this.worldOnline()
-            .then(() => ajax_1.Ajax.get(`/worlds/logs/${this.worldId}`))
-            .then(logs => logs.split('\n'))
+            .then(function () { return ajax_1.Ajax.get("/worlds/logs/" + _this.worldId); })
+            .then(function (logs) { return logs.split('\n'); })
             .then(this.logParser.parse);
-    }
+    };
     /**
      * @inheritdoc
      */
-    send(message) {
+    PortalApi.prototype.send = function (message) {
         this.messageQueue.push(message);
-    }
+    };
     /**
      * Waits until the world is online before resolving.
      */
-    worldOnline() {
-        return ajax_1.Ajax.postJSON(`/api`, { command: 'status', worldId: this.worldId })
-            .then((response) => {
+    PortalApi.prototype.worldOnline = function () {
+        var _this = this;
+        return ajax_1.Ajax.postJSON("/api", { command: 'status', worldId: this.worldId })
+            .then(function (response) {
             if (response.status != 'ok') {
                 throw new Error('Api error');
             }
             if (response.worldStatus != 'online') {
-                ajax_1.Ajax.postJSON(`/api`, { command: 'start', worldId: this.worldId })
+                ajax_1.Ajax.postJSON("/api", { command: 'start', worldId: _this.worldId })
                     .catch(console.error);
                 throw new Error('World should be online');
             }
         })
-            .catch(() => this.worldOnline());
-    }
+            .catch(function () { return _this.worldOnline(); });
+    };
     /**
      * Sends the oldest queued message if possible.
      */
-    postMessage() {
+    PortalApi.prototype.postMessage = function () {
+        var _this = this;
         if (this.messageQueue.length) {
-            ajax_1.Ajax.postJSON(`/api`, {
+            ajax_1.Ajax.postJSON("/api", {
                 command: 'send',
                 worldId: this.worldId,
                 message: this.messageQueue.shift()
             })
-                .then(() => {
-                setTimeout(this.postMessage, 500);
-            }, () => {
-                setTimeout(this.postMessage, 1000);
+                .then(function () {
+                setTimeout(_this.postMessage, 500);
+            }, function () {
+                setTimeout(_this.postMessage, 1000);
             });
         }
         else {
             setTimeout(this.postMessage, 500);
         }
-    }
-}
+    };
+    return PortalApi;
+}());
 exports.PortalApi = PortalApi;

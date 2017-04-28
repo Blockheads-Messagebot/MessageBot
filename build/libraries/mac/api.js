@@ -1,25 +1,41 @@
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const logparser_1 = require("./logparser");
-const plist = require('simple-plist');
-const child_process_1 = require("child_process");
-const fs = require("fs");
-const request = require("request");
+var logparser_1 = require("./logparser");
+var plist = require('simple-plist');
+var child_process_1 = require("child_process");
+var fs = require("fs");
+var request = require("request");
 /**
  * This class is only used by the [[World]] class. You don't need to know anything about it unless you are creating new instances of the [[World]] class.
  */
-class MacApi {
+var MacApi = (function () {
     /**
      * Creates a new instance of the MacApi class.
      *
      * @param path the path to the world save folder.
      */
-    constructor(path) {
+    function MacApi(path) {
         // Strip trailing slash if present
         this.path = path.replace(/\/$/, '');
         if ([
             fs.existsSync(path + '/worldv2'),
-        ].some(exists => !exists)) {
+        ].some(function (exists) { return !exists; })) {
             throw new Error("Invalid world path, missing worldv2 file.");
         }
         try {
@@ -33,23 +49,25 @@ class MacApi {
     /**
      * @inheritdoc
      */
-    getLists() {
+    MacApi.prototype.getLists = function () {
         return Promise.all([
             this.readText('adminlist'),
             this.readText('modlist'),
             this.readText('blacklist'),
             this.readText('whitelist'),
         ])
-            .then((lists) => lists.map(list => list.splice(2))) //remove instructions
-            .then(([adminlist, modlist, blacklist, whitelist]) => {
-            return { adminlist, modlist, blacklist, whitelist };
+            .then(function (lists) { return lists.map(function (list) { return list.splice(2); }); }) //remove instructions
+            .then(function (_a) {
+            var _b = __read(_a, 4), adminlist = _b[0], modlist = _b[1], blacklist = _b[2], whitelist = _b[3];
+            return { adminlist: adminlist, modlist: modlist, blacklist: blacklist, whitelist: whitelist };
         });
-    }
+    };
     /**
      * @inheritdoc
      */
-    getOverview() {
-        let translateWorldSize = (size) => {
+    MacApi.prototype.getOverview = function () {
+        var _this = this;
+        var translateWorldSize = function (size) {
             switch (size) {
                 case 512 * 1 / 16:
                     return '1/16x';
@@ -67,10 +85,10 @@ class MacApi {
         };
         return Promise.all([
             this.readText('whitelist'),
-            new Promise(resolve => {
-                request.get('https://api.ipify.org?format=json', {}, (_err, _req, body) => {
+            new Promise(function (resolve) {
+                request.get('https://api.ipify.org?format=json', {}, function (_err, _req, body) {
                     try {
-                        let { ip } = JSON.parse(body);
+                        var ip = JSON.parse(body).ip;
                         resolve(ip ? ip : '0.0.0.0');
                     }
                     catch (e) {
@@ -78,55 +96,58 @@ class MacApi {
                     }
                 });
             })
-        ]).then(([whitelist, ip]) => {
+        ]).then(function (_a) {
+            var _b = __read(_a, 2), whitelist = _b[0], ip = _b[1];
             return {
-                name: this.worldv2.worldName,
+                name: _this.worldv2.worldName,
                 owner: 'SERVER',
-                created: this.worldv2.creationDate,
-                last_activity: this.worldv2.saveDate,
+                created: _this.worldv2.creationDate,
+                last_activity: _this.worldv2.saveDate,
                 credit_until: new Date('12/30/9999'),
-                link: `http://theblockheads.net/join.php?ip=${ip}&port=${this.worldv2.hostPort}&name=${this.worldv2.worldName}`,
-                pvp: !this.worldv2.pvpDisabled,
+                link: "http://theblockheads.net/join.php?ip=" + ip + "&port=" + _this.worldv2.hostPort + "&name=" + _this.worldv2.worldName,
+                pvp: !_this.worldv2.pvpDisabled,
                 privacy: 'private',
-                size: translateWorldSize(this.worldv2.worldSize),
+                size: translateWorldSize(_this.worldv2.worldSize),
                 password: false,
                 whitelist: !whitelist.length,
                 online: [],
             };
         });
-    }
+    };
     /**
      * @inheritdoc
      */
-    getLogs() {
+    MacApi.prototype.getLogs = function () {
         return this.readText('logs')
             .then(this.parser.parse);
-    }
+    };
     /**
      * @inheritdoc
      */
-    send(message) {
+    MacApi.prototype.send = function (message) {
         child_process_1.spawn("osascript", [
             '-l', 'JavaScript',
             __dirname + '/send.scpt',
             this.worldv2.worldName,
             message
         ]);
-    }
+    };
     /**
      * Gets the specified list for the world.
      *
      * @param file the file to read
      */
-    readText(file) {
-        return new Promise(resolve => {
-            fs.readFile(this.path + `/${file}.txt`, 'utf8', (err, data) => {
+    MacApi.prototype.readText = function (file) {
+        var _this = this;
+        return new Promise(function (resolve) {
+            fs.readFile(_this.path + ("/" + file + ".txt"), 'utf8', function (err, data) {
                 if (err) {
                     resolve([]);
                 }
                 resolve(data.split('\n'));
             });
         });
-    }
-}
+    };
+    return MacApi;
+}());
 exports.MacApi = MacApi;

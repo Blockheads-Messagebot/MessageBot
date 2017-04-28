@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const simpleevent_1 = require("../simpleevent");
-const child_process_1 = require("child_process");
-const fs = require("fs");
-const chatparser_1 = require("./chatparser");
-class MacChatWatcher {
+var simpleevent_1 = require("../simpleevent");
+var child_process_1 = require("child_process");
+var fs = require("fs");
+var chatparser_1 = require("./chatparser");
+var MacChatWatcher = (function () {
     /**
      * Creates a new instance of the MacChatWatcher class.
      *
      * @param path the path to where the world is stored.
      */
-    constructor(path) {
+    function MacChatWatcher(path) {
         /**
          * @inheritdoc
          */
@@ -20,34 +20,37 @@ class MacChatWatcher {
     /**
      * @inheritdoc
      */
-    setup(name, online) {
-        let re = new RegExp(String.raw `^\w\w\w ( |\d)\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[\d+]: ${name.toUpperCase()}`);
+    MacChatWatcher.prototype.setup = function (name, online) {
+        var _this = this;
+        var re = new RegExp((_a = ["^www ( |d)d dd:dd:dd ([w-]+) BlockheadsServer[d+]: ", ""], _a.raw = ["^\\w\\w\\w ( |\\d)\\d \\d\\d:\\d\\d:\\d\\d ([\\w-]+) BlockheadsServer\\[\\d+]: ", ""], String.raw(_a, name.toUpperCase())));
         this.parser = new chatparser_1.MacChatParser(online);
         this.logs = fs.createWriteStream(this.path + '/logs.txt', { flags: 'a' });
         this.tail = child_process_1.spawn('tail', [
             '-f',
             '/private/var/log/system.log'
         ]);
-        this.tail.stdout.on('data', (data) => {
-            let year = (new Date()).getFullYear();
+        this.tail.stdout.on('data', function (data) {
+            var year = (new Date()).getFullYear();
             if (Buffer.isBuffer(data)) {
                 data = data.toString('utf8');
             }
-            let lines = data.split('\n');
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
+            var lines = data.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
                 // Get multiline messages
                 while (lines[++i] && lines[i].startsWith('\t')) {
                     line += '\n' + lines[i];
                 }
                 i--;
                 if (re.test(line)) {
-                    this.parser.parse(line.substr(line.indexOf(']: ') + 6 + name.length))
-                        .forEach(message => this.onMessage.dispatch(message));
-                    this.logs.write(line.slice(0, 7) + year + ' ' + line.slice(7) + '\n');
+                    _this.parser.parse(line.substr(line.indexOf(']: ') + 6 + name.length))
+                        .forEach(function (message) { return _this.onMessage.dispatch(message); });
+                    _this.logs.write(line.slice(0, 7) + year + ' ' + line.slice(7) + '\n');
                 }
             }
         });
-    }
-}
+        var _a;
+    };
+    return MacChatWatcher;
+}());
 exports.MacChatWatcher = MacChatWatcher;

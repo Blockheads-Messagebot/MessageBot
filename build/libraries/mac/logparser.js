@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Parses logs from the portal into a standard format. This is only used by the [[PortalAPI]] class.
  */
-class MacLogParser {
+var MacLogParser = (function () {
     /**
      * Creates a new instance of the class.
      *
      * @param name the name of the world.
      */
-    constructor(name) {
+    function MacLogParser(name) {
         this.name = name;
         this.entries = [];
     }
@@ -18,12 +18,12 @@ class MacLogParser {
      *
      * @param lines {string[]} the raw log lines.
      */
-    parse(lines) {
+    MacLogParser.prototype.parse = function (lines) {
         // Copy the lines array
         lines = lines.slice(0);
         // Assume first line is valid, if it isn't it will be dropped.
-        for (let i = lines.length - 1; i > 0; i--) {
-            let line = lines[i];
+        for (var i = lines.length - 1; i > 0; i--) {
+            var line = lines[i];
             if (!this.isValidLine(line)) {
                 lines[i - 1] += '\n' + lines.splice(i, 1);
                 continue;
@@ -33,20 +33,21 @@ class MacLogParser {
         if (this.isValidLine(lines[0])) {
             this.addLine(lines[0]);
         }
-        let entries = this.entries.reverse();
+        var entries = this.entries.reverse();
         this.entries = [];
         return entries;
-    }
-    isValidLine(line) {
+    };
+    MacLogParser.prototype.isValidLine = function (line) {
         return /^\w\w\w (?:\d| )\d \d\d\d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
-    }
-    addLine(line) {
-        let ts = line.substr(0, 20);
+    };
+    MacLogParser.prototype.addLine = function (line) {
+        var ts = line.substr(0, 20);
         this.entries.push({
             raw: line,
             timestamp: new Date(ts),
             message: line.substr(line.indexOf(']') + 6 + this.name.length)
         });
-    }
-}
+    };
+    return MacLogParser;
+}());
 exports.MacLogParser = MacLogParser;

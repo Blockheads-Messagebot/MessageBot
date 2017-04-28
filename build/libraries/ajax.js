@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const request = require("request");
-const querystring_1 = require("querystring");
-const baseRequest = request.defaults({
+var request = require("request");
+var querystring_1 = require("querystring");
+var baseRequest = request.defaults({
     headers: {
         'x-requested-with': 'XMLHttpRequest',
     },
@@ -12,7 +12,9 @@ const baseRequest = request.defaults({
 /**
  * System generic class for making http requests. Extensions can use through ex.ajax.
  */
-class Ajax {
+var Ajax = (function () {
+    function Ajax() {
+    }
     /**
      * Function to GET a page. Passes the response of the XHR in the resolve promise.
      *
@@ -23,20 +25,22 @@ class Ajax {
      * get('/some/url.php', {a: 'test'}).then(console.log)
      * //sends a GET request to /some/url.php?a=test
      */
-    static get(url = '/', params = {}) {
-        let paramstr = querystring_1.stringify(params);
+    Ajax.get = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
+        var paramstr = querystring_1.stringify(params);
         if (paramstr.length) {
             url = (url.includes('?') ? url + '&' : url + '?') + paramstr;
         }
-        return new Promise((resolve, reject) => {
-            baseRequest.get(url, {}, (err, _req, body) => {
+        return new Promise(function (resolve, reject) {
+            baseRequest.get(url, {}, function (err, _req, body) {
                 if (err) {
                     return reject(err);
                 }
                 resolve(body);
             });
         });
-    }
+    };
     /**
      * Returns a JSON object from the response.
      *
@@ -46,9 +50,11 @@ class Ajax {
      * @example
      * getJSON('/', {id: '123'}).then(console.log);
      */
-    static getJSON(url = '/', params = {}) {
+    Ajax.getJSON = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
         return Ajax.get(url, params)
-            .then(data => {
+            .then(function (data) {
             try {
                 return JSON.parse(data);
             }
@@ -56,7 +62,7 @@ class Ajax {
                 return {};
             }
         });
-    }
+    };
     /**
      * Function to make a post request
      * @param url the url to fetch.
@@ -65,21 +71,23 @@ class Ajax {
      * @example
      * post('/', {id: '123'}).then(console.log);
      */
-    static post(url = '/', params = {}) {
-        return new Promise((resolve, reject) => {
+    Ajax.post = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
+        return new Promise(function (resolve, reject) {
             baseRequest.post(url, {
                 headers: {
                     'content-type': 'application/x-www-form-urlencoded',
                 },
                 body: querystring_1.stringify(params),
-            }, (err, _req, body) => {
+            }, function (err, _req, body) {
                 if (err) {
                     return reject(err);
                 }
                 resolve(body);
             });
         });
-    }
+    };
     /**
      * Function to fetch JSON from a page through post.
      * @param url the url to fetch.
@@ -88,9 +96,11 @@ class Ajax {
      * @example
      * postJSON('/', {id: 'test'}).then(console.log);
      */
-    static postJSON(url = '/', params = {}) {
+    Ajax.postJSON = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
         return Ajax.post(url, params)
-            .then(data => {
+            .then(function (data) {
             try {
                 return JSON.parse(data);
             }
@@ -98,6 +108,7 @@ class Ajax {
                 return {};
             }
         });
-    }
-}
+    };
+    return Ajax;
+}());
 exports.Ajax = Ajax;

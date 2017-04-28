@@ -4,8 +4,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * Storage class which manages saving and retriving data between bot launches.
  * Extensions can access this class through ex.world.storage.
  */
-class Storage {
-    constructor(namespace) {
+var Storage = (function () {
+    function Storage(namespace) {
         this.namespace = String(namespace);
     }
     /**
@@ -19,16 +19,16 @@ class Storage {
      * @param fallback what to return if the key was not found.
      * @param local whether or not to use a namespace when checking for the key.
      */
-    getString(key, fallback, local) {
+    Storage.prototype.getString = function (key, fallback, local) {
         var result;
         if (local) {
-            result = localStorage.getItem(`${key}${this.namespace}`);
+            result = localStorage.getItem("" + key + this.namespace);
         }
         else {
             result = localStorage.getItem(key);
         }
         return (result === null) ? fallback : result;
-    }
+    };
     /**
      * Gets a stored object if it exists, otherwise returns fallback.
      *
@@ -39,12 +39,12 @@ class Storage {
      * @param fallback what to return if the item does not exist or fails to parse correctly.
      * @param local whether or not a namespace should be used.
      */
-    getObject(key, fallback, local) {
-        let raw = this.getString(key, '', local);
+    Storage.prototype.getObject = function (key, fallback, local) {
+        var raw = this.getString(key, '', local);
         if (!raw) {
             return fallback;
         }
-        let result;
+        var result;
         try {
             result = JSON.parse(raw);
         }
@@ -55,7 +55,7 @@ class Storage {
             result = fallback;
         }
         return result;
-    }
+    };
     /**
      * Sets an object in the storage, stringifying it first if neccessary.
      *
@@ -67,9 +67,9 @@ class Storage {
      * @param data any stringifyable type.
      * @param local whether to save the item with a namespace.
      */
-    set(key, data, local) {
+    Storage.prototype.set = function (key, data, local) {
         if (local) {
-            key = `${key}${this.namespace}`;
+            key = "" + key + this.namespace;
         }
         if (typeof data == 'string') {
             localStorage.setItem(key, data);
@@ -77,7 +77,7 @@ class Storage {
         else {
             localStorage.setItem(key, JSON.stringify(data));
         }
-    }
+    };
     /**
      * Removes all items starting with namespace from the storage.
      *
@@ -90,15 +90,16 @@ class Storage {
      *
      * @param namespace the prefix to check for when removing items.
      */
-    clearNamespace(namespace) {
-        let remove = [];
-        for (let i = 0; i < localStorage.length + 5; i++) {
-            let key = localStorage.key(i);
+    Storage.prototype.clearNamespace = function (namespace) {
+        var remove = [];
+        for (var i = 0; i < localStorage.length + 5; i++) {
+            var key = localStorage.key(i);
             if (key && key.startsWith(namespace)) {
                 remove.push(key);
             }
         }
-        remove.forEach(key => localStorage.removeItem(key));
-    }
-}
+        remove.forEach(function (key) { return localStorage.removeItem(key); });
+    };
+    return Storage;
+}());
 exports.Storage = Storage;

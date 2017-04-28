@@ -1,21 +1,27 @@
-// See ajax.ts for documentation.
 "use strict";
+// See ajax.ts for documentation.
 Object.defineProperty(exports, "__esModule", { value: true });
-class Ajax {
-    static get(url = '/', params = {}) {
+var Ajax = (function () {
+    function Ajax() {
+    }
+    Ajax.get = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
         if (Object.keys(params).length) {
             var addition = urlStringify(params);
             if (url.includes('?')) {
-                url += `&${addition}`;
+                url += "&" + addition;
             }
             else {
-                url += `?${addition}`;
+                url += "?" + addition;
             }
         }
         return xhr('GET', url, {});
-    }
-    static getJSON(url = '/', params = {}) {
-        return Ajax.get(url, params).then(data => {
+    };
+    Ajax.getJSON = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
+        return Ajax.get(url, params).then(function (data) {
             try {
                 return JSON.parse(data);
             }
@@ -23,12 +29,16 @@ class Ajax {
                 return {};
             }
         });
-    }
-    static post(url = '/', params = {}) {
+    };
+    Ajax.post = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
         return xhr('POST', url, params);
-    }
-    static postJSON(url = '/', params = {}) {
-        return Ajax.post(url, params).then(data => {
+    };
+    Ajax.postJSON = function (url, params) {
+        if (url === void 0) { url = '/'; }
+        if (params === void 0) { params = {}; }
+        return Ajax.post(url, params).then(function (data) {
             try {
                 return JSON.parse(data);
             }
@@ -36,13 +46,16 @@ class Ajax {
                 return {};
             }
         });
-    }
-}
+    };
+    return Ajax;
+}());
 exports.Ajax = Ajax;
 /**
  * Helper function to make XHR requests.
  */
-function xhr(protocol, url = '/', params = {}) {
+function xhr(protocol, url, params) {
+    if (url === void 0) { url = '/'; }
+    if (params === void 0) { params = {}; }
     var paramStr = urlStringify(params);
     return new Promise(function (resolve, reject) {
         var req = new XMLHttpRequest();
@@ -76,6 +89,6 @@ function xhr(protocol, url = '/', params = {}) {
  */
 function urlStringify(obj) {
     return Object.keys(obj)
-        .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k].toString())}`)
+        .map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(obj[k].toString()); })
         .join('&');
 }

@@ -7,21 +7,50 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const chat_1 = require("./types/chat");
-const simpleevent_1 = require("../simpleevent");
-const player_1 = require("./player");
-const commandwatcher_1 = require("./commandwatcher");
+var chat_1 = require("./types/chat");
+var simpleevent_1 = require("../simpleevent");
+var player_1 = require("./player");
+var commandwatcher_1 = require("./commandwatcher");
 /**
  * Class which contains functions for interacting with a world. Extensions can access this through ex.world.
  */
-class World {
+var World = (function () {
     /**
      * Creates an instance of the World class. Note: These parameters are all passed in a single object.
      *
      * @param options the options to use when creating the class.
      */
-    constructor({ api, storage, chatWatcher }) {
+    function World(_a) {
+        var api = _a.api, storage = _a.storage, chatWatcher = _a.chatWatcher;
+        var _this = this;
         this.STORAGE_ID = 'mb_players';
         // Events
         /**
@@ -47,20 +76,31 @@ class World {
         this.storage = storage;
         this.api = api;
         this.players = this.storage.getObject(this.STORAGE_ID, {});
-        (() => __awaiter(this, void 0, void 0, function* () {
-            if (!chatWatcher) {
-                return;
-            }
-            let overview = yield this.getOverview();
-            if (this.players[overview.owner]) {
-                this.players[overview.owner].owner = true;
-            }
-            chatWatcher.setup(overview.name, overview.online);
-            chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
-            let lists = yield this.getLists();
-            let watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer);
-            this.onCommand.subscribe(watcher.listener);
-        }))();
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var overview, lists, watcher;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!chatWatcher) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, this.getOverview()];
+                    case 1:
+                        overview = _a.sent();
+                        if (this.players[overview.owner]) {
+                            this.players[overview.owner].owner = true;
+                        }
+                        chatWatcher.setup(overview.name, overview.online);
+                        chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
+                        return [4 /*yield*/, this.getLists()];
+                    case 2:
+                        lists = _a.sent();
+                        watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer);
+                        this.onCommand.subscribe(watcher.listener);
+                        return [2 /*return*/];
+                }
+            });
+        }); })();
     }
     //Methods
     /**
@@ -72,13 +112,14 @@ class World {
      *   console.log(Object.keys(lists));
      * });
      */
-    getLists() {
+    World.prototype.getLists = function () {
+        var _this = this;
         if (this.lists) {
             return Promise.resolve(this.lists);
         }
         return this.api.getLists()
-            .then(lists => this.lists = lists);
-    }
+            .then(function (lists) { return _this.lists = lists; });
+    };
     /**
      * Gets the server logs and resolves with an array of the lines. The returned array should not be mutated.
      *
@@ -91,13 +132,15 @@ class World {
      *   });
      * });
      */
-    getLogs(refresh = false) {
+    World.prototype.getLogs = function (refresh) {
+        var _this = this;
+        if (refresh === void 0) { refresh = false; }
         if (this.logs && !refresh) {
             return Promise.resolve(this.logs);
         }
         return this.api.getLogs()
-            .then(logs => this.logs = logs);
-    }
+            .then(function (logs) { return _this.logs = logs; });
+    };
     /**
      * Gets an overview of the server info, the returned object should not be mutated.
      *
@@ -106,21 +149,23 @@ class World {
      * @example
      * getOverview().then(console.log);
      */
-    getOverview(refresh = false) {
+    World.prototype.getOverview = function (refresh) {
+        var _this = this;
+        if (refresh === void 0) { refresh = false; }
         if (this.overview && !refresh) {
             return Promise.resolve(this.overview);
         }
-        let online = this.overview ? this.overview.online : [];
-        return this.api.getOverview().then(overview => {
-            overview.online.forEach(name => {
+        var online = this.overview ? this.overview.online : [];
+        return this.api.getOverview().then(function (overview) {
+            overview.online.forEach(function (name) {
                 if (!online.includes(name)) {
                     online.push(name);
                 }
             });
             overview.online = online;
-            return this.overview = overview;
+            return _this.overview = overview;
         });
-    }
+    };
     /**
      * Adds a message into the queue of messages to send.
      *
@@ -128,9 +173,9 @@ class World {
      * @example
      * send('Hello!');
      */
-    send(message) {
+    World.prototype.send = function (message) {
         this.api.send(message);
-    }
+    };
     /**
      * Gets the names of all players which have joined the server.
      *
@@ -142,9 +187,9 @@ class World {
      *   }
      * });
      */
-    getPlayerNames() {
+    World.prototype.getPlayerNames = function () {
         return Object.keys(this.players);
-    }
+    };
     /**
      * Gets an instance of the Player class for the specified name.
      *
@@ -154,47 +199,47 @@ class World {
      * let player = getPlayer('someone');
      * if (player.hasJoined()) { ... }
      */
-    getPlayer(name) {
+    World.prototype.getPlayer = function (name) {
         name = name.toLocaleUpperCase();
-        let info = this.players[name] || { ip: '', ips: [], joins: 0 };
+        var info = this.players[name] || { ip: '', ips: [], joins: 0 };
         if (this.overview && this.overview.owner == name) {
             this.players[name].owner = true;
         }
         return new player_1.Player(name, info, this.lists || { adminlist: [], modlist: [], whitelist: [], blacklist: [] });
-    }
+    };
     // Private methods
     /**
      * Continually watches chat for new messages and emits events when new messages come in.
      *
      * @param message the message to emit events for.
      */
-    messageWatcher(message) {
-        let player = this.getPlayer(message.name || '');
+    World.prototype.messageWatcher = function (message) {
+        var player = this.getPlayer(message.name || '');
         switch (message.type) {
             case chat_1.ChatType.join:
                 return this.handleJoin(message.name, message.ip);
             case chat_1.ChatType.leave:
                 return this.onLeave.dispatch(player);
             case chat_1.ChatType.command:
-                return this.onCommand.dispatch({ player, command: message.command, args: message.args });
+                return this.onCommand.dispatch({ player: player, command: message.command, args: message.args });
             case chat_1.ChatType.message:
-                return this.onMessage.dispatch({ player, message: message.message });
+                return this.onMessage.dispatch({ player: player, message: message.message });
             case chat_1.ChatType.other:
                 return this.onOther.dispatch(message.message);
         }
-    }
+    };
     /**
      * Increments a player's joins and saves their IP.
      *
      * @param name the player's name
      * @param ip the player's IP
      */
-    handleJoin(name, ip) {
+    World.prototype.handleJoin = function (name, ip) {
         if (!name || !ip) {
             return;
         }
-        let player = this.players[name] = this.players[name] || {
-            ip, ips: [ip], joins: 0
+        var player = this.players[name] = this.players[name] || {
+            ip: ip, ips: [ip], joins: 0
         };
         player.joins++;
         player.ip = ip;
@@ -203,6 +248,7 @@ class World {
         }
         this.storage.set(this.STORAGE_ID, this.players);
         this.onJoin.dispatch(this.getPlayer(name));
-    }
-}
+    };
+    return World;
+}());
 exports.World = World;

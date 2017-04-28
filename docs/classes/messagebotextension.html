@@ -95,6 +95,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#ajax" class="tsd-kind-icon">ajax</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#bot" class="tsd-kind-icon">bot</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#exports" class="tsd-kind-icon">exports</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#isnode" class="tsd-kind-icon">is<wbr>Node</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#settings" class="tsd-kind-icon">settings</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="messagebotextension.html#world" class="tsd-kind-icon">world</a></li>
 							</ul>
@@ -121,7 +122,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L38">bot/extension.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L43">bot/extension.ts:43</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -153,7 +154,7 @@
 					<div class="tsd-signature tsd-kind-icon">ajax<span class="tsd-signature-symbol">:</span> <a href="ajax.html" class="tsd-signature-type">Ajax</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L38">bot/extension.ts:38</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L38">bot/extension.ts:38</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -168,7 +169,7 @@
 					<div class="tsd-signature tsd-kind-icon">bot<span class="tsd-signature-symbol">:</span> <a href="messagebot.html" class="tsd-signature-type">MessageBot</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L23">bot/extension.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L23">bot/extension.ts:23</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -183,12 +184,12 @@
 					<div class="tsd-signature tsd-kind-icon">exports<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L28">bot/extension.ts:28</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L28">bot/extension.ts:28</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Any exports which are availible to other extensions.</p>
+							<p>Any exports which are available to other extensions.</p>
 						</div>
 					</div>
 					<div class="tsd-type-declaration">
@@ -201,12 +202,27 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="isnode" class="tsd-anchor"></a>
+					<h3>is<wbr>Node</h3>
+					<div class="tsd-signature tsd-kind-icon">is<wbr>Node<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;!!global.process</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L43">bot/extension.ts:43</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Used to check if the bot is loaded in a browser or in a node environment.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="settings" class="tsd-anchor"></a>
 					<h3>settings</h3>
 					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <a href="settings.html" class="tsd-signature-type">Settings</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L33">bot/extension.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L33">bot/extension.ts:33</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -221,7 +237,7 @@
 					<div class="tsd-signature tsd-kind-icon">world<span class="tsd-signature-symbol">:</span> <a href="world.html" class="tsd-signature-type">World</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L18">bot/extension.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L18">bot/extension.ts:18</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -243,7 +259,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L63">bot/extension.ts:63</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L68">bot/extension.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -286,7 +302,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/496c865/src/bot/extension.ts#L55">bot/extension.ts:55</a></li>
+									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/e3dabcf/src/bot/extension.ts#L60">bot/extension.ts:60</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -334,6 +350,9 @@
 								<a href="messagebotextension.html#exports" class="tsd-kind-icon">exports</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="messagebotextension.html#isnode" class="tsd-kind-icon">is<wbr>Node</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="messagebotextension.html#settings" class="tsd-kind-icon">settings</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
@@ -362,7 +381,13 @@
 						<a href="storage.html" class="tsd-kind-icon">Storage</a>
 					</li>
 					<li class=" tsd-kind-class">
+						<a href="tabmanager.html" class="tsd-kind-icon">Tab<wbr>Manager</a>
+					</li>
+					<li class=" tsd-kind-class">
 						<a href="world.html" class="tsd-kind-icon">World</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="../interfaces/uiextensionexports.html" class="tsd-kind-icon">UIExtension<wbr>Exports</a>
 					</li>
 				</ul>
 			</nav>

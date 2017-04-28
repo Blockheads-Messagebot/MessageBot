@@ -1,22 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const logparser_1 = require("./logparser");
-const chai_1 = require("chai");
+var logparser_1 = require("./logparser");
+var chai_1 = require("chai");
 require("mocha");
 describe('MacLogParser#parse', function () {
-    let parser;
+    var parser;
     beforeEach(function () {
         parser = new logparser_1.MacLogParser('GEM TREES!');
     });
     it('Does not mutate the passed array', function () {
-        let messages = ['Apr  1 2017 14:49:24 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Hi'];
-        let clone = messages.slice(0);
+        var messages = ['Apr  1 2017 14:49:24 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Hi'];
+        var clone = messages.slice(0);
         parser.parse(messages);
         chai_1.expect(messages).to.deep.equal(clone);
     });
     it('Should handle chat', function () {
-        let message = 'Apr  1 2017 14:49:24 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Hi';
-        let result = parser.parse([message]);
+        var message = 'Apr  1 2017 14:49:24 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Hi';
+        var result = parser.parse([message]);
         chai_1.expect(result).to.deep.equal([{
                 raw: message,
                 timestamp: new Date('Apr  1 2017 14:49:24'),
@@ -24,8 +24,8 @@ describe('MacLogParser#parse', function () {
             }]);
     });
     it('Should handle join messages', function () {
-        let message = 'Apr  1 2017 14:49:31 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Player Connected BIBLIOPHILE | 172.16.32.11 | 99d616273e72ffd7e2ec5e19a78f13af';
-        let result = parser.parse([message]);
+        var message = 'Apr  1 2017 14:49:31 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Player Connected BIBLIOPHILE | 172.16.32.11 | 99d616273e72ffd7e2ec5e19a78f13af';
+        var result = parser.parse([message]);
         chai_1.expect(result).to.deep.equal([{
                 raw: message,
                 timestamp: new Date('Apr  1 2017 14:49:31'),
@@ -33,28 +33,21 @@ describe('MacLogParser#parse', function () {
             }]);
     });
     it('Should handle multiline messages', function () {
-        let lines = [
-            `Apr  1 2017 18:06:06 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER:`,
-            `\t/HELP - display this message.`,
-            `\t/PLAYERS - list currently active players.`
+        var lines = [
+            "Apr  1 2017 18:06:06 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER:",
+            "\t/HELP - display this message.",
+            "\t/PLAYERS - list currently active players."
         ];
-        let result = parser.parse(lines);
+        var result = parser.parse(lines);
         chai_1.expect(result).to.deep.equal([{
                 raw: lines.join('\n'),
                 timestamp: new Date('Apr  1 2017 18:06:06'),
-                message: `SERVER:
-	/HELP - display this message.
-	/PLAYERS - list currently active players.`
+                message: "SERVER:\n\t/HELP - display this message.\n\t/PLAYERS - list currently active players."
             }]);
     });
     it('Should handle multiple messages', function () {
-        let messages = `Apr  1 2017 15:19:43 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Player Connected BIBLIOPHILE | 192.168.14.12 | 99d616273e72ffd7e2ec5e19a78f13ad
-Apr  1 2017 15:19:44 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Welcome BIBLIOPHILE!
-Apr  1 2017 15:19:51 biblios-Mac BlockheadsServer[1304]: GEM TREES! - BIBLIOPHILE: Hello
-Apr  1 2017 15:19:55 biblios-Mac BlockheadsServer[1304]: GEM TREES! - BIBLIOPHILE: Chat works!
-Apr  1 2017 15:27:39 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Client disconnected:99d616273e72ffd7e2ec5e19a78f13ad
-Apr  1 2017 15:27:39 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Player Disconnected BIBLIOPHILE`.split('\n');
-        let parsed = parser.parse(messages);
+        var messages = "Apr  1 2017 15:19:43 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Player Connected BIBLIOPHILE | 192.168.14.12 | 99d616273e72ffd7e2ec5e19a78f13ad\nApr  1 2017 15:19:44 biblios-Mac BlockheadsServer[1304]: GEM TREES! - SERVER: Welcome BIBLIOPHILE!\nApr  1 2017 15:19:51 biblios-Mac BlockheadsServer[1304]: GEM TREES! - BIBLIOPHILE: Hello\nApr  1 2017 15:19:55 biblios-Mac BlockheadsServer[1304]: GEM TREES! - BIBLIOPHILE: Chat works!\nApr  1 2017 15:27:39 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Client disconnected:99d616273e72ffd7e2ec5e19a78f13ad\nApr  1 2017 15:27:39 biblios-Mac BlockheadsServer[1304]: GEM TREES! - Player Disconnected BIBLIOPHILE".split('\n');
+        var parsed = parser.parse(messages);
         chai_1.expect(parsed).to.deep.equal([
             { raw: messages[0], timestamp: new Date(messages[0].substr(0, 20)), message: messages[0].substr(70) },
             { raw: messages[1], timestamp: new Date(messages[1].substr(0, 20)), message: messages[1].substr(70) },

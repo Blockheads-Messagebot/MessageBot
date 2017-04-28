@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const player_1 = require("./player");
-const chai_1 = require("chai");
+var player_1 = require("./player");
+var chai_1 = require("chai");
 require("mocha");
 describe('Player', function () {
-    let info;
-    let lists;
-    let players;
-    let getPlayer = (name) => players.get(name) || players.get('fake');
+    var info;
+    var lists;
+    var players;
+    var getPlayer = function (name) { return players.get(name) || players.get('fake'); };
     beforeEach(function () {
         info = { ip: '', ips: [], joins: 0 };
         lists = {
