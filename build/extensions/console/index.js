@@ -1,5 +1,5 @@
 "use strict";
-// Mac / Terminal version, for browser version see the console-browser folder. The exports are the same for both extensions.
+// Mac / Terminal version, for browser version see the browser.js folder. The exports are the same.
 Object.defineProperty(exports, "__esModule", { value: true });
 var bot_1 = require("../../bot/bot");
 var colors = require('colors/safe');
@@ -9,6 +9,8 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
         input: process.stdin,
         output: process.stdout,
     });
+    // This is necessary to gracefully exit on windows when CTRL-C is used.
+    rl.on('SIGINT', function () { return process.exit(); });
     var consoleExports = {
         log: function (message) {
             var columns = process.stdout.columns;
@@ -63,7 +65,9 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
     }
     world.onLeave.sub(logLeaves);
     function logOther(message) {
-        consoleExports.log(message);
+        if (ex.settings.get('logUnparsedMessages', true)) {
+            consoleExports.log(message);
+        }
     }
     world.onOther.sub(logOther);
     ex.uninstall = function () {

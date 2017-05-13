@@ -57,7 +57,7 @@ export interface UIExtensionExports {
      * @param target the parent node to append the cloned template to.
      * @param rules the rules to apply to the cloned template before appending it to the target.
      */
-    buildTemplate: (template: string | HTMLElement, target: string | HTMLElement, rules: TemplateRule[]) => void;
+    buildTemplate: (template: string | HTMLTemplateElement, target: string | HTMLElement, rules: TemplateRule[]) => void;
     /**
      * Sends a non-critical alert to the user, should be used in place of [[UIExtensionExports.alert]] if possible as it is non-blocking.
      *
@@ -91,6 +91,7 @@ MessageBot.registerExtension('ui', function(ex) {
     // Page creation
 
     document.body.innerHTML = fs.readFileSync(__dirname + '/layout.html', 'utf8');
+    document.head.querySelectorAll('link').forEach(el => el.remove());
     // Bulma tries to make this scroll
     let el = document.createElement('style');
     el.textContent = fs.readFileSync(__dirname + '/style.css', 'utf8');

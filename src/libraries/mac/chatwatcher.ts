@@ -38,6 +38,7 @@ export class MacChatWatcher implements ChatWatcher {
 
         this.tail = spawn('tail', [
             '-f',
+            '-n', '0',
             '/private/var/log/system.log'
         ]);
 

@@ -20,7 +20,8 @@ html {
     right: 0;
 }
 .has-fixed-nav {
-    margin-top: 50px;
+    position: relative;
+    top: 52px;
 }
 
 // Bulma provides is-medium and is-large -- this is 1/3rd the default size.
@@ -135,7 +136,7 @@ html {
 
 #container > div {
     position: relative;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 52px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }

@@ -27,6 +27,7 @@ var MacChatWatcher = (function () {
         this.logs = fs.createWriteStream(this.path + '/logs.txt', { flags: 'a' });
         this.tail = child_process_1.spawn('tail', [
             '-f',
+            '-n', '0',
             '/private/var/log/system.log'
         ]);
         this.tail.stdout.on('data', function (data) {

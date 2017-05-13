@@ -24,6 +24,7 @@ bot_1.MessageBot.registerExtension('ui', function (ex) {
     };
     // Page creation
     document.body.innerHTML = fs.readFileSync(__dirname + '/layout.html', 'utf8');
+    document.head.querySelectorAll('link').forEach(function (el) { return el.remove(); });
     // Bulma tries to make this scroll
     var el = document.createElement('style');
     el.textContent = fs.readFileSync(__dirname + '/style.css', 'utf8');

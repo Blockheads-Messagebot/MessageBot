@@ -1,6 +1,9 @@
-// Mac / Terminal version, for browser version see the console-browser folder. The exports are the same for both extensions.
+// Mac / Terminal version, for browser version see the browser.js folder. The exports are the same.
 
 export interface ConsoleExtensionExports {
+    /**
+     * Logs a message to the console, visible to the bot user but not sent to players on the server.
+     */
     log: (message: string) => void;
 }
 
@@ -18,6 +21,8 @@ MessageBot.registerExtension('console', function(ex, world) {
         input: process.stdin,
         output: process.stdout,
     });
+    // This is necessary to gracefully exit on windows when CTRL-C is used.
+    rl.on('SIGINT', () => process.exit());
 
     let consoleExports: ConsoleExtensionExports = {
         log: (message: string) => {
@@ -82,7 +87,9 @@ MessageBot.registerExtension('console', function(ex, world) {
     world.onLeave.sub(logLeaves);
 
     function logOther(message: string): void {
-        consoleExports.log(message);
+        if (ex.settings.get('logUnparsedMessages', true)) {
+            consoleExports.log(message);
+        }
     }
     world.onOther.sub(logOther);
 

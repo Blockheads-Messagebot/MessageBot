@@ -34,6 +34,7 @@ let auth = new PortalAuth(config.username, config.password);
 
     console.log("Logged in!");
 
+
     let world = new World({
         api: new PortalApi(config.worldId),
         chatWatcher: new PortalChatWatcher({

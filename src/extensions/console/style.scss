@@ -1,9 +1,7 @@
 $mod-color: #05f529;
 $admin-color: #2b26bd;
 
-#mb_console {
-    height: calc(100% - 3.5em);
-
+#console {
     .mod > span:first-child {
         color: $mod-color;
     }
@@ -14,7 +12,7 @@ $admin-color: #2b26bd;
 
     .chat {
         margin: 0 1em;
-        max-height: 100%;
+        height: calc(100vh - 52px - 4.25em);
         overflow-y: auto;
     }
 
@@ -22,8 +20,8 @@ $admin-color: #2b26bd;
         position: fixed;
         bottom: 0;
         width: 100vw;
-
-        .control {
+        background: #fff;
+        .field {
             margin: 1em;
         }
     }

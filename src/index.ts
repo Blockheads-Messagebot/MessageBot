@@ -11,7 +11,7 @@ import {SimpleEvent} from './libraries/simpleevent';
 declare var worldId: number;
 
 import './extensions/ui';
-import './extensions/console-browser';
+import './extensions/console/browser';
 
 let world = new World({
     api: new PortalApi(worldId),

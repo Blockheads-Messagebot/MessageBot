@@ -11,7 +11,7 @@ export interface ChatWatcher {
      */
     setup(name: string, online: string[]): void;
     /**
-     * Fired whenever a new message is recieved.
+     * Fired whenever a new message is received.
      */
     onMessage: SimpleEvent<ChatMessage>;
 }
@@ -43,7 +43,7 @@ export enum ChatType {
 }
 
 /**
- * Object emitted whenever a message is recieved from the server.
+ * Object emitted whenever a message is received from the server.
  */
 export interface ChatMessage {
     /**
