@@ -1,7 +1,7 @@
 import {LogEntry} from '../blockheads/types/logs';
 
 /**
- * Parses logs from the portal into a standard format. This is only used by the [[PortalAPI]] class.
+ * Parses logs from the portal into a standard format. This is only used by the [[PortalApi]] class.
  */
 export class PortalLogParser {
     private entries: LogEntry[];

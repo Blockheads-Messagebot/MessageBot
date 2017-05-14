@@ -1,4 +1,5 @@
-import { Storage } from './storage';
+// Tests for the browser based storage class here.
+import { Storage } from './browser';
 
 import { expect } from 'chai';
 import 'mocha';

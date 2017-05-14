@@ -14,7 +14,7 @@
 0. Run: `npm run start:cloud` or `npm run start:mac`.
 
 ##### Importing configs
-If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named `import.json` in the `./config` directory, next run `npm run import` to import your backup.
+If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named `localStorage.json` in your `config` directory. The bot will load this file each time it is launched to update the config (and will save changes to it). Manually editing the config is not recommended.
 
 # Development
 ### To run tests:

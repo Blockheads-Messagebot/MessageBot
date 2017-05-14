@@ -35,9 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// Polyfill localStorage
-var LocalStorage = require('node-localstorage').LocalStorage;
-global.localStorage = new LocalStorage('./localStorage');
 // Import config, making it as hard as possible to fail with a bad error.
 var config = require('../config/bot');
 config.username = config.username || '';

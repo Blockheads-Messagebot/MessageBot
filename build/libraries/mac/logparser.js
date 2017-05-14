@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * Parses logs from the portal into a standard format. This is only used by the [[PortalAPI]] class.
+ * Parses logs from the portal into a standard format. This is only used by the [[PortalApi]] class.
  */
 var MacLogParser = (function () {
     /**

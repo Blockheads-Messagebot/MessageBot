@@ -1,7 +1,3 @@
-// Polyfill localStorage
-const {LocalStorage} = require('node-localstorage');
-(<any>global).localStorage = new LocalStorage('./localStorage');
-
 // Import config.
 const config = require('../config/bot') as {path: string, worldId: number | string};
 config.path = config.path || '';
@@ -34,5 +30,3 @@ import './extensions/messages';
 
     new MessageBot(world);
 }());
-
-

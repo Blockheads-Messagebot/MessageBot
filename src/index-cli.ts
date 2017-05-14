@@ -1,7 +1,3 @@
-// Polyfill localStorage
-const {LocalStorage} = require('node-localstorage');
-(global as any).localStorage = new LocalStorage('./localStorage');
-
 // Import config, making it as hard as possible to fail with a bad error.
 const config = require('../config/bot') as {username: string, password: string, worldId: number};
 config.username = config.username || '';

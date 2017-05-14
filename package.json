@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/Bibliofile/Blockheads-MessageBot#readme",
   "scripts": {
-    "docs": "typedoc --options ./typedoc.json --target es6",
+    "docs": "typedoc --options ./typedoc.json",
     "gulp": "gulp",
     "import": "node build/import.js",
     "start:cloud": "node build/index-cli.js",
@@ -21,12 +21,12 @@
   },
   "browser": {
     "./src/libraries/ajax.ts": "./src/libraries/ajax-browser.ts",
+    "./src/libraries/storage/index.ts": "./src/libraries/storage/browser.ts",
     "mocha": "./test/mocha.js",
     "chai": "./test/chai.js"
   },
   "dependencies": {
     "colors": "^1.1.2",
-    "node-localstorage": "^1.3.0",
     "request": "^2.81.0",
     "sha1": "^1.1.1",
     "simple-plist": "^0.2.1"
