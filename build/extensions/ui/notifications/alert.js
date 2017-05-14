@@ -46,6 +46,7 @@ function addButton(button) {
     }
     modalFooter.appendChild(el);
 }
+/** @hidden */
 function alert(html, buttons, callback) {
     if (instance.active) {
         instance.queue.push({ html: html, buttons: buttons, callback: callback });

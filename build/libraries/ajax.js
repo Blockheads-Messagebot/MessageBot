@@ -28,9 +28,9 @@ var Ajax = (function () {
     Ajax.get = function (url, params) {
         if (url === void 0) { url = '/'; }
         if (params === void 0) { params = {}; }
-        var paramstr = querystring_1.stringify(params);
-        if (paramstr.length) {
-            url = (url.includes('?') ? url + '&' : url + '?') + paramstr;
+        var paramStr = querystring_1.stringify(params);
+        if (paramStr.length) {
+            url = (url.includes('?') ? url + '&' : url + '?') + paramStr;
         }
         return new Promise(function (resolve, reject) {
             baseRequest.get(url, {}, function (err, _req, body) {

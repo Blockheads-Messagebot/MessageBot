@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/** @hidden */
 function notify(text, displayTime) {
     if (displayTime === void 0) { displayTime = 2; }
     var el = document.createElement('div');

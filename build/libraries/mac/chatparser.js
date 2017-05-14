@@ -18,7 +18,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var chat_1 = require("../blockheads/types/chat");
 /**
- * Parses chat in the format recieved from the mac API.
+ * Parses chat in the format received from the mac API.
  *
  * This is only used by the [[MacChatWatcher]] class.
  */
