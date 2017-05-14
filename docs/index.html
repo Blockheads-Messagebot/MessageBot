@@ -89,13 +89,11 @@
 					<li>Open <code>test/index.html</code> in your web browser.</li>
 				</ol>
 				<h3 id="to-build">To build</h3>
-				<p>The current code will always be linted to check for problems.</p>
 				<ul>
-					<li>Node: <code>npm run gulp build</code></li>
-					<li>Node + Browser: <code>npm run gulp browserify</code></li>
-					<li>Node + Browser continually: <code>npm run gulp watch</code></li>
-					<li>Node + Browser + Docs + run tests: <code>npm run gulp all</code></li>
-					<li>Docs only: <code>npm run gulp docs</code></li>
+					<li>Node: <code>npm run gulp build:node</code></li>
+					<li>Node + Browser: <code>npm run gulp build</code></li>
+					<li>Browser: <code>npm run gulp build:browser</code></li>
+					<li>Watch both: <code>npm run gulp build:watch</code></li>
 				</ul>
 			</div>
 		</div>
@@ -135,6 +133,9 @@
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/world.html" class="tsd-kind-icon">World</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/consoleextensionexports.html" class="tsd-kind-icon">Console<wbr>Extension<wbr>Exports</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/uiextensionexports.html" class="tsd-kind-icon">UIExtension<wbr>Exports</a>
