@@ -94,7 +94,7 @@ MessageBot.registerExtension('ui', function(ex) {
     document.head.querySelectorAll('link').forEach(el => el.remove());
     // Bulma tries to make this scroll
     let el = document.createElement('style');
-    el.textContent = fs.readFileSync(__dirname + '/style.css', 'utf8');
+    el.textContent = require('./style.scss').css;
     document.head.appendChild(el);
 
     // Why doesn't this already exist in TypeScript?

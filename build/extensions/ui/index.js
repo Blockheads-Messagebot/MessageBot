@@ -27,7 +27,7 @@ bot_1.MessageBot.registerExtension('ui', function (ex) {
     document.head.querySelectorAll('link').forEach(function (el) { return el.remove(); });
     // Bulma tries to make this scroll
     var el = document.createElement('style');
-    el.textContent = fs.readFileSync(__dirname + '/style.css', 'utf8');
+    el.textContent = require('./style.scss').css;
     document.head.appendChild(el);
     // Polyfill for Edge
     if (!('open' in document.createElement('details'))) {

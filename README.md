@@ -23,10 +23,8 @@ If you are moving a bot from the browser, you can import your config by placing 
 2. Open `test/index.html` in your web browser.
 
 ### To build
-The current code will always be linted to check for problems.
 
-- Node: `npm run gulp build`
-- Node + Browser: `npm run gulp browserify`
-- Node + Browser continually: `npm run gulp watch`
-- Node + Browser + Docs + run tests: `npm run gulp all`
-- Docs only: `npm run gulp docs`
+- Node: `npm run gulp build:node`
+- Node + Browser: `npm run gulp build`
+- Browser: `npm run gulp build:browser`
+- Watch both: `npm run gulp build:watch`

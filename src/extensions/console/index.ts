@@ -17,6 +17,10 @@ const colors = require('colors/safe') as {
 import * as readline from 'readline';
 
 MessageBot.registerExtension('console', function(ex, world) {
+    if (!ex.isNode) {
+        throw new Error('This extension can only be used in the node version of the bot.');
+    }
+
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

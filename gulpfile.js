@@ -1,94 +1,65 @@
-const fs = require('fs');
-const gulp = require('gulp');
-const del = require('del');
-const browserify = require('browserify');
-const {spawn} = require('child_process');
-const path = require('path');
-const tsify = require('tsify');
-const sass = require('gulp-sass');
+const args = process.argv.slice(2);
 
-function run(command, args, alwaysLog = false) {
-    if (process.platform == 'win32') {
-        command += '.cmd';
-    }
-
-    let cmd = spawn(
-        path.join(__dirname, '/node_modules/.bin/', command),
-        args
-    );
-
-    let output = '';
-    cmd.stdout.setEncoding('utf8');
-    cmd.stderr.setEncoding('utf8');
-    cmd.stdout.on('data', data => output += data);
-    cmd.stderr.on('data', data => output += data);
-
-    return new Promise((resolve, reject) => {
-        cmd.on('exit', code => {
-            if (code || alwaysLog) {
-                console.log(output);
-            }
-            resolve();
-        });
-        cmd.on('error', reject);
-    })
+// If the task includes watch, include the --watch flag as well.
+if (args[0].includes('watch')) {
+    args.push('--watch');
 }
 
-// Note: It is assumed that gulp will be started with `npm start gulp -- task`.
+const gulp = require('gulp');
 
-gulp.task('lint', function() {
-    return run('tslint', [
-        '-c', 'tslint.json',
-        './src/**/*.ts'
-    ]);
-});
+const browserify = require('browserify');
+const watchify = require('watchify');
+const fs = require('fs');
 
-gulp.task('build', ['lint'], function()  {
-    return run('tsc');
-});
+// For compiling scss
+const scss = require('scssify');
 
-gulp.task('scss', function() {
-    return gulp.src('./src/**/*.scss')
-        .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-        .pipe(gulp.dest('./src'));
-});
+// For browserify bundling
+const tsify = require('tsify');
+// Just for compiling
+const ts = require('gulp-typescript');
+const tsProject = ts.createProject('tsconfig.json', {declaration: true });
 
-gulp.task('browserify', ['scss'], function() {
-    return browserify(['src/index.ts'], {
-            debug: false
-        })
+gulp.task('build:browser', function() {
+    let b = browserify(['src/index.ts'], { debug: true /* sourcemaps */ })
         .plugin(tsify)
+        .plugin('minifyify', {map: 'bot.js.map', output: __dirname + '/build/compiled/bot.js.map'})
+        .transform(scss, { autoInject: false, export: true })
         .transform('brfs')
-        .bundle()
-        .pipe(fs.createWriteStream('build/compiled/bot.js'));
+
+    let bundle = () => b.bundle().pipe(fs.createWriteStream('build/compiled/bot.js'))
+
+    if (args.includes('--watch')) {
+        let w = watchify(b);
+        w.on('update', () => bundle());
+        w.on('log', console.log);
+    }
+
+    return bundle();
 });
 
-gulp.task('docs', function() {
-    return run('typedoc', [
-        '--options', './typedoc.json',
-        '--target', 'es6' //NOTE: This is a hack to let typedoc work until it updates to Typescript 2.3.
-    ]);
+gulp.task('build:node', function() {
+    return gulp.src('src/**/*.ts')
+        .pipe(tsProject())
+        .js.pipe(gulp.dest('build'));
 });
 
 gulp.task('build:test', function() {
     let testFiles = require('glob').sync('src/**/*.test.ts');
+
     return browserify({
             debug: false,
             entries: testFiles,
         })
         .plugin(tsify)
+        .transform(scss, { autoInject: false, export: true })
         .transform('brfs')
         .bundle()
         .pipe(fs.createWriteStream('test/tests.js'));
 });
 
-gulp.task('clean', function() {
-    return del(['build/**/*', '!build/compiled', 'src/**/*.css']);
-});
+gulp.task('build', ['build:browser', 'build:node']);
 
-gulp.task('watch', ['browserify'], function() {
-    gulp.watch(['src/**/*'], ['browserify']);
+gulp.task('build:watch', ['build'], function() {
+    gulp.watch('src/**/*.ts', ['build:node']);
 });
-
-gulp.task('all', ['browserify', 'build', 'docs']);
-gulp.task('default', ['browserify']);

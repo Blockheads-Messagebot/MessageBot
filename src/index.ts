@@ -12,6 +12,7 @@ declare var worldId: number;
 
 import './extensions/ui';
 import './extensions/console/browser';
+import './extensions/messages';
 
 let world = new World({
     api: new PortalApi(worldId),

@@ -9,7 +9,7 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
     var ui = ex.bot.getExports('ui');
     // Create the tab.
     var style = document.createElement('style');
-    style.textContent = fs.readFileSync(__dirname + '/style.css', 'utf8');
+    style.textContent = require('./style.scss').css;
     document.head.appendChild(style);
     var tab = ui.addTab('Console');
     tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');

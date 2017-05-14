@@ -10,6 +10,7 @@ var simpleevent_1 = require("./libraries/simpleevent");
 global.SimpleEvent = simpleevent_1.SimpleEvent;
 require("./extensions/ui");
 require("./extensions/console/browser");
+require("./extensions/messages");
 var world = new world_1.World({
     api: new api_1.PortalApi(worldId),
     chatWatcher: new chatwatcher_1.PortalChatWatcher({

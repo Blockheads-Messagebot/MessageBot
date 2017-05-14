@@ -14,7 +14,7 @@ MessageBot.registerExtension('console', function(ex, world) {
 
     // Create the tab.
     let style = document.createElement('style');
-    style.textContent = fs.readFileSync(__dirname + '/style.css', 'utf8');
+    style.textContent = require('./style.scss').css;
     document.head.appendChild(style);
 
     let tab = ui.addTab('Console');

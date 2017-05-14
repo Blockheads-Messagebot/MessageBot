@@ -5,6 +5,9 @@ var bot_1 = require("../../bot/bot");
 var colors = require('colors/safe');
 var readline = require("readline");
 bot_1.MessageBot.registerExtension('console', function (ex, world) {
+    if (!ex.isNode) {
+        throw new Error('This extension can only be used in the node version of the bot.');
+    }
     var rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

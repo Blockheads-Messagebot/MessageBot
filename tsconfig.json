@@ -9,6 +9,7 @@
         "removeComments": false,
         "noImplicitAny": true,
         "strictNullChecks": true,
+        "sourceMap": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true
     }
