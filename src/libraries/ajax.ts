@@ -25,9 +25,9 @@ export class Ajax {
      * //sends a GET request to /some/url.php?a=test
      */
     static get(url: string = '/', params: {[key: string]: string|number} = {}): Promise<string> {
-        let paramstr = stringify(params);
-        if (paramstr.length) {
-            url = (url.includes('?') ? url + '&' : url + '?') + paramstr;
+        let paramStr = stringify(params);
+        if (paramStr.length) {
+            url = (url.includes('?') ? url + '&' : url + '?') + paramStr;
         }
 
         return new Promise((resolve, reject) => {

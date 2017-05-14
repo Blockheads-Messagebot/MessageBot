@@ -58,6 +58,7 @@ function addButton(button: {text: string, style?: string} | string) {
     modalFooter.appendChild(el);
 }
 
+/** @hidden */
 export function alert(html: string, buttons?: Array<{ text: string, style?: string } | string>, callback?: (text: string) => void): void {
     if (instance.active) {
         instance.queue.push({html, buttons, callback});

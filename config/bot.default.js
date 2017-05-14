@@ -1,5 +1,5 @@
 /**
- * Copy this file into bot.js in the same directory and modify as necesary for the bot type you are running.
+ * Copy this file into bot.js in the same directory and modify as necessary for the bot type you are running.
  */
 module.exports = {
     /**

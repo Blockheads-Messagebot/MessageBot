@@ -1,3 +1,4 @@
+/** @hidden */
 export function notify(text: string, displayTime: number = 2) {
     var el = document.createElement('div');
     el.classList.add('bot-notification', 'is-active');
