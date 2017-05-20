@@ -17,7 +17,7 @@ export class PortalLogParser {
     /**
      * Parses the logs into a standard format.
      *
-     * @param lines {string[]} the raw log lines.
+     * @param lines the raw log lines.
      */
     parse(lines: string[]): LogEntry[] {
         // Copy the lines array

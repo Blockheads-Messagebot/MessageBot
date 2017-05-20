@@ -79,6 +79,6 @@ export class Storage implements IStorage {
             }
         }
 
-        remove.forEach(localStorage.removeItem);
+        remove.forEach(key => localStorage.removeItem(key));
     }
 }

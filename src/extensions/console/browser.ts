@@ -21,6 +21,7 @@ MessageBot.registerExtension('console', function(ex, world) {
     tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');
 
     let chatUl = tab.querySelector('ul') as HTMLUListElement;
+    let chatContainer = chatUl.parentElement as HTMLDivElement;
     let template = tab.querySelector('template') as HTMLTemplateElement;
 
     // Handle sending
@@ -41,9 +42,23 @@ MessageBot.registerExtension('console', function(ex, world) {
 
     // Autoscroll when new chat is added to the page, unless we are scrolled up.
     new MutationObserver(function(events) {
-        // Each line adds 24 pixels to the page
-        // let totalAdded = events.length * 24;
-        console.log(events.length);
+        let total = chatUl.children.length;
+
+        // Determine how many messages have been added
+        let addedHeight = 0;
+        for (let i = total - events.length; i < total; i++) {
+            addedHeight += chatUl.children[i].clientHeight;
+        }
+
+        // If we were scrolled down already, stay scrolled down
+        if (chatContainer.scrollHeight - chatContainer.clientHeight - chatContainer.scrollTop == addedHeight) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Remove old messages if necessary
+        while (chatUl.children.length > 500) {
+            chatUl.children[0].remove();
+        }
     }).observe(chatUl, {childList: true, subtree: true});
 
     // Add a message to the page
