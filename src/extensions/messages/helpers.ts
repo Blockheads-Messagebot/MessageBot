@@ -3,7 +3,7 @@ import {MessageConfig, MessageGroupType} from './index';
 
 /** @hidden */
 export function checkJoins(player: Player, message: MessageConfig) {
-    return player.getJoins() >= message.joins_low && player.getJoins() <= message.join_high;
+    return player.getJoins() >= message.joins_low && player.getJoins() <= message.joins_high;
 }
 
 /** @hidden */

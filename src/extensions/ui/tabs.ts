@@ -117,6 +117,7 @@ export class TabManager {
         let summary = document.createElement('summary');
         summary.textContent = text;
         group.appendChild(summary);
+        group.classList.add('nav-item');
         group.dataset.tabGroup = groupName;
 
         let parentNav: HTMLElement;

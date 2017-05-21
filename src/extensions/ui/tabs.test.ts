@@ -109,6 +109,11 @@ describe('TabManager', function() {
             expect(navRoot.children[0].nodeName).to.equal('DETAILS');
         });
 
+        it('Should add the .nav-item class to the details element', function() {
+            tabs.addTabGroup('Text', 'group');
+            expect(navRoot.children[0].classList.contains('nav-item')).to.be.true;
+        });
+
         it('Should set the summary element\'s text to the provided text', function() {
             tabs.addTabGroup('Text', 'group');
             expect(navRoot.children[0].children[0].textContent).to.equal('Text');

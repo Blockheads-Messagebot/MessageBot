@@ -136,7 +136,7 @@ export class MessageBot {
      * Sends a message to the world for this bot, should usually be used in place of world.send.
      *
      * @param message the message to send
-     * @param params any variables to inject into the message.
+     * @param params any variables to inject into the message. If `name` is provided, it will be available through {{NAME}}, {{Name}} and {{name}}
      */
     send(message: string, params: {[key: string]: string} = {}) {
         let messages: string[];

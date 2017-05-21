@@ -1,3 +1,5 @@
+// Note: The messages extension handles responding to messages. The messages-ui extension handles editing messages in a browser.
+
 import {MessageBot} from '../../bot/bot';
 import {MessageBotExtension} from '../../bot/extension';
 import {Player} from '../../libraries/blockheads/player';
@@ -9,7 +11,7 @@ import {checkJoins, checkGroups} from './helpers';
 export interface MessageConfig {
     message: string;
     joins_low: number;
-    join_high: number;
+    joins_high: number;
     group: MessageGroupType;
     not_group: MessageGroupType;
 }
@@ -32,8 +34,8 @@ MessageBot.registerExtension('messages', function(ex, world) {
     };
 });
 
-
-type JoinMessageConfig = MessageConfig;
+/** @hidden **/
+export type JoinMessageConfig = MessageConfig;
 
 function joinModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'joinArr';
@@ -58,8 +60,8 @@ function joinModule(ex: MessageBotExtension, world: World) {
     };
 }
 
-
-type LeaveMessageConfig = MessageConfig;
+/** @hidden **/
+export type LeaveMessageConfig = MessageConfig;
 
 function leaveModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'leaveArr';
@@ -84,8 +86,8 @@ function leaveModule(ex: MessageBotExtension, world: World) {
     };
 }
 
-
-type TriggerMessageConfig = MessageConfig & {
+/** @hidden **/
+export type TriggerMessageConfig = MessageConfig & {
     trigger: string
 };
 
@@ -132,8 +134,8 @@ function triggerModule(ex: MessageBotExtension, world: World) {
     };
 }
 
-
-type AnnouncementMessageConfig = {message: string};
+/** @hidden **/
+export type AnnouncementMessageConfig = {message: string};
 
 function announcementModule(ex: MessageBotExtension, world: World) {
     let STORAGE_ID = 'announcementArr';

@@ -23,6 +23,10 @@ html {
     position: relative;
     top: 52px;
 }
+// This requires a z-index for models
+.modal {
+    z-index: 1050;
+}
 
 // Bulma provides is-medium and is-large -- this is 1/3rd the default size.
 .section.is-small {

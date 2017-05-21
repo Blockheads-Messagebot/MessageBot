@@ -71,9 +71,8 @@ export interface UIExtensionExports {
      * @param html the html to be set for the modal body.
      * @param buttons buttons that the user can click to close the modal, for each item, if it is a string it will be set as the text with the default style, or the text can be specified explicitly. If no buttons are specified, a generic OK button will be used.
      * @param callback will be called when the alert is closed as a result of the user clicking on one of the provided buttons. It will be passed a single argument with the text of the button clicked.
-     * @return a promise that will resolve when the alert is closed with the text of the button.
      */
-    alert: (html: string, buttons?: Array<{text: string, style?: string}|string>, callback?: (text: string) => void) => Promise<string>;
+    alert: (html: string, buttons?: Array<{text: string, style?: string}|string>, callback?: (text: string) => void) => void;
     /**
      * A tab manager which can be used within extension pages.
      */

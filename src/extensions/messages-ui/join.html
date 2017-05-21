@@ -1,0 +1,38 @@
+<template>
+    <div class="column is-4-desktop is-6-tablet">
+        <div class="box">
+            <label> Message: <textarea data-target="message" class="textarea is-fluid m"></textarea></label>
+            <details>
+                <summary>More options <small class="summary"></small></summary>
+                <label>Player is: <select data-target="group">
+                    <option value="all">anyone</option>
+                    <option value="staff">a staff member</option>
+                    <option value="mod">a mod</option>
+                    <option value="admin">an admin</option>
+                    <option value="owner">the owner</option>
+                </select></label>
+                <br>
+                <label>Player is not: <select data-target="not_group">
+                    <option value="nobody">nobody</option>
+                    <option value="staff">a staff member</option>
+                    <option value="mod">a mod</option>
+                    <option value="admin">an admin</option>
+                    <option value="owner">the owner</option>
+                </select></label>
+                <br>
+                <input type="number" value="0" data-target="joins_low">
+                <span> &le; player joins &le; </span>
+                <input type="number" value="9999" data-target="joins_high">
+            </details>
+            <a>Delete</a>
+        </div>
+    </div>
+</template>
+<div class="container is-fluid">
+    <section class="section is-small">
+        <span class="button is-primary is-pulled-right">+</span>
+        <h3 class="title is-4">These are checked when a player joins the server.</h3>
+        <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>
+    </section>
+    <div class="columns is-multiline messages-container" style="border-top: 1px solid #000"></div>
+</div>
