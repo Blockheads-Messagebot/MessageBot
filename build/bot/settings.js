@@ -68,7 +68,7 @@ var Settings = (function () {
      * @param prefix the prefix to save settings with.
      */
     Settings.prototype.prefix = function (prefix) {
-        return new Settings(this.storage, this._prefix + prefix);
+        return new Settings(this.storage, this._prefix + "/" + prefix);
     };
     return Settings;
 }());

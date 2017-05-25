@@ -14,7 +14,7 @@ var PortalLogParser = (function () {
     /**
      * Parses the logs into a standard format.
      *
-     * @param lines {string[]} the raw log lines.
+     * @param lines the raw log lines.
      */
     PortalLogParser.prototype.parse = function (lines) {
         // Copy the lines array

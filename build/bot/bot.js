@@ -28,7 +28,6 @@ var MessageBot = (function () {
     function MessageBot(world) {
         this.world = world;
         this.settings = new settings_1.Settings(world.storage);
-        this.botSettings = this.settings.prefix('mb_');
         this.extensions = new Map();
         extensionRegistered.sub(this.registerExtension.bind(this));
         extensionDeregistered.sub(this.deregisterExtension.bind(this));
@@ -54,6 +53,7 @@ var MessageBot = (function () {
      * @param creator the function to call in order to initialize the extension.
      */
     MessageBot.registerExtension = function (id, creator) {
+        id = id.toLocaleLowerCase();
         console.log('Launching extension', id);
         if (extensions.has(id)) {
             console.log("Extension " + id + " was already registered. Abort.");
@@ -130,15 +130,15 @@ var MessageBot = (function () {
      * Sends a message to the world for this bot, should usually be used in place of world.send.
      *
      * @param message the message to send
-     * @param params any variables to inject into the message.
+     * @param params any variables to inject into the message. If `name` is provided, it will be available through {{NAME}}, {{Name}} and {{name}}
      */
     MessageBot.prototype.send = function (message, params) {
         var _this = this;
         if (params === void 0) { params = {}; }
         var messages;
         // Split the message if splitting is enabled.
-        if (this.botSettings.get('splitMessages', false)) {
-            messages = message.split(this.botSettings.get('splitToken', '<split>'));
+        if (this.settings.get('splitMessages', false)) {
+            messages = message.split(this.settings.get('splitToken', '<split>'));
         }
         else {
             messages = [message];

@@ -96,6 +96,10 @@ function triggerModule(ex: MessageBotExtension, world: World) {
     let storage = world.storage;
 
     function triggerMatch(message: string, trigger: string) {
+        if (!ex.settings.get('disableWhitespaceTrimming', false)) {
+            trigger = trigger.trim();
+        }
+
         if (ex.settings.get('regexTriggers', false)) {
             try {
                 return new RegExp(trigger, 'i').test(message);

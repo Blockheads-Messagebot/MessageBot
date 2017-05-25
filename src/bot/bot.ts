@@ -22,7 +22,6 @@ export class MessageBot {
      */
     public settings: Settings;
 
-    private botSettings: Settings;
     private extensions: Map<string, MessageBotExtension>;
 
     /**
@@ -33,7 +32,6 @@ export class MessageBot {
     constructor(world: World) {
         this.world = world;
         this.settings = new Settings(world.storage);
-        this.botSettings = this.settings.prefix('mb_');
 
         this.extensions = new Map();
 
@@ -55,6 +53,8 @@ export class MessageBot {
         id: string,
         creator: ExtensionInitializer,
     ) {
+        id = id.toLocaleLowerCase();
+
         console.log('Launching extension', id);
         if (extensions.has(id)) {
             console.log(`Extension ${id} was already registered. Abort.`);
@@ -141,8 +141,8 @@ export class MessageBot {
     send(message: string, params: {[key: string]: string} = {}) {
         let messages: string[];
         // Split the message if splitting is enabled.
-        if (this.botSettings.get('splitMessages', false)) {
-            messages = message.split(this.botSettings.get('splitToken', '<split>'));
+        if (this.settings.get('splitMessages', false)) {
+            messages = message.split(this.settings.get('splitToken', '<split>'));
         } else {
             messages = [message];
         }

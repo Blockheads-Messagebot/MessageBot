@@ -129,6 +129,7 @@ var TabManager = (function () {
         var summary = document.createElement('summary');
         summary.textContent = text;
         group.appendChild(summary);
+        group.classList.add('nav-item');
         group.dataset.tabGroup = groupName;
         var parentNav;
         if (parent) {

@@ -1,4 +1,5 @@
 "use strict";
+// Note: The messages extension handles responding to messages. The messages-ui extension handles editing messages in a browser.
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -86,6 +87,9 @@ function triggerModule(ex, world) {
     var STORAGE_ID = 'triggerArr';
     var storage = world.storage;
     function triggerMatch(message, trigger) {
+        if (!ex.settings.get('disableWhitespaceTrimming', false)) {
+            trigger = trigger.trim();
+        }
         if (ex.settings.get('regexTriggers', false)) {
             try {
                 return new RegExp(trigger, 'i').test(message);

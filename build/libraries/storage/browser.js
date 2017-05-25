@@ -70,7 +70,7 @@ var Storage = (function () {
                 remove.push(key);
             }
         }
-        remove.forEach(localStorage.removeItem);
+        remove.forEach(function (key) { return localStorage.removeItem(key); });
     };
     return Storage;
 }());

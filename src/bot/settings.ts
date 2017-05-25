@@ -81,6 +81,6 @@ export class Settings {
      * @param prefix the prefix to save settings with.
      */
     prefix(prefix: string): Settings {
-        return new Settings(this.storage, this._prefix + prefix);
+        return new Settings(this.storage, `${this._prefix}/${prefix}`);
     }
 }

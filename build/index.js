@@ -11,6 +11,9 @@ global.SimpleEvent = simpleevent_1.SimpleEvent;
 require("./extensions/ui");
 require("./extensions/console/browser");
 require("./extensions/messages");
+require("./extensions/messages-ui");
+require("./extensions/settings-ui");
+require("./extensions/extensions-ui");
 var world = new world_1.World({
     api: new api_1.PortalApi(worldId),
     chatWatcher: new chatwatcher_1.PortalChatWatcher({

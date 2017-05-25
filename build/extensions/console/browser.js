@@ -14,6 +14,7 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
     var tab = ui.addTab('Console');
     tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');
     var chatUl = tab.querySelector('ul');
+    var chatContainer = chatUl.parentElement;
     var template = tab.querySelector('template');
     // Handle sending
     var input = tab.querySelector('input');
@@ -29,12 +30,66 @@ bot_1.MessageBot.registerExtension('console', function (ex, world) {
             userSend();
         }
     });
+    // History module, used to be a separate extension
+    (function () {
+        var history = [];
+        var current = 0;
+        function addToHistory(message) {
+            history.push(message);
+            while (history.length > 100) {
+                history.shift();
+            }
+            current = history.length;
+        }
+        function addIfNew(message) {
+            if (message != history.slice(-1).pop()) {
+                addToHistory(message);
+            }
+            else {
+                current = history.length;
+            }
+        }
+        input.addEventListener('keydown', function (event) {
+            if (event.key == 'ArrowUp') {
+                if (input.value.length && current == history.length) {
+                    addToHistory(input.value);
+                    current--;
+                }
+                if (history.length && current) {
+                    input.value = history[--current];
+                }
+            }
+            else if (event.key == 'ArrowDown') {
+                if (history.length > current + 1) {
+                    input.value = history[++current];
+                }
+                else if (history.length == current + 1) {
+                    input.value = '';
+                    current = history.length;
+                }
+            }
+            else if (event.key == 'Enter') {
+                addIfNew(input.value);
+            }
+        });
+    }());
     tab.querySelector('button').addEventListener('click', userSend);
     // Autoscroll when new chat is added to the page, unless we are scrolled up.
     new MutationObserver(function (events) {
-        // Each line adds 24 pixels to the page
-        // let totalAdded = events.length * 24;
-        console.log(events.length);
+        var total = chatUl.children.length;
+        // Determine how many messages have been added
+        var addedHeight = 0;
+        for (var i = total - events.length; i < total; i++) {
+            addedHeight += chatUl.children[i].clientHeight;
+        }
+        // If we were scrolled down already, stay scrolled down
+        if (chatContainer.scrollHeight - chatContainer.clientHeight - chatContainer.scrollTop == addedHeight) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        // Remove old messages if necessary
+        while (chatUl.children.length > 500) {
+            chatUl.children[0].remove();
+        }
     }).observe(chatUl, { childList: true, subtree: true });
     // Add a message to the page
     function addPlayerMessage(player, message) {

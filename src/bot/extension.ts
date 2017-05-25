@@ -35,7 +35,7 @@ export class MessageBotExtension {
     /**
      * Utility class which can be used to send http requests with a promise based API.
      */
-    public ajax: Ajax;
+    public ajax: typeof Ajax;
 
     /**
      * Used to check if the bot is loaded in a browser or in a node environment.

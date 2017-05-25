@@ -37,7 +37,7 @@ export class MacChatWatcher implements ChatWatcher {
         this.logs = fs.createWriteStream(this.path + '/logs.txt', {flags: 'a'});
 
         this.tail = spawn('tail', [
-            '-f',
+            '-fF',
             '-n', '0',
             '/private/var/log/system.log'
         ]);

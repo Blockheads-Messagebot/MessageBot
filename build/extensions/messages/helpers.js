@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 /** @hidden */
 function checkJoins(player, message) {
-    return player.getJoins() >= message.joins_low && player.getJoins() <= message.join_high;
+    return player.getJoins() >= message.joins_low && player.getJoins() <= message.joins_high;
 }
 exports.checkJoins = checkJoins;
 /** @hidden */
