@@ -29,6 +29,7 @@ function del(dir) {
 del('./build');
 fs.mkdirSync('./build');
 fs.mkdirSync('./build/compiled');
+fs.mkdirSync('./build/declarations');
 
 // For compiling scss
 const scss = require('scssify');
@@ -37,7 +38,7 @@ const scss = require('scssify');
 const tsify = require('tsify');
 // Just for compiling
 const ts = require('gulp-typescript');
-const tsProject = ts.createProject('tsconfig.json', {declaration: true });
+const tsProject = ts.createProject('./tsconfig.json');
 
 gulp.task('build:browser', function() {
     let b = browserify(['src/index.ts'], { debug: true /* sourcemaps */ })
@@ -58,9 +59,11 @@ gulp.task('build:browser', function() {
 });
 
 gulp.task('build:node', function() {
-    return gulp.src('src/**/*.ts')
+    let result = gulp.src('src/**/*.ts')
         .pipe(tsProject())
-        .js.pipe(gulp.dest('build'));
+
+    result.dts.pipe(gulp.dest('build/declarations'));
+    return result.js.pipe(gulp.dest('build'));
 });
 
 gulp.task('build:test', function() {

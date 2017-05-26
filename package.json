@@ -12,6 +12,7 @@
     "url": "https://github.com/Bibliofile/Blockheads-MessageBot/issues"
   },
   "homepage": "https://github.com/Bibliofile/Blockheads-MessageBot#readme",
+  "types": "./build/declarations/index.d.ts",
   "scripts": {
     "docs": "typedoc --options ./typedoc.json",
     "gulp": "gulp",
