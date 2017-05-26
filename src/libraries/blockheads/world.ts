@@ -82,7 +82,7 @@ export class World {
             chatWatcher.onMessage.subscribe(this.messageWatcher.bind(this));
 
             let lists = await this.getLists();
-            let watcher = new CommandWatcher(lists, this.getPlayer);
+            let watcher = new CommandWatcher(lists, this.getPlayer.bind(this));
             this.onCommand.subscribe(watcher.listener);
         })();
     }

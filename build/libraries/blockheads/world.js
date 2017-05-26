@@ -95,7 +95,7 @@ var World = (function () {
                         return [4 /*yield*/, this.getLists()];
                     case 2:
                         lists = _a.sent();
-                        watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer);
+                        watcher = new commandwatcher_1.CommandWatcher(lists, this.getPlayer.bind(this));
                         this.onCommand.subscribe(watcher.listener);
                         return [2 /*return*/];
                 }
