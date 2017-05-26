@@ -85,6 +85,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#alert" class="tsd-kind-icon">alert</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#buildtemplate" class="tsd-kind-icon">build<wbr>Template</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#notify" class="tsd-kind-icon">notify</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#prompt" class="tsd-kind-icon">prompt</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#removetab" class="tsd-kind-icon">remove<wbr>Tab</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#removetabgroup" class="tsd-kind-icon">remove<wbr>Tab<wbr>Group</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="uiextensionexports.html#tabshown" class="tsd-kind-icon">tab<wbr>Shown</a></li>
@@ -102,7 +103,7 @@
 					<div class="tsd-signature tsd-kind-icon">Tab<wbr>Manager<span class="tsd-signature-symbol">:</span> <a href="../classes/tabmanager.html" class="tsd-signature-type">TabManager</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L79">extensions/ui/index.ts:79</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L86">extensions/ui/index.ts:86</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -117,7 +118,7 @@
 					<div class="tsd-signature tsd-kind-icon">add<wbr>Tab<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L25">extensions/ui/index.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L25">extensions/ui/index.ts:25</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -167,7 +168,7 @@
 					<div class="tsd-signature tsd-kind-icon">add<wbr>Tab<wbr>Group<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L39">extensions/ui/index.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L39">extensions/ui/index.ts:39</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -220,12 +221,12 @@
 					<div class="tsd-signature tsd-kind-icon">alert<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L75">extensions/ui/index.ts:75</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L75">extensions/ui/index.ts:75</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Requires input from the user with a modal box.</p>
+							<p>Requires a response from the user with a modal box.</p>
 						</div>
 						<dl class="tsd-comment-tags">
 							<dt>param</dt>
@@ -273,7 +274,7 @@
 					<div class="tsd-signature tsd-kind-icon">build<wbr>Template<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L60">extensions/ui/index.ts:60</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L60">extensions/ui/index.ts:60</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -326,7 +327,7 @@
 					<div class="tsd-signature tsd-kind-icon">notify<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L67">extensions/ui/index.ts:67</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L67">extensions/ui/index.ts:67</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -368,12 +369,59 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="prompt" class="tsd-anchor"></a>
+					<h3>prompt</h3>
+					<div class="tsd-signature tsd-kind-icon">prompt<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L82">extensions/ui/index.ts:82</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Utility method for getting text from the user.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>param</dt>
+							<dd><p>displayed to the user when asking for input</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>will be called once the user clicks OK with the input, or an empty string if no input was supplied.</p>
+							</dd>
+						</dl>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>text<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, callback<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>text: <span class="tsd-signature-type">string</span></h5>
+											</li>
+											<li>
+												<h5><span class="tsd-flag ts-flagOptional">Optional</span> callback: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="removetab" class="tsd-anchor"></a>
 					<h3>remove<wbr>Tab</h3>
 					<div class="tsd-signature tsd-kind-icon">remove<wbr>Tab<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L31">extensions/ui/index.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L31">extensions/ui/index.ts:31</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -414,7 +462,7 @@
 					<div class="tsd-signature tsd-kind-icon">remove<wbr>Tab<wbr>Group<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L46">extensions/ui/index.ts:46</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L46">extensions/ui/index.ts:46</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -458,7 +506,7 @@
 					<div class="tsd-signature tsd-kind-icon">tab<wbr>Shown<span class="tsd-signature-symbol">:</span> <a href="../classes/simpleevent.html" class="tsd-signature-type">SimpleEvent</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">HTMLDivElement</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L52">extensions/ui/index.ts:52</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L52">extensions/ui/index.ts:52</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -478,7 +526,7 @@
 					<div class="tsd-signature tsd-kind-icon">toggle<wbr>Menu<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/517331d/src/extensions/ui/index.ts#L17">extensions/ui/index.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/0530766/src/extensions/ui/index.ts#L17">extensions/ui/index.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -566,6 +614,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="uiextensionexports.html#notify" class="tsd-kind-icon">notify</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="uiextensionexports.html#prompt" class="tsd-kind-icon">prompt</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="uiextensionexports.html#removetab" class="tsd-kind-icon">remove<wbr>Tab</a>
