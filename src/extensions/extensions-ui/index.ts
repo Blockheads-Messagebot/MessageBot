@@ -130,7 +130,7 @@ MessageBot.registerExtension('extensions-ui', function(ex) {
 
             // If the extension does not exist, a generic description will be returned
             unlisted.forEach(id => {
-                ex.ajax.getJSON(`blockheadsfans.com/messagebot/api/extension/${id}`)
+                ex.ajax.getJSON(`http://blockheadsfans.com/messagebot/api/extension/${id}`)
                     .then((response: {status: string} & ExtensionInfo) => {
                         if (response.status == 'ok') {
                             buildCard(response);

@@ -103,7 +103,7 @@ bot_1.MessageBot.registerExtension('extensions-ui', function (ex) {
             .every(function (ex) { return id != (ex.user + "/" + ex.id).toLocaleLowerCase(); }); });
         // If the extension does not exist, a generic description will be returned
         unlisted.forEach(function (id) {
-            ex.ajax.getJSON("blockheadsfans.com/messagebot/api/extension/" + id)
+            ex.ajax.getJSON("http://blockheadsfans.com/messagebot/api/extension/" + id)
                 .then(function (response) {
                 if (response.status == 'ok') {
                     buildCard(response);
