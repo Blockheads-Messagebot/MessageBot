@@ -10,6 +10,25 @@ const gulp = require('gulp');
 const browserify = require('browserify');
 const watchify = require('watchify');
 const fs = require('fs');
+const path = require('path');
+
+// All tasks here are build tasks, thus all should result in purging the build folder
+function del(dir) {
+    if (fs.existsSync(dir)) {
+        fs.readdirSync(dir).forEach(function (entry) {
+            var entry_path = path.join(dir, entry);
+            if (fs.lstatSync(entry_path).isDirectory()) {
+                del(entry_path);
+            } else {
+                fs.unlinkSync(entry_path);
+            }
+        });
+        fs.rmdirSync(dir);
+    }
+}
+del('./build');
+fs.mkdirSync('./build');
+fs.mkdirSync('./build/compiled');
 
 // For compiling scss
 const scss = require('scssify');
