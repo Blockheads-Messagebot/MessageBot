@@ -75,7 +75,7 @@ bot_1.MessageBot.registerExtension('extensions-ui', function (ex) {
                 return;
             }
             // Not on the page, ask BHFans for info
-            ex.ajax.getJSON("blockheadsfans.com/messagebot/api/extension/" + result)
+            ex.ajax.getJSON("http://blockheadsfans.com/messagebot/api/extension/" + result)
                 .then(function (response) {
                 if (response.status == 'ok') {
                     buildCard(response);
