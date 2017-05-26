@@ -25,3 +25,4 @@ function notify(text, displayTime) {
 exports.notify = notify;
 var alert_1 = require("./alert");
 exports.alert = alert_1.alert;
+exports.prompt = alert_1.prompt;

@@ -92,6 +92,66 @@ bot_1.MessageBot.registerExtension('settings-ui', function (ex) {
         }
         var e_2, _b;
     });
+    function importBackup(backup) {
+        var parsed;
+        try {
+            parsed = JSON.parse(backup);
+            if (parsed === null) {
+                throw new Error('Invalid backup');
+            }
+        }
+        catch (e) {
+            ui.notify('Invalid backup code. No action taken.');
+            return;
+        }
+        localStorage.clear();
+        Object.keys(parsed).forEach(function (key) {
+            localStorage.setItem(key, parsed[key]);
+        });
+        location.reload();
+    }
+    tab.querySelector('[data-do=show_backup]').addEventListener('click', function () {
+        // Must be loaded in a browser, so safe to use localStorage
+        var backup = JSON.stringify(localStorage).replace(/</g, '&lt;');
+        ui.alert("<p>Copy this to a safe place.</p><textarea class=\"textarea\">" + backup + "</textarea>");
+    });
+    tab.querySelector('[data-do=import_backup]').addEventListener('click', function () {
+        ui.prompt('Enter your backup code, this will reload the page:', function (result) {
+            if (result) {
+                importBackup(result);
+            }
+        });
+    });
+    tab.querySelector('[data-do=download_backup]').addEventListener('click', function () {
+        var backup = JSON.stringify(localStorage);
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(backup));
+        element.setAttribute('download', 'bot_backup.txt');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    });
+    tab.querySelector('[data-do=upload_backup]').addEventListener('click', function () {
+        if (!File || !FileReader || !FileList || !Blob) {
+            alert("It looks like your browser doesn't support this.");
+            return;
+        }
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.addEventListener('change', function () {
+            if (!input.files || input.files[0].type != 'text/plain') {
+                ui.notify('Upload a text file.');
+                return;
+            }
+            var reader = new FileReader();
+            reader.addEventListener('load', function () {
+                importBackup(reader.result);
+            });
+            reader.readAsText(input.files[0]);
+        });
+        input.click();
+    });
     ex.uninstall = function () {
         ui.removeTab(tab);
     };

@@ -22,4 +22,4 @@ export function notify(text: string, displayTime: number = 2) {
     });
 }
 
-export {alert} from './alert';
+export {alert, prompt} from './alert';

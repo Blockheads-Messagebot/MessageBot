@@ -66,13 +66,20 @@ export interface UIExtensionExports {
      */
     notify: (text: string, displayTime?: number) => void;
     /**
-     * Requires input from the user with a modal box.
+     * Requires a response from the user with a modal box.
      *
      * @param html the html to be set for the modal body.
      * @param buttons buttons that the user can click to close the modal, for each item, if it is a string it will be set as the text with the default style, or the text can be specified explicitly. If no buttons are specified, a generic OK button will be used.
      * @param callback will be called when the alert is closed as a result of the user clicking on one of the provided buttons. It will be passed a single argument with the text of the button clicked.
      */
     alert: (html: string, buttons?: Array<{text: string, style?: string}|string>, callback?: (text: string) => void) => void;
+    /**
+     * Utility method for getting text from the user.
+     *
+     * @param text displayed to the user when asking for input
+     * @param callback will be called once the user clicks OK with the input, or an empty string if no input was supplied.
+     */
+    prompt: (text: string, callback?: (response: string) => void) => void;
     /**
      * A tab manager which can be used within extension pages.
      */
@@ -134,7 +141,7 @@ MessageBot.registerExtension('ui', function(ex) {
     );
 
     // Exports
-    const { notify, alert }: Pick<UIExtensionExports, 'notify' | 'alert'> = require('./notifications');
+    const { notify, alert, prompt }: Pick<UIExtensionExports, 'notify' | 'alert' | 'prompt'> = require('./notifications');
 
     let uiExports: UIExtensionExports = {
         toggleMenu: () => {
@@ -151,6 +158,7 @@ MessageBot.registerExtension('ui', function(ex) {
         buildTemplate,
         notify,
         alert,
+        prompt,
         TabManager,
     };
 

@@ -58,6 +58,19 @@ function alert(html, buttons, callback) {
     if (Array.isArray(buttons)) {
         buttons.forEach(addButton);
     }
+    else {
+        addButton('OK');
+    }
     modal.classList.add('is-active');
 }
 exports.alert = alert;
+function prompt(text, callback) {
+    var p = document.createElement('p');
+    p.textContent = text;
+    alert(p.outerHTML + '<textarea class="textarea"></textarea>', ['OK', 'Cancel'], function () {
+        var textarea = document.querySelector('#alert textarea');
+        if (callback)
+            callback(textarea.textContent || '');
+    });
+}
+exports.prompt = prompt;

@@ -71,8 +71,18 @@ export function alert(html: string, buttons?: Array<{ text: string, style?: stri
 
     if (Array.isArray(buttons)) {
         buttons.forEach(addButton);
+    } else {
+        addButton('OK');
     }
 
     modal.classList.add('is-active');
 }
 
+export function prompt(text: string, callback?: (response: string) => void): void {
+    let p = document.createElement('p');
+    p.textContent = text;
+    alert(p.outerHTML + '<textarea class="textarea"></textarea>', ['OK', 'Cancel'], () => {
+        let textarea = document.querySelector('#alert textarea') as HTMLTextAreaElement;
+        if (callback) callback(textarea.textContent || '');
+    });
+}

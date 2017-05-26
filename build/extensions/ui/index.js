@@ -54,7 +54,7 @@ bot_1.MessageBot.registerExtension('ui', function (ex) {
     }
     var tabManager = new tabs_1.TabManager(document.querySelector('.nav-slider-container .nav-slider'), document.querySelector('#container'));
     // Exports
-    var _a = require('./notifications'), notify = _a.notify, alert = _a.alert;
+    var _a = require('./notifications'), notify = _a.notify, alert = _a.alert, prompt = _a.prompt;
     var uiExports = {
         toggleMenu: function () {
             document.querySelector('.nav-slider-container .nav-slider').classList.toggle('is-active');
@@ -69,6 +69,7 @@ bot_1.MessageBot.registerExtension('ui', function (ex) {
         buildTemplate: template_1.buildTemplate,
         notify: notify,
         alert: alert,
+        prompt: prompt,
         TabManager: tabs_1.TabManager,
     };
     ex.exports = uiExports;
