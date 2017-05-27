@@ -129,4 +129,23 @@ export class Storage implements IStorage {
 
         lastChange = Date.now();
     }
+
+    /**
+     * @inheritdoc
+     */
+    migrate<T>(key: string, actor: (found: T) => T): void {
+        let keys: string[] = [];
+
+        for (let sKey of fileStorage.keys()) {
+            if (sKey.startsWith(key)) {
+                keys.push(sKey);
+            }
+        }
+
+        keys.forEach(key => {
+            this.set(key, actor(this.getObject(key, {} as T, false)), false);
+        });
+
+        lastChange = Date.now();
+    }
 }

@@ -45,8 +45,6 @@ export interface IStorage {
     /**
      * Removes all items starting with namespace from the storage.
      *
-     * Note: Using Object.keys(localStorage) works, but is not covered in the spec.
-     *
      * @example
      * set('key+test', 1);
      * set('key+test2', 2);
@@ -55,4 +53,11 @@ export interface IStorage {
      * @param namespace the prefix to check for when removing items.
      */
     clearNamespace: (namespace: string) => void;
+    /**
+     * Runs the migration function on all storage items that match the passed key. getObject will be used to parse the stored data.
+     *
+     * @param key the key to match
+     * @param actor the function to call on all found data.
+     */
+    migrate: <T>(key: string, actor: (found: T) => T) => void;
 }

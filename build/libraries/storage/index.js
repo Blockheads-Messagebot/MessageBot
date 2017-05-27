@@ -169,6 +169,33 @@ var Storage = (function () {
         lastChange = Date.now();
         var e_3, _c;
     };
+    /**
+     * @inheritdoc
+     */
+    Storage.prototype.migrate = function (key, actor) {
+        var _this = this;
+        var keys = [];
+        try {
+            for (var _a = __values(fileStorage.keys()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var sKey = _b.value;
+                if (sKey.startsWith(key)) {
+                    keys.push(sKey);
+                }
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        keys.forEach(function (key) {
+            _this.set(key, actor(_this.getObject(key, {}, false)), false);
+        });
+        lastChange = Date.now();
+        var e_4, _c;
+    };
     return Storage;
 }());
 exports.Storage = Storage;

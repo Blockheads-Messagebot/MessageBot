@@ -64,13 +64,31 @@ var Storage = (function () {
      */
     Storage.prototype.clearNamespace = function (namespace) {
         var remove = [];
-        for (var i = 0; i < localStorage.length + 5; i++) {
+        for (var i = 0; i < localStorage.length; i++) {
             var key = localStorage.key(i);
             if (key && key.startsWith(namespace)) {
                 remove.push(key);
             }
         }
         remove.forEach(function (key) { return localStorage.removeItem(key); });
+    };
+    /**
+     * @inheritdoc
+     */
+    Storage.prototype.migrate = function (key, actor) {
+        var _this = this;
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) {
+            var lsKey = localStorage.key(i);
+            if (lsKey && lsKey.startsWith(key)) {
+                keys.push(lsKey);
+            }
+        }
+        keys.forEach(function (lsKey) {
+            var old = _this.getObject(lsKey, {}, false);
+            var updated = actor(old);
+            _this.set(lsKey, updated, false);
+        });
     };
     return Storage;
 }());

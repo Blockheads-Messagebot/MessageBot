@@ -92,4 +92,38 @@ describe('Storage', function () {
             });
         });
     });
+    describe('migrate', function () {
+        beforeEach(function () {
+            [
+                'something',
+                'str__abc',
+                'obj__adf',
+                'ns__123',
+                'ns__656',
+                'ns__test',
+            ].forEach(function (item) { return localStorage.setItem(item, '[]'); });
+            storage.migrate('ns__', function (value) {
+                value.push('Hi');
+                return value;
+            });
+        });
+        it('Updates keys starting with the passed key', function () {
+            [
+                'ns__123',
+                'ns__656',
+                'ns__test',
+            ].forEach(function (key) {
+                chai_1.expect(localStorage.getItem(key)).to.equal('["Hi"]');
+            });
+        });
+        it('Does not update matching keys', function () {
+            [
+                'something',
+                'str__abc',
+                'obj__adf',
+            ].forEach(function (key) {
+                chai_1.expect(localStorage.getItem(key)).to.equal('[]');
+            });
+        });
+    });
 });

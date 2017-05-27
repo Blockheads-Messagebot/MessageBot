@@ -24,4 +24,8 @@ export declare class Storage implements IStorage {
      * @inheritdoc
      */
     clearNamespace(namespace: string): void;
+    /**
+     * @inheritdoc
+     */
+    migrate<T>(key: string, actor: (found: T) => T): void;
 }
