@@ -6,6 +6,9 @@ bot_1.MessageBot.registerExtension('extensions-ui', function (ex) {
     if (ex.isNode || !ex.bot.getExports('ui')) {
         throw new Error('This extension must be loaded in a browser after the UI extension has been loaded.');
     }
+    var style = document.createElement('style');
+    style.textContent = require('./style.scss').css;
+    document.head.appendChild(style);
     // Preformatted, user/id
     var extensions = ex.world.storage.getObject('extensions', [], false);
     function loadExtension(id) {
@@ -111,4 +114,8 @@ bot_1.MessageBot.registerExtension('extensions-ui', function (ex) {
             });
         });
     });
+    ex.uninstall = function () {
+        ui.removeTab(tab);
+        style.remove();
+    };
 });

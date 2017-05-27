@@ -17,6 +17,10 @@ MessageBot.registerExtension('extensions-ui', function(ex) {
         throw new Error('This extension must be loaded in a browser after the UI extension has been loaded.');
     }
 
+    let style = document.createElement('style');
+    style.textContent = require('./style.scss').css;
+    document.head.appendChild(style);
+
     // Preformatted, user/id
     let extensions = ex.world.storage.getObject('extensions', [] as string[], false);
 
@@ -138,4 +142,9 @@ MessageBot.registerExtension('extensions-ui', function(ex) {
                     });
             });
         });
+
+    ex.uninstall = function() {
+        ui.removeTab(tab);
+        style.remove();
+    };
 });

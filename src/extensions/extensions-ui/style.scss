@@ -1,0 +1,12 @@
+@import "node_modules/bulma/sass/utilities/mixins";
+
+// Overdefined, simple hack to make this work for now
+$tablet: 769px;
+
+.exts {
+    @include tablet {
+        .card-content {
+            height: 105px
+        }
+    }
+}
