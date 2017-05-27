@@ -5,9 +5,13 @@ var api_1 = require("./libraries/portal/api");
 var world_1 = require("./libraries/blockheads/world");
 var storage_1 = require("./libraries/storage");
 var bot_1 = require("./bot");
+exports.MessageBot = bot_1.MessageBot;
 global.MessageBot = bot_1.MessageBot;
 var simpleevent_1 = require("./libraries/simpleevent");
+exports.SimpleEvent = simpleevent_1.SimpleEvent;
 global.SimpleEvent = simpleevent_1.SimpleEvent;
+// Alias global to window for browser extensions
+global.global = global;
 require("./extensions/ui");
 require("./extensions/console/browser");
 require("./extensions/messages");

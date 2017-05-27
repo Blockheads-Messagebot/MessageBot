@@ -5,8 +5,15 @@ import {Storage} from './libraries/storage';
 
 import {MessageBot} from './bot';
 (global as any).MessageBot = MessageBot;
+
 import {SimpleEvent} from './libraries/simpleevent';
 (global as any).SimpleEvent = SimpleEvent;
+
+// Needed for nice typings
+export {MessageBot, SimpleEvent};
+
+// Alias global to window for browser extensions
+(global as any).global = global;
 
 declare var worldId: number;
 
