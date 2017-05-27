@@ -138,7 +138,7 @@ describe('Storage', function() {
             });
         });
 
-        it('Does not update matching keys', function() {
+        it('Does not update non-matching keys', function() {
             [
                 'something',
                 'str__abc',

@@ -116,7 +116,7 @@ describe('Storage', function () {
                 chai_1.expect(localStorage.getItem(key)).to.equal('["Hi"]');
             });
         });
-        it('Does not update matching keys', function () {
+        it('Does not update non-matching keys', function () {
             [
                 'something',
                 'str__abc',
