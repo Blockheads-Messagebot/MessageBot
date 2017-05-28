@@ -17,25 +17,25 @@ export declare class PortalApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getLists(): Promise<WorldLists>;
+    getLists: () => Promise<WorldLists>;
     /**
      * @inheritdoc
      */
-    getOverview(): Promise<WorldOverview>;
+    getOverview: () => Promise<WorldOverview>;
     /**
      * @inheritdoc
      */
-    getLogs(): Promise<LogEntry[]>;
+    getLogs: () => Promise<LogEntry[]>;
     /**
      * @inheritdoc
      */
-    send(message: string): void;
+    send: (message: string) => void;
     /**
      * Waits until the world is online before resolving.
      */
-    private worldOnline();
+    private worldOnline;
     /**
      * Sends the oldest queued message if possible.
      */
-    private postMessage();
+    private postMessage;
 }

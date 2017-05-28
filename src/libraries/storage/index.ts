@@ -1,5 +1,7 @@
 import {IStorage} from './storage';
 
+export { IStorage };
+
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -62,7 +64,7 @@ export class Storage implements IStorage {
     /**
      * @inheritdoc
      */
-    getString(key: string, fallback: string, local: boolean = true): string {
+    getString = (key: string, fallback: string, local: boolean = true): string => {
         let result;
         if (local) {
             result = fileStorage.get(`${key}${this.namespace}`);
@@ -76,7 +78,7 @@ export class Storage implements IStorage {
     /**
      * @inheritdoc
      */
-    getObject<T>(key: string, fallback: T, local?: boolean): T {
+    getObject = <T>(key: string, fallback: T, local?: boolean): T => {
         let raw = this.getString(key, '', local);
 
         if (!raw) {
@@ -100,7 +102,7 @@ export class Storage implements IStorage {
     /**
      * @inheritdoc
      */
-    set(key: string, data: any, local: boolean = true): void {
+    set = (key: string, data: any, local: boolean = true): void => {
         if (local) {
             key = `${key}${this.namespace}`;
         }
@@ -116,7 +118,7 @@ export class Storage implements IStorage {
     /**
      * @inheritdoc
      */
-    clearNamespace(namespace: string): void {
+    clearNamespace = (namespace: string): void => {
         let toDelete: string[] = [];
 
         for (let key of fileStorage.keys()) {
@@ -133,7 +135,7 @@ export class Storage implements IStorage {
     /**
      * @inheritdoc
      */
-    migrate<T>(key: string, actor: (found: T) => T): void {
+    migrate = <T>(key: string, actor: (found: T) => T): void => {
         let keys: string[] = [];
 
         for (let sKey of fileStorage.keys()) {

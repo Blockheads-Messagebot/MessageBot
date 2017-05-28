@@ -16,23 +16,23 @@ export declare class MacApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getLists(): Promise<WorldLists>;
+    getLists: () => Promise<WorldLists>;
     /**
      * @inheritdoc
      */
-    getOverview(): Promise<WorldOverview>;
+    getOverview: () => Promise<WorldOverview>;
     /**
      * @inheritdoc
      */
-    getLogs(): Promise<LogEntry[]>;
+    getLogs: () => Promise<LogEntry[]>;
     /**
      * @inheritdoc
      */
-    send(message: string): void;
+    send: (message: string) => void;
     /**
      * Gets the specified list for the world.
      *
      * @param file the file to read
      */
-    private readText(file);
+    private readText;
 }

@@ -16,5 +16,5 @@ export declare class PortalAuth {
      *
      * @return true if logging in was successful, otherwise false.
      */
-    login(): Promise<void>;
+    login: () => Promise<void>;
 }

@@ -73,6 +73,150 @@ var World = (function () {
          * Event fired for all messages which failed to be parsed.
          */
         this.onOther = new simpleevent_1.SimpleEvent();
+        //Methods
+        /**
+         * Gets the current admin, mod, white, and black lists. The returned object should not be mutated.
+         *
+         * @return the current server lists.
+         * @example
+         * getLists().then(lists => {
+         *   console.log(Object.keys(lists));
+         * });
+         */
+        this.getLists = function () {
+            if (_this.lists) {
+                return Promise.resolve(_this.lists);
+            }
+            return _this.api.getLists()
+                .then(function (lists) { return _this.lists = lists; });
+        };
+        /**
+         * Gets the server logs and resolves with an array of the lines. The returned array should not be mutated.
+         *
+         * @param refresh whether or not the logs should be downloaded again.
+         * @return the server logs.
+         * @example
+         * getLogs().then(lines => {
+         *   lines.forEach(line => {
+         *     //something
+         *   });
+         * });
+         */
+        this.getLogs = function (refresh) {
+            if (refresh === void 0) { refresh = false; }
+            if (_this.logs && !refresh) {
+                return Promise.resolve(_this.logs);
+            }
+            return _this.api.getLogs()
+                .then(function (logs) { return _this.logs = logs; });
+        };
+        /**
+         * Gets an overview of the server info, the returned object should not be mutated.
+         *
+         * @param refresh whether or not to re-fetch the page.
+         * @return the world info.
+         * @example
+         * getOverview().then(console.log);
+         */
+        this.getOverview = function (refresh) {
+            if (refresh === void 0) { refresh = false; }
+            if (_this.overview && !refresh) {
+                return Promise.resolve(_this.overview);
+            }
+            var online = _this.overview ? _this.overview.online : [];
+            return _this.api.getOverview().then(function (overview) {
+                overview.online.forEach(function (name) {
+                    if (!online.includes(name)) {
+                        online.push(name);
+                    }
+                });
+                overview.online = online;
+                return _this.overview = overview;
+            });
+        };
+        /**
+         * Adds a message into the queue of messages to send.
+         *
+         * @param message the message to send.
+         * @example
+         * send('Hello!');
+         */
+        this.send = function (message) {
+            _this.api.send(message);
+        };
+        /**
+         * Gets the names of all players which have joined the server.
+         *
+         * @return an array of names.
+         * @example
+         * world.getPlayerNames().forEach(name => {
+         *   if (world.getPlayer(name).isAdmin()) {
+         *     console.log(name);
+         *   }
+         * });
+         */
+        this.getPlayerNames = function () {
+            return Object.keys(_this.players);
+        };
+        /**
+         * Gets an instance of the Player class for the specified name.
+         *
+         * @param name the player name to get.
+         * @return the player, or a dummy player if they do not exist.
+         * @example
+         * let player = getPlayer('someone');
+         * if (player.hasJoined()) { ... }
+         */
+        this.getPlayer = function (name) {
+            name = name.toLocaleUpperCase();
+            var info = _this.players[name] || { ip: '', ips: [], joins: 0 };
+            if (_this.overview && _this.overview.owner == name) {
+                info.owner = true;
+            }
+            return new player_1.Player(name, info, _this.lists || { adminlist: [], modlist: [], whitelist: [], blacklist: [] });
+        };
+        // Private methods
+        /**
+         * Continually watches chat for new messages and emits events when new messages come in.
+         *
+         * @param message the message to emit events for.
+         */
+        this.messageWatcher = function (message) {
+            var player = _this.getPlayer(message.name || '');
+            switch (message.type) {
+                case chat_1.ChatType.join:
+                    return _this.handleJoin(message.name, message.ip);
+                case chat_1.ChatType.leave:
+                    return _this.onLeave.dispatch(player);
+                case chat_1.ChatType.command:
+                    return _this.onCommand.dispatch({ player: player, command: message.command, args: message.args });
+                case chat_1.ChatType.message:
+                    return _this.onMessage.dispatch({ player: player, message: message.message });
+                case chat_1.ChatType.other:
+                    return _this.onOther.dispatch(message.message);
+            }
+        };
+        /**
+         * Increments a player's joins and saves their IP.
+         *
+         * @param name the player's name
+         * @param ip the player's IP
+         */
+        this.handleJoin = function (name, ip) {
+            if (!name || !ip) {
+                return;
+            }
+            var player = _this.players[name] = _this.players[name] || {
+                ip: ip, ips: [ip], joins: 0
+            };
+            player.joins++;
+            player.ip = ip;
+            if (!player.ips.includes(ip)) {
+                player.ips.push(ip);
+            }
+            _this.storage.set(_this.STORAGE_ID, _this.players);
+            _this.onJoin.dispatch(_this.getPlayer(name));
+        };
         this.storage = storage;
         this.api = api;
         this.players = this.storage.getObject(this.STORAGE_ID, {});
@@ -102,153 +246,6 @@ var World = (function () {
             });
         }); })();
     }
-    //Methods
-    /**
-     * Gets the current admin, mod, white, and black lists. The returned object should not be mutated.
-     *
-     * @return the current server lists.
-     * @example
-     * getLists().then(lists => {
-     *   console.log(Object.keys(lists));
-     * });
-     */
-    World.prototype.getLists = function () {
-        var _this = this;
-        if (this.lists) {
-            return Promise.resolve(this.lists);
-        }
-        return this.api.getLists()
-            .then(function (lists) { return _this.lists = lists; });
-    };
-    /**
-     * Gets the server logs and resolves with an array of the lines. The returned array should not be mutated.
-     *
-     * @param refresh whether or not the logs should be downloaded again.
-     * @return the server logs.
-     * @example
-     * getLogs().then(lines => {
-     *   lines.forEach(line => {
-     *     //something
-     *   });
-     * });
-     */
-    World.prototype.getLogs = function (refresh) {
-        var _this = this;
-        if (refresh === void 0) { refresh = false; }
-        if (this.logs && !refresh) {
-            return Promise.resolve(this.logs);
-        }
-        return this.api.getLogs()
-            .then(function (logs) { return _this.logs = logs; });
-    };
-    /**
-     * Gets an overview of the server info, the returned object should not be mutated.
-     *
-     * @param refresh whether or not to re-fetch the page.
-     * @return the world info.
-     * @example
-     * getOverview().then(console.log);
-     */
-    World.prototype.getOverview = function (refresh) {
-        var _this = this;
-        if (refresh === void 0) { refresh = false; }
-        if (this.overview && !refresh) {
-            return Promise.resolve(this.overview);
-        }
-        var online = this.overview ? this.overview.online : [];
-        return this.api.getOverview().then(function (overview) {
-            overview.online.forEach(function (name) {
-                if (!online.includes(name)) {
-                    online.push(name);
-                }
-            });
-            overview.online = online;
-            return _this.overview = overview;
-        });
-    };
-    /**
-     * Adds a message into the queue of messages to send.
-     *
-     * @param message the message to send.
-     * @example
-     * send('Hello!');
-     */
-    World.prototype.send = function (message) {
-        this.api.send(message);
-    };
-    /**
-     * Gets the names of all players which have joined the server.
-     *
-     * @return an array of names.
-     * @example
-     * world.getPlayerNames().forEach(name => {
-     *   if (world.getPlayer(name).isAdmin()) {
-     *     console.log(name);
-     *   }
-     * });
-     */
-    World.prototype.getPlayerNames = function () {
-        return Object.keys(this.players);
-    };
-    /**
-     * Gets an instance of the Player class for the specified name.
-     *
-     * @param name the player name to get.
-     * @return the player, or a dummy player if they do not exist.
-     * @example
-     * let player = getPlayer('someone');
-     * if (player.hasJoined()) { ... }
-     */
-    World.prototype.getPlayer = function (name) {
-        name = name.toLocaleUpperCase();
-        var info = this.players[name] || { ip: '', ips: [], joins: 0 };
-        if (this.overview && this.overview.owner == name) {
-            info.owner = true;
-        }
-        return new player_1.Player(name, info, this.lists || { adminlist: [], modlist: [], whitelist: [], blacklist: [] });
-    };
-    // Private methods
-    /**
-     * Continually watches chat for new messages and emits events when new messages come in.
-     *
-     * @param message the message to emit events for.
-     */
-    World.prototype.messageWatcher = function (message) {
-        var player = this.getPlayer(message.name || '');
-        switch (message.type) {
-            case chat_1.ChatType.join:
-                return this.handleJoin(message.name, message.ip);
-            case chat_1.ChatType.leave:
-                return this.onLeave.dispatch(player);
-            case chat_1.ChatType.command:
-                return this.onCommand.dispatch({ player: player, command: message.command, args: message.args });
-            case chat_1.ChatType.message:
-                return this.onMessage.dispatch({ player: player, message: message.message });
-            case chat_1.ChatType.other:
-                return this.onOther.dispatch(message.message);
-        }
-    };
-    /**
-     * Increments a player's joins and saves their IP.
-     *
-     * @param name the player's name
-     * @param ip the player's IP
-     */
-    World.prototype.handleJoin = function (name, ip) {
-        if (!name || !ip) {
-            return;
-        }
-        var player = this.players[name] = this.players[name] || {
-            ip: ip, ips: [ip], joins: 0
-        };
-        player.joins++;
-        player.ip = ip;
-        if (!player.ips.includes(ip)) {
-            player.ips.push(ip);
-        }
-        this.storage.set(this.STORAGE_ID, this.players);
-        this.onJoin.dispatch(this.getPlayer(name));
-    };
     return World;
 }());
 exports.World = World;

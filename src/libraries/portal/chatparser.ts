@@ -39,7 +39,7 @@ export class PortalChatParser {
      *
      * @param messages the messages to parse.
      */
-    parse(messages: string[]): ChatMessage[] {
+    parse = (messages: string[]): ChatMessage[] => {
         this.messages = [];
         messages.forEach(message => {
             if (message.startsWith(`${this.name} - Player Connected `)) {
@@ -79,7 +79,7 @@ export class PortalChatParser {
      * @param name the name of the player who is joining.
      * @param ip the ip of the player who is joining.
      */
-    private handleJoin(name: string, ip: string): void {
+    private handleJoin = (name: string, ip: string): void => {
         if (!this.online.includes(name)) {
             this.online.push(name);
         }
@@ -92,7 +92,7 @@ export class PortalChatParser {
      *
      * @param name the name of the player leaving.
      */
-    private handleLeave(name: string): void {
+    private handleLeave = (name: string): void => {
         if (this.online.includes(name)) {
             this.online.splice(this.online.indexOf(name), 1);
             this.messages.push({type: ChatType.leave, name});
@@ -105,7 +105,7 @@ export class PortalChatParser {
      * @param name the name of the player chatting.
      * @param message the message sent.
      */
-    private handleChat(name: string, message: string): void {
+    private handleChat = (name: string, message: string): void => {
         this.messages.push({type: ChatType.message, name, message});
 
         if (message.startsWith('/') && !message.startsWith('/ ')) {
@@ -126,7 +126,7 @@ export class PortalChatParser {
      *
      * @param message the message to extract a username from.
      */
-    private getUsername(message: string): string {
+    private getUsername = (message: string): string => {
         for (let i = 18; i > 4; i--) {
             let possibleName = message.substring(0, message.lastIndexOf(': ', i));
             if (this.online.includes(possibleName) || possibleName == 'SERVER') {

@@ -29,31 +29,31 @@ export declare class PortalChatParser {
      *
      * @param messages the messages to parse.
      */
-    parse(messages: string[]): ChatMessage[];
+    parse: (messages: string[]) => ChatMessage[];
     /**
      * Keeps the online list up to date and emits join events.
      *
      * @param name the name of the player who is joining.
      * @param ip the ip of the player who is joining.
      */
-    private handleJoin(name, ip);
+    private handleJoin;
     /**
      * Keeps the online list up to date and emits leave events.
      *
      * @param name the name of the player leaving.
      */
-    private handleLeave(name);
+    private handleLeave;
     /**
      * Checks the chat type and parses accordingly.
      *
      * @param name the name of the player chatting.
      * @param message the message sent.
      */
-    private handleChat(name, message);
+    private handleChat;
     /**
      * Tries to guess a player's name from chat.
      *
      * @param message the message to extract a username from.
      */
-    private getUsername(message);
+    private getUsername;
 }

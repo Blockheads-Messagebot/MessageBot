@@ -23,65 +23,65 @@ export declare class Player {
      *
      * @return true if the player has joined before, otherwise false.
      */
-    hasJoined(): boolean;
+    hasJoined: () => boolean;
     /**
      * Gets the player's name.
      *
      * @return The name of the player.
      */
-    getName(): string;
+    getName: () => string;
     /**
      * Gets the most recently used IP of the player.
      *
      * @return the player's IP
      */
-    getIP(): string;
+    getIP: () => string;
     /**
      * Gets the all IPs used by the player on the world.
      *
      * @return an array of IPs
      */
-    getIPs(): string[];
+    getIPs: () => string[];
     /**
      * Gets the number of times the player has joined the server.
      *
      * @return how many times the player has joined.
      */
-    getJoins(): number;
+    getJoins: () => number;
     /**
      * Returns true if the player is the owner of the server or is the server.
      *
      * @return true if the player is the owner.
      */
-    isOwner(): boolean;
+    isOwner: () => boolean;
     /**
      * Checks if the player is an admin.
      *
      * @return true if the player is an admin.
      */
-    isAdmin(): boolean;
+    isAdmin: () => boolean;
     /**
      * Checks if the player is a mod without admin permissions.
      *
      * @return true if the player is an admin and not a mod.
      */
-    isMod(): boolean;
+    isMod: () => boolean;
     /**
      * Checks if the player is an admin or a mod.
      *
      * @return true if the player is an admin or a mod.
      */
-    isStaff(): boolean;
+    isStaff: () => boolean;
     /**
      * Checks if the player is whitelisted.
      *
      * @return true if the player can join the server when it is whitelisted.
      */
-    isWhitelisted(): boolean;
+    isWhitelisted: () => boolean;
     /**
      * Checks if the player is banned.
      *
      * @return true if the player is on the blacklist.
      */
-    isBanned(): boolean;
+    isBanned: () => boolean;
 }

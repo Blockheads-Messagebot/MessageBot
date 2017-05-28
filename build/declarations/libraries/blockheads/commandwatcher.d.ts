@@ -21,86 +21,86 @@ export declare class CommandWatcher {
      * @param command the command used
      * @param args any arguments supplied
      */
-    listener({player, command, args}: {
+    listener: ({player, command, args}: {
         player: Player;
         command: string;
         args: string;
-    }): void;
+    }) => void;
     /**
      * Handles /ban and /ban-no-device commands
      *
      * @param player the player sending the message
      * @param target the player to ban
      */
-    private ban(player, target);
+    private ban;
     /**
      * Handles the /unban command.
      *
      * @param player the player sending the command
      * @param target the player to unban.
      */
-    private unban(player, target);
+    private unban;
     /**
      * Handles the /whitelist command.
      *
      * @param player the player sending the command.
      * @param target the player to whitelist.
      */
-    private whitelist(player, target);
+    private whitelist;
     /**
      * Handles the /unwhitelist command.
      *
      * @param player the player sending the command.
      * @param target the player to remove from the whitelist.
      */
-    private unwhitelist(player, target);
+    private unwhitelist;
     /**
      * Handles the /mod command.
      *
      * @param player the player sending the command.
      * @param target the player to mod.
      */
-    private mod(player, target);
+    private mod;
     /**
      * Handles the /unmod command.
      *
      * @param player the player sending the command
      * @param target the player to remove from the modlist.
      */
-    private unmod(player, target);
+    private unmod;
     /**
      * Handles the /admin command.
      *
      * @param player the player sending the command.
      * @param target the player to admin.
      */
-    private admin(player, target);
+    private admin;
     /**
      * Handles the /unadmin command.
      *
      * @param player the player sending the command.
      * @param target the player to remove from the adminlist.
      */
-    private unadmin(player, target);
+    private unadmin;
     /**
      * Handles /clear-list commands.
      *
      * @param list the list to clear.
      * @param player the payer sending the command.
      */
-    private clear(list, player);
+    private clear;
     /**
      * Handles adding a player to a list.
      *
      * @param list the list to add the player to.
      * @param player the player to add to the list.
      */
-    private add(list, player);
+    private add;
     /**
      * Handles removing players from a list.
      *
      * @param list the list to remove the player from.
      * @param player the player to remove.
      */
-    private remove(list, player);
+    private remove;
 }

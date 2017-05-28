@@ -56,7 +56,7 @@ export class MacApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getLists(): Promise<WorldLists> {
+    getLists = (): Promise<WorldLists> => {
         return Promise.all([
             this.readText('adminlist'),
             this.readText('modlist'),
@@ -72,7 +72,7 @@ export class MacApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getOverview(): Promise<WorldOverview> {
+    getOverview = (): Promise<WorldOverview> => {
         let translateWorldSize = (size: number): WorldSizes => {
             switch (size) {
                 case 512 * 1/16:
@@ -123,14 +123,14 @@ export class MacApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getLogs(): Promise<LogEntry[]> {
+    getLogs = (): Promise<LogEntry[]> => {
         return this.readText('logs')
             .then(this.parser.parse);
     }
     /**
      * @inheritdoc
      */
-    send(message: string): void {
+    send = (message: string): void => {
         spawn("osascript", [
             '-l', 'JavaScript',
             __dirname + '/send.scpt',
@@ -144,7 +144,7 @@ export class MacApi implements WorldApi {
      *
      * @param file the file to read
      */
-    private readText(file: string): Promise<string[]> {
+    private readText = (file: string): Promise<string[]> => {
         return new Promise(resolve => {
             fs.readFile(this.path + `/${file}.txt`, 'utf8', (err, data) => {
                 if (err) {

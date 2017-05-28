@@ -33,7 +33,7 @@ export class MacChatParser {
      *
      * @param messages the messages to parse.
      */
-    parse(message: string): ChatMessage[] {
+    parse = (message: string): ChatMessage[] => {
         this.messages = [];
 
         if (message.startsWith(`Player Connected `)) {
@@ -72,7 +72,7 @@ export class MacChatParser {
      * @param name the name of the player who is joining.
      * @param ip the ip of the player who is joining.
      */
-    private handleJoin(name: string, ip: string): void {
+    private handleJoin = (name: string, ip: string): void => {
         if (!this.online.includes(name)) {
             this.online.push(name);
         }
@@ -85,7 +85,7 @@ export class MacChatParser {
      *
      * @param name the name of the player leaving.
      */
-    private handleLeave(name: string): void {
+    private handleLeave = (name: string): void => {
         if (this.online.includes(name)) {
             this.online.splice(this.online.indexOf(name), 1);
             this.messages.push({type: ChatType.leave, name});
@@ -98,7 +98,7 @@ export class MacChatParser {
      * @param name the name of the player chatting.
      * @param message the message sent.
      */
-    private handleChat(name: string, message: string): void {
+    private handleChat = (name: string, message: string): void => {
         if (name == 'SERVER') {
             // Server chat must be ignored to avoid an infinite loop.
             return;
@@ -124,7 +124,7 @@ export class MacChatParser {
      *
      * @param message the message to extract a username from.
      */
-    private getUsername(message: string): string {
+    private getUsername = (message: string): string => {
         for (let i = 18; i > 4; i--) {
             let possibleName = message.substring(0, message.lastIndexOf(': ', i));
             if (this.online.includes(possibleName) || possibleName == 'SERVER') {

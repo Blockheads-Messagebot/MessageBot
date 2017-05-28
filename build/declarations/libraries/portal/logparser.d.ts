@@ -13,7 +13,7 @@ export declare class PortalLogParser {
      *
      * @param lines the raw log lines.
      */
-    parse(lines: string[]): LogEntry[];
-    private isValidLine(line);
-    private addLine(line);
+    parse: (lines: string[]) => LogEntry[];
+    private isValidLine;
+    private addLine;
 }

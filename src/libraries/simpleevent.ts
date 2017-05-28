@@ -9,8 +9,6 @@ export class SimpleEvent<TEvent> {
      */
     constructor() {
         this.listeners = [];
-
-        this.dispatch = this.dispatch.bind(this);
     }
 
     /**
@@ -18,7 +16,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param callback the handler to add.
      */
-    subscribe(callback: (e: TEvent) => void): void {
+    subscribe = (callback: (e: TEvent) => void): void => {
         if (!this.has(callback)) {
             this.listeners.push({cb: callback, once: false});
         }
@@ -30,7 +28,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param callback the handler to add.
      */
-    sub(callback: (e: TEvent) => void): void {
+    sub = (callback: (e: TEvent) => void): void => {
         this.subscribe(callback);
     }
 
@@ -39,7 +37,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param callback the handler to add.
      */
-    once(callback: (e: TEvent) => void): void {
+    once = (callback: (e: TEvent) => void): void => {
         if (!this.has(callback)) {
             this.listeners.push({cb: callback, once: true});
         }
@@ -50,7 +48,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param callback the callback to remove as a handler.
      */
-    unsubscribe(callback: (e: TEvent) => void): void {
+    unsubscribe = (callback: (e: TEvent) => void): void => {
         for (let i = 0; i < this.listeners.length; i++) {
             if (this.listeners[i].cb == callback) {
                 this.listeners.splice(i, 1);
@@ -64,7 +62,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param callback the callback to remove as a handler.
      */
-    unsub(callback: (e: TEvent) => void): void {
+    unsub = (callback: (e: TEvent) => void): void => {
         this.unsubscribe(callback);
     }
 
@@ -73,7 +71,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param event the arguments to be passed to the handlers.
      */
-    dispatch(event: TEvent): void {
+    dispatch = (event: TEvent): void => {
         let len = this.listeners.length;
         for (let i = 0; i < len; i++) {
             if (this.listeners[i].once) {
@@ -98,7 +96,7 @@ export class SimpleEvent<TEvent> {
      *
      * @param callback the handler which may be attached to the event.
      */
-    has(callback: (e: TEvent) => void): boolean {
+    has = (callback: (e: TEvent) => void): boolean => {
         return this.listeners.some(({cb}) => cb == callback);
     }
 }

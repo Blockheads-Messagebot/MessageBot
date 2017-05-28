@@ -60,7 +60,7 @@ export class TabManager {
      * @param groupName the tab group to add the tab to, if omitted the tab will be added to the root navigation.
      * @return the div which the tab content should be placed in.
      */
-    addTab(text: string, groupName?: string): HTMLDivElement {
+    addTab = (text: string, groupName?: string): HTMLDivElement => {
         let tabName = 'tab_' + this.tabUID++;
 
         let tab = document.createElement('span');
@@ -91,7 +91,7 @@ export class TabManager {
      *
      * @param content the tab which should be removed.
      */
-    removeTab(content: HTMLDivElement): boolean {
+    removeTab = (content: HTMLDivElement): boolean => {
         let nav = this.navigationRoot.querySelector(`.nav-item[data-tab-name=${content.dataset.tabName}]`);
         if (nav) {
             nav.remove();
@@ -108,7 +108,7 @@ export class TabManager {
      * @param groupName the name of the group to create or update
      * @param parent the parent of this group, if not provided the group will be added to the root of the navigation tree.
      */
-    addTabGroup(text: string, groupName: string, parent?: string): void {
+    addTabGroup = (text: string, groupName: string, parent?: string): void => {
         if (this.navigationRoot.querySelector(`[data-tab-group="${groupName}"]`)) {
             throw new Error('Group already exists.');
         }
@@ -140,7 +140,7 @@ export class TabManager {
      * @param groupName the group to remove.
      * @return boolean true if the group existed and was removed, otherwise false.
      */
-    removeTabGroup(groupName: string): boolean {
+    removeTabGroup = (groupName: string): boolean => {
         let group = this.navigationRoot.querySelector(`[data-tab-group="${groupName}"]`);
 
         if (!group) {

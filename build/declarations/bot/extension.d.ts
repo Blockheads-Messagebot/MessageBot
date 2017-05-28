@@ -52,5 +52,5 @@ export declare class MessageBotExtension {
      * @param key the export name
      * @param prop the property to export
      */
-    export<T>(key: string, prop: T): T;
+    export: <T>(key: string, prop: T) => T;
 }

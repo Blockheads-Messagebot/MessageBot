@@ -34,9 +34,9 @@ abstract class MessagesTab<T> {
     protected root: HTMLDivElement;
     protected template: HTMLTemplateElement;
 
-    abstract getStorageID(): string;
-    abstract addMessage(message?: Partial<T>): void;
-    abstract insertHTML(): void;
+    abstract getStorageID: () => string;
+    abstract addMessage: (message?: Partial<T>) => void;
+    abstract insertHTML: () => void;
 
     constructor({name, ui, ex}: {name: string, ui: UIExtensionExports, ex: MessageBotExtension}) {
         this.ui = ui;
@@ -82,15 +82,15 @@ abstract class MessagesTab<T> {
         });
     }
 
-    remove() {
+    remove = () => {
         this.ui.removeTab(this.tab);
     }
 
-    save() {
+    save = () => {
         this.ex.world.storage.set(this.getStorageID(), this.getMessages());
     }
 
-    getMessages(): {[key: string]: string | number}[] {
+    getMessages = (): {[key: string]: string | number}[] => {
         let messages: {[key: string]: string | number}[] = [];
 
         Array.from(this.root.children).forEach(element => {
@@ -121,15 +121,15 @@ class JoinTab extends MessagesTab<JoinMessageConfig> {
         super({name: 'Join', ui, ex});
     }
 
-    insertHTML() {
+    insertHTML = () => {
         this.tab.innerHTML = fs.readFileSync(__dirname + '/join.html', 'utf8');
     }
 
-    getStorageID() {
+    getStorageID = () => {
         return 'joinArr';
     }
 
-    addMessage(msg: Partial<JoinMessageConfig> = {}) {
+    addMessage = (msg: Partial<JoinMessageConfig> = {}) => {
         this.ui.buildTemplate(this.template, this.root, [
             { selector: '[data-target=message]', text: msg.message || '' },
             { selector: '[data-target=joins_low]', value: msg.joins_low || 0 },
@@ -145,15 +145,15 @@ class LeaveTab extends MessagesTab<LeaveMessageConfig> {
         super({name: 'Leave', ui, ex});
     }
 
-    insertHTML() {
+    insertHTML = () => {
         this.tab.innerHTML = fs.readFileSync(__dirname + '/leave.html', 'utf8');
     }
 
-    getStorageID() {
+    getStorageID = () => {
         return 'leaveArr';
     }
 
-    addMessage(msg: Partial<LeaveMessageConfig> = {}) {
+    addMessage = (msg: Partial<LeaveMessageConfig> = {}) => {
         this.ui.buildTemplate(this.template, this.root, [
             { selector: '[data-target=message]', text: msg.message || '' },
             { selector: '[data-target=joins_low]', value: msg.joins_low || 0 },
@@ -169,15 +169,15 @@ class TriggerTab extends MessagesTab<TriggerMessageConfig> {
         super({name: 'Trigger', ui, ex});
     }
 
-    insertHTML() {
+    insertHTML = () => {
         this.tab.innerHTML = fs.readFileSync(__dirname + '/trigger.html', 'utf8');
     }
 
-    getStorageID() {
+    getStorageID = () => {
         return 'triggerArr';
     }
 
-    addMessage(msg: Partial<TriggerMessageConfig> = {}) {
+    addMessage = (msg: Partial<TriggerMessageConfig> = {}) => {
         this.ui.buildTemplate(this.template, this.root, [
             { selector: '[data-target=message]', text: msg.message || '' },
             { selector: '[data-target=trigger]', value: msg.trigger || ''},
@@ -194,15 +194,15 @@ class AnnouncementTab extends MessagesTab<AnnouncementMessageConfig> {
         super({name: 'Announcements', ui, ex});
     }
 
-    insertHTML() {
+    insertHTML = () => {
         this.tab.innerHTML = fs.readFileSync(__dirname + '/announcements.html', 'utf8');
     }
 
-    getStorageID() {
+    getStorageID = () => {
         return 'announcementArr';
     }
 
-    addMessage(msg: Partial<TriggerMessageConfig> = {}) {
+    addMessage = (msg: Partial<TriggerMessageConfig> = {}) => {
         this.ui.buildTemplate(this.template, this.root, [
             { selector: '[data-target=message]', text: msg.message || '' },
         ]);

@@ -31,6 +31,107 @@ var MacApi = (function () {
      * @param path the path to the world save folder.
      */
     function MacApi(path) {
+        var _this = this;
+        /**
+         * @inheritdoc
+         */
+        this.getLists = function () {
+            return Promise.all([
+                _this.readText('adminlist'),
+                _this.readText('modlist'),
+                _this.readText('blacklist'),
+                _this.readText('whitelist'),
+            ])
+                .then(function (lists) { return lists.map(function (list) { return list.splice(2); }); }) //remove instructions
+                .then(function (_a) {
+                var _b = __read(_a, 4), adminlist = _b[0], modlist = _b[1], blacklist = _b[2], whitelist = _b[3];
+                return { adminlist: adminlist, modlist: modlist, blacklist: blacklist, whitelist: whitelist };
+            });
+        };
+        /**
+         * @inheritdoc
+         */
+        this.getOverview = function () {
+            var translateWorldSize = function (size) {
+                switch (size) {
+                    case 512 * 1 / 16:
+                        return '1/16x';
+                    case 512 * 1 / 4:
+                        return '1/4x';
+                    case 512 * 1:
+                        return '1x';
+                    case 512 * 4:
+                        return '4x';
+                    case 512 * 16:
+                        return '16x';
+                    default:
+                        return '1x';
+                }
+            };
+            return Promise.all([
+                _this.readText('whitelist'),
+                new Promise(function (resolve) {
+                    request.get('https://api.ipify.org?format=json', {}, function (_err, _req, body) {
+                        try {
+                            var ip = JSON.parse(body).ip;
+                            resolve(ip ? ip : '0.0.0.0');
+                        }
+                        catch (e) {
+                            resolve('0.0.0.0');
+                        }
+                    });
+                })
+            ]).then(function (_a) {
+                var _b = __read(_a, 2), whitelist = _b[0], ip = _b[1];
+                return {
+                    name: _this.worldv2.worldName,
+                    owner: 'SERVER',
+                    created: _this.worldv2.creationDate,
+                    last_activity: _this.worldv2.saveDate,
+                    credit_until: new Date('12/30/9999'),
+                    link: "http://theblockheads.net/join.php?ip=" + ip + "&port=" + _this.worldv2.hostPort + "&name=" + _this.worldv2.worldName,
+                    pvp: !_this.worldv2.pvpDisabled,
+                    privacy: 'private',
+                    size: translateWorldSize(_this.worldv2.worldSize),
+                    password: false,
+                    whitelist: !whitelist.length,
+                    online: [],
+                };
+            });
+        };
+        /**
+         * @inheritdoc
+         */
+        this.getLogs = function () {
+            return _this.readText('logs')
+                .then(_this.parser.parse);
+        };
+        /**
+         * @inheritdoc
+         */
+        this.send = function (message) {
+            child_process_1.spawn("osascript", [
+                '-l', 'JavaScript',
+                __dirname + '/send.scpt',
+                _this.worldv2.worldName,
+                message
+            ]);
+        };
+        /**
+         * Gets the specified list for the world.
+         *
+         * @param file the file to read
+         */
+        this.readText = function (file) {
+            return new Promise(function (resolve) {
+                fs.readFile(_this.path + ("/" + file + ".txt"), 'utf8', function (err, data) {
+                    if (err) {
+                        resolve([]);
+                    }
+                    resolve(data.split('\n'));
+                });
+            });
+        };
         // Strip trailing slash if present
         this.path = path.replace(/\/$/, '');
         if ([
@@ -46,108 +147,6 @@ var MacApi = (function () {
         }
         this.parser = new logparser_1.MacLogParser(this.worldv2.worldName);
     }
-    /**
-     * @inheritdoc
-     */
-    MacApi.prototype.getLists = function () {
-        return Promise.all([
-            this.readText('adminlist'),
-            this.readText('modlist'),
-            this.readText('blacklist'),
-            this.readText('whitelist'),
-        ])
-            .then(function (lists) { return lists.map(function (list) { return list.splice(2); }); }) //remove instructions
-            .then(function (_a) {
-            var _b = __read(_a, 4), adminlist = _b[0], modlist = _b[1], blacklist = _b[2], whitelist = _b[3];
-            return { adminlist: adminlist, modlist: modlist, blacklist: blacklist, whitelist: whitelist };
-        });
-    };
-    /**
-     * @inheritdoc
-     */
-    MacApi.prototype.getOverview = function () {
-        var _this = this;
-        var translateWorldSize = function (size) {
-            switch (size) {
-                case 512 * 1 / 16:
-                    return '1/16x';
-                case 512 * 1 / 4:
-                    return '1/4x';
-                case 512 * 1:
-                    return '1x';
-                case 512 * 4:
-                    return '4x';
-                case 512 * 16:
-                    return '16x';
-                default:
-                    return '1x';
-            }
-        };
-        return Promise.all([
-            this.readText('whitelist'),
-            new Promise(function (resolve) {
-                request.get('https://api.ipify.org?format=json', {}, function (_err, _req, body) {
-                    try {
-                        var ip = JSON.parse(body).ip;
-                        resolve(ip ? ip : '0.0.0.0');
-                    }
-                    catch (e) {
-                        resolve('0.0.0.0');
-                    }
-                });
-            })
-        ]).then(function (_a) {
-            var _b = __read(_a, 2), whitelist = _b[0], ip = _b[1];
-            return {
-                name: _this.worldv2.worldName,
-                owner: 'SERVER',
-                created: _this.worldv2.creationDate,
-                last_activity: _this.worldv2.saveDate,
-                credit_until: new Date('12/30/9999'),
-                link: "http://theblockheads.net/join.php?ip=" + ip + "&port=" + _this.worldv2.hostPort + "&name=" + _this.worldv2.worldName,
-                pvp: !_this.worldv2.pvpDisabled,
-                privacy: 'private',
-                size: translateWorldSize(_this.worldv2.worldSize),
-                password: false,
-                whitelist: !whitelist.length,
-                online: [],
-            };
-        });
-    };
-    /**
-     * @inheritdoc
-     */
-    MacApi.prototype.getLogs = function () {
-        return this.readText('logs')
-            .then(this.parser.parse);
-    };
-    /**
-     * @inheritdoc
-     */
-    MacApi.prototype.send = function (message) {
-        child_process_1.spawn("osascript", [
-            '-l', 'JavaScript',
-            __dirname + '/send.scpt',
-            this.worldv2.worldName,
-            message
-        ]);
-    };
-    /**
-     * Gets the specified list for the world.
-     *
-     * @param file the file to read
-     */
-    MacApi.prototype.readText = function (file) {
-        var _this = this;
-        return new Promise(function (resolve) {
-            fs.readFile(_this.path + ("/" + file + ".txt"), 'utf8', function (err, data) {
-                if (err) {
-                    resolve([]);
-                }
-                resolve(data.split('\n'));
-            });
-        });
-    };
     return MacApi;
 }());
 exports.MacApi = MacApi;

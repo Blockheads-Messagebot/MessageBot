@@ -98,7 +98,7 @@ export class World {
      *   console.log(Object.keys(lists));
      * });
      */
-    getLists(): Promise<WorldLists> {
+    getLists = (): Promise<WorldLists> => {
         if (this.lists) {
             return Promise.resolve(this.lists);
         }
@@ -119,7 +119,7 @@ export class World {
      *   });
      * });
      */
-    getLogs(refresh = false): Promise<LogEntry[]> {
+    getLogs = (refresh = false): Promise<LogEntry[]> => {
         if (this.logs && !refresh) {
             return Promise.resolve(this.logs);
         }
@@ -136,7 +136,7 @@ export class World {
      * @example
      * getOverview().then(console.log);
      */
-    getOverview(refresh = false): Promise<WorldOverview> {
+    getOverview = (refresh = false): Promise<WorldOverview> => {
         if (this.overview && !refresh) {
             return Promise.resolve(this.overview);
         }
@@ -163,7 +163,7 @@ export class World {
      * @example
      * send('Hello!');
      */
-    send(message: string): void {
+    send = (message: string): void => {
         this.api.send(message);
     }
 
@@ -178,7 +178,7 @@ export class World {
      *   }
      * });
      */
-    getPlayerNames(): string[] {
+    getPlayerNames = (): string[] => {
         return Object.keys(this.players);
     }
 
@@ -191,7 +191,7 @@ export class World {
      * let player = getPlayer('someone');
      * if (player.hasJoined()) { ... }
      */
-    getPlayer(name: string): Player {
+    getPlayer = (name: string): Player => {
         name = name.toLocaleUpperCase();
         let info = this.players[name] || {ip: '', ips: [], joins: 0};
 
@@ -209,7 +209,7 @@ export class World {
      *
      * @param message the message to emit events for.
      */
-    private messageWatcher(message: ChatMessage) {
+    private messageWatcher = (message: ChatMessage) => {
         let player = this.getPlayer(message.name || '');
         switch (message.type) {
             case ChatType.join:
@@ -231,7 +231,7 @@ export class World {
      * @param name the player's name
      * @param ip the player's IP
      */
-    private handleJoin(name: string | undefined, ip: string | undefined) {
+    private handleJoin = (name: string | undefined, ip: string | undefined) => {
         if (!name || !ip) {
             return;
         }

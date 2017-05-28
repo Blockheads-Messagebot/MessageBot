@@ -27,7 +27,7 @@ export class Settings {
      * @param key the setting name
      * @param fallback what to return if the key wasn't found or was the wrong type.
      */
-    get<T extends string | number | boolean>(key: string, fallback: T): T {
+    get = <T extends string | number | boolean>(key: string, fallback: T): T => {
         let items = this.storage.getObject(this.STORAGE_ID, {}) as {[key: string]: T};
 
         if (typeof fallback == typeof items[this._prefix + key]) {
@@ -42,7 +42,7 @@ export class Settings {
      * @param key the setting name to save
      * @param pref what to save.
      */
-    set(key: string, pref: string | number | boolean) {
+    set = (key: string, pref: string | number | boolean) => {
         let items = this.storage.getObject(this.STORAGE_ID, {}) as {[key: string]: string | number | boolean};
 
         items[this._prefix + key] = pref;
@@ -54,7 +54,7 @@ export class Settings {
      *
      * @param key the setting name to remove.
      */
-    remove(key: string) {
+    remove = (key: string) => {
         let items = this.storage.getObject(this.STORAGE_ID, {}) as {[key: string]: string | number | boolean};
 
         delete items[this._prefix + key];
@@ -64,7 +64,7 @@ export class Settings {
     /**
      * Removes all settings under a prefix, if set, or all settings.
      */
-    removeAll() {
+    removeAll = () => {
         let items = this.storage.getObject(this.STORAGE_ID, {}) as {[key: string]: string | number | boolean};
 
         Object.keys(items).forEach(key => {
@@ -80,7 +80,7 @@ export class Settings {
      *
      * @param prefix the prefix to save settings with.
      */
-    prefix(prefix: string): Settings {
+    prefix = (prefix: string): Settings => {
         return new Settings(this.storage, `${this._prefix}/${prefix}`);
     }
 }

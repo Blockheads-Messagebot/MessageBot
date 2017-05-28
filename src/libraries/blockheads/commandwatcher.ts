@@ -17,8 +17,6 @@ export class CommandWatcher {
     constructor(lists: WorldLists, getPlayer: (name: string) => Player) {
         this.lists = lists;
         this.getPlayer = getPlayer;
-
-        this.listener = this.listener.bind(this);
     }
 
     /**
@@ -30,7 +28,7 @@ export class CommandWatcher {
      * @param args any arguments supplied
      */
     //tslint:disable-next-line:cyclomatic-complexity
-    listener({player, command, args}: {player: Player, command: string, args: string}) {
+    listener = ({player, command, args}: {player: Player, command: string, args: string}) => {
         let target = this.getPlayer(args);
 
         switch (command.toLocaleLowerCase()) {
@@ -74,7 +72,7 @@ export class CommandWatcher {
      * @param player the player sending the message
      * @param target the player to ban
      */
-    private ban(player: Player, target: Player) {
+    private ban = (player: Player, target: Player) => {
         if (player.isStaff()) {
             if (player.isMod() && target.isStaff()) {
                 return;
@@ -95,7 +93,7 @@ export class CommandWatcher {
      * @param player the player sending the command
      * @param target the player to unban.
      */
-    private unban(player: Player, target: Player) {
+    private unban = (player: Player, target: Player) => {
         if (player.isStaff()) {
             this.remove('blacklist', target);
         }
@@ -107,7 +105,7 @@ export class CommandWatcher {
      * @param player the player sending the command.
      * @param target the player to whitelist.
      */
-    private whitelist(player: Player, target: Player) {
+    private whitelist = (player: Player, target: Player) => {
         if (player.isStaff()) {
             this.add('whitelist', target);
             this.remove('blacklist', target);
@@ -120,7 +118,7 @@ export class CommandWatcher {
      * @param player the player sending the command.
      * @param target the player to remove from the whitelist.
      */
-    private unwhitelist(player: Player, target: Player) {
+    private unwhitelist = (player: Player, target: Player) => {
         if (player.isStaff()) {
             this.remove('whitelist', target);
         }
@@ -132,7 +130,7 @@ export class CommandWatcher {
      * @param player the player sending the command.
      * @param target the player to mod.
      */
-    private mod(player: Player, target: Player) {
+    private mod = (player: Player, target: Player) => {
         if (player.isAdmin()) {
             this.add('modlist', target);
             this.remove('blacklist', target);
@@ -145,7 +143,7 @@ export class CommandWatcher {
      * @param player the player sending the command
      * @param target the player to remove from the modlist.
      */
-    private unmod(player: Player, target: Player) {
+    private unmod = (player: Player, target: Player) => {
         if (player.isAdmin()) {
             this.remove('modlist', target);
         }
@@ -157,7 +155,7 @@ export class CommandWatcher {
      * @param player the player sending the command.
      * @param target the player to admin.
      */
-    private admin(player: Player, target: Player) {
+    private admin = (player: Player, target: Player) => {
         if (player.isAdmin()) {
             this.add('adminlist', target);
             this.remove('blacklist', target);
@@ -170,7 +168,7 @@ export class CommandWatcher {
      * @param player the player sending the command.
      * @param target the player to remove from the adminlist.
      */
-    private unadmin(player: Player, target: Player) {
+    private unadmin = (player: Player, target: Player) => {
         if (player.isAdmin() && !target.isOwner()) {
             this.remove('adminlist', target);
         }
@@ -182,7 +180,7 @@ export class CommandWatcher {
      * @param list the list to clear.
      * @param player the payer sending the command.
      */
-    private clear(list: keyof WorldLists, player: Player) {
+    private clear = (list: keyof WorldLists, player: Player) => {
         if (player.isAdmin()) {
             this.lists[list].length = 0;
         }
@@ -194,7 +192,7 @@ export class CommandWatcher {
      * @param list the list to add the player to.
      * @param player the player to add to the list.
      */
-    private add(list: keyof WorldLists, player: Player) {
+    private add = (list: keyof WorldLists, player: Player) => {
         if (!this.lists[list].includes(player.getName())) {
             this.lists[list].push(player.getName());
         }
@@ -206,7 +204,7 @@ export class CommandWatcher {
      * @param list the list to remove the player from.
      * @param player the player to remove.
      */
-    private remove(list: keyof WorldLists, player: Player) {
+    private remove = (list: keyof WorldLists, player: Player) => {
         if (this.lists[list].includes(player.getName())) {
             this.lists[list].splice(this.lists[list].indexOf(player.getName()), 1);
         }

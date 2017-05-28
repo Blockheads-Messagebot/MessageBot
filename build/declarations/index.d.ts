@@ -1,6 +1,16 @@
-import { MessageBot } from './bot';
+import { World } from './libraries/blockheads/world';
+import { Storage } from './libraries/storage';
+import { MessageBot, MessageBotExtension } from './bot';
 import { SimpleEvent } from './libraries/simpleevent';
-export { MessageBot, SimpleEvent };
+export { Ajax } from './libraries/ajax';
+export { MessageBot, MessageBotExtension };
+export { Player } from './libraries/blockheads/player';
+export { Settings } from './bot';
+export { SimpleEvent };
+export { Storage };
+export { World };
+export { UIExtensionExports } from './extensions/ui';
+export { ConsoleExtensionExports } from './extensions/console';
 import './extensions/ui';
 import './extensions/console/browser';
 import './extensions/messages';

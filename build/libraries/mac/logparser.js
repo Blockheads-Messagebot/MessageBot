@@ -10,44 +10,45 @@ var MacLogParser = (function () {
      * @param name the name of the world.
      */
     function MacLogParser(name) {
+        var _this = this;
+        /**
+         * Parses the logs into a standard format.
+         *
+         * @param lines {string[]} the raw log lines.
+         */
+        this.parse = function (lines) {
+            // Copy the lines array
+            lines = lines.slice(0);
+            // Assume first line is valid, if it isn't it will be dropped.
+            for (var i = lines.length - 1; i > 0; i--) {
+                var line = lines[i];
+                if (!_this.isValidLine(line)) {
+                    lines[i - 1] += '\n' + lines.splice(i, 1);
+                    continue;
+                }
+                _this.addLine(line);
+            }
+            if (_this.isValidLine(lines[0])) {
+                _this.addLine(lines[0]);
+            }
+            var entries = _this.entries.reverse();
+            _this.entries = [];
+            return entries;
+        };
+        this.isValidLine = function (line) {
+            return /^\w\w\w (?:\d| )\d \d\d\d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
+        };
+        this.addLine = function (line) {
+            var ts = line.substr(0, 20);
+            _this.entries.push({
+                raw: line,
+                timestamp: new Date(ts),
+                message: line.substr(line.indexOf(']') + 6 + _this.name.length)
+            });
+        };
         this.name = name;
         this.entries = [];
     }
-    /**
-     * Parses the logs into a standard format.
-     *
-     * @param lines {string[]} the raw log lines.
-     */
-    MacLogParser.prototype.parse = function (lines) {
-        // Copy the lines array
-        lines = lines.slice(0);
-        // Assume first line is valid, if it isn't it will be dropped.
-        for (var i = lines.length - 1; i > 0; i--) {
-            var line = lines[i];
-            if (!this.isValidLine(line)) {
-                lines[i - 1] += '\n' + lines.splice(i, 1);
-                continue;
-            }
-            this.addLine(line);
-        }
-        if (this.isValidLine(lines[0])) {
-            this.addLine(lines[0]);
-        }
-        var entries = this.entries.reverse();
-        this.entries = [];
-        return entries;
-    };
-    MacLogParser.prototype.isValidLine = function (line) {
-        return /^\w\w\w (?:\d| )\d \d\d\d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
-    };
-    MacLogParser.prototype.addLine = function (line) {
-        var ts = line.substr(0, 20);
-        this.entries.push({
-            raw: line,
-            timestamp: new Date(ts),
-            message: line.substr(line.indexOf(']') + 6 + this.name.length)
-        });
-    };
     return MacLogParser;
 }());
 exports.MacLogParser = MacLogParser;

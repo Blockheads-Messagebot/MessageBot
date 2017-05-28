@@ -1,19 +1,31 @@
 import {PortalChatWatcher} from './libraries/portal/chatwatcher';
 import {PortalApi} from './libraries/portal/api';
+
 import {World} from './libraries/blockheads/world';
 import {Storage} from './libraries/storage';
-
-import {MessageBot} from './bot';
-(global as any).MessageBot = MessageBot;
-
+import {MessageBot, MessageBotExtension} from './bot';
 import {SimpleEvent} from './libraries/simpleevent';
-(global as any).SimpleEvent = SimpleEvent;
 
-// Needed for nice typings
-export {MessageBot, SimpleEvent};
+// Global exports
+[
+    ['global', global],
+    ['World', World],
+    ['Storage', Storage],
+    ['MessageBot', MessageBot],
+    ['SimpleEvent', SimpleEvent],
+].forEach(([key, item]: [string, any]) => (global as any)[key] = item);
 
-// Alias global to window for browser extensions
-(global as any).global = global;
+// For typings
+export {Ajax} from './libraries/ajax';
+export {MessageBot, MessageBotExtension};
+export {Player} from './libraries/blockheads/player';
+export {Settings} from './bot';
+export {SimpleEvent};
+export {Storage};
+export {World};
+
+export {UIExtensionExports} from './extensions/ui';
+export {ConsoleExtensionExports} from './extensions/console';
 
 declare var worldId: number;
 

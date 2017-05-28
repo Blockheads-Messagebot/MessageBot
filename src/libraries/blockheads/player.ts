@@ -25,7 +25,7 @@ export class Player {
      *
      * @return true if the player has joined before, otherwise false.
      */
-    hasJoined(): boolean {
+    hasJoined = (): boolean => {
         return this.info.joins > 0;
     }
 
@@ -34,7 +34,7 @@ export class Player {
      *
      * @return The name of the player.
      */
-    getName(): string {
+    getName = (): string => {
         return this.name;
     }
 
@@ -43,7 +43,7 @@ export class Player {
      *
      * @return the player's IP
      */
-    getIP(): string {
+    getIP = (): string => {
         return this.info.ip;
     }
 
@@ -52,7 +52,7 @@ export class Player {
      *
      * @return an array of IPs
      */
-    getIPs(): string[] {
+    getIPs = (): string[] => {
         return this.info.ips.slice(0);
     }
 
@@ -61,7 +61,7 @@ export class Player {
      *
      * @return how many times the player has joined.
      */
-    getJoins(): number {
+    getJoins = (): number => {
         return this.info.joins;
     }
 
@@ -70,7 +70,7 @@ export class Player {
      *
      * @return true if the player is the owner.
      */
-    isOwner(): boolean {
+    isOwner = (): boolean => {
         return !!this.info.owner || this.name == 'SERVER';
     }
 
@@ -79,7 +79,7 @@ export class Player {
      *
      * @return true if the player is an admin.
      */
-    isAdmin(): boolean {
+    isAdmin = (): boolean => {
         return this.lists.adminlist.includes(this.name) || this.isOwner();
     }
 
@@ -88,7 +88,7 @@ export class Player {
      *
      * @return true if the player is an admin and not a mod.
      */
-    isMod(): boolean {
+    isMod = (): boolean => {
         return this.lists.modlist.includes(this.name) && !this.isAdmin();
     }
 
@@ -97,7 +97,7 @@ export class Player {
      *
      * @return true if the player is an admin or a mod.
      */
-    isStaff(): boolean {
+    isStaff = (): boolean => {
         return this.isAdmin() || this.isMod();
     }
 
@@ -106,7 +106,7 @@ export class Player {
      *
      * @return true if the player can join the server when it is whitelisted.
      */
-    isWhitelisted(): boolean {
+    isWhitelisted = (): boolean => {
         return this.lists.whitelist.includes(this.name) || this.isStaff();
     }
 
@@ -115,7 +115,7 @@ export class Player {
      *
      * @return true if the player is on the blacklist.
      */
-    isBanned(): boolean {
+    isBanned = (): boolean => {
         return this.lists.blacklist.includes(this.name);
     }
 }

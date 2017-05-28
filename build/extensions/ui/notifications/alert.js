@@ -64,6 +64,7 @@ function alert(html, buttons, callback) {
     modal.classList.add('is-active');
 }
 exports.alert = alert;
+/** @hidden */
 function prompt(text, callback) {
     var p = document.createElement('p');
     p.textContent = text;

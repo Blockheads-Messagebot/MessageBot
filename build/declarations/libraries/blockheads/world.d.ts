@@ -62,7 +62,7 @@ export declare class World {
      *   console.log(Object.keys(lists));
      * });
      */
-    getLists(): Promise<WorldLists>;
+    getLists: () => Promise<WorldLists>;
     /**
      * Gets the server logs and resolves with an array of the lines. The returned array should not be mutated.
      *
@@ -75,7 +75,7 @@ export declare class World {
      *   });
      * });
      */
-    getLogs(refresh?: boolean): Promise<LogEntry[]>;
+    getLogs: (refresh?: boolean) => Promise<LogEntry[]>;
     /**
      * Gets an overview of the server info, the returned object should not be mutated.
      *
@@ -84,7 +84,7 @@ export declare class World {
      * @example
      * getOverview().then(console.log);
      */
-    getOverview(refresh?: boolean): Promise<WorldOverview>;
+    getOverview: (refresh?: boolean) => Promise<WorldOverview>;
     /**
      * Adds a message into the queue of messages to send.
      *
@@ -92,7 +92,7 @@ export declare class World {
      * @example
      * send('Hello!');
      */
-    send(message: string): void;
+    send: (message: string) => void;
     /**
      * Gets the names of all players which have joined the server.
      *
@@ -104,7 +104,7 @@ export declare class World {
      *   }
      * });
      */
-    getPlayerNames(): string[];
+    getPlayerNames: () => string[];
     /**
      * Gets an instance of the Player class for the specified name.
      *
@@ -114,18 +114,18 @@ export declare class World {
      * let player = getPlayer('someone');
      * if (player.hasJoined()) { ... }
      */
-    getPlayer(name: string): Player;
+    getPlayer: (name: string) => Player;
     /**
      * Continually watches chat for new messages and emits events when new messages come in.
      *
      * @param message the message to emit events for.
      */
-    private messageWatcher(message);
+    private messageWatcher;
     /**
      * Increments a player's joins and saves their IP.
      *
      * @param name the player's name
      * @param ip the player's IP
      */
-    private handleJoin(name, ip);
+    private handleJoin;
 }

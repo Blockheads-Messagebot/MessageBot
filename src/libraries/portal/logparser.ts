@@ -19,7 +19,7 @@ export class PortalLogParser {
      *
      * @param lines the raw log lines.
      */
-    parse(lines: string[]): LogEntry[] {
+    parse = (lines: string[]): LogEntry[] => {
         // Copy the lines array
         lines = lines.slice(0);
 
@@ -45,11 +45,11 @@ export class PortalLogParser {
         return entries;
     }
 
-    private isValidLine(line: string): boolean {
+    private isValidLine = (line: string): boolean => {
         return /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d blockheads_server/.test(line);
     }
 
-    private addLine(line: string): void {
+    private addLine = (line: string): void => {
         let ts = line.substr(0, 24)
             .replace(' ', 'T')
             .replace(' ', 'Z');

@@ -26,6 +26,97 @@ var MessageBot = (function () {
      * @param world the world to use for sending messages.
      */
     function MessageBot(world) {
+        var _this = this;
+        /**
+         * Loads an extension into this bot.
+         *
+         * @param id the extension to load
+         */
+        this.registerExtension = function (id) {
+            if (_this.extensions.has(id)) {
+                return;
+            }
+            var creator = extensions.get(id);
+            if (creator) {
+                try {
+                    var ex = new extension_1.MessageBotExtension(_this);
+                    ex.settings = _this.settings.prefix(id);
+                    _this.extensions.set(id, ex);
+                    creator.call(ex, ex, ex.world);
+                }
+                catch (err) {
+                    console.log('Error creating extension:', err);
+                }
+            }
+        };
+        /**
+         * Removes an extension from this bot
+         *
+         * @param id the extension to remove.
+         */
+        this.deregisterExtension = function (id) {
+            var ex = _this.extensions.get(id);
+            if (!ex) {
+                return;
+            }
+            try {
+                ex.uninstall();
+            }
+            catch (err) {
+                console.log('Error uninstalling:', err);
+            }
+            finally {
+                _this.extensions.delete(id);
+            }
+        };
+        /**
+         * Gets an extension's exports, if it has been registered. Otherwise returns undefined.
+         *
+         * @param extensionId the id of the extension to get the exports for.
+         */
+        this.getExports = function (extensionId) {
+            var ex = _this.extensions.get(extensionId);
+            if (ex) {
+                return ex.exports;
+            }
+        };
+        /**
+         * Sends a message to the world for this bot, should usually be used in place of world.send.
+         *
+         * @param message the message to send
+         * @param params any variables to inject into the message. If `name` is provided, it will be available through {{NAME}}, {{Name}} and {{name}}
+         */
+        this.send = function (message, params) {
+            if (params === void 0) { params = {}; }
+            var messages;
+            // Split the message if splitting is enabled.
+            if (_this.settings.get('splitMessages', false)) {
+                messages = message.split(_this.settings.get('splitToken', '<split>'));
+            }
+            else {
+                messages = [message];
+            }
+            // Common enough to be done here, set the name of the player up right.
+            if (params['name'] && params['name'].length) {
+                var player = params['name'];
+                params['name'] = player.toLocaleLowerCase();
+                params['Name'] = player[0].toLocaleUpperCase() + player.substr(1).toLocaleLowerCase();
+                params['NAME'] = player.toLocaleUpperCase();
+            }
+            // Loop through messages, replacing variables, then send the message
+            messages.forEach(function (msg) {
+                Object.keys(params).forEach(function (key) {
+                    // Escape RegExp special characters in key
+                    var safeKey = key.replace(/([.+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+                    msg = msg.replace(new RegExp("{{" + safeKey + "}}", 'g'), params[key]);
+                });
+                // Allow {{ip}} if {{name}} exists and the message is "private"
+                if (msg.startsWith('/') && params['name']) {
+                    msg = msg.replace(/{{ip}}/gi, _this.world.getPlayer(params['name']).getIP());
+                }
+                _this.world.send(msg);
+            });
+        };
         this.world = world;
         this.settings = new settings_1.Settings(world.storage);
         this.extensions = new Map();
@@ -72,97 +163,6 @@ var MessageBot = (function () {
             extensions.delete(id);
             extensionDeregistered.dispatch(id);
         }
-    };
-    /**
-     * Loads an extension into this bot.
-     *
-     * @param id the extension to load
-     */
-    MessageBot.prototype.registerExtension = function (id) {
-        if (this.extensions.has(id)) {
-            return;
-        }
-        var creator = extensions.get(id);
-        if (creator) {
-            try {
-                var ex = new extension_1.MessageBotExtension(this);
-                ex.settings = this.settings.prefix(id);
-                this.extensions.set(id, ex);
-                creator.call(ex, ex, ex.world);
-            }
-            catch (err) {
-                console.log('Error creating extension:', err);
-            }
-        }
-    };
-    /**
-     * Removes an extension from this bot
-     *
-     * @param id the extension to remove.
-     */
-    MessageBot.prototype.deregisterExtension = function (id) {
-        var ex = this.extensions.get(id);
-        if (!ex) {
-            return;
-        }
-        try {
-            ex.uninstall();
-        }
-        catch (err) {
-            console.log('Error uninstalling:', err);
-        }
-        finally {
-            this.extensions.delete(id);
-        }
-    };
-    /**
-     * Gets an extension's exports, if it has been registered. Otherwise returns undefined.
-     *
-     * @param extensionId the id of the extension to get the exports for.
-     */
-    MessageBot.prototype.getExports = function (extensionId) {
-        var ex = this.extensions.get(extensionId);
-        if (ex) {
-            return ex.exports;
-        }
-    };
-    /**
-     * Sends a message to the world for this bot, should usually be used in place of world.send.
-     *
-     * @param message the message to send
-     * @param params any variables to inject into the message. If `name` is provided, it will be available through {{NAME}}, {{Name}} and {{name}}
-     */
-    MessageBot.prototype.send = function (message, params) {
-        var _this = this;
-        if (params === void 0) { params = {}; }
-        var messages;
-        // Split the message if splitting is enabled.
-        if (this.settings.get('splitMessages', false)) {
-            messages = message.split(this.settings.get('splitToken', '<split>'));
-        }
-        else {
-            messages = [message];
-        }
-        // Common enough to be done here, set the name of the player up right.
-        if (params['name'] && params['name'].length) {
-            var player = params['name'];
-            params['name'] = player.toLocaleLowerCase();
-            params['Name'] = player[0].toLocaleUpperCase() + player.substr(1).toLocaleLowerCase();
-            params['NAME'] = player.toLocaleUpperCase();
-        }
-        // Loop through messages, replacing variables, then send the message
-        messages.forEach(function (msg) {
-            Object.keys(params).forEach(function (key) {
-                // Escape RegExp special characters in key
-                var safeKey = key.replace(/([.+?^=!:${}()|\[\]\/\\])/g, '\\$1');
-                msg = msg.replace(new RegExp("{{" + safeKey + "}}", 'g'), params[key]);
-            });
-            // Allow {{ip}} if {{name}} exists and the message is "private"
-            if (msg.startsWith('/') && params['name']) {
-                msg = msg.replace(/{{ip}}/gi, _this.world.getPlayer(params['name']).getIP());
-            }
-            _this.world.send(msg);
-        });
     };
     return MessageBot;
 }());

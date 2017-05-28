@@ -49,10 +49,7 @@ export class MessageBot {
      * @param id the unique name/extension ID for this extension.
      * @param creator the function to call in order to initialize the extension.
      */
-    static registerExtension(
-        id: string,
-        creator: ExtensionInitializer,
-    ) {
+    static registerExtension(id: string, creator: ExtensionInitializer) {
         id = id.toLocaleLowerCase();
 
         console.log('Launching extension', id);
@@ -82,7 +79,7 @@ export class MessageBot {
      *
      * @param id the extension to load
      */
-    private registerExtension(id: string) {
+    private registerExtension = (id: string) => {
         if (this.extensions.has(id)) {
             return;
         }
@@ -105,7 +102,7 @@ export class MessageBot {
      *
      * @param id the extension to remove.
      */
-    private deregisterExtension(id: string) {
+    private deregisterExtension = (id: string) => {
         let ex = this.extensions.get(id);
         if (!ex) {
             return;
@@ -125,7 +122,7 @@ export class MessageBot {
      *
      * @param extensionId the id of the extension to get the exports for.
      */
-    getExports(extensionId: string): {[key: string]: any} | undefined {
+    getExports = (extensionId: string): {[key: string]: any} | undefined => {
         let ex = this.extensions.get(extensionId);
         if (ex) {
             return ex.exports;
@@ -138,7 +135,7 @@ export class MessageBot {
      * @param message the message to send
      * @param params any variables to inject into the message. If `name` is provided, it will be available through {{NAME}}, {{Name}} and {{name}}
      */
-    send(message: string, params: {[key: string]: string} = {}) {
+    send = (message: string, params: {[key: string]: string} = {}) => {
         let messages: string[];
         // Split the message if splitting is enabled.
         if (this.settings.get('splitMessages', false)) {

@@ -93,109 +93,109 @@ var Storage = (function () {
      * Creates a new instance of the storage class, should not be used by extensions.
      */
     function Storage(namespace) {
+        var _this = this;
+        /**
+         * @inheritdoc
+         */
+        this.getString = function (key, fallback, local) {
+            if (local === void 0) { local = true; }
+            var result;
+            if (local) {
+                result = fileStorage.get("" + key + _this.namespace);
+            }
+            else {
+                result = fileStorage.get(key);
+            }
+            return (result == null) ? fallback : result;
+        };
+        /**
+         * @inheritdoc
+         */
+        this.getObject = function (key, fallback, local) {
+            var raw = _this.getString(key, '', local);
+            if (!raw) {
+                return fallback;
+            }
+            var result;
+            try {
+                result = JSON.parse(raw);
+            }
+            catch (e) {
+                result = fallback;
+            }
+            if (!result) {
+                result = fallback;
+            }
+            return result;
+        };
+        /**
+         * @inheritdoc
+         */
+        this.set = function (key, data, local) {
+            if (local === void 0) { local = true; }
+            if (local) {
+                key = "" + key + _this.namespace;
+            }
+            if (typeof data == 'string') {
+                fileStorage.set(key, data);
+            }
+            else {
+                fileStorage.set(key, JSON.stringify(data));
+            }
+            lastChange = Date.now();
+        };
+        /**
+         * @inheritdoc
+         */
+        this.clearNamespace = function (namespace) {
+            var toDelete = [];
+            try {
+                for (var _a = __values(fileStorage.keys()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                    var key = _b.value;
+                    if (key.startsWith(namespace)) {
+                        toDelete.push(key);
+                    }
+                }
+            }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            finally {
+                try {
+                    if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                }
+                finally { if (e_3) throw e_3.error; }
+            }
+            toDelete.forEach(fileStorage.delete);
+            lastChange = Date.now();
+            var e_3, _c;
+        };
+        /**
+         * @inheritdoc
+         */
+        this.migrate = function (key, actor) {
+            var keys = [];
+            try {
+                for (var _a = __values(fileStorage.keys()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                    var sKey = _b.value;
+                    if (sKey.startsWith(key)) {
+                        keys.push(sKey);
+                    }
+                }
+            }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            finally {
+                try {
+                    if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                }
+                finally { if (e_4) throw e_4.error; }
+            }
+            keys.forEach(function (key) {
+                _this.set(key, actor(_this.getObject(key, {}, false)), false);
+            });
+            lastChange = Date.now();
+            var e_4, _c;
+        };
         this.namespace = String(namespace);
     }
-    /**
-     * @inheritdoc
-     */
-    Storage.prototype.getString = function (key, fallback, local) {
-        if (local === void 0) { local = true; }
-        var result;
-        if (local) {
-            result = fileStorage.get("" + key + this.namespace);
-        }
-        else {
-            result = fileStorage.get(key);
-        }
-        return (result == null) ? fallback : result;
-    };
-    /**
-     * @inheritdoc
-     */
-    Storage.prototype.getObject = function (key, fallback, local) {
-        var raw = this.getString(key, '', local);
-        if (!raw) {
-            return fallback;
-        }
-        var result;
-        try {
-            result = JSON.parse(raw);
-        }
-        catch (e) {
-            result = fallback;
-        }
-        if (!result) {
-            result = fallback;
-        }
-        return result;
-    };
-    /**
-     * @inheritdoc
-     */
-    Storage.prototype.set = function (key, data, local) {
-        if (local === void 0) { local = true; }
-        if (local) {
-            key = "" + key + this.namespace;
-        }
-        if (typeof data == 'string') {
-            fileStorage.set(key, data);
-        }
-        else {
-            fileStorage.set(key, JSON.stringify(data));
-        }
-        lastChange = Date.now();
-    };
-    /**
-     * @inheritdoc
-     */
-    Storage.prototype.clearNamespace = function (namespace) {
-        var toDelete = [];
-        try {
-            for (var _a = __values(fileStorage.keys()), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var key = _b.value;
-                if (key.startsWith(namespace)) {
-                    toDelete.push(key);
-                }
-            }
-        }
-        catch (e_3_1) { e_3 = { error: e_3_1 }; }
-        finally {
-            try {
-                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-            }
-            finally { if (e_3) throw e_3.error; }
-        }
-        toDelete.forEach(fileStorage.delete);
-        lastChange = Date.now();
-        var e_3, _c;
-    };
-    /**
-     * @inheritdoc
-     */
-    Storage.prototype.migrate = function (key, actor) {
-        var _this = this;
-        var keys = [];
-        try {
-            for (var _a = __values(fileStorage.keys()), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var sKey = _b.value;
-                if (sKey.startsWith(key)) {
-                    keys.push(sKey);
-                }
-            }
-        }
-        catch (e_4_1) { e_4 = { error: e_4_1 }; }
-        finally {
-            try {
-                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-            }
-            finally { if (e_4) throw e_4.error; }
-        }
-        keys.forEach(function (key) {
-            _this.set(key, actor(_this.getObject(key, {}, false)), false);
-        });
-        lastChange = Date.now();
-        var e_4, _c;
-    };
     return Storage;
 }());
 exports.Storage = Storage;

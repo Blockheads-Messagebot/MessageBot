@@ -39,19 +39,19 @@ export declare class MessageBot {
      *
      * @param id the extension to load
      */
-    private registerExtension(id);
+    private registerExtension;
     /**
      * Removes an extension from this bot
      *
      * @param id the extension to remove.
      */
-    private deregisterExtension(id);
+    private deregisterExtension;
     /**
      * Gets an extension's exports, if it has been registered. Otherwise returns undefined.
      *
      * @param extensionId the id of the extension to get the exports for.
      */
-    getExports(extensionId: string): {
+    getExports: (extensionId: string) => {
         [key: string]: any;
     } | undefined;
     /**
@@ -60,7 +60,7 @@ export declare class MessageBot {
      * @param message the message to send
      * @param params any variables to inject into the message. If `name` is provided, it will be available through {{NAME}}, {{Name}} and {{name}}
      */
-    send(message: string, params?: {
+    send: (message: string, params?: {
         [key: string]: string;
-    }): void;
+    }) => void;
 }

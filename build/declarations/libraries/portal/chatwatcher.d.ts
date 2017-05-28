@@ -25,17 +25,17 @@ export declare class PortalChatWatcher implements ChatWatcher {
     /**
      * @inheritdoc
      */
-    setup(name: string, online: string[]): void;
+    setup: (name: string, online: string[]) => void;
     /**
      * Continually checks chat for new messages.
      */
-    private checkChat();
+    private checkChat;
     /**
      * Queues checking for new chat to parse.
      */
-    private queueChatCheck();
+    private queueChatCheck;
     /**
      * Gets the unread messages from the server queue.
      */
-    private getMessages();
+    private getMessages;
 }

@@ -18,5 +18,5 @@ export declare class MacChatWatcher implements ChatWatcher {
     /**
      * @inheritdoc
      */
-    setup(name: string, online: string[]): void;
+    setup: (name: string, online: string[]) => void;
 }

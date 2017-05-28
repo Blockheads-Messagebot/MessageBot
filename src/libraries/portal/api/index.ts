@@ -31,7 +31,7 @@ export class PortalApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getLists(): Promise<WorldLists> {
+    getLists = (): Promise<WorldLists> => {
         return this.worldOnline()
             .then(() => ajax.get(`/worlds/lists/${this.worldId}`))
             .then((html: string) => {
@@ -80,7 +80,7 @@ export class PortalApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getOverview(): Promise<WorldOverview> {
+    getOverview = (): Promise<WorldOverview> => {
         return ajax.get(`/worlds/${this.worldId}`)
             .then(html => {
                 let firstMatch = (r: RegExp): string => {
@@ -126,7 +126,7 @@ export class PortalApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    getLogs(): Promise<LogEntry[]> {
+    getLogs = (): Promise<LogEntry[]> => {
         return this.worldOnline()
             .then(() => ajax.get(`/worlds/logs/${this.worldId}`))
             .then(logs => logs.split('\n'))
@@ -136,14 +136,14 @@ export class PortalApi implements WorldApi {
     /**
      * @inheritdoc
      */
-    send(message: string): void {
+    send = (message: string): void => {
         this.messageQueue.push(message);
     }
 
     /**
      * Waits until the world is online before resolving.
      */
-    private worldOnline(): Promise<void> {
+    private worldOnline = (): Promise<void> => {
         return ajax.postJSON(`/api`, {command: 'status', worldId: this.worldId})
             .then((response: {status: string, worldStatus: string}) => {
                 if (response.status != 'ok') {
@@ -163,7 +163,7 @@ export class PortalApi implements WorldApi {
     /**
      * Sends the oldest queued message if possible.
      */
-    private postMessage(): void {
+    private postMessage = (): void => {
         if (this.messageQueue.length) {
             ajax.postJSON(`/api`, {
                 command: 'send',

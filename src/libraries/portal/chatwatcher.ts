@@ -32,7 +32,7 @@ export class PortalChatWatcher implements ChatWatcher {
     /**
      * @inheritdoc
      */
-    setup(name: string, online: string[]) {
+    setup = (name: string, online: string[]) => {
         this.parser = new ChatParser(name, online);
         this.queueChatCheck();
     }
@@ -40,7 +40,7 @@ export class PortalChatWatcher implements ChatWatcher {
     /**
      * Continually checks chat for new messages.
      */
-    private checkChat() {
+    private checkChat = () => {
         this.getMessages()
             .then(this.parser.parse)
             .then(msgs => msgs.forEach(this.onMessage.dispatch))
@@ -50,14 +50,14 @@ export class PortalChatWatcher implements ChatWatcher {
     /**
      * Queues checking for new chat to parse.
      */
-    private queueChatCheck() {
+    private queueChatCheck = () => {
         setTimeout(() => this.checkChat(), 5000);
     }
 
     /**
      * Gets the unread messages from the server queue.
      */
-    private getMessages(): Promise<string[]> {
+    private getMessages = (): Promise<string[]> => {
         return Ajax.postJSON('/api', {command: 'getchat', worldId: this.worldId, firstId: this.firstId})
             .then((data: {
                 status: string;

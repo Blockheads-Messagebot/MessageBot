@@ -25,7 +25,7 @@ export class PortalAuth {
      *
      * @return true if logging in was successful, otherwise false.
      */
-    login(): Promise<void> {
+    login = (): Promise<void> => {
         return Ajax.postJSON('/login', {username: this.username})
             .then((data: {salt: string, salt2: string, seed: string, status: string}) => {
                 if (data.status != 'ok') {

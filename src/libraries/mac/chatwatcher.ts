@@ -30,7 +30,7 @@ export class MacChatWatcher implements ChatWatcher {
     /**
      * @inheritdoc
      */
-    setup(name: string, online: string[]): void {
+    setup = (name: string, online: string[]): void => {
         let re = new RegExp(String.raw`^\w\w\w ( |\d)\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[\d+]: ${name.toUpperCase()}`);
         this.parser = new ChatParser(online);
 

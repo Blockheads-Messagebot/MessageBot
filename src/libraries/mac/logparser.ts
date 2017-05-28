@@ -22,7 +22,7 @@ export class MacLogParser {
      *
      * @param lines {string[]} the raw log lines.
      */
-    parse(lines: string[]): LogEntry[] {
+    parse = (lines: string[]): LogEntry[] => {
         // Copy the lines array
         lines = lines.slice(0);
 
@@ -48,11 +48,11 @@ export class MacLogParser {
         return entries;
     }
 
-    private isValidLine(line: string): boolean {
+    private isValidLine = (line: string): boolean => {
         return /^\w\w\w (?:\d| )\d \d\d\d\d \d\d:\d\d:\d\d ([\w-]+) BlockheadsServer\[/.test(line);
     }
 
-    private addLine(line: string): void {
+    private addLine = (line: string): void => {
         let ts = line.substr(0, 20);
 
         this.entries.push({
