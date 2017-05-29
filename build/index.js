@@ -45,6 +45,8 @@ var player_1 = require("./libraries/blockheads/player");
 exports.Player = player_1.Player;
 var bot_2 = require("./bot");
 exports.Settings = bot_2.Settings;
+var tabs_1 = require("./extensions/ui/tabs");
+exports.TabManager = tabs_1.TabManager;
 require("./extensions/ui");
 require("./extensions/console/browser");
 require("./extensions/messages");

@@ -21,6 +21,7 @@ export {MessageBot, MessageBotExtension};
 export {Player} from './libraries/blockheads/player';
 export {Settings} from './bot';
 export {SimpleEvent};
+export {TabManager} from './extensions/ui/tabs';
 export {Storage};
 export {World};
 
