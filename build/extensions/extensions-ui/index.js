@@ -54,7 +54,10 @@ bot_1.MessageBot.registerExtension('extensions-ui', function (ex) {
         else if (target.textContent == 'Remove' && extensions.includes(id)) {
             extensions.splice(extensions.indexOf(id), 1);
             ex.world.storage.set('extensions', extensions, false);
+            target.textContent = "Removing";
             bot_1.MessageBot.deregisterExtension(id);
+            setTimeout(function () { return target.textContent = 'Removed!'; }, 1000);
+            setTimeout(function () { return target.textContent = 'Install'; }, 2000);
         }
     });
     // Loading by ID / URL
