@@ -21,6 +21,10 @@ MessageBot.registerExtension('messages-ui', function(ex) {
         new AnnouncementTab(ex, ui),
     ];
 
+    for (let tab of tabs) {
+        tab.setup();
+    }
+
     ex.uninstall = function() {
         tabs.forEach(tab => tab.remove());
     };
@@ -42,7 +46,9 @@ abstract class MessagesTab<T> {
         this.ui = ui;
         this.ex = ex;
         this.tab = ui.addTab(name, 'messages');
+    }
 
+    setup = () => {
         this.insertHTML();
         this.template = this.tab.querySelector('template') as HTMLTemplateElement;
         this.root = this.tab.querySelector('.messages-container') as HTMLDivElement;
@@ -60,14 +66,14 @@ abstract class MessagesTab<T> {
             if (target.tagName == 'A' && target.textContent == 'Delete') {
                 event.preventDefault();
 
-                ui.alert(
+                this.ui.alert(
                     'Really delete this message?',
-                    [{text: 'Delete', style: 'is-danger'}, {text: 'Cancel'}],
+                    [{ text: 'Delete', style: 'is-danger' }, { text: 'Cancel' }],
                     result => {
                         if (result != 'Delete') return;
 
                         let parent = target;
-                        while(!parent.classList.contains('column')) {
+                        while (!parent.classList.contains('column')) {
                             parent = parent.parentElement as HTMLElement;
                         }
                         parent.remove();

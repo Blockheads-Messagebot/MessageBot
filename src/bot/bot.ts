@@ -92,7 +92,7 @@ export class MessageBot {
                 this.extensions.set(id, ex);
                 creator.call(ex, ex, ex.world);
             } catch (err) {
-                console.log('Error creating extension:', err);
+                console.log('Error creating extension:', id, err);
             }
         }
     }

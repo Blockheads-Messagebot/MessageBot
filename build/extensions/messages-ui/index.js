@@ -9,6 +9,16 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var bot_1 = require("../../bot");
 var fs = require("fs");
@@ -24,14 +34,60 @@ bot_1.MessageBot.registerExtension('messages-ui', function (ex) {
         new TriggerTab(ex, ui),
         new AnnouncementTab(ex, ui),
     ];
+    try {
+        for (var tabs_1 = __values(tabs), tabs_1_1 = tabs_1.next(); !tabs_1_1.done; tabs_1_1 = tabs_1.next()) {
+            var tab = tabs_1_1.value;
+            tab.setup();
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (tabs_1_1 && !tabs_1_1.done && (_a = tabs_1.return)) _a.call(tabs_1);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
     ex.uninstall = function () {
         tabs.forEach(function (tab) { return tab.remove(); });
     };
+    var e_1, _a;
 });
 var MessagesTab = (function () {
     function MessagesTab(_a) {
         var name = _a.name, ui = _a.ui, ex = _a.ex;
         var _this = this;
+        this.setup = function () {
+            _this.insertHTML();
+            _this.template = _this.tab.querySelector('template');
+            _this.root = _this.tab.querySelector('.messages-container');
+            // Auto save messages
+            _this.tab.addEventListener('input', function () { return _this.save(); });
+            // Create a new message
+            var button = _this.tab.querySelector('.button.is-primary');
+            button.addEventListener('click', function () {
+                _this.addMessage();
+            });
+            // Deleting messages
+            _this.tab.addEventListener('click', function (event) {
+                var target = event.target;
+                if (target.tagName == 'A' && target.textContent == 'Delete') {
+                    event.preventDefault();
+                    _this.ui.alert('Really delete this message?', [{ text: 'Delete', style: 'is-danger' }, { text: 'Cancel' }], function (result) {
+                        if (result != 'Delete')
+                            return;
+                        var parent = target;
+                        while (!parent.classList.contains('column')) {
+                            parent = parent.parentElement;
+                        }
+                        parent.remove();
+                        _this.save();
+                    });
+                }
+            });
+            _this.ex.world.storage.getObject(_this.getStorageID(), []).forEach(function (message) {
+                _this.addMessage(message);
+            });
+        };
         this.remove = function () {
             _this.ui.removeTab(_this.tab);
         };
@@ -61,36 +117,6 @@ var MessagesTab = (function () {
         this.ui = ui;
         this.ex = ex;
         this.tab = ui.addTab(name, 'messages');
-        this.insertHTML();
-        this.template = this.tab.querySelector('template');
-        this.root = this.tab.querySelector('.messages-container');
-        // Auto save messages
-        this.tab.addEventListener('input', function () { return _this.save(); });
-        // Create a new message
-        var button = this.tab.querySelector('.button.is-primary');
-        button.addEventListener('click', function () {
-            _this.addMessage();
-        });
-        // Deleting messages
-        this.tab.addEventListener('click', function (event) {
-            var target = event.target;
-            if (target.tagName == 'A' && target.textContent == 'Delete') {
-                event.preventDefault();
-                ui.alert('Really delete this message?', [{ text: 'Delete', style: 'is-danger' }, { text: 'Cancel' }], function (result) {
-                    if (result != 'Delete')
-                        return;
-                    var parent = target;
-                    while (!parent.classList.contains('column')) {
-                        parent = parent.parentElement;
-                    }
-                    parent.remove();
-                    _this.save();
-                });
-            }
-        });
-        this.ex.world.storage.getObject(this.getStorageID(), []).forEach(function (message) {
-            _this.addMessage(message);
-        });
     }
     return MessagesTab;
 }());
