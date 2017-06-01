@@ -14,12 +14,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var bot_1 = require("../../bot/bot");
 var helpers_1 = require("./helpers");
 bot_1.MessageBot.registerExtension('messages', function (ex, world) {
-    var uninstallFns = [
-        joinModule(ex, world),
-        leaveModule(ex, world),
-        triggerModule(ex, world),
-        announcementModule(ex, world),
-    ];
+    var uninstallFns = [];
+    // Delay loading to prevent spam
+    setTimeout(function () {
+        uninstallFns = [
+            joinModule(ex, world),
+            leaveModule(ex, world),
+            triggerModule(ex, world),
+            announcementModule(ex, world),
+        ];
+    }, 2500);
     ex.uninstall = function () {
         uninstallFns.forEach(function (fn) { return fn(); });
         ex.settings.removeAll();

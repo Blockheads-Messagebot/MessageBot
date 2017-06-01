@@ -17,7 +17,7 @@ bot_1.MessageBot.registerExtension('extensions-ui', function (ex) {
         el.crossOrigin = 'anonymous';
         document.head.appendChild(el);
     }
-    extensions.forEach(loadExtension);
+    setTimeout(function () { return extensions.forEach(loadExtension); }, 2500);
     var ui = ex.bot.getExports('ui');
     var tab = ui.addTab('Extensions');
     tab.innerHTML = fs.readFileSync(__dirname + '/tab.html', 'utf8');

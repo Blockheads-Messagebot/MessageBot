@@ -21,12 +21,17 @@ export type MessageGroupType = 'all' | 'staff' | 'mod' | 'admin' | 'owner' | 'no
 
 
 MessageBot.registerExtension('messages', function(ex, world) {
-    let uninstallFns = [
-        joinModule(ex, world),
-        leaveModule(ex, world),
-        triggerModule(ex, world),
-        announcementModule(ex, world),
-    ];
+    let uninstallFns: Array<() => void> = [];
+
+    // Delay loading to prevent spam
+    setTimeout(() => {
+        uninstallFns = [
+            joinModule(ex, world),
+            leaveModule(ex, world),
+            triggerModule(ex, world),
+            announcementModule(ex, world),
+        ];
+    }, 2500);
 
     ex.uninstall = function() {
         uninstallFns.forEach(fn => fn());

@@ -31,7 +31,7 @@ MessageBot.registerExtension('extensions-ui', function(ex) {
         document.head.appendChild(el);
     }
 
-    extensions.forEach(loadExtension);
+    setTimeout(() => extensions.forEach(loadExtension), 2500);
 
     let ui = ex.bot.getExports('ui') as UIExtensionExports;
 
