@@ -20,6 +20,9 @@ export class World {
     private lists?: WorldLists;
     private overview?: WorldOverview;
 
+    // For addCommand, removeCommand
+    private commands: Map<string, (player: Player, args: string) => void>;
+
     /**
      * For interacting with the world.
      */
@@ -65,6 +68,13 @@ export class World {
     constructor({api, storage, chatWatcher}: WorldOptions) {
         this.storage = storage;
         this.api = api;
+
+        this.commands = new Map();
+        this.onCommand.sub(({player, command, args}) => {
+            command = command.toLocaleLowerCase();
+            let handler = this.commands.get(command);
+            if (handler) handler(player, args);
+        });
 
         this.players = this.storage.getObject(this.STORAGE_ID, {});
 
@@ -200,6 +210,32 @@ export class World {
         }
 
         return new Player(name, info, this.lists || {adminlist: [], modlist: [], whitelist: [], blacklist: []});
+    }
+
+    /**
+     * Adds a listener for a single command, can be used when a command can be statically matched.
+     *
+     * @param command the command that the listener should be called for, case insensitive
+     * @param listener the function which should be called whenever the command is used
+     * @example
+     * world.addCommand('marco', () => { ex.bot.send('Polo!'); });
+     */
+    addCommand = (command: string, listener: (player: Player, args: string) => void) => {
+        command = command.toLocaleLowerCase();
+        if (this.commands.has(command)) {
+            throw new Error('This command already exists.');
+        }
+        this.commands.set(command, listener);
+    }
+
+    /**
+     * Removes a listener for a command, if it exists.
+     *
+     * @param command the command for which the listener should be removed.
+     * @return whether or not a listener was removed
+     */
+    removeCommand = (command: string): boolean => {
+        return this.commands.delete(command.toLocaleLowerCase());
     }
 
     // Private methods

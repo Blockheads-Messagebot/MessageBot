@@ -12,6 +12,7 @@ export declare class World {
     private players;
     private lists?;
     private overview?;
+    private commands;
     /**
      * For interacting with the world.
      */
@@ -115,6 +116,22 @@ export declare class World {
      * if (player.hasJoined()) { ... }
      */
     getPlayer: (name: string) => Player;
+    /**
+     * Adds a listener for a single command, can be used when a command can be statically matched.
+     *
+     * @param command the command that the listener should be called for, case insensitive
+     * @param listener the function which should be called whenever the command is used
+     * @example
+     * world.addCommand('marco', () => { ex.bot.send('Polo!'); });
+     */
+    addCommand: (command: string, listener: (player: Player, args: string) => void) => void;
+    /**
+     * Removes a listener for a command, if it exists.
+     *
+     * @param command the command for which the listener should be removed.
+     * @return whether or not a listener was removed
+     */
+    removeCommand: (command: string) => boolean;
     /**
      * Continually watches chat for new messages and emits events when new messages come in.
      *

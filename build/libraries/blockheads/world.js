@@ -175,6 +175,30 @@ var World = (function () {
             }
             return new player_1.Player(name, info, _this.lists || { adminlist: [], modlist: [], whitelist: [], blacklist: [] });
         };
+        /**
+         * Adds a listener for a single command, can be used when a command can be statically matched.
+         *
+         * @param command the command that the listener should be called for, case insensitive
+         * @param listener the function which should be called whenever the command is used
+         * @example
+         * world.addCommand('marco', () => { ex.bot.send('Polo!'); });
+         */
+        this.addCommand = function (command, listener) {
+            command = command.toLocaleLowerCase();
+            if (_this.commands.has(command)) {
+                throw new Error('This command already exists.');
+            }
+            _this.commands.set(command, listener);
+        };
+        /**
+         * Removes a listener for a command, if it exists.
+         *
+         * @param command the command for which the listener should be removed.
+         * @return whether or not a listener was removed
+         */
+        this.removeCommand = function (command) {
+            return _this.commands.delete(command.toLocaleLowerCase());
+        };
         // Private methods
         /**
          * Continually watches chat for new messages and emits events when new messages come in.
@@ -219,6 +243,14 @@ var World = (function () {
         };
         this.storage = storage;
         this.api = api;
+        this.commands = new Map();
+        this.onCommand.sub(function (_a) {
+            var player = _a.player, command = _a.command, args = _a.args;
+            command = command.toLocaleLowerCase();
+            var handler = _this.commands.get(command);
+            if (handler)
+                handler(player, args);
+        });
         this.players = this.storage.getObject(this.STORAGE_ID, {});
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var overview, lists, watcher;
