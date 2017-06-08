@@ -33,7 +33,7 @@ describe('Player', function() {
         ]);
     });
 
-    describe('#hasJoined', function() {
+    describe('hasJoined', function() {
        it('Should return false if the player has never joined.', function() {
            expect(getPlayer('player').hasJoined()).to.be.false;
        });
@@ -45,32 +45,32 @@ describe('Player', function() {
        });
     });
 
-    describe('#getName', function() {
+    describe('getName', function() {
         it('Should return the name of the player', function() {
             expect(getPlayer('player').getName()).to.equal('PLAYER');
         });
     });
 
-    describe('#getIP', function() {
+    describe('getIP', function() {
         it('Should return the IP of the player', function() {
             expect(getPlayer('player').getIP()).to.equal('');
         });
     });
 
-    describe('#getIPs', function() {
+    describe('getIPs', function() {
         it('Should return the IPs of the player', function() {
             expect(getPlayer('player').getIPs()).to.deep.equal(info.ips);
         });
     });
 
-    describe('#getJoins', function() {
+    describe('getJoins', function() {
         it('Should return the joins of the player', function() {
             info.joins = 42;
             expect(getPlayer('player').getJoins()).to.deep.equal(info.joins);
         });
     });
 
-    describe('#isOwner', function() {
+    describe('isOwner', function() {
         it('Should return false if the player is not the owner', function() {
             expect(getPlayer('player').isOwner()).to.equal(false, 'players are not owners');
             expect(getPlayer('admin').isOwner()).to.equal(false, 'admins are not owners');
@@ -86,7 +86,7 @@ describe('Player', function() {
         });
     });
 
-    describe('#isAdmin', function() {
+    describe('isAdmin', function() {
         it('Should return false for players', function() {
             expect(getPlayer('player').isAdmin()).to.be.false;
         });
@@ -108,7 +108,7 @@ describe('Player', function() {
         });
     });
 
-    describe('#isMod', function() {
+    describe('isMod', function() {
         it('Should return false for players', function() {
             expect(getPlayer('player').isMod()).to.be.false;
         });
@@ -138,7 +138,7 @@ describe('Player', function() {
         });
     });
 
-    describe('#isStaff', function() {
+    describe('isStaff', function() {
         it('Should return false for players', function() {
             expect(getPlayer('player').isStaff()).to.be.false;
         });
@@ -157,7 +157,7 @@ describe('Player', function() {
         });
     });
 
-    describe('#isWhitelisted', function() {
+    describe('isWhitelisted', function() {
         it('Should return false for players who are not whitelisted', function() {
             expect(getPlayer('player').isWhitelisted()).to.be.false;
         });
@@ -180,7 +180,7 @@ describe('Player', function() {
         });
     });
 
-    describe('#isBanned', function() {
+    describe('isBanned', function() {
         it('Should return false for players who are not banned', function() {
             expect(getPlayer('player').isBanned()).to.be.false;
         });

@@ -23,8 +23,13 @@ function updateElement(el, rule) {
     else if (typeof rule.html == 'string') {
         el.innerHTML = rule.html;
     }
+    var blacklist = ['selector', 'text', 'html', 'multiple'];
+    if (el instanceof HTMLTextAreaElement && 'value' in rule) {
+        blacklist.push('value');
+        el.textContent = rule['value'];
+    }
     Object.keys(rule)
-        .filter(function (key) { return !['selector', 'text', 'html', 'remove', 'multiple'].includes(key); })
+        .filter(function (key) { return !blacklist.includes(key); })
         .forEach(function (key) { return el.setAttribute(key, rule[key]); });
 }
 /**
@@ -69,18 +74,20 @@ function buildTemplate(template, target, rules) {
     }
     // Remove this cast when Typedoc updates to Typescript 2.3
     var parent = document.importNode(template.content, true);
-    try {
-        for (var rules_1 = __values(rules), rules_1_1 = rules_1.next(); !rules_1_1.done; rules_1_1 = rules_1.next()) {
-            var rule = rules_1_1.value;
-            handleRule(parent, rule);
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
+    if (Array.isArray(rules)) {
         try {
-            if (rules_1_1 && !rules_1_1.done && (_a = rules_1.return)) _a.call(rules_1);
+            for (var rules_1 = __values(rules), rules_1_1 = rules_1.next(); !rules_1_1.done; rules_1_1 = rules_1.next()) {
+                var rule = rules_1_1.value;
+                handleRule(parent, rule);
+            }
         }
-        finally { if (e_1) throw e_1.error; }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (rules_1_1 && !rules_1_1.done && (_a = rules_1.return)) _a.call(rules_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
     }
     target.appendChild(parent);
     var e_1, _a;

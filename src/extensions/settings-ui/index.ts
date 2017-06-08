@@ -87,7 +87,7 @@ MessageBot.registerExtension('settings-ui', function(ex) {
     });
 
     (tab.querySelector('[data-do=download_backup]') as HTMLElement).addEventListener('click', () => {
-        let backup = JSON.stringify(localStorage);
+        let backup = JSON.stringify(localStorage, undefined, 4);
 
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(backup));

@@ -123,7 +123,7 @@ bot_1.MessageBot.registerExtension('settings-ui', function (ex) {
         });
     });
     tab.querySelector('[data-do=download_backup]').addEventListener('click', function () {
-        var backup = JSON.stringify(localStorage);
+        var backup = JSON.stringify(localStorage, undefined, 4);
         var element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(backup));
         element.setAttribute('download', 'bot_backup.txt');

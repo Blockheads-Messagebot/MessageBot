@@ -77,7 +77,7 @@ setInterval(function () {
             finally { if (e_2) throw e_2.error; }
         }
         try {
-            fs.writeFileSync(jsonPath, JSON.stringify(objMap), 'utf8');
+            fs.writeFileSync(jsonPath, JSON.stringify(objMap, undefined, 4), 'utf8');
         }
         catch (e) {
             console.error('Failed to save config', e);

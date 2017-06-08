@@ -31,4 +31,4 @@ export interface TemplateRule {
  * @param target the parent node to append the cloned template to.
  * @param rules the rules to apply to the cloned template before appending it to the target.
  */
-export declare function buildTemplate(template: string | HTMLTemplateElement, target: string | HTMLElement, rules: TemplateRule[]): void;
+export declare function buildTemplate(template: string | HTMLTemplateElement, target: string | HTMLElement, rules?: TemplateRule[]): void;

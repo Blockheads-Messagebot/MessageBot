@@ -71,7 +71,7 @@ describe('PortalApi', function () {
     afterEach(function () {
         server.restore();
     });
-    describe('#getLists', function () {
+    describe('getLists', function () {
         beforeEach(function () {
             handlers.push({
                 method: 'GET',
@@ -116,7 +116,7 @@ describe('PortalApi', function () {
             return req;
         });
     });
-    describe('#getOverview', function () {
+    describe('getOverview', function () {
         beforeEach(function () {
             handlers.push({
                 method: 'GET',
@@ -202,7 +202,7 @@ describe('PortalApi', function () {
             return req;
         });
     });
-    describe('#getLogs', function () {
+    describe('getLogs', function () {
         beforeEach(function () {
             handlers.push({
                 method: 'GET',
@@ -219,7 +219,7 @@ describe('PortalApi', function () {
             return req;
         });
     });
-    describe('#send', function () {
+    describe('send', function () {
         it('Should send the message', function (done) {
             // This test could probably be improved, relying on timing is... not good.
             handlers.push({

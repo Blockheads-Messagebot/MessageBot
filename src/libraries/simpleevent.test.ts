@@ -10,7 +10,7 @@ describe('SimpleEvent', function() {
         event = new SimpleEvent<string>();
     });
 
-    describe('#subscribe', function() {
+    describe('subscribe', function() {
         it('Attaches the passed handler', function() {
             let calls = 0;
             let caller = () => { calls++; };
@@ -33,7 +33,7 @@ describe('SimpleEvent', function() {
         });
     });
 
-    describe('#sub', function() {
+    describe('sub', function() {
         it('Attaches the passed handler', function() {
             let calls = 0;
             let caller = () => { calls++; };
@@ -56,7 +56,7 @@ describe('SimpleEvent', function() {
         });
     });
 
-    describe('#once', function() {
+    describe('once', function() {
         it('Attaches the passed handler', function() {
             let calls = 0;
             let caller = () => { calls++; };
@@ -104,7 +104,7 @@ describe('SimpleEvent', function() {
         });
     });
 
-    describe('#unsubscribe', function() {
+    describe('unsubscribe', function() {
         it('Should remove the handler', function() {
             let calls = 0;
             let caller = () => { calls++; };
@@ -124,7 +124,7 @@ describe('SimpleEvent', function() {
         });
     });
 
-    describe('#unsub', function() {
+    describe('unsub', function() {
         it('Should remove the handler', function() {
             let calls = 0;
             let caller = () => { calls++; };
@@ -144,7 +144,7 @@ describe('SimpleEvent', function() {
         });
     });
 
-    describe('#dispatch', function() {
+    describe('dispatch', function() {
         it('Should call all handlers once', function() {
             let calls1 = 0;
             let caller1 = () => { calls1++; };
@@ -177,7 +177,7 @@ describe('SimpleEvent', function() {
         });
     });
 
-    describe('#has', function() {
+    describe('has', function() {
         it('Should return true if the callback is a handler', function() {
             let caller = () => {};
             event.sub(caller);

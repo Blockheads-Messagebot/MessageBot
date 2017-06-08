@@ -37,8 +37,15 @@ function updateElement(el: Element, rule: TemplateRule) {
         el.innerHTML = rule.html;
     }
 
+    let blacklist = ['selector', 'text', 'html', 'multiple'];
+
+    if (el instanceof HTMLTextAreaElement && 'value' in rule) {
+        blacklist.push('value');
+        el.textContent = rule['value'];
+    }
+
     Object.keys(rule)
-        .filter(key => !['selector', 'text', 'html', 'remove', 'multiple'].includes(key))
+        .filter(key => !blacklist.includes(key))
         .forEach(key => el.setAttribute(key, rule[key]));
 }
 
@@ -72,7 +79,7 @@ function handleRule(parent: DocumentFragment, rule: TemplateRule) {
  * @param target the parent node to append the cloned template to.
  * @param rules the rules to apply to the cloned template before appending it to the target.
  */
-export function buildTemplate(template: string | HTMLTemplateElement, target: string | HTMLElement, rules: TemplateRule[]) {
+export function buildTemplate(template: string | HTMLTemplateElement, target: string | HTMLElement, rules?: TemplateRule[]) {
     if (typeof template == 'string') {
         template = document.querySelector(template) as HTMLTemplateElement;
         if (!template) throw new Error("Template not found.");
@@ -85,8 +92,10 @@ export function buildTemplate(template: string | HTMLTemplateElement, target: st
     // Remove this cast when Typedoc updates to Typescript 2.3
     let parent = document.importNode(template.content, true) as DocumentFragment;
 
-    for (let rule of rules) {
-        handleRule(parent, rule);
+    if (Array.isArray(rules)) {
+        for (let rule of rules) {
+            handleRule(parent, rule);
+        }
     }
 
     target.appendChild(parent);

@@ -26,10 +26,12 @@ function del(dir) {
         fs.rmdirSync(dir);
     }
 }
-del('./build');
-fs.mkdirSync('./build');
-fs.mkdirSync('./build/compiled');
-fs.mkdirSync('./build/declarations');
+if (args[0] != 'build:test') {
+    del('./build');
+    fs.mkdirSync('./build');
+    fs.mkdirSync('./build/compiled');
+    fs.mkdirSync('./build/declarations');
+}
 
 // For compiling scss
 const scss = require('scssify');

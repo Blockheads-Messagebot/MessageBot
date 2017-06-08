@@ -8,7 +8,7 @@ describe('SimpleEvent', function () {
     beforeEach(function () {
         event = new simpleevent_1.SimpleEvent();
     });
-    describe('#subscribe', function () {
+    describe('subscribe', function () {
         it('Attaches the passed handler', function () {
             var calls = 0;
             var caller = function () { calls++; };
@@ -25,7 +25,7 @@ describe('SimpleEvent', function () {
             chai_1.expect(calls).to.equal(1);
         });
     });
-    describe('#sub', function () {
+    describe('sub', function () {
         it('Attaches the passed handler', function () {
             var calls = 0;
             var caller = function () { calls++; };
@@ -42,7 +42,7 @@ describe('SimpleEvent', function () {
             chai_1.expect(calls).to.equal(1);
         });
     });
-    describe('#once', function () {
+    describe('once', function () {
         it('Attaches the passed handler', function () {
             var calls = 0;
             var caller = function () { calls++; };
@@ -78,7 +78,7 @@ describe('SimpleEvent', function () {
             chai_1.expect(calls).to.equal(2);
         });
     });
-    describe('#unsubscribe', function () {
+    describe('unsubscribe', function () {
         it('Should remove the handler', function () {
             var calls = 0;
             var caller = function () { calls++; };
@@ -93,7 +93,7 @@ describe('SimpleEvent', function () {
             // An error will pop up if this throws.
         });
     });
-    describe('#unsub', function () {
+    describe('unsub', function () {
         it('Should remove the handler', function () {
             var calls = 0;
             var caller = function () { calls++; };
@@ -108,7 +108,7 @@ describe('SimpleEvent', function () {
             // An error will pop up if this throws.
         });
     });
-    describe('#dispatch', function () {
+    describe('dispatch', function () {
         it('Should call all handlers once', function () {
             var calls1 = 0;
             var caller1 = function () { calls1++; };
@@ -135,7 +135,7 @@ describe('SimpleEvent', function () {
             chai_1.expect(calls2).to.equal(1);
         });
     });
-    describe('#has', function () {
+    describe('has', function () {
         it('Should return true if the callback is a handler', function () {
             var caller = function () { };
             event.sub(caller);
