@@ -23,17 +23,34 @@ export type MessageGroupType = 'all' | 'staff' | 'mod' | 'admin' | 'owner' | 'no
 MessageBot.registerExtension('messages', function(ex, world) {
     let uninstallFns: Array<() => void> = [];
 
-    // Delay loading to prevent spam
-    setTimeout(() => {
+    let hasLoaded = false;
+
+    let load = () => {
+        if (hasLoaded) return;
+        hasLoaded = true;
+
+        let timeout = setTimeout(() => {
+            uninstallFns = [
+                joinModule(ex, world),
+                leaveModule(ex, world),
+                triggerModule(ex, world),
+                announcementModule(ex, world),
+            ];
+        }, 500);
+
         uninstallFns = [
-            joinModule(ex, world),
-            leaveModule(ex, world),
-            triggerModule(ex, world),
-            announcementModule(ex, world),
+            () => clearTimeout(timeout)
         ];
-    }, 2500);
+    };
+
+    // Delay loading to prevent spam
+    world.onMessage.once(load);
+    world.onJoin.once(load);
+    world.onLeave.once(load);
+    world.onOther.once(load);
 
     ex.uninstall = function() {
+        hasLoaded = true;
         uninstallFns.forEach(fn => fn());
         ex.settings.removeAll();
     };

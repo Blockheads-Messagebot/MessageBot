@@ -15,16 +15,30 @@ var bot_1 = require("../../bot/bot");
 var helpers_1 = require("./helpers");
 bot_1.MessageBot.registerExtension('messages', function (ex, world) {
     var uninstallFns = [];
-    // Delay loading to prevent spam
-    setTimeout(function () {
+    var hasLoaded = false;
+    var load = function () {
+        if (hasLoaded)
+            return;
+        hasLoaded = true;
+        var timeout = setTimeout(function () {
+            uninstallFns = [
+                joinModule(ex, world),
+                leaveModule(ex, world),
+                triggerModule(ex, world),
+                announcementModule(ex, world),
+            ];
+        }, 500);
         uninstallFns = [
-            joinModule(ex, world),
-            leaveModule(ex, world),
-            triggerModule(ex, world),
-            announcementModule(ex, world),
+            function () { return clearTimeout(timeout); }
         ];
-    }, 2500);
+    };
+    // Delay loading to prevent spam
+    world.onMessage.once(load);
+    world.onJoin.once(load);
+    world.onLeave.once(load);
+    world.onOther.once(load);
     ex.uninstall = function () {
+        hasLoaded = true;
         uninstallFns.forEach(function (fn) { return fn(); });
         ex.settings.removeAll();
     };
