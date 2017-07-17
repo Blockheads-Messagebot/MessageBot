@@ -13,8 +13,9 @@ import {Storage} from './libraries/storage';
 import {MessageBot} from './bot/bot';
 (global as any).MessageBot = MessageBot;
 
-import './extensions/console';
-import './extensions/messages';
+import './extensions/extension-installer';
+import './extensionList';
+
 
 let auth = new PortalAuth(config.username, config.password);
 
@@ -42,5 +43,3 @@ let auth = new PortalAuth(config.username, config.password);
 
     new MessageBot(world);
 }());
-
-

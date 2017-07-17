@@ -47,8 +47,8 @@ var world_1 = require("./libraries/blockheads/world");
 var storage_1 = require("./libraries/storage");
 var bot_1 = require("./bot/bot");
 global.MessageBot = bot_1.MessageBot;
-require("./extensions/console");
-require("./extensions/messages");
+require("./extensions/extension-installer");
+require("./extensionList");
 var auth = new auth_1.PortalAuth(config.username, config.password);
 (function main() {
     return __awaiter(this, void 0, void 0, function () {
