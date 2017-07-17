@@ -1,2 +1,2 @@
-import './extensions/console';
-import './extensions/messages';
+import './extensions/extension-installer';
+import './extensionList';
