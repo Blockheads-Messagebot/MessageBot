@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": "https://github.com/Blockheads-MessageBot/MessageBot",
   "author": "Bibliofile <bibliofilegit@gmail.com>",
-  "license": "MIT",
+  "license": "GPL-3.0+",
   "devDependencies": {
     "tslint": "^5.6.0",
     "typedoc": "0.7.1",
