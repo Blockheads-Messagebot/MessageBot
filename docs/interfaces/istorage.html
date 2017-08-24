@@ -67,8 +67,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Storage class which manages saving and retrieving data between bot launches.
-						Extensions can access this class through ex.world.storage.</p>
+						<p>The storage class used by the <a href="../classes/messagebot.html">MessageBot</a> class and all <a href="../classes/messagebotextension.html">MessageBotExtension</a> instances.
+						It is expected that the</p>
 					</div>
 				</div>
 			</section>
@@ -80,328 +80,165 @@
 					</li>
 				</ul>
 			</section>
-			<section class="tsd-panel">
-				<h3>Implemented by</h3>
-				<ul class="tsd-hierarchy">
-					<li><a href="../classes/storage.html" class="tsd-signature-type">Storage</a></li>
-					<li><a href="../classes/storage.html" class="tsd-signature-type">Storage</a></li>
-				</ul>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Properties</h3>
+							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="istorage.html#clearnamespace" class="tsd-kind-icon">clear<wbr>Namespace</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="istorage.html#getobject" class="tsd-kind-icon">get<wbr>Object</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="istorage.html#getstring" class="tsd-kind-icon">get<wbr>String</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="istorage.html#migrate" class="tsd-kind-icon">migrate</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="istorage.html#set" class="tsd-kind-icon">set</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="istorage.html#clear" class="tsd-kind-icon">clear</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="istorage.html#get" class="tsd-kind-icon">get</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="istorage.html#prefix" class="tsd-kind-icon">prefix</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="istorage.html#set" class="tsd-kind-icon">set</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="clearnamespace" class="tsd-anchor"></a>
-					<h3>clear<wbr>Namespace</h3>
-					<div class="tsd-signature tsd-kind-icon">clear<wbr>Namespace<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/storage/storage.ts#L55">libraries/storage/storage.ts:55</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Removes all items starting with namespace from the storage.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>example</dt>
-							<dd><p>set(&#39;key+test&#39;, 1);
-									set(&#39;key+test2&#39;, 2);
-								clearNamespace(&#39;key+&#39;); //both key+test and key+test2 have been removed.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the prefix to check for when removing items.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>namespace<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="clear" class="tsd-anchor"></a>
+					<h3>clear</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>prefix<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in storage.ts:28</li>
 								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>namespace: <span class="tsd-signature-type">string</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Clears all keys using the current prefix, or the current prefix and the additional prefix if supplied.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> prefix: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the prefix to limit clearing to</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="getobject" class="tsd-anchor"></a>
-					<h3>get<wbr>Object</h3>
-					<div class="tsd-signature tsd-kind-icon">get<wbr>Object<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/storage/storage.ts#L30">libraries/storage/storage.ts:30</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Gets a stored object if it exists, otherwise returns fallback.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>example</dt>
-							<dd><p>var x = getObject(&#39;stored_key&#39;, [1, 2, 3]);</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the item to retrieve.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>what to return if the item does not exist or fails to parse correctly.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>whether or not a namespace should be used. Default: true</p>
-							</dd>
-							<dt>returns</dt>
-							<dd><p>the retrieved object, if it exists and can be parsed into a compatible format.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-has-type-parameter tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon">&lt;T&gt;<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="get" class="tsd-anchor"></a>
+					<h3>get</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">get&lt;T&gt;<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in storage.ts:15</li>
 								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-type-parameters-title">Type parameters</h4>
-										<ul class="tsd-type-parameters">
-											<li>
-												<h4>T</h4>
-											</li>
-										</ul>
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>key: <span class="tsd-signature-type">string</span></h5>
-											</li>
-											<li>
-												<h5>fallback: <span class="tsd-signature-type">T</span></h5>
-											</li>
-											<li>
-												<h5><span class="tsd-flag ts-flagOptional">Optional</span> local: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the specified key from the storage, if the key has not been set, returns the fallback.
+										Note that though this is typed as the type of the fallback being returned, a deep comparison will not be used.
+									You must validate your own objects.</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the key to get</p>
+									</div>
+								</li>
+								<li>
+									<h5>fallback: <span class="tsd-signature-type">T</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>if the key was not set, this will be returned.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+							<p>the stored value for the key.</p>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="getstring" class="tsd-anchor"></a>
-					<h3>get<wbr>String</h3>
-					<div class="tsd-signature tsd-kind-icon">get<wbr>String<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/storage/storage.ts#L17">libraries/storage/storage.ts:17</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Gets a string from the storage if it exists and returns it, otherwise returns fallback.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>example</dt>
-							<dd><p>var x = getString(&#39;stored_prefs&#39;, &#39;nothing&#39;);
-								var y = getString(&#39;stored_prefs&#39;, &#39;nothing&#39;, false);</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the key to retrieve.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>what to return if the key was not found.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>whether or not to use a namespace when checking for the key. Defaults to true.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, fallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="prefix" class="tsd-anchor"></a>
+					<h3>prefix</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">prefix<span class="tsd-signature-symbol">(</span>prefix<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="istorage.html" class="tsd-signature-type">IStorage</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in storage.ts:32</li>
 								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>key: <span class="tsd-signature-type">string</span></h5>
-											</li>
-											<li>
-												<h5>fallback: <span class="tsd-signature-type">string</span></h5>
-											</li>
-											<li>
-												<h5><span class="tsd-flag ts-flagOptional">Optional</span> local: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates a new instance of this class with the current prefix and the additional prefix supplied.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>prefix: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="istorage.html" class="tsd-signature-type">IStorage</a></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="migrate" class="tsd-anchor"></a>
-					<h3>migrate</h3>
-					<div class="tsd-signature tsd-kind-icon">migrate<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/storage/storage.ts#L62">libraries/storage/storage.ts:62</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Runs the migration function on all storage items that match the passed key. getObject will be used to parse the stored data.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>param</dt>
-							<dd><p>the key to match</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the function to call on all found data.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-has-type-parameter tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon">&lt;T&gt;<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, actor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-type-parameters-title">Type parameters</h4>
-										<ul class="tsd-type-parameters">
-											<li>
-												<h4>T</h4>
-											</li>
-										</ul>
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>key: <span class="tsd-signature-type">string</span></h5>
-											</li>
-											<li>
-												<h5>actor: <span class="tsd-signature-type">function</span></h5>
-												<ul class="tsd-parameters">
-													<li class="tsd-parameter-siganture">
-														<ul class="tsd-signatures tsd-kind-type-literal tsd-is-not-exported">
-															<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>found<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
-														</ul>
-														<ul class="tsd-descriptions">
-															<li class="tsd-description">
-																<h4 class="tsd-parameters-title">Parameters</h4>
-																<ul class="tsd-parameters">
-																	<li>
-																		<h5>found: <span class="tsd-signature-type">T</span></h5>
-																	</li>
-																</ul>
-																<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
-															</li>
-														</ul>
-													</li>
-												</ul>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
 					<a name="set" class="tsd-anchor"></a>
 					<h3>set</h3>
-					<div class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/storage/storage.ts#L43">libraries/storage/storage.ts:43</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Sets an object in the storage, stringifying it first if necessary.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>example</dt>
-							<dd><p>set(&#39;some_key&#39;, {a: [1, 2, 3], b: &#39;test&#39;});
-									//returns &#39;{&quot;a&quot;:[1,2,3],&quot;b&quot;:&quot;test&quot;}&#39;
-								getString(&#39;some_key&#39;);</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the item to overwrite or create.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>any stringifyable type.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>whether to save the item with a namespace. Defaults to true.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in storage.ts:22</li>
 								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>key: <span class="tsd-signature-type">string</span></h5>
-											</li>
-											<li>
-												<h5>data: <span class="tsd-signature-type">any</span></h5>
-											</li>
-											<li>
-												<h5><span class="tsd-flag ts-flagOptional">Optional</span> local: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the specified key in the storage, overwriting any current data.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the key to set</p>
+									</div>
+								</li>
+								<li>
+									<h5>value: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the value to set in the storage.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -416,9 +253,6 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class">
-						<a href="../classes/ajax.html" class="tsd-kind-icon">Ajax</a>
-					</li>
-					<li class=" tsd-kind-class">
 						<a href="../classes/messagebot.html" class="tsd-kind-icon">Message<wbr>Bot</a>
 					</li>
 					<li class=" tsd-kind-class">
@@ -428,25 +262,31 @@
 						<a href="../classes/player.html" class="tsd-kind-icon">Player</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="../classes/settings.html" class="tsd-kind-icon">Settings</a>
-					</li>
-					<li class=" tsd-kind-class tsd-has-type-parameter">
-						<a href="../classes/simpleevent.html" class="tsd-kind-icon">Simple<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/storage.html" class="tsd-kind-icon">Storage</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/tabmanager.html" class="tsd-kind-icon">Tab<wbr>Manager</a>
-					</li>
-					<li class=" tsd-kind-class">
 						<a href="../classes/world.html" class="tsd-kind-icon">World</a>
 					</li>
-					<li class=" tsd-kind-interface">
-						<a href="consoleextensionexports.html" class="tsd-kind-icon">Console<wbr>Extension<wbr>Exports</a>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface">
+						<a href="istorage.html" class="tsd-kind-icon">IStorage</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="istorage.html#clear" class="tsd-kind-icon">clear</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="istorage.html#get" class="tsd-kind-icon">get</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="istorage.html#prefix" class="tsd-kind-icon">prefix</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="istorage.html#set" class="tsd-kind-icon">set</a>
+							</li>
+						</ul>
 					</li>
-					<li class=" tsd-kind-interface">
-						<a href="uiextensionexports.html" class="tsd-kind-icon">UIExtension<wbr>Exports</a>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#extensioninitializer" class="tsd-kind-icon">Extension<wbr>Initializer</a>
 					</li>
 				</ul>
 			</nav>

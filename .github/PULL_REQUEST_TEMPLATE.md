@@ -8,4 +8,4 @@ A brief overview, simply restating the fix / feature is fine.
 
 ## Changes Proposed
 
-- A list of changes made.
+- A list of changes made, if not covered in breaking changes.

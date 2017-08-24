@@ -62,39 +62,73 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<h1 id="usage">Usage</h1>
-				<h5 id="installation-browser">Installation - Browser</h5>
-				<ol>
-					<li>Bookmark this page</li>
-					<li>Copy this code:
-					<code>javascript:(function(){var s=document.createElement(&#39;script&#39;); s.src=&#39;//blockheadsfans.com/messagebot/bot/load&#39;; s.crossOrigin=&#39;anonymous&#39;; document.head.appendChild(s);})()</code></li>
-					<li>Edit the bookmark, look for the URL of this page and change it to the code you copied. Be sure to remove all the previous text!</li>
-					<li>Install complete!</li>
-				</ol>
-				<h5 id="installation-node">Installation - Node</h5>
-				<ol>
-					<li>Clone the repo, <code>git clone http://github.com/Bibliofile/Blockheads-MessageBot</code></li>
-					<li>Enter the directory, <code>cd Blockheads-MessageBot</code></li>
-					<li>Install dependencies, <code>npm install --production</code></li>
-					<li>Edit the config in <code>./config/bot.js</code>, copy the default config into this file from <code>./config/bot.default.js</code></li>
-					<li>Run: <code>npm run start:cloud</code> or <code>npm run start:mac</code>.</li>
-				</ol>
-				<h5 id="importing-configs">Importing configs</h5>
-				<p>If you are moving a bot from the browser, you can import your config by placing the entire text from backing up the bot in a file named <code>localStorage.json</code> in your <code>config</code> directory. The bot will load this file each time it is launched to update the config (and will save changes to it). Manually editing the config is not recommended.</p>
-				<h1 id="development">Development</h1>
-				<h3 id="to-run-tests-">To run tests:</h3>
-				<ol>
-					<li>Build tests:
-					<code>npm run gulp build:test</code></li>
-					<li>Open <code>test/index.html</code> in your web browser.</li>
-				</ol>
-				<h3 id="to-build">To build</h3>
-				<ul>
-					<li>Node: <code>npm run gulp build:node</code></li>
-					<li>Node + Browser: <code>npm run gulp build</code></li>
-					<li>Browser: <code>npm run gulp build:browser</code></li>
-					<li>Watch both: <code>npm run gulp build:watch</code></li>
-				</ul>
+				<h1 id="blockheads-messagebot">Blockheads MessageBot</h1>
+				<h3 id="what-is-this-">What is this?</h3>
+				<p>The MessageBot is a framework for quickly building bots for The Blockheads that work on both Mac and Cloud servers. If you want to use the MessageBot without writing code, you will want to take a look at one of the following links.</p>
+				<table>
+					<thead>
+						<tr>
+							<th style="text-align:center">Page</th>
+							<th style="text-align:center">Cloud</th>
+							<th style="text-align:center">Mac</th>
+							<th style="text-align:center">Mobile</th>
+							<th style="text-align:center">Windows</th>
+							<th style="text-align:center">OS X</th>
+							<th style="text-align:center">Linux</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td style="text-align:center"><a href="https://github.com/Blockheads-Messagebot/Browser-Loader">Bookmarklet</a></td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+						</tr>
+						<tr>
+							<td style="text-align:center"><a href="https://github.com/Blockheads-Messagebot/Electron-Cloud-Loader">Electron App</a></td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+						</tr>
+						<tr>
+							<td style="text-align:center"><a href="https://github.com/Blockheads-Messagebot/Terminal-Cloud-Loader">Terminal App</a></td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✓</td>
+						</tr>
+						<tr>
+							<td style="text-align:center"><a href="https://github.com/Blockheads-Messagebot/Electron-Mac-Loader">Electron App</a></td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+						</tr>
+						<tr>
+							<td style="text-align:center"><a href="https://github.com/Blockheads-Messagebot/Terminal-Mac-Loader">Terminal App</a></td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✖</td>
+							<td style="text-align:center">✓</td>
+							<td style="text-align:center">✖</td>
+						</tr>
+					</tbody>
+				</table>
+				<h3 id="docs-for-devs">Docs for Devs</h3>
+				<p>See <a href="https://blockheads-messagebot.github.io/MessageBot/">here</a>. For a simple extension tutorial, see <a href="https://github.com/Blockheads-Messagebot/MessageBot/wiki/2.-Development:-Start-Here">the wiki</a></p>
+				<h3 id="contributing">Contributing</h3>
+				<p>See <a href="https://github.com/Blockheads-Messagebot/MessageBot/.github/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -108,9 +142,6 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class">
-						<a href="classes/ajax.html" class="tsd-kind-icon">Ajax</a>
-					</li>
-					<li class=" tsd-kind-class">
 						<a href="classes/messagebot.html" class="tsd-kind-icon">Message<wbr>Bot</a>
 					</li>
 					<li class=" tsd-kind-class">
@@ -120,25 +151,13 @@
 						<a href="classes/player.html" class="tsd-kind-icon">Player</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="classes/settings.html" class="tsd-kind-icon">Settings</a>
-					</li>
-					<li class=" tsd-kind-class tsd-has-type-parameter">
-						<a href="classes/simpleevent.html" class="tsd-kind-icon">Simple<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="classes/storage.html" class="tsd-kind-icon">Storage</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="classes/tabmanager.html" class="tsd-kind-icon">Tab<wbr>Manager</a>
-					</li>
-					<li class=" tsd-kind-class">
 						<a href="classes/world.html" class="tsd-kind-icon">World</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="interfaces/consoleextensionexports.html" class="tsd-kind-icon">Console<wbr>Extension<wbr>Exports</a>
+						<a href="interfaces/istorage.html" class="tsd-kind-icon">IStorage</a>
 					</li>
-					<li class=" tsd-kind-interface">
-						<a href="interfaces/uiextensionexports.html" class="tsd-kind-icon">UIExtension<wbr>Exports</a>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#extensioninitializer" class="tsd-kind-icon">Extension<wbr>Initializer</a>
 					</li>
 				</ul>
 			</nav>

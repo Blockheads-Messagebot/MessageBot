@@ -1,58 +1,23 @@
 {
   "name": "blockheads-messagebot",
-  "version": "6.0.0",
-  "description": "A bot for the Blockheads Cloud Portal",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Bibliofile/Blockheads-MessageBot.git"
-  },
-  "author": "Bibliofile",
-  "license": "SEE LICENSE IN LICENSE",
-  "bugs": {
-    "url": "https://github.com/Bibliofile/Blockheads-MessageBot/issues"
-  },
-  "homepage": "https://github.com/Bibliofile/Blockheads-MessageBot#readme",
-  "types": "./build/declarations/index.d.ts",
-  "scripts": {
-    "docs": "typedoc --options ./typedoc.json",
-    "gulp": "gulp",
-    "import": "node build/import.js",
-    "start:cloud": "node build/index-cli.js",
-    "start:mac": "node build/index-mac.js"
-  },
-  "browser": {
-    "./src/libraries/ajax.ts": "./src/libraries/ajax-browser.ts",
-    "./src/libraries/storage/index.ts": "./src/libraries/storage/browser.ts",
-    "mocha": "./test/mocha.js",
-    "chai": "./test/chai.js"
+  "version": "7.0.0a",
+  "description": "A bot framework for the Blockheads game that supports extensions.",
+  "main": "index.js",
+  "repository": "https://github.com/Blockheads-MesageBot/MessageBot",
+  "author": "Bibliofile <bibliofilegit@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tslint": "^5.6.0",
+    "typedoc": "0.7.1",
+    "typescript": "^2.4.2"
   },
   "dependencies": {
-    "colors": "^1.1.2",
-    "request": "^2.81.0",
-    "sha1": "^1.1.1",
-    "simple-plist": "^0.2.1"
+    "blockheads-api": "^0.3.2",
+    "strongly-typed-events": "^1.0.1"
   },
-  "devDependencies": {
-    "@types/chai": "^3.5.2",
-    "@types/mocha": "^2.2.41",
-    "@types/node": "^7.0.21",
-    "@types/request": "0.0.43",
-    "@types/sinon": "^2.2.2",
-    "brfs": "^1.4.3",
-    "browserify": "^14.3.0",
-    "bulma": "^0.4.1",
-    "chai": "^3.5.0",
-    "glob": "^7.1.2",
-    "gulp": "^3.9.1",
-    "gulp-typescript": "^3.1.6",
-    "merge2": "^1.0.3",
-    "minifyify": "^7.3.5",
-    "mocha": "^3.4.1",
-    "scssify": "^2.3.0",
-    "sinon": "^2.2.0",
-    "tsify": "^3.0.1",
-    "typedoc": "^0.7.1",
-    "typescript": "^2.3.2",
-    "watchify": "^3.9.0"
+  "scripts": {
+    "docs": "typedoc --options typedoc.json",
+    "build": "tsc",
+    "prepare": "npm run build"
   }
 }
