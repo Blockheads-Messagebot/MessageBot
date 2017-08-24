@@ -1,9 +1,9 @@
 {
   "name": "blockheads-messagebot",
-  "version": "7.0.0a",
+  "version": "7.0.0a2",
   "description": "A bot framework for the Blockheads game that supports extensions.",
   "main": "index.js",
-  "repository": "https://github.com/Blockheads-MesageBot/MessageBot",
+  "repository": "https://github.com/Blockheads-MessageBot/MessageBot",
   "author": "Bibliofile <bibliofilegit@gmail.com>",
   "license": "MIT",
   "devDependencies": {
