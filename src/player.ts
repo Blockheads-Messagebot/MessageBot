@@ -1,4 +1,6 @@
 import { WorldLists } from 'blockheads-api/api'
+export { WorldLists } from 'blockheads-api/api'
+
 
 function arrayContainsAny(haystack: string[], ...needles: string[]): boolean {
     return haystack.some(item => needles.includes(item))
@@ -76,8 +78,8 @@ export class Player {
      *
      * @return true if the player has joined before, otherwise false.
      */
-    hasJoined = (): boolean => {
-        return this._info.joins > 0
+    get hasJoined(): boolean {
+        return this.joins > 0
     }
 
     /**
@@ -85,7 +87,7 @@ export class Player {
      *
      * @return true if the player is the owner.
      */
-    isOwner = (): boolean => {
+    get isOwner(): boolean {
         return !!this._info.owner || this._name == 'SERVER'
     }
 
@@ -94,9 +96,9 @@ export class Player {
      *
      * @return true if the player is an admin.
      */
-    isAdmin = (): boolean => {
+    get isAdmin(): boolean {
         // A player is admin if their name or their latest IP is listed on the adminlist, or they are the owner.
-        return this.isOwner() || arrayContainsAny(this._lists.adminlist, this._name, this._info.ip)
+        return this.isOwner || arrayContainsAny(this._lists.adminlist, this._name, this._info.ip)
     }
 
     /**
@@ -104,9 +106,9 @@ export class Player {
      *
      * @return true if the player is an admin and not a mod.
      */
-    isMod = (): boolean => {
+    get isMod(): boolean {
         // A player is mod if their name or their latest IP is on the modlist
-        return !this.isAdmin() && arrayContainsAny(this._lists.modlist, this._name, this._info.ip)
+        return !this.isAdmin && arrayContainsAny(this._lists.modlist, this._name, this._info.ip)
     }
 
     /**
@@ -114,8 +116,8 @@ export class Player {
      *
      * @return true if the player is an admin or a mod.
      */
-    isStaff = (): boolean => {
-        return this.isAdmin() || this.isMod()
+    get isStaff(): boolean {
+        return this.isAdmin || this.isMod
     }
 
     /**
@@ -123,9 +125,9 @@ export class Player {
      *
      * @return true if the player can join the server when it is whitelisted.
      */
-    isWhitelisted = (): boolean => {
+    get isWhitelisted(): boolean {
         // A player is whitelisted if they are staff or if their name or latest ip is on the whitelist.
-        return this.isStaff() || arrayContainsAny(this._lists.whitelist, this._name, this._info.ip)
+        return this.isStaff || arrayContainsAny(this._lists.whitelist, this._name, this._info.ip)
     }
 
     /**
@@ -133,8 +135,8 @@ export class Player {
      *
      * @return true if the player is on the blacklist.
      */
-    isBanned = (): boolean => {
-        return !this.isStaff() && this._lists.blacklist
+    get isBanned(): boolean {
+        return !this.isStaff && this._lists.blacklist
             .some(entry => {
                 // We don't know the current player's device ID so can't check for that on the blacklist
                 // If the player's name is on the blacklist, they are banned.

@@ -1,5 +1,8 @@
 import { WorldApi } from 'blockheads-api/api'
-import { ISimpleEvent, createSimpleEventDispatcher } from 'strongly-typed-events'
+import { ISimpleEvent, createSimpleEventDispatcher, SimpleEventDispatcher } from 'strongly-typed-events'
+// Typescript incorrectly types clearTimeout as not accepting a NodeJS.Timer
+declare function clearTimeout(handle: number | NodeJS.Timer): void
+
 
 /**
  * Arguments passed when a player joins the server
@@ -24,10 +27,11 @@ export interface MessageEventArgs {
  * @hidden
  */
 export class ChatWatcher {
-    private _onMessage = createSimpleEventDispatcher<MessageEventArgs>()
-    private _onJoin = createSimpleEventDispatcher<JoinEventArgs>()
-    private _onLeave = createSimpleEventDispatcher<string>()
-    private _onOther = createSimpleEventDispatcher<string>()
+    protected _onMessage: SimpleEventDispatcher<MessageEventArgs> = createSimpleEventDispatcher()
+    protected _onJoin: SimpleEventDispatcher<JoinEventArgs> = createSimpleEventDispatcher()
+    protected _onLeave: SimpleEventDispatcher<string> = createSimpleEventDispatcher()
+    protected _onOther: SimpleEventDispatcher<string> = createSimpleEventDispatcher()
+    protected timeoutId: NodeJS.Timer | number | null = null
 
     /**
      * Event which fires when a player joins the server.
@@ -58,78 +62,114 @@ export class ChatWatcher {
     }
 
     /**
+     * True if the watcher is currently running, otherwise false.
+     */
+    get running(): boolean {
+        return this.timeoutId != null
+    }
+
+    /**
      * Creates a new ChatWatcher
      * @param api the api to be used to communicate with chat
      * @param online a shared array with the host world class that this class keeps up to date.
      */
-    constructor(private api: WorldApi, private online: string[]) {
-        this.checkChat(0)
+    constructor(protected api: Pick<WorldApi, 'getMessages'>, protected online: string[]) {}
+
+    /**
+     * Starts the listener. Calling multiple times will not result in multiple listeners being started.
+     */
+    start(): void {
+        if (this.timeoutId) this.stop()
+        this.timeoutId = setTimeout(this.checkChat, 0, 0)
+    }
+
+    /**
+     * Stops the listener if it is running. If not running, does nothing.
+     */
+    stop(): void {
+        if (this.timeoutId) clearTimeout(this.timeoutId)
+        this.timeoutId = null
     }
 
     /**
      * Parses a chat message, firing the appropriate events if required.
      */
-    parse = (message: string): void => {
-        if (/^[^a-z]+ - Player Connected /.test(message)) {
-            try {
-                let [, name, ip] = message.match(/Connected (.*) \| ([\d.]+) \|/) as RegExpMatchArray
-                this.online.includes(name) || this.online.push(name)
-                this._onJoin.dispatch({name, ip})
-                return
-            } catch (_) {
-                this._onOther.dispatch(message)
-                return
-            }
+    protected parse = (message: string): void => {
+        let parseError = () => {
+            this._onOther.dispatch(message)
         }
 
-        if (/^[^a-z] - Player Disconnected /.test(message)) {
-            let [, name] = message.match(/Disconnected (.*)$/) as RegExpMatchArray
-            if (this.online.includes(name)) {
-                this.online.splice(this.online.indexOf(name), 1)
-                this._onLeave.dispatch(name)
-                return
-            }
+        if (/^[^a-z]+ - Player Connected /.test(message)) {
+            try {
+                let [, name, ip] = message.match(/Connected ([^a-z]{3,}) \| ([\d.]+) \| .{32}$/) as RegExpMatchArray
+                if (!this.online.includes(name)) {
+                    this.online.includes(name) || this.online.push(name)
+                    this._onJoin.dispatch({name, ip})
+                    return
+                }
+            } catch { }
+            return parseError()
+        }
+
+        if (/^[^a-z]+ - Player Disconnected /.test(message)) {
+            try {
+                let [, name] = message.match(/Disconnected ([^a-z]{3,})$/) as RegExpMatchArray
+                if (this.online.includes(name)) {
+                    this.online.splice(this.online.indexOf(name), 1)
+                    this._onLeave.dispatch(name)
+                    return
+                }
+            } catch { }
+            return parseError()
         }
 
         if (message.slice(0, 18).includes(': ')) {
             let name = this.getUser(message)
             if (name) {
                 message = message.substr(name.length + 2)
+                if (name == 'SERVER' && message.startsWith('/')) {
+                    return parseError()
+                }
+
                 this._onMessage.dispatch({name, message})
                 return
             }
         }
 
-        this._onOther.dispatch(message)
+        return parseError()
     }
 
     /**
      * Parses a message to extract a player name.
      * @param message the message to extract a name from.
      */
-    private getUser(message: string): string {
+    protected getUser(message: string): string {
         for (let i = 18; i > 4; i--) {
             let possibleName = message.substring(0, message.lastIndexOf(': ', i))
             if (this.online.includes(possibleName) || possibleName == 'SERVER') {
                 return possibleName
             }
         }
-        // Should ideally never happen.
-        return message.substring(0, message.lastIndexOf(': ', 18))
+        // Player is most likely offline
+        if (/[^a-z]{3,16}: /.test(message)) return message.substring(0, message.lastIndexOf(': ', 18))
+        // Invalid name
+        return ''
     }
 
     /**
      * Continually checks chat for new messages
      * @param lastId the ID to pass to the API to get only most recent messages.
      */
-    private checkChat = async (lastId: number) => {
+    protected checkChat = async (lastId: number): Promise<void> => {
         try {
             let { log, nextId } = await this.api.getMessages(lastId)
+            if (this.timeoutId == null) return
             log.forEach(this.parse)
-            setTimeout(this.checkChat, 5000, nextId)
-        } catch (_) {
+            this.timeoutId = setTimeout(this.checkChat, 5000, nextId)
+        } catch {
             // Network error, wait 30 seconds before retrying
-            return setTimeout(this.checkChat, 30000, 0)
+            this.timeoutId = setTimeout(this.checkChat, 30000, 0)
+            return
         }
     }
 }

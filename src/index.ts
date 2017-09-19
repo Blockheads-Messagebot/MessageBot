@@ -45,7 +45,7 @@ export class MessageBot {
     /**
      * All loaded extension instances for this bot.
      */
-    private extensions = new Map<string, MessageBotExtension>()
+    private _extensions = new Map<string, MessageBotExtension>()
 
     /**
      *
@@ -77,7 +77,7 @@ export class MessageBot {
      * @param id the extension id to get exports from
      */
     getExports = (id: string): {[key: string]: any} | undefined => {
-        let ex = this.extensions.get(id.toLocaleLowerCase())
+        let ex = this._extensions.get(id.toLocaleLowerCase())
         if (ex) return ex.exports
     }
 
@@ -88,16 +88,16 @@ export class MessageBot {
      */
     addExtension = (id: string) => {
         id = id.toLocaleLowerCase()
-        if (this.extensions.has(id)) throw new Error(`The ${id} extension has already been added.`)
+        if (this._extensions.has(id)) throw new Error(`The ${id} extension has already been added.`)
 
         let creator = extensions.get(id)
         if (!creator) throw new Error(`The ${id} extension has not been registered.`)
         try {
             let ex = new MessageBotExtension(id, this)
-            this.extensions.set(id, ex)
+            this._extensions.set(id, ex)
             creator.call(ex, ex, this.world)
-        } catch (_) {
-            console.log(`Error adding the ${id} extension. It may be partially loaded.`)
+        } catch (error) {
+            console.error(`Error adding the ${id} extension. It may be partially loaded.`, error)
         }
     }
 
@@ -105,19 +105,18 @@ export class MessageBot {
      * Removes a currently loaded extension. Should not be used by published extensions unless
      * the extension is an extension manager.
      * @param id the id of the extension to remove
-     * @param uninstall whether or not to call the uninstall function.
      */
-    removeExtension = (id: string, uninstall = true) => {
+    removeExtension = (id: string) => {
         id = id.toLocaleLowerCase()
-        let ex = this.extensions.get(id)
+        let ex = this._extensions.get(id)
         if (!ex) throw new Error(`The ${id} extension is not loaded.`)
 
         try {
-            if (uninstall) ex.uninstall()
+            ex.uninstall()
         } catch (error) {
-            console.log(`Error uninstalling ${id}:`, error)
+            console.error(`Error uninstalling ${id}:`, error)
         } finally {
-            this.extensions.delete(id)
+            this._extensions.delete(id)
         }
     }
 }
