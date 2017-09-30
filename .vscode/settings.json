@@ -4,5 +4,6 @@
         "*.js.map": true,
         ".nyc_output": true,
         "coverage": true
-    }
+    },
+    "eslint.enable": false
 }

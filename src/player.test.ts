@@ -2,13 +2,14 @@ import test from 'ava'
 
 import { Player, PlayerInfo, WorldLists } from './player'
 
+const lists = { adminlist: [], modlist: [], whitelist: [], blacklist: [] }
+
 const tn = ([s]: TemplateStringsArray) => `Player - ${s}`
 
-const emptyLists: WorldLists = { adminlist: [], modlist: [], whitelist: [], blacklist: [] }
 const defaultInfo: PlayerInfo = { ip: '0.0.0.0', ips: ['0.0.0.0', '0.0.0.1'], joins: 1}
 
-function makePlayer(name: string, lists: Partial<WorldLists> = {}, info: Partial<PlayerInfo> = {}) {
-    return new Player(name, {...defaultInfo, ...info}, {...emptyLists, ...lists})
+function makePlayer(name: string, lists2: Partial<WorldLists> = {}, info: Partial<PlayerInfo> = {}) {
+    return new Player(name, {...defaultInfo, ...info}, {...lists, ...lists2})
 }
 
 test(tn`Should expose the player name`, t => {

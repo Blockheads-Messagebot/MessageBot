@@ -4,13 +4,18 @@ import { WorldApi, LogEntry, WorldOverview, WorldLists } from 'blockheads-api/ap
 
 import { Player, PlayerInfo } from './player'
 import { ChatWatcher } from './chatWatcher'
-import { IStorage } from './storage'
+import { Storage } from './storage'
 import { ISimpleEvent, createSimpleEventDispatcher } from 'strongly-typed-events'
 
+const cloneDate = (d: Date) => new Date(d.getTime())
+
+const PLAYERS_KEY = 'mb_players'
+type PlayerStorage = {[name: string]: PlayerInfo}
+
 export class World {
-    private _api: WorldApi
-    private _storage: IStorage
-    private _chatWatcher: ChatWatcher
+    protected _api: WorldApi
+    protected _storage: Storage
+    protected _chatWatcher: ChatWatcher
 
     private _cache: {
         logs?: Promise<LogEntry[]>
@@ -24,34 +29,15 @@ export class World {
         onMessage: createSimpleEventDispatcher<{player: Player, message: string}>(),
     }
 
-    private _online: string[] = []
-    private _lists: WorldLists = {adminlist: [], modlist: [], whitelist: [], blacklist: []}
-    private _players: {[name: string]: PlayerInfo}
-    private _commands: Map<string, (player: Player, args: string) => void> = new Map()
+    protected _online: string[] = []
+    protected _lists: WorldLists = {adminlist: [], modlist: [], whitelist: [], blacklist: []}
+    protected _commands: Map<string, (player: Player, args: string) => void> = new Map()
 
-    constructor(api: WorldApi, storage: IStorage) {
+    constructor(api: WorldApi, storage: Storage) {
         this._api = api
         this._storage = storage
-        this._players = storage.get('mb_players', {})
-        let watcher = this._chatWatcher = new ChatWatcher(api, this._online)
-        watcher.onJoin.sub(({name, ip}) => {
-            name = name.toLocaleUpperCase()
-            let player = this._players[name] = this._players[name] || { ip, ips: [ip], joins: 0}
-            player.joins++
-            player.ip = ip
-            if (!player.ips.includes(ip)) player.ips.push(ip)
-            this._events.onJoin.dispatch(this.getPlayer(name))
-        })
-        watcher.onLeave.sub(name => this._events.onLeave.dispatch(this.getPlayer(name)))
-        watcher.onMessage.sub(({name, message}) => {
-            this._events.onMessage.dispatch({player: this.getPlayer(name), message})
-            if (/^\/[^ ]/.test(message)) {
-                let [, command, args] = message.match(/^\/([^ ]+) ?(.*)$/) as RegExpMatchArray
-                let handler = this._commands.get(command.toLocaleUpperCase())
-                if (handler) handler(this.getPlayer(name), args)
-            }
-        })
 
+        this._createWatcher()
         this.getOverview() // Sets the owner, gets initial online players
         this.getLists() // Loads the current server lists
     }
@@ -97,23 +83,34 @@ export class World {
      * Gets all players who have joined the server
      */
     get players(): Player[] {
-        return Object.keys(this._players).map(this.getPlayer)
+        let players = this._storage.get<PlayerStorage>(PLAYERS_KEY, {})
+        return Object.keys(players).map(this.getPlayer)
     }
 
     /**
      * Gets an overview of the server info
      */
-    getOverview = (refresh = false): Promise<WorldOverview> => {
+    getOverview = async (refresh = false): Promise<WorldOverview> => {
         if (!this._cache.overview || refresh) {
-            this._cache.overview = this._api.getOverview().then(overview => {
-                overview.online.forEach(name => this._online.includes(name) || this._online.push(name))
-                this._players[overview.owner] = this._players[overview.owner] || { ip: '', ips: [], joins: 0 }
-                this._players[overview.owner].owner = true
-                return overview
+            let overview = await (this._cache.overview = this._api.getOverview())
+            // Add online players to the online list if they aren't already online
+            overview.online.forEach(name => this._online.includes(name) || this._online.push(name))
+
+            // Make sure the owner has the owner flag set to true
+            this._storage.with<PlayerStorage>(PLAYERS_KEY, {}, players => {
+                players[overview.owner] = players[overview.owner] || { ip: '', ips: [], joins: 0 }
+                players[overview.owner].owner = true
             })
         }
-        return this._cache.overview
-            .then(overview => ({ ...overview }))
+
+        let overview = await this._cache.overview
+        return {
+            ...overview,
+            created: cloneDate(overview.created),
+            last_activity: cloneDate(overview.last_activity),
+            credit_until: cloneDate(overview.credit_until),
+            online: this.online
+        }
     }
 
     /**
@@ -150,10 +147,13 @@ export class World {
      *
      * @param refresh if true, will get the latest logs, otherwise will returned the cached version.
      */
-    getLogs = (refresh = false): Promise<LogEntry[]> => {
+    getLogs = async (refresh = false): Promise<LogEntry[]> => {
         if (!this._cache.logs || refresh) this._cache.logs = this._api.getLogs()
-        return this._cache.logs
-            .then(lines => lines.slice().map(line => ({...line})))
+        let lines = await this._cache.logs
+        return lines.slice().map(line => ({
+            ...line,
+            timestamp: cloneDate(line.timestamp)
+        }))
     }
 
 
@@ -169,7 +169,8 @@ export class World {
      */
     getPlayer = (name: string): Player => {
         name = name.toLocaleUpperCase()
-        return new Player(name, this._players[name] || {ip: '', ips: [], joins: 0}, this._lists)
+        let players = this._storage.get<PlayerStorage>(PLAYERS_KEY, {})
+        return new Player(name, players[name] || {ip: '', ips: [], joins: 0}, this._lists)
     }
 
     /**
@@ -211,4 +212,35 @@ export class World {
      * Sends a restart request, if the world is offline no actions will be taken.
      */
     restart = () => this._api.restart()
+
+    /**
+     * Internal init function
+     */
+    protected _createWatcher(): void {
+        let watcher = this._chatWatcher = new ChatWatcher(this._api, this._online)
+
+        watcher.onJoin.sub(({ name, ip }) => {
+            name = name.toLocaleUpperCase()
+            this._storage.with<PlayerStorage>(PLAYERS_KEY, {}, players => {
+                let player = players[name] = players[name] || { ip, ips: [ip], joins: 0 }
+                player.joins++
+                player.ip = ip
+                if (!player.ips.includes(ip)) player.ips.push(ip)
+            })
+            this._events.onJoin.dispatch(this.getPlayer(name))
+        })
+
+        watcher.onLeave.sub(name => this._events.onLeave.dispatch(this.getPlayer(name)))
+
+        watcher.onMessage.sub(({ name, message }) => {
+            this._events.onMessage.dispatch({ player: this.getPlayer(name), message })
+            if (/^\/[^ ]/.test(message)) {
+                let [, command, args] = message.match(/^\/([^ ]+) ?(.*)$/) as RegExpMatchArray
+                let handler = this._commands.get(command.toLocaleUpperCase())
+                if (handler) handler(this.getPlayer(name), args)
+            }
+        })
+
+        watcher.start()
+    }
 }

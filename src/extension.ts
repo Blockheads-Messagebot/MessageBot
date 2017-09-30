@@ -1,6 +1,6 @@
 import { World } from './world'
 import { MessageBot } from './index'
-import { IStorage } from './storage'
+import { Storage } from './storage'
 
 /**
  * Function used to create an extension, will be called for each bot that the extension is attached to.
@@ -11,7 +11,7 @@ export class MessageBotExtension {
     /**
      * The prefixed storage reserved for this extension.
      */
-    storage: IStorage
+    storage: Storage
 
     /**
      * A shortcut for this.bot.world
@@ -34,8 +34,16 @@ export class MessageBotExtension {
     }
 
     /**
+     * Removes the extension, listeners and ui should be removed here. Stored settings should not be removed.
+     */
+    remove() {}
+
+    /**
      * Removes the extension. All listeners should be removed here.
      */
-    uninstall() {}
+    uninstall() {
+        this.remove()
+        this.storage.clear()
+    }
 
 }
