@@ -1,5 +1,7 @@
 # Blockheads MessageBot
 
+[![Build Status](https://travis-ci.org/Blockheads-Messagebot/MessageBot.svg?branch=master)](https://travis-ci.org/Blockheads-Messagebot/MessageBot)
+
 ### What is this?
 
 The MessageBot is a framework for quickly building bots for The Blockheads that work on both Mac and Cloud servers. If you want to use the MessageBot without writing code, you will want to take a look at one of the following links.
@@ -7,10 +9,8 @@ The MessageBot is a framework for quickly building bots for The Blockheads that 
 | Page | Cloud | Mac | Mobile | Windows | OS X | Linux |
 | :--: | :---: | :-: | :----: | :-----: | :-: | :---: |
 | [Bookmarklet](https://github.com/Blockheads-Messagebot/Browser-Loader) | ✓ | ✖ | ✓ | ✓ | ✓ | ✓ |
-| [Electron App](https://github.com/Blockheads-Messagebot/Electron-Cloud-Loader) | ✓ | ✖ | ✖ | ✓ | ✓ | ✓ |
-| [Terminal App](https://github.com/Blockheads-Messagebot/Terminal-Cloud-Loader) | ✓ | ✖ | ✖ | ✓ | ✓ | ✓ |
-| [Electron App](https://github.com/Blockheads-Messagebot/Electron-Mac-Loader) | ✖ | ✓ | ✖ | ✖ | ✓ | ✖ |
-| [Terminal App](https://github.com/Blockheads-Messagebot/Terminal-Mac-Loader) | ✖ | ✓ | ✖ | ✖ | ✓ | ✖ |
+| [Cloud](https://github.com/Blockheads-Messagebot/Cloud-Loader) | ✓ | ✖ | ✖ | ✓ | ✓ | ✓ |
+| [Mac](https://github.com/Blockheads-Messagebot/Mac-Loader) | ✖ | ✓ | ✖ | ✖ | ✓ | ✖ |
 
 ### Docs for Devs
 

@@ -13,6 +13,7 @@ Please keep pull requests to one bugfix / feature, this makes them easier to rev
 #### Code style
 
 - Indent with 4 spaces
-- Always use semicolons.
+- Semicolons only if required
 - Variables, methods, and properties are `camelCased`, classes and interfaces are `PascalCased`.
 - Write JSDoc comments at a minimum for methods accessible to extensions, if the method is not exposed, documenting parameters is optional though a summary of the method is a good idea.
+- Test coverage must remain at 100%.
