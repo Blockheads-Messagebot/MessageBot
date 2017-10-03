@@ -8,7 +8,6 @@
             "scripthost"
         ],
         "moduleResolution": "node",
-        "module": "commonjs",
         "declaration": true,
         "removeComments": false,
         "noImplicitAny": true,
