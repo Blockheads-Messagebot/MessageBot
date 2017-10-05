@@ -21,7 +21,7 @@
     "docs": "typedoc --options typedoc.json",
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "npm run build && nyc ava",
+    "test": "tsc --module CommonJS && nyc ava",
     "report": "nyc report --reporter=html"
   }
 }

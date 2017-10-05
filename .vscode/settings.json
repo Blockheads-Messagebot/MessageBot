@@ -2,6 +2,7 @@
     "files.exclude": {
         "*.js": true,
         "*.js.map": true,
+        "*.d.ts": true,
         ".nyc_output": true,
         "coverage": true
     },
