@@ -209,3 +209,44 @@ test(tn`removeExtension should call uninstall if the extension is not being unin
 
     MessageBot.deregisterExtension(id)
 })
+
+test(tn`send should inject variables`, t => {
+    let bot = makeBot(t)
+    bot.world.send = (message: string) => {
+        t.is(message, 'Message VAR end.')
+        return Promise.resolve()
+    }
+
+    bot.send('Message {{key}} end.', {key: 'VAR'})
+})
+
+test(tn`send variable expansion should not be recursive`, t => {
+    let bot = makeBot(t)
+    bot.world.send = (message: string) => {
+        t.is(message, 'Message {{VAR}} end.')
+        return Promise.resolve()
+    }
+
+    bot.send('Message {{key}} end.', { key: '{{VAR}}', VAR: 'Other' })
+    bot.send('Message {{key}} end.', { VAR: 'Other', key: '{{VAR}}' })
+})
+
+test(tn`send should allow the usage of 'name'`, t => {
+    let bot = makeBot(t)
+    bot.world.send = (message: string) => {
+        t.is(message, 'NAME Name name')
+        return Promise.resolve()
+    }
+
+    bot.send('{{NAME}} {{Name}} {{name}}', { name: 'NaMe' })
+})
+
+test(tn`Should allow not passing a params variable`, t => {
+    let bot = makeBot(t)
+    bot.world.send = (message: string) => {
+        t.is(message, '{{fakeKey}}')
+        return Promise.resolve()
+    }
+
+    bot.send('{{fakeKey}}')
+})
