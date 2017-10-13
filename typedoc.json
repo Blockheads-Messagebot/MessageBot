@@ -1,22 +1,9 @@
 {
-    "out": "docs",
     "mode": "file",
+    "out": "docs",
     "name": "MessageBot",
     "excludePrivate": true,
     "excludeNotExported": true,
     "listInvalidSymbolLinks": true,
-    "toc": [
-        "Ajax",
-        "Hook",
-        "MessageBot",
-        "MessageBotExtension",
-        "Player",
-        "Settings",
-        "SimpleEvent",
-        "Storage",
-        "TabManager",
-        "World",
-        "ConsoleExtensionExports",
-        "UIExtensionExports"
-    ]
+    "include": "./src/*"
 }

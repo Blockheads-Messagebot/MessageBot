@@ -90,19 +90,19 @@
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
-							<h3>Methods</h3>
+							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#getip" class="tsd-kind-icon">getIP</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#getips" class="tsd-kind-icon">getIPs</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#getjoins" class="tsd-kind-icon">get<wbr>Joins</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#getname" class="tsd-kind-icon">get<wbr>Name</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#hasjoined" class="tsd-kind-icon">has<wbr>Joined</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#isadmin" class="tsd-kind-icon">is<wbr>Admin</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#isbanned" class="tsd-kind-icon">is<wbr>Banned</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#ismod" class="tsd-kind-icon">is<wbr>Mod</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#isowner" class="tsd-kind-icon">is<wbr>Owner</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#isstaff" class="tsd-kind-icon">is<wbr>Staff</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="player.html#iswhitelisted" class="tsd-kind-icon">is<wbr>Whitelisted</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#hasjoined" class="tsd-kind-icon">has<wbr>Joined</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#ip" class="tsd-kind-icon">ip</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#ips" class="tsd-kind-icon">ips</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#isadmin" class="tsd-kind-icon">is<wbr>Admin</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#isbanned" class="tsd-kind-icon">is<wbr>Banned</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#ismod" class="tsd-kind-icon">is<wbr>Mod</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#isowner" class="tsd-kind-icon">is<wbr>Owner</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#isstaff" class="tsd-kind-icon">is<wbr>Staff</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#iswhitelisted" class="tsd-kind-icon">is<wbr>Whitelisted</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#joins" class="tsd-kind-icon">joins</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="player.html#name" class="tsd-kind-icon">name</a></li>
 							</ul>
 						</section>
 					</div>
@@ -114,13 +114,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Player<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, info<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span>, lists<span class="tsd-signature-symbol">: </span><a href="../interfaces/worldlists.html" class="tsd-signature-type">WorldLists</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="player.html" class="tsd-signature-type">Player</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Player<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, info<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">PlayerInfo</span>, lists<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">WorldLists</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="player.html" class="tsd-signature-type">Player</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L9">libraries/blockheads/player.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L26">player.ts:26</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -134,22 +134,20 @@
 									<h5>name: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
-											<p>the name of the player.</p>
+											<p>The name of the player.</p>
 										</div>
 									</div>
 								</li>
 								<li>
-									<h5>info: <span class="tsd-signature-type">object</span></h5>
+									<h5>info: <span class="tsd-signature-type">PlayerInfo</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
-											<p>the player info stored between bot launches.</p>
+											<p>The player info stored between bot launches.</p>
 										</div>
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 								<li>
-									<h5>lists: <a href="../interfaces/worldlists.html" class="tsd-signature-type">WorldLists</a></h5>
+									<h5>lists: <span class="tsd-signature-type">WorldLists</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="player.html" class="tsd-signature-type">Player</a></h4>
@@ -158,110 +156,18 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getip" class="tsd-anchor"></a>
-					<h3>getIP</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">getIP<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L46">libraries/blockheads/player.ts:46</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Gets the most recently used IP of the player.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-							<p>the player&#39;s IP</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getips" class="tsd-anchor"></a>
-					<h3>getIPs</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">getIPs<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L55">libraries/blockheads/player.ts:55</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Gets the all IPs used by the player on the world.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4>
-							<p>an array of IPs</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getjoins" class="tsd-anchor"></a>
-					<h3>get<wbr>Joins</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Joins<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L64">libraries/blockheads/player.ts:64</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Gets the number of times the player has joined the server.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
-							<p>how many times the player has joined.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getname" class="tsd-anchor"></a>
-					<h3>get<wbr>Name</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Name<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L37">libraries/blockheads/player.ts:37</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Gets the player&#39;s name.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-							<p>The name of the player.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="hasjoined" class="tsd-anchor"></a>
 					<h3>has<wbr>Joined</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">has<wbr>Joined<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> hasJoined<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L28">libraries/blockheads/player.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L81">player.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -274,22 +180,68 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="isadmin" class="tsd-anchor"></a>
-					<h3>is<wbr>Admin</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Admin<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="ip" class="tsd-anchor"></a>
+					<h3>ip</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> ip<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L82">libraries/blockheads/player.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L54">player.ts:54</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Checks if the player is an admin.</p>
+									<p>Gets the most recently used IP of the player.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>the player&#39;s IP</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="ips" class="tsd-anchor"></a>
+					<h3>ips</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> ips<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L63">player.ts:63</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the all IPs used by the player on the world.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4>
+							<p>an array of IPs</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isadmin" class="tsd-anchor"></a>
+					<h3>is<wbr>Admin</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isAdmin<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L99">player.ts:99</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Checks if the player is an admin or the owner.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -297,17 +249,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="isbanned" class="tsd-anchor"></a>
 					<h3>is<wbr>Banned</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Banned<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isBanned<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L118">libraries/blockheads/player.ts:118</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L138">player.ts:138</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -320,17 +272,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="ismod" class="tsd-anchor"></a>
 					<h3>is<wbr>Mod</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Mod<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isMod<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L91">libraries/blockheads/player.ts:91</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L109">player.ts:109</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -343,17 +295,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="isowner" class="tsd-anchor"></a>
 					<h3>is<wbr>Owner</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Owner<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isOwner<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L73">libraries/blockheads/player.ts:73</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L90">player.ts:90</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -366,17 +318,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="isstaff" class="tsd-anchor"></a>
 					<h3>is<wbr>Staff</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Staff<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isStaff<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L100">libraries/blockheads/player.ts:100</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L119">player.ts:119</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -389,17 +341,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="iswhitelisted" class="tsd-anchor"></a>
 					<h3>is<wbr>Whitelisted</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Whitelisted<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isWhitelisted<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Bibliofile/Blockheads-MessageBot/blob/9b302b6/src/libraries/blockheads/player.ts#L109">libraries/blockheads/player.ts:109</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L128">player.ts:128</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -409,6 +361,52 @@
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 							<p>true if the player can join the server when it is whitelisted.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="joins" class="tsd-anchor"></a>
+					<h3>joins</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> joins<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L72">player.ts:72</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the number of times the player has joined the server.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>how many times the player has joined.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> name<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/c478a7a/src/player.ts#L45">player.ts:45</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the player&#39;s name.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>The name of the player.</p>
 						</li>
 					</ul>
 				</section>
@@ -425,9 +423,6 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class">
-						<a href="ajax.html" class="tsd-kind-icon">Ajax</a>
-					</li>
-					<li class=" tsd-kind-class">
 						<a href="messagebot.html" class="tsd-kind-icon">Message<wbr>Bot</a>
 					</li>
 					<li class=" tsd-kind-class">
@@ -441,63 +436,51 @@
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
 								<a href="player.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="player.html#getip" class="tsd-kind-icon">getIP</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="player.html#getips" class="tsd-kind-icon">getIPs</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="player.html#getjoins" class="tsd-kind-icon">get<wbr>Joins</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="player.html#getname" class="tsd-kind-icon">get<wbr>Name</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#hasjoined" class="tsd-kind-icon">has<wbr>Joined</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="player.html#ip" class="tsd-kind-icon">ip</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="player.html#ips" class="tsd-kind-icon">ips</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#isadmin" class="tsd-kind-icon">is<wbr>Admin</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#isbanned" class="tsd-kind-icon">is<wbr>Banned</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#ismod" class="tsd-kind-icon">is<wbr>Mod</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#isowner" class="tsd-kind-icon">is<wbr>Owner</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#isstaff" class="tsd-kind-icon">is<wbr>Staff</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="player.html#iswhitelisted" class="tsd-kind-icon">is<wbr>Whitelisted</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="player.html#joins" class="tsd-kind-icon">joins</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="player.html#name" class="tsd-kind-icon">name</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-class">
-						<a href="settings.html" class="tsd-kind-icon">Settings</a>
-					</li>
-					<li class=" tsd-kind-class tsd-has-type-parameter">
-						<a href="simpleevent.html" class="tsd-kind-icon">Simple<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class">
 						<a href="storage.html" class="tsd-kind-icon">Storage</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="tabmanager.html" class="tsd-kind-icon">Tab<wbr>Manager</a>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="world.html" class="tsd-kind-icon">World</a>
 					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/consoleextensionexports.html" class="tsd-kind-icon">Console<wbr>Extension<wbr>Exports</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/uiextensionexports.html" class="tsd-kind-icon">UIExtension<wbr>Exports</a>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#extensioninitializer" class="tsd-kind-icon">Extension<wbr>Initializer</a>
 					</li>
 				</ul>
 			</nav>

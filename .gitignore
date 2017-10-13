@@ -1,23 +1,10 @@
-#Node
-node_modules/*
+# Built files
+*.js
+*.d.ts
 
-# IDE Files
-.vscode
-.tags
+# Modules
+node_modules
 
-# System files
-.DS_Store
-
-# Stored config
-localStorage
-test-localStorage
-
-# Bot settings
-config/bot.js
-config/localStorage.json
-
-# Test builds
-test/tests.js
-
-# Built CSS files
-*.css
+# Testing
+coverage
+.nyc_output

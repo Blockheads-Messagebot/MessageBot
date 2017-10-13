@@ -1,0 +1,8 @@
+.github
+.vscode
+.gitignore
+docs
+src
+tsconfig.json
+tslint.json
+typedoc.json
