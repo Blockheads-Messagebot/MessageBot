@@ -54,6 +54,9 @@ export class MessageBot {
         }
     }
 
+    /**
+     * An array of all registered extensions.
+     */
     static get extensions() {
         return [...registeredExtensions.keys()]
     }
@@ -77,6 +80,13 @@ export class MessageBot {
         if (!MessageBot.dependencies) throw new Error('Dependencies must be set before creating this class.')
 
         this.world = new World(new MessageBot.dependencies.Api(info), storage)
+    }
+
+    /**
+     * An array of currently loaded extension ids
+     */
+    get extensions() {
+        return [...this._extensions.keys()]
     }
 
     /**
@@ -155,6 +165,6 @@ export class MessageBot {
             })
         }
 
-        this.world.send(message)
+        this.world.send(message).catch(() => {})
     }
 }

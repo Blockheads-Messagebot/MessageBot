@@ -250,3 +250,20 @@ test(tn`Should allow not passing a params variable`, t => {
 
     bot.send('{{fakeKey}}')
 })
+
+test(tn`send should not care if the send request rejects`, async t => {
+    let bot = makeBot(t)
+    bot.world.send = () => Promise.reject(Error('Failed to send'))
+    bot.send('Message')
+    // If this fails, an unhandled rejection will be thrown
+    t.pass()
+})
+
+test(tn`extensions should be an array of currently loaded extensions`, t => {
+    let bot = makeBot(t)
+    MessageBot.registerExtension('test', () => {})
+    bot.addExtension('test')
+    t.deepEqual(bot.extensions, ['test'])
+
+    MessageBot.deregisterExtension('test')
+})
