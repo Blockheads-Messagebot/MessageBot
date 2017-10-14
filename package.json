@@ -1,6 +1,6 @@
 {
   "name": "@bhmb/bot",
-  "version": "7.0.0-a8",
+  "version": "7.0.0",
   "description": "A bot framework for the Blockheads game that supports extensions.",
   "main": "index.js",
   "repository": "https://github.com/Blockheads-MessageBot/MessageBot",
