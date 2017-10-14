@@ -390,3 +390,11 @@ test(tn`Should send leave events`, async t => {
     await delay(500)
     world.stopWatcher()
 })
+
+test(tn`Should send events when a message starting with / is sent`, t => {
+    let storage = new MockStorage()
+    let world = new MockWorldWatcher(api, storage)
+
+    world.onMessage.sub(({ message }) => t.is(message, '/command'))
+    world.send('/command')
+})

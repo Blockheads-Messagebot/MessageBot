@@ -162,8 +162,10 @@ export class World {
      *
      * @param message the message to send
      */
-    send = (message: string) => this._api.send(message)
-
+    send = (message: string): Promise<void> => {
+        if (message.startsWith('/')) this._events.onMessage.dispatch({ player: this.getPlayer('SERVER'), message})
+        return this._api.send(message)
+    }
     /**
      * Gets a specific player by name
      */
