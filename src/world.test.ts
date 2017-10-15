@@ -398,3 +398,11 @@ test(tn`Should send events when a message starting with / is sent`, t => {
     world.onMessage.sub(({ message }) => t.is(message, '/command'))
     world.send('/command')
 })
+
+test(tn`addCommand should work with sent messages`, t => {
+    let storage = new MockStorage()
+    let world = new MockWorldWatcher(api, storage)
+
+    world.addCommand('test', () => t.pass())
+    world.send('/test')
+})

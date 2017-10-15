@@ -236,10 +236,13 @@ export class World {
 
         watcher.onMessage.sub(({ name, message }) => {
             this._events.onMessage.dispatch({ player: this.getPlayer(name), message })
+        })
+
+        this.onMessage.sub(({player, message}) => {
             if (/^\/[^ ]/.test(message)) {
                 let [, command, args] = message.match(/^\/([^ ]+) ?(.*)$/) as RegExpMatchArray
                 let handler = this._commands.get(command.toLocaleUpperCase())
-                if (handler) handler(this.getPlayer(name), args)
+                if (handler) handler(player, args)
             }
         })
 
