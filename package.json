@@ -7,6 +7,7 @@
   "author": "Bibliofile <bibliofilegit@gmail.com>",
   "license": "GPL-3.0+",
   "devDependencies": {
+    "@std/esm": "^0.12.0",
     "ava": "^0.22.0",
     "nyc": "^11.2.1",
     "tslint": "^5.7.0",
@@ -20,10 +21,16 @@
     "docs": "typedoc --options typedoc.json",
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "tsc --module CommonJS && nyc ava",
+    "test": "tsc && nyc ava",
     "report": "nyc report --reporter=html"
   },
+  "nyc": {
+    "require": [
+      "@std/esm"
+    ]
+  },
   "@std/esm": {
-    "esm": "js"
+    "esm": "js",
+    "cjs": true
   }
 }
