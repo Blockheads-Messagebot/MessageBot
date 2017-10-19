@@ -14,8 +14,7 @@
     "typescript": "^2.5.3"
   },
   "dependencies": {
-    "blockheads-api": "^0.3.2",
-    "strongly-typed-events": "^1.0.1"
+    "blockheads-api": "^0.3.2"
   },
   "scripts": {
     "docs": "typedoc --options typedoc.json",

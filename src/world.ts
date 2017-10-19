@@ -5,7 +5,7 @@ import { WorldApi, LogEntry, WorldOverview, WorldLists } from 'blockheads-api/ap
 import { Player, PlayerInfo } from './player'
 import { ChatWatcher } from './chatWatcher'
 import { Storage } from './storage'
-import { ISimpleEvent, createSimpleEventDispatcher } from 'strongly-typed-events'
+import { SimpleEvent, SafeSimpleEvent } from './events'
 
 const cloneDate = (d: Date) => new Date(d.getTime())
 
@@ -24,9 +24,9 @@ export class World {
     } = {}
 
     private _events = {
-        onJoin: createSimpleEventDispatcher<Player>(),
-        onLeave: createSimpleEventDispatcher<Player>(),
-        onMessage: createSimpleEventDispatcher<{player: Player, message: string}>(),
+        onJoin: new SimpleEvent<Player>(),
+        onLeave: new SimpleEvent<Player>(),
+        onMessage: new SimpleEvent<{player: Player, message: string}>(),
     }
 
     protected _online: string[] = []
@@ -45,14 +45,14 @@ export class World {
     /**
      * Fires whenever a player joins the server
      */
-    get onJoin(): ISimpleEvent<Player> {
+    get onJoin(): SafeSimpleEvent<Player> {
         return this._events.onJoin.asEvent()
     }
 
     /**
      * Fires whenever a player leaves the server.
      */
-    get onLeave(): ISimpleEvent<Player> {
+    get onLeave(): SafeSimpleEvent<Player> {
         return this._events.onLeave.asEvent()
     }
 
@@ -60,14 +60,14 @@ export class World {
      * Fires whenever a player or the server sends a message in chat.
      * Includes messages starting with /
      */
-    get onMessage(): ISimpleEvent<{player: Player, message: string}> {
+    get onMessage(): SafeSimpleEvent<{player: Player, message: string}> {
         return this._events.onMessage.asEvent()
     }
 
     /**
      * Fires whenever a message that cannot be parsed is encountered.
      */
-    get onOther(): ISimpleEvent<string> {
+    get onOther(): SafeSimpleEvent<string> {
         // This class doesn't do anything with the onOther events, so just pass it through.
         return this._chatWatcher.onOther
     }

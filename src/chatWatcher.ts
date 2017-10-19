@@ -1,5 +1,5 @@
 import { WorldApi } from 'blockheads-api/api'
-import { ISimpleEvent, createSimpleEventDispatcher, SimpleEventDispatcher } from 'strongly-typed-events'
+import { SimpleEvent, SafeSimpleEvent } from './events'
 // Typescript incorrectly types clearTimeout as not accepting a NodeJS.Timer
 declare function clearTimeout(handle: number | NodeJS.Timer): void
 
@@ -27,37 +27,37 @@ export interface MessageEventArgs {
  * @hidden
  */
 export class ChatWatcher {
-    protected _onMessage: SimpleEventDispatcher<MessageEventArgs> = createSimpleEventDispatcher()
-    protected _onJoin: SimpleEventDispatcher<JoinEventArgs> = createSimpleEventDispatcher()
-    protected _onLeave: SimpleEventDispatcher<string> = createSimpleEventDispatcher()
-    protected _onOther: SimpleEventDispatcher<string> = createSimpleEventDispatcher()
+    protected _onMessage: SimpleEvent<MessageEventArgs> = new SimpleEvent()
+    protected _onJoin: SimpleEvent<JoinEventArgs> = new SimpleEvent()
+    protected _onLeave: SimpleEvent<string> = new SimpleEvent()
+    protected _onOther: SimpleEvent<string> = new SimpleEvent()
     protected timeoutId: NodeJS.Timer | number | null = null
 
     /**
      * Event which fires when a player joins the server.
      */
-    get onJoin(): ISimpleEvent<JoinEventArgs> {
+    get onJoin(): SafeSimpleEvent<JoinEventArgs> {
         return this._onJoin.asEvent()
     }
 
     /**
      * Event which fires when a player leaves the server.
      */
-    get onLeave(): ISimpleEvent<string> {
+    get onLeave(): SafeSimpleEvent<string> {
         return this._onLeave.asEvent()
     }
 
     /**
      * Event which fires when a player sends a message in chat.
      */
-    get onMessage(): ISimpleEvent<MessageEventArgs> {
+    get onMessage(): SafeSimpleEvent<MessageEventArgs> {
         return this._onMessage.asEvent()
     }
 
     /**
      * Event which fires when a chat message cannot be parsed as a message, join, or leave.
      */
-    get onOther(): ISimpleEvent<string> {
+    get onOther(): SafeSimpleEvent<string> {
         return this._onOther.asEvent()
     }
 

@@ -3057,10 +3057,6 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-strongly-typed-events@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/strongly-typed-events/-/strongly-typed-events-1.0.1.tgz#f288cb77d6c9eb8cdb4803fb15826bdb6788500e"
-
 supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"

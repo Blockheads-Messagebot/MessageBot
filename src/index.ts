@@ -4,13 +4,13 @@ import { Player } from './player'
 import { Storage } from './storage'
 
 import { WorldApi, WorldInfo } from 'blockheads-api/api'
-import { createSimpleEventDispatcher, ISimpleEvent } from 'strongly-typed-events'
+import { SimpleEvent, SafeSimpleEvent } from './events'
 
 export { MessageBotExtension, World, Player, Storage, WorldApi }
 
 let registeredExtensions = new Map<string, ExtensionInitializer>()
-let extensionRegistered = createSimpleEventDispatcher<string>()
-let extensionDeregistered = createSimpleEventDispatcher<string>()
+let extensionRegistered = new SimpleEvent<string>()
+let extensionDeregistered = new SimpleEvent<string>()
 
 export class MessageBot {
     /**
@@ -24,12 +24,12 @@ export class MessageBot {
     /**
      * An event that fires whenever an extension is registered or re-registered.
      */
-    static extensionRegistered: ISimpleEvent<string> = extensionRegistered.asEvent()
+    static extensionRegistered: SafeSimpleEvent<string> = extensionRegistered.asEvent()
 
     /**
      * An event that fires when an extension is deregistered, if it has been registered. Will not fire when an extension is re-registered.
      */
-    static extensionDeregistered: ISimpleEvent<string> = extensionDeregistered.asEvent()
+    static extensionDeregistered: SafeSimpleEvent<string> = extensionDeregistered.asEvent()
 
     /**
      * Registers an extension that can be loaded by instances of the bot.
