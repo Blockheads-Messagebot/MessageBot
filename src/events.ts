@@ -3,6 +3,9 @@ interface Subscription<Argument> {
     once: boolean
 }
 
+/**
+ * An object which enables subscribing and unsubscribing from an event without exposing methods to fire the event.
+ */
 export interface SafeSimpleEvent<Argument> {
     /**
      * Subscribe to the event.
@@ -23,7 +26,6 @@ export interface SafeSimpleEvent<Argument> {
 
 /**
  * An event which can be subscribed to and dispatched
- * @private
  */
 export class SimpleEvent<Argument> {
     private subscribers: Subscription<Argument>[] = []
