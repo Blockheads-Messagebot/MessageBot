@@ -96,10 +96,18 @@ test.serial(tn`Should throw an error if dependencies are not set`, t => {
     t.throws(() => makeBot(t))
 })
 
+test.serial(tn`fetch should return the fetch instance set in the dependencies`, t => {
+    let s = Symbol('fetch')
+    MessageBot.dependencies = { Api: MockApi, async getWorlds() { return [] }, fetch: s } as any
+    let bot = makeBot(t)
+    t.is(bot.fetch, s as any)
+})
+
 test.serial(tn`Should not throw if dependencies are set`, t => {
     MessageBot.dependencies = {
         Api: MockApi,
-        async getWorlds() { return [] }
+        async getWorlds() { return [] },
+        fetch: () => Promise.resolve(new Response())
     }
     t.notThrows(() => makeBot(t))
 })

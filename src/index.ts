@@ -6,7 +6,7 @@ import { Storage } from './storage'
 import { WorldApi, WorldInfo } from 'blockheads-api/api'
 import { SimpleEvent, SafeSimpleEvent } from './events'
 
-export { MessageBotExtension, World, Player, Storage, WorldApi }
+export { MessageBotExtension, World, Player, Storage, WorldApi, SimpleEvent, SafeSimpleEvent }
 
 let registeredExtensions = new Map<string, ExtensionInitializer>()
 let extensionRegistered = new SimpleEvent<string>()
@@ -18,7 +18,8 @@ export class MessageBot {
      */
     static dependencies: {
         Api: new (info: WorldInfo) => WorldApi,
-        getWorlds: () => Promise<WorldInfo[]>
+        getWorlds: () => Promise<WorldInfo[]>,
+        fetch: typeof fetch
     }
 
     /**
@@ -87,6 +88,13 @@ export class MessageBot {
      */
     get extensions() {
         return [...this._extensions.keys()]
+    }
+
+    /**
+     * Shortcut for `MessageBot.dependencies.fetch`
+     */
+    get fetch() {
+        return MessageBot.dependencies.fetch
     }
 
     /**
