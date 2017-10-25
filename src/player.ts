@@ -1,9 +1,12 @@
 import { WorldLists } from 'blockheads-api/api'
 export { WorldLists } from 'blockheads-api/api'
 
+function equalCaseInsensitive(a: string, b: string): boolean {
+    return a.localeCompare(b, undefined, { sensitivity: 'base'}) === 0
+}
 
 function arrayContainsAny(haystack: string[], ...needles: string[]): boolean {
-    return haystack.some(item => needles.includes(item))
+    return haystack.some(item => needles.some(needle => equalCaseInsensitive(item, needle)))
 }
 
 /**
@@ -145,7 +148,7 @@ export class Player {
                 // Remove device ID from blacklist entry, if there is one
                 if (entry.includes(' \\')) entry = entry.substr(0, entry.indexOf(' \\'))
 
-                if (entry == this._name) return true
+                if (equalCaseInsensitive(this._name, entry)) return true
                 if (this._info.ips.includes(entry)) return true
 
                 return false

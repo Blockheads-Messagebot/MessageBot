@@ -144,3 +144,14 @@ test(tn`Device IDs should be removed from blacklist entries when checking if a p
     let player = makePlayer('NAME', { blacklist: ['NAME \\device_id']})
     t.is(player.isBanned, true)
 })
+
+test(tn`Should check lists without case sensitivity`, t => {
+    let player = makePlayer('NAME', { blacklist: ['name']})
+    t.is(player.isBanned, true)
+    player = makePlayer('NAME', { adminlist: ['name']})
+    t.is(player.isAdmin, true)
+    player = makePlayer('NAME', { modlist: ['name']})
+    t.is(player.isMod, true)
+    player = makePlayer('NAME', { whitelist: ['name']})
+    t.is(player.isWhitelisted, true)
+})
