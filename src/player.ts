@@ -42,8 +42,6 @@ export class Player {
 
     /**
      * Gets the player's name.
-     *
-     * @return The name of the player.
      */
     get name(): string {
         return this._name
@@ -51,8 +49,6 @@ export class Player {
 
     /**
      * Gets the most recently used IP of the player.
-     *
-     * @return the player's IP
      */
     get ip(): string {
         return this._info.ip
@@ -60,8 +56,6 @@ export class Player {
 
     /**
      * Gets the all IPs used by the player on the world.
-     *
-     * @return an array of IPs
      */
     get ips(): string[] {
         return [...this._info.ips]
@@ -69,8 +63,6 @@ export class Player {
 
     /**
      * Gets the number of times the player has joined the server.
-     *
-     * @return how many times the player has joined.
      */
     get joins(): number {
         return this._info.joins
@@ -78,8 +70,6 @@ export class Player {
 
     /**
      * Checks if the player has joined the server.
-     *
-     * @return true if the player has joined before, otherwise false.
      */
     get hasJoined(): boolean {
         return this.joins > 0
@@ -87,8 +77,6 @@ export class Player {
 
     /**
      * Returns true if the player is the owner of the server or is the server.
-     *
-     * @return true if the player is the owner.
      */
     get isOwner(): boolean {
         return !!this._info.owner || this._name == 'SERVER'
@@ -96,8 +84,6 @@ export class Player {
 
     /**
      * Checks if the player is an admin or the owner.
-     *
-     * @return true if the player is an admin.
      */
     get isAdmin(): boolean {
         // A player is admin if their name or their latest IP is listed on the adminlist, or they are the owner.
@@ -106,8 +92,6 @@ export class Player {
 
     /**
      * Checks if the player is a mod without admin permissions.
-     *
-     * @return true if the player is an admin and not a mod.
      */
     get isMod(): boolean {
         // A player is mod if their name or their latest IP is on the modlist
@@ -116,17 +100,13 @@ export class Player {
 
     /**
      * Checks if the player is an admin or a mod.
-     *
-     * @return true if the player is an admin or a mod.
      */
     get isStaff(): boolean {
         return this.isAdmin || this.isMod
     }
 
     /**
-     * Checks if the player is whitelisted.
-     *
-     * @return true if the player can join the server when it is whitelisted.
+     * Checks if the player is whitelisted. Is true if the player can join the server while it is whitelisted.
      */
     get isWhitelisted(): boolean {
         // A player is whitelisted if they are staff or if their name or latest ip is on the whitelist.
@@ -135,8 +115,6 @@ export class Player {
 
     /**
      * Checks if the player is banned.
-     *
-     * @return true if the player is on the blacklist.
      */
     get isBanned(): boolean {
         return !this.isStaff && this._lists.blacklist

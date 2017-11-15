@@ -1,6 +1,5 @@
 /**
  * The storage class used by the [[MessageBot]] class and all [[MessageBotExtension]] instances.
- * It is expected that the
  */
 export abstract class Storage {
     /**
@@ -35,10 +34,15 @@ export abstract class Storage {
     abstract prefix(prefix: string): Storage
 
     /**
+     * Gets all storage keys available in the current storage object
+     */
+    abstract keys(prefix?: string): string[]
+
+    /**
      * Utility method to use and automatically save a key
      * @param key the key use when getting and setting the value
      * @param fallback the fallback if the key doesn't exist
-     * @param callback the function to be called with the data, must return the value to be saved
+     * @param callback the function to be called with the data, if the callback returns null or undefined, it is assumed that the value has been mutated and will be saved.
      */
     with<T>(key: string, fallback: T, callback: (value: T) => T | void): void {
         let value = this.get(key, fallback)

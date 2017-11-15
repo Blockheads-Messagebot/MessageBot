@@ -7,7 +7,8 @@ import {
     WorldLists,
     LogEntry,
     WorldPrivacy,
-    WorldSizes
+    WorldSizes,
+    WorldStates
 } from 'blockheads-api/api'
 import { Storage } from './storage'
 
@@ -29,6 +30,9 @@ class MockStorage extends Storage {
     prefix(_prefix: string): Storage {
         throw new Error('Not implemented')
     }
+    keys(): string[] {
+        throw new Error('Not implemented')
+    }
 }
 
 const overview: WorldOverview = Object.freeze({
@@ -43,7 +47,8 @@ const overview: WorldOverview = Object.freeze({
     password: false,
     size: '1x' as WorldSizes, // Ditto
     whitelist: false,
-    online: ['ONLINE']
+    online: ['ONLINE'],
+    status: 'online' as WorldStates
 })
 
 const lists = { adminlist: [], whitelist: [], blacklist: [], modlist: [] }
@@ -281,7 +286,7 @@ test(tn`Should throw if a command has already been added`, t => {
     try {
         world.addCommand('test', () => {})
         t.fail('Should have thrown')
-    } catch {
+    } catch (_) {
         t.pass()
     }
 })

@@ -22,6 +22,9 @@ class MockStorage extends Storage {
     prefix(_prefix: string): Storage {
         throw new Error('Not implemented')
     }
+    keys(): string[] {
+        throw new Error('Not implemented')
+    }
 }
 
 class PrefixedMockStorage extends MockStorage {

@@ -107,7 +107,7 @@ export class ChatWatcher {
                     this._onJoin.dispatch({name, ip})
                     return
                 }
-            } catch { }
+            } catch (_) { }
             return parseError()
         }
 
@@ -119,7 +119,7 @@ export class ChatWatcher {
                     this._onLeave.dispatch(name)
                     return
                 }
-            } catch { }
+            } catch (_) { }
             return parseError()
         }
 
@@ -166,7 +166,7 @@ export class ChatWatcher {
             if (this.timeoutId == null) return
             log.forEach(this.parse)
             this.timeoutId = setTimeout(this.checkChat, 5000, nextId)
-        } catch {
+        } catch (_) {
             // Network error, wait 30 seconds before retrying
             this.timeoutId = setTimeout(this.checkChat, 30000, 0)
             return

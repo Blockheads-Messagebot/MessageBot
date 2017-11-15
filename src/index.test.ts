@@ -5,7 +5,8 @@ import {
     WorldOverview,
     LogEntry,
     WorldPrivacy,
-    WorldSizes
+    WorldSizes,
+    WorldStates
 } from 'blockheads-api/api'
 
 const overview: WorldOverview = Object.freeze({
@@ -20,7 +21,8 @@ const overview: WorldOverview = Object.freeze({
     password: false,
     size: '1x' as WorldSizes, // Ditto
     whitelist: false,
-    online: ['ONLINE']
+    online: ['ONLINE'],
+    status: 'online' as WorldStates
 })
 
 const lists = {
@@ -35,6 +37,7 @@ class MockStorage extends Storage {
     set() { }
     clear() { }
     prefix() { return this }
+    keys(): string[] { throw new Error('Not implemented') }
 }
 
 class MockApi implements WorldApi {

@@ -1,9 +1,0 @@
-{
-    "mode": "file",
-    "out": "docs",
-    "name": "MessageBot",
-    "excludePrivate": true,
-    "excludeNotExported": true,
-    "listInvalidSymbolLinks": true,
-    "include": "./src/*"
-}
