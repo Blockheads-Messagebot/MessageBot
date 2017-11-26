@@ -15,8 +15,7 @@
         "strictNullChecks": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "inlineSources": true,
-        "inlineSourceMap": true
+        "sourceMap": true
     },
     "exclude": [
         "node_modules"

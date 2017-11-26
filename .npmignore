@@ -1,8 +1,13 @@
 .github
 .vscode
 .gitignore
+.nyc_output
+coverage
+.travis.yml
 docs
 src
 tsconfig.json
+tsconfig_es.json
 tslint.json
 typedoc.json
+*.tgz

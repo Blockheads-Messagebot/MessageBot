@@ -1,6 +1,7 @@
 # Built files
 *.js
 *.d.ts
+*.map
 
 # Modules
 node_modules
