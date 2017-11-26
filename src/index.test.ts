@@ -6,8 +6,8 @@ import {
     LogEntry,
     WorldPrivacy,
     WorldSizes,
-    WorldStates
-} from 'blockheads-api/api'
+    WorldStatus
+} from 'blockheads-api-interface'
 
 const overview: WorldOverview = Object.freeze({
     name: 'WORLD',
@@ -22,7 +22,7 @@ const overview: WorldOverview = Object.freeze({
     size: '1x' as WorldSizes, // Ditto
     whitelist: false,
     online: ['ONLINE'],
-    status: 'online' as WorldStates
+    status: 'online' as WorldStatus
 })
 
 const lists = {
@@ -31,6 +31,8 @@ const lists = {
     whitelist: [],
     blacklist: []
 }
+
+let status: WorldStatus = 'online'
 
 class MockStorage extends Storage {
     get<T>() { return {} as T }
@@ -41,8 +43,13 @@ class MockStorage extends Storage {
 }
 
 class MockApi implements WorldApi {
+    get name() { return 'hi' }
+    get id() { return '123' }
     async getLists(): Promise<WorldLists> {
         return lists
+    }
+    async getStatus(): Promise<WorldStatus> {
+        return status
     }
     setLists(_lists: WorldLists): Promise<void> {
         throw new Error('Method not implemented.')

@@ -3,7 +3,7 @@ import { World } from './world'
 import { Player } from './player'
 import { Storage } from './storage'
 
-import { WorldApi, WorldInfo } from 'blockheads-api/api'
+import { WorldApi, WorldInfo } from 'blockheads-api-interface'
 import { SimpleEvent, SafeSimpleEvent } from './events'
 
 export { MessageBotExtension, World, Player, Storage, WorldApi, SimpleEvent, SafeSimpleEvent }

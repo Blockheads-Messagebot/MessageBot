@@ -1,22 +1,20 @@
 {
   "name": "@bhmb/bot",
-  "version": "7.0.7",
+  "version": "7.0.8",
   "description": "A bot framework for the Blockheads game that supports extensions.",
   "main": "index.js",
   "repository": "https://github.com/Blockheads-MessageBot/MessageBot",
   "author": "Bibliofile <bibliofilegit@gmail.com>",
   "license": "GPL-3.0+",
   "devDependencies": {
-    "@std/esm": "^0.15.0",
     "ava": "^0.23.0",
     "nyc": "^11.3.0",
-    "ts-jsdoc": "^2.0.6",
     "tslint": "^5.8.0",
     "typedoc": "^0.9.0",
     "typescript": "^2.6.1"
   },
   "dependencies": {
-    "blockheads-api": "^0.3.9"
+    "blockheads-api-interface": "^0.0.1"
   },
   "scripts": {
     "docs": "typedoc src",
@@ -24,14 +22,5 @@
     "prepare": "npm run build",
     "test": "tsc && nyc ava",
     "report": "nyc report --reporter=html"
-  },
-  "nyc": {
-    "require": [
-      "@std/esm"
-    ]
-  },
-  "@std/esm": {
-    "esm": "js",
-    "cjs": true
   }
 }

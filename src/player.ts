@@ -1,5 +1,4 @@
-import { WorldLists } from 'blockheads-api/api'
-export { WorldLists } from 'blockheads-api/api'
+import { WorldLists } from 'blockheads-api-interface'
 
 function equalCaseInsensitive(a: string, b: string): boolean {
     return a.localeCompare(b, undefined, { sensitivity: 'base'}) === 0

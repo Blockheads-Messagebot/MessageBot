@@ -1,6 +1,4 @@
-// The /api export of blockheads-api only contains typescript interfaces
-// So no code will be imported here.
-import { WorldApi, LogEntry, WorldOverview, WorldLists } from 'blockheads-api/api'
+import { WorldApi, LogEntry, WorldOverview, WorldLists } from 'blockheads-api-interface'
 
 import { Player, PlayerInfo } from './player'
 import { ChatWatcher } from './chatWatcher'
@@ -112,6 +110,11 @@ export class World {
             online: this.online
         }
     }
+
+    /**
+     * Returns the current world status, will always make a request to the server.
+     */
+    getStatus = () => this._api.getStatus()
 
     /**
      * Gets the server's lists

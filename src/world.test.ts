@@ -8,8 +8,8 @@ import {
     LogEntry,
     WorldPrivacy,
     WorldSizes,
-    WorldStates
-} from 'blockheads-api/api'
+    WorldStatus
+} from 'blockheads-api-interface'
 import { Storage } from './storage'
 
 class MockStorage extends Storage {
@@ -48,12 +48,15 @@ const overview: WorldOverview = Object.freeze({
     size: '1x' as WorldSizes, // Ditto
     whitelist: false,
     online: ['ONLINE'],
-    status: 'online' as WorldStates
+    status: 'online' as WorldStatus
 })
 
 const lists = { adminlist: [], whitelist: [], blacklist: [], modlist: [] }
 
 const api: WorldApi = {
+    get name() { return 'hi' },
+    get id() { return '123' },
+    async getStatus() { return 'online' as WorldStatus },
     async getLists() { return lists },
     async setLists() { },
     async getOverview() { return overview },
@@ -108,6 +111,13 @@ test(tn`Should expose all players in storage`, async t => {
     t.is(world.players.length, 1)
     // The name is NAME
     t.is(world.players[0].name, 'NAME')
+})
+
+test(tn`Should get the world status`, async t => {
+    let storage = new MockStorage()
+    let world = new World(api, storage)
+
+    t.is(overview.status, await world.getStatus())
 })
 
 test(tn`Should cache overview api calls`, async t => {

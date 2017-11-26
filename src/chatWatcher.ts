@@ -1,4 +1,4 @@
-import { WorldApi } from 'blockheads-api/api'
+import { WorldApi } from 'blockheads-api-interface'
 import { SimpleEvent, SafeSimpleEvent } from './events'
 // Typescript incorrectly types clearTimeout as not accepting a NodeJS.Timer
 declare function clearTimeout(handle: number | NodeJS.Timer): void

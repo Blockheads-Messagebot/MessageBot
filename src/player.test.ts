@@ -1,6 +1,7 @@
 import test from 'ava'
 
-import { Player, PlayerInfo, WorldLists } from './player'
+import { Player, PlayerInfo } from './player'
+import { WorldLists } from 'blockheads-api-interface'
 
 const lists = { adminlist: [], modlist: [], whitelist: [], blacklist: [] }
 
