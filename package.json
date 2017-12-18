@@ -22,7 +22,7 @@
     "docs": "typedoc src",
     "build": "tsc && tsc -p tsconfig_es.json",
     "prepare": "npm run build",
-    "test": "tsc && nyc ava",
+    "test": "tsc && nyc ava \"*.test.js\"",
     "report": "nyc report --reporter=html"
   }
 }
