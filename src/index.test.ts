@@ -57,8 +57,8 @@ class MockApi implements WorldApi {
     async getOverview(): Promise<WorldOverview> {
         return overview
     }
-    getLogs(): Promise<LogEntry[]> {
-        throw new Error('Method not implemented.')
+    async getLogs(): Promise<LogEntry[]> {
+        return []
     }
     send(_message: string): Promise<void> {
         throw new Error('Method not implemented.')

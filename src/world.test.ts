@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import { World } from './world'
+import { World, PlayerStorage } from './world'
 import {
     WorldOverview,
     WorldApi,
@@ -238,6 +238,29 @@ test(tn`Should return logs in a safe manner`, async t => {
     t.deepEqual(worldLogs, logs)
 })
 
+test(tn`Should update the players object when fetching logs`, async t => {
+    const storage = new MockStorage()
+    storage.set('lastPlayersUpdate', Date.now())
+    const world = new World({
+        ...api,
+        async getLogs() {
+            return [
+                // Before now, won't be used.
+                { raw: '', timestamp: new Date(0), message: `${overview.name} - Player Connected PLAYER NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345`},
+                // This should be far enough in the future...
+                { raw: '', timestamp: new Date(1e15), message: `SERVER: Hi!`},
+                { raw: '', timestamp: new Date(1e15), message: `${overview.name} - Player Connected PLAYER NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345`}
+            ]
+        }
+    }, storage)
+
+    await world.getLogs()
+    t.deepEqual(storage.get<PlayerStorage>('players', {}), {
+        'OWNER': { ip: '', ips: [], joins: 0, owner: true },
+        'PLAYER NAME': { ip: '0.0.0.0', ips: ['0.0.0.0'], joins: 1 }
+    })
+})
+
 test(tn`Should return a player object even for names that do not exist`, t => {
     let storage = new MockStorage()
     let world = new World(api, storage)
@@ -339,10 +362,6 @@ test(tn`Should pass other methods through to the api`, async t => {
 
 test(tn`Should update the player list when a player joins`, async t => {
     let storage = new MockStorage()
-    storage.set = (_, value) => {
-        if (value.OWNER) return
-        t.deepEqual(value, { TEST: { ip: '0.0.0.0', ips: ['0.0.0.0'], joins: 1 } })
-    }
     let mockApi = {
         ...api,
         async getMessages() {
@@ -357,16 +376,16 @@ test(tn`Should update the player list when a player joins`, async t => {
     world.startWatcher()
     await delay(500)
     world.stopWatcher()
+
+    t.deepEqual(storage.get<PlayerStorage>('players', {}), {
+        OWNER: { ip: '', ips: [], joins: 0, owner: true },
+        TEST: { ip: '0.0.0.0', ips: ['0.0.0.0'], joins: 1 }
+    })
 })
 
 test(tn`Should add IPs if they are not yet recorded`, async t => {
     let storage = new MockStorage()
-    storage.get = () => ({ TEST: { joins: 1, ip: '0.0.0.0', ips: [] } }) as any
-    storage.set = (_, value) => {
-        // Handle the overview request setting the owner
-        if (value.OWNER) return
-        t.deepEqual(value, { TEST: { joins: 2, ip: '0.0.0.0', ips: ['0.0.0.0'] } })
-    }
+    storage.set('players', { TEST: { joins: 1, ip: '0.0.0.0', ips: [] } })
     let mockApi = {
         ...api,
         async getMessages() {
@@ -383,6 +402,11 @@ test(tn`Should add IPs if they are not yet recorded`, async t => {
     world.startWatcher()
     await delay(500)
     world.stopWatcher()
+
+    t.deepEqual(storage.get<PlayerStorage>('players', {}), {
+        OWNER: { ip: '', ips: [], joins: 0, owner: true },
+        TEST: { ip: '0.0.0.0', ips: ['0.0.0.0'], joins: 2 }
+    })
 })
 
 test(tn`Should send leave events`, async t => {

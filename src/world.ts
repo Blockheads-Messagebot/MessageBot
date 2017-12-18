@@ -7,8 +7,9 @@ import { SimpleEvent, SafeSimpleEvent } from './events'
 
 const cloneDate = (d: Date) => new Date(d.getTime())
 
-const PLAYERS_KEY = 'mb_players'
-type PlayerStorage = {[name: string]: PlayerInfo}
+const PLAYERS_KEY = 'players'
+const LAST_UPDATE_KEY = 'lastPlayersUpdate'
+export type PlayerStorage = {[name: string]: PlayerInfo}
 
 export class World {
     protected _api: WorldApi
@@ -151,7 +152,11 @@ export class World {
      * @param refresh if true, will get the latest logs, otherwise will returned the cached version.
      */
     getLogs = async (refresh = false): Promise<LogEntry[]> => {
-        if (!this._cache.logs || refresh) this._cache.logs = this._api.getLogs()
+        if (!this._cache.logs || refresh) {
+            const updatePlayers = !this._cache.logs
+            this._cache.logs = this._api.getLogs()
+            if (updatePlayers) await this._updatePlayers()
+        }
         let lines = await this._cache.logs
         return lines.slice().map(line => ({
             ...line,
@@ -224,16 +229,7 @@ export class World {
     protected _createWatcher(): void {
         let watcher = this._chatWatcher = new ChatWatcher(this._api, this._online)
 
-        watcher.onJoin.sub(({ name, ip }) => {
-            name = name.toLocaleUpperCase()
-            this._storage.with<PlayerStorage>(PLAYERS_KEY, {}, players => {
-                let player = players[name] = players[name] || { ip, ips: [ip], joins: 0 }
-                player.joins++
-                player.ip = ip
-                if (!player.ips.includes(ip)) player.ips.push(ip)
-            })
-            this._events.onJoin.dispatch(this.getPlayer(name))
-        })
+        watcher.onJoin.sub(arg => this._addUser(arg))
 
         watcher.onLeave.sub(name => this._events.onLeave.dispatch(this.getPlayer(name)))
 
@@ -243,12 +239,40 @@ export class World {
 
         this.onMessage.sub(({player, message}) => {
             if (/^\/[^ ]/.test(message)) {
-                let [, command, args] = message.match(/^\/([^ ]+) ?(.*)$/) as RegExpMatchArray
-                let handler = this._commands.get(command.toLocaleUpperCase())
+                const [, command, args] = message.match(/^\/([^ ]+) ?(.*)$/)!
+                const handler = this._commands.get(command.toLocaleUpperCase())
                 if (handler) handler(player, args)
             }
         })
 
         watcher.start()
+    }
+
+    protected async _updatePlayers(): Promise<void> {
+        // Note: We can't just use this.getLogs() here due to magic required to make players update only once.
+        const lines = await this._cache.logs!
+        const { name } = await this.getOverview()
+        const lastUpdate = this._storage.get(LAST_UPDATE_KEY, 0)
+
+        for (const line of lines) {
+            if (line.timestamp.getTime() < lastUpdate) continue
+            if (!line.message.startsWith(`${name} - Player Connected`)) continue
+
+            const [, user, ip] = line.message.match(/Connected ([^a-z]{3,}) \| ([\d.]+) \| .{32}$/)!
+            this._addUser({ name: user, ip })
+        }
+    }
+
+    protected _addUser({name, ip}: { name: string, ip: string }): void {
+        name = name.toLocaleUpperCase()
+        this._storage.with<PlayerStorage>(PLAYERS_KEY, {}, players => {
+            const player = players[name] = players[name] || { ip, ips: [ip], joins: 0 }
+            player.joins++
+            player.ip = ip
+            if (!player.ips.includes(ip)) player.ips.push(ip)
+        })
+        this._events.onJoin.dispatch(this.getPlayer(name))
+        // Prevent this join from being counted twice
+        this._storage.set(LAST_UPDATE_KEY, Date.now())
     }
 }
