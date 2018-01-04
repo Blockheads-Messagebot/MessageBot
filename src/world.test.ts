@@ -430,6 +430,28 @@ test(tn`Should send leave events`, async t => {
     world.stopWatcher()
 })
 
+test(tn`Names with leading colon-space`, async t => {
+    let storage = new MockStorage()
+    let mockApi = {
+        ...api,
+        async getMessages() {
+            return {
+                status: 'ok', log: [
+                    'WORLD - Player Connected : TIMOTHY  | 0.0.0.0 | 3d83feb8ddbcf3abc7c6b3c28f5c84d0',
+                    'WORLD - Player Disconnected : TIMOTHY '
+                ], nextId: 0
+            }
+        }
+    }
+
+    let world = new MockWorldWatcher(mockApi, storage)
+    world.onLeave.sub(({name}) => t.is(name, ': TIMOTHY '))
+    world.startWatcher()
+    await delay(500)
+    t.deepEqual(world.online, ['ONLINE'])
+    world.stopWatcher()
+})
+
 test(tn`Should send events when a message starting with / is sent`, t => {
     let storage = new MockStorage()
     let world = new MockWorldWatcher(api, storage)
