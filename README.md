@@ -9,7 +9,7 @@ The MessageBot is a framework for quickly building bots for The Blockheads that 
 | Page | Cloud | Mac | Mobile | Windows | OS X | Linux |
 | :--: | :---: | :-: | :----: | :-----: | :-: | :---: |
 | [Bookmarklet](https://github.com/Blockheads-Messagebot/Browser-Loader) | ✓ | ✖ | ✓ | ✓ | ✓ | ✓ |
-| [Cloud](https://github.com/Blockheads-Messagebot/Cloud-Loader) | ✓ | ✖ | ✖ | ✓ | ✓ | ✓ |
+| [Console](https://github.com/Blockheads-Messagebot/Console-Loader) | ✓ | ✖ | ✖ | ✓ | ✓ | ✓ |
 | [Mac](https://github.com/Blockheads-Messagebot/Mac-Loader) | ✖ | ✓ | ✖ | ✖ | ✓ | ✖ |
 
 ### Docs for Devs
