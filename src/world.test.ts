@@ -153,7 +153,8 @@ test(tn`Should expose the overview safely`, async t => {
     let world = new World(api, storage)
 
     let worldOverview = await world.getOverview()
-    Object.keys(worldOverview).forEach((key: keyof WorldOverview) => {
+    Object.keys(worldOverview).forEach(k => {
+        const key = k as keyof WorldOverview
         if (typeof worldOverview[key] == 'object') {
             t.not(worldOverview[key], overview[key])
         }
@@ -240,16 +241,18 @@ test(tn`Should return logs in a safe manner`, async t => {
 
 test(tn`Should update the players object when fetching logs`, async t => {
     const storage = new MockStorage()
-    storage.set('lastPlayersUpdate', Date.now())
+    storage.set('lastPlayersUpdate', 10)
     const world = new World({
         ...api,
         async getLogs() {
             return [
-                // Before now, won't be used.
+                // Before before last update, won't be used.
                 { raw: '', timestamp: new Date(0), message: `${overview.name} - Player Connected PLAYER NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345`},
                 // This should be far enough in the future...
-                { raw: '', timestamp: new Date(1e15), message: `SERVER: Hi!`},
-                { raw: '', timestamp: new Date(1e15), message: `${overview.name} - Player Connected PLAYER NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345`}
+                { raw: '', timestamp: new Date(Date.now() - 1000), message: `SERVER: Hi!`},
+                { raw: '', timestamp: new Date(Date.now() - 1000), message: `${overview.name} - Player Connected PLAYER NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345` },
+                // After now, won't be used
+                { raw: '', timestamp: new Date(Date.now() + 1000), message: `${overview.name} - Player Connected PLAYER NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345`}
             ]
         }
     }, storage)

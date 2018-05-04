@@ -8,8 +8,8 @@ const delay = (ms: number = 100) => new Promise(resolve => setTimeout(resolve, m
 class Race {
     promise: Promise<void>
     cleanup: () => void
-    private resolve: () => void
-    private reject: (reason: any) => void
+    private resolve !: () => void
+    private reject !: (reason: any) => void
 
     constructor({timeout = 100, cleanup = () => {}} = {}) {
         this.cleanup = cleanup

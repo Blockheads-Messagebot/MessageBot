@@ -4,7 +4,9 @@
         "*.js.map": true,
         "*.d.ts": true,
         ".nyc_output": true,
-        "coverage": true
+        "coverage": true,
+        "node_modules": true,
+        "es": true
     },
     "eslint.enable": false
 }

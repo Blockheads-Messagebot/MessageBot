@@ -14,7 +14,7 @@ export type PlayerStorage = {[name: string]: PlayerInfo}
 export class World {
     protected _api: WorldApi
     protected _storage: Storage
-    protected _chatWatcher: ChatWatcher
+    protected _chatWatcher !: ChatWatcher
 
     private _cache: {
         logs?: Promise<LogEntry[]>
@@ -32,9 +32,20 @@ export class World {
     protected _lists: WorldLists = {adminlist: [], modlist: [], whitelist: [], blacklist: []}
     protected _commands: Map<string, (player: Player, args: string) => void> = new Map()
 
+    /**
+     * The last time joins were updated from the log
+     */
+    protected _lastLogUpdate: number
+    /**
+     * The first time joins were updated from chat
+     * It is assumed that all joins from this point onwards have been counted.
+     */
+    protected _firstChatUpdate: number = Date.now()
+
     constructor(api: WorldApi, storage: Storage) {
         this._api = api
         this._storage = storage
+        this._lastLogUpdate = storage.get(LAST_UPDATE_KEY, 0)
 
         this._createWatcher()
         this.getOverview() // Sets the owner, gets initial online players
@@ -249,13 +260,12 @@ export class World {
     }
 
     protected async _updatePlayers(): Promise<void> {
-        // Note: We can't just use this.getLogs() here due to magic required to make players update only once.
-        const lines = await this._cache.logs!
+        const lines = await this.getLogs()
         const { name } = await this.getOverview()
-        const lastUpdate = this._storage.get(LAST_UPDATE_KEY, 0)
 
         for (const line of lines) {
-            if (line.timestamp.getTime() < lastUpdate) continue
+            if (line.timestamp.getTime() < this._lastLogUpdate) continue
+            if (line.timestamp.getTime() > this._firstChatUpdate) continue
             if (!line.message.startsWith(`${name} - Player Connected`)) continue
 
             const [, user, ip] = line.message.match(/Connected ([^a-z]{3,}) \| ([\d.]+) \| .{32}$/)!
