@@ -9,8 +9,11 @@
   "author": "Bibliofile <bibliofilegit@gmail.com>",
   "license": "GPL-3.0+",
   "devDependencies": {
-    "ava": "^0.25.0",
+    "@types/tape": "^4.2.32",
     "nyc": "^11.7.1",
+    "tap-prettify": "^0.0.2",
+    "tape": "^4.9.0",
+    "ts-node": "^6.0.2",
     "tslint": "^5.10.0",
     "typedoc": "^0.11.0",
     "typescript": "^2.8.3"
@@ -22,7 +25,16 @@
     "docs": "typedoc src",
     "build": "tsc && tsc -p tsconfig_es.json",
     "prepare": "npm run build",
-    "test": "tsc && nyc ava \"*.test.js\"",
+    "test": "tape -r ts-node/register src/*.test.ts | tap-prettify -",
+    "coverage": "nyc yarn test",
     "report": "nyc report --reporter=html"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.test.ts"
+    ]
   }
 }

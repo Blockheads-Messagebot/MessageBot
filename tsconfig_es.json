@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "outDir": "./es",
-    "target": "es6",
+    "target": "es2015",
     "lib": [
-      "es7",
-      "dom",
-      "scripthost"
+      "es2017",
+      "es2107.object",
+      "dom"
     ],
     "moduleResolution": "node",
     "declaration": true,

@@ -236,6 +236,16 @@ export class World {
     restart = () => this._api.restart()
 
     /**
+     * Starts the internal chat watcher
+     */
+    startWatchingChat = () => this._chatWatcher.start()
+
+    /**
+     * Stops the internal chat watcher.
+     */
+    stopWatchingChat = () => this._chatWatcher.stop()
+
+    /**
      * Internal init function
      */
     protected _createWatcher(): void {
@@ -258,8 +268,6 @@ export class World {
                 if (handler) handler(player, args)
             }
         })
-
-        watcher.start()
     }
 
     protected async _updatePlayers(): Promise<void> {

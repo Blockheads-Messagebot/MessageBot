@@ -1,34 +1,9 @@
-import test from 'ava'
+import * as test from 'tape'
 
 import { ChatWatcher, JoinEventArgs, MessageEventArgs } from './chatWatcher'
 
 // Note: Using delays in tests is not a good idea, however for testing this module it is unavoidable.
 const delay = (ms: number = 100) => new Promise(resolve => setTimeout(resolve, ms))
-
-class Race {
-    promise: Promise<void>
-    cleanup: () => void
-    private resolve !: () => void
-    private reject !: (reason: any) => void
-
-    constructor({timeout = 100, cleanup = () => {}} = {}) {
-        this.cleanup = cleanup
-
-        this.promise = new Promise<void>((re, rj) => {
-            this.resolve = re
-            this.reject = rj
-        })
-        delay(timeout).then(() => {
-            if (this.cleanup) this.cleanup()
-            this.reject('Timeout')
-        })
-    }
-
-    finish() {
-        if (this.cleanup) this.cleanup()
-        this.resolve()
-    }
-}
 
 const tn = ([s]: TemplateStringsArray) => `ChatWatcher - ${s}`
 
@@ -40,6 +15,7 @@ function makeApi(...log: string[]) {
 }
 
 test(tn`Should correctly report if running`, t => {
+    t.plan(3)
     let watcher = new ChatWatcher(makeApi(), [])
     t.is(watcher.running, false)
     watcher.start()
@@ -48,45 +24,42 @@ test(tn`Should correctly report if running`, t => {
     t.is(watcher.running, false)
 })
 
-function joinRace(watcher: ChatWatcher, cb: (info: JoinEventArgs) => void): Promise<void> {
-    let race = new Race({ cleanup: () => watcher.stop })
-    watcher.onJoin.sub(info => {
-        cb(info)
-        race.finish()
-    })
+async function joinRace(watcher: ChatWatcher, cb: (info: JoinEventArgs) => void): Promise<void> {
+    watcher.onJoin.sub(cb)
     watcher.start()
-
-    return race.promise
+    await delay()
+    watcher.stop()
 }
 
 test(tn`Should fire join events`, t => {
-    // Only a single event should be fired
     t.plan(1)
-
     let api = makeApi('WORLD - Player Connected NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345')
 
     let watcher = new ChatWatcher(api, [])
 
-    return joinRace(watcher, () => t.pass())
+    joinRace(watcher, () => t.pass())
 })
 
 test(tn`Should include the player name in join events`, t => {
+    t.plan(1)
     let api = makeApi('WORLD - Player Connected NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345')
 
     let watcher = new ChatWatcher(api, [])
 
-    return joinRace(watcher, ({name}) => t.is(name, 'NAME'))
+    joinRace(watcher, ({name}) => t.is(name, 'NAME'))
 })
 
 test(tn`Should include the player ip in join events`, t => {
+    t.plan(1)
     let api = makeApi('WORLD - Player Connected NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345')
 
     let watcher = new ChatWatcher(api, [])
 
-    return joinRace(watcher, ({ip}) => t.is(ip, '0.0.0.0'))
+    joinRace(watcher, ({ip}) => t.is(ip, '0.0.0.0'))
 })
 
 test(tn`Should not fire join events for players already connected`, async t => {
+    t.plan(1)
     let api = makeApi(
         'WORLD - Player Connected NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345',
     )
@@ -100,6 +73,7 @@ test(tn`Should not fire join events for players already connected`, async t => {
 })
 
 test(tn`Should add connected players to the online array`, async t => {
+    t.plan(1)
     let api = makeApi(
         'WORLD - Player Connected NAME | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345',
     )
@@ -107,12 +81,13 @@ test(tn`Should add connected players to the online array`, async t => {
 
     let watcher = new ChatWatcher(api, online)
 
-    return joinRace(watcher, () => {
+    joinRace(watcher, () => {
         t.deepEqual(online, ['NAME'])
     })
 })
 
 test(tn`Should not fire events for invalid names`, async t => {
+    t.plan(1)
     let api = makeApi(
         'WORLD - Player Connected AB | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345',
         'WORLD - Player Connected asdf | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345',
@@ -127,6 +102,7 @@ test(tn`Should not fire events for invalid names`, async t => {
 })
 
 test(tn`Should not fire events for invalid joins`, async t => {
+    t.plan(1)
     let api = makeApi(
         'WORLD - Player Connected ABC | 0.0.0.0 | short',
     )
@@ -140,6 +116,7 @@ test(tn`Should not fire events for invalid joins`, async t => {
 })
 
 test(tn`Should handle names with pipes`, t => {
+    t.plan(1)
     let api = makeApi('WORLD - Player Connected NAME | MORE | 0.0.0.0 | abcdefghijklmnopqrstuvwxyz012345')
 
     let watcher = new ChatWatcher(api, [])
@@ -147,28 +124,26 @@ test(tn`Should handle names with pipes`, t => {
     return joinRace(watcher, ({ name }) => t.is(name, 'NAME | MORE'))
 })
 
-function leaveRace(watcher: ChatWatcher, cb: (name: string) => void): Promise<void> {
-    let race = new Race({ cleanup: () => watcher.stop })
-    watcher.onLeave.sub(name => {
-        cb(name)
-        race.finish()
-    })
+async function leaveRace(watcher: ChatWatcher, cb: (name: string) => void): Promise<void> {
+    watcher.onLeave.sub(cb)
     watcher.start()
-
-    return race.promise
+    await delay()
+    watcher.stop()
 }
 
 test(tn`Should fire leave events`, async t => {
+    t.plan(1)
     let api = makeApi(
         'WORLD - Player Disconnected NAME',
     )
 
     let watcher = new ChatWatcher(api, ['NAME'])
 
-    return leaveRace(watcher, () => t.pass())
+    leaveRace(watcher, () => t.pass())
 })
 
 test(tn`Should not fire leave events for offline players`, async t => {
+    t.plan(1)
     let api = makeApi(
         'WORLD - Player Disconnected NAME',
     )
@@ -183,36 +158,35 @@ test(tn`Should not fire leave events for offline players`, async t => {
 })
 
 test(tn`Should remove players from the online array`, t => {
+    t.plan(1)
     let api = makeApi('WORLD - Player Disconnected NAME')
     let online = ['NAME']
 
     let watcher = new ChatWatcher(api, online)
-    return leaveRace(watcher, () => {
+    leaveRace(watcher, () => {
         t.deepEqual(online, [])
     })
 })
 
 test(tn`Should include the player name in leave events`, t => {
+    t.plan(1)
     let api = makeApi('WORLD - Player Disconnected NAME')
 
     let watcher = new ChatWatcher(api, ['NAME'])
-    return leaveRace(watcher, name => {
+    leaveRace(watcher, name => {
         t.is(name, 'NAME')
     })
 })
 
-function messageRace(watcher: ChatWatcher, cb: (data: MessageEventArgs) => void) {
-    let race = new Race({ cleanup: () => watcher.stop })
-    watcher.onMessage.sub(data => {
-        cb(data)
-        race.finish()
-    })
+async function messageRace(watcher: ChatWatcher, cb: (data: MessageEventArgs) => void) {
+    watcher.onMessage.sub(cb)
     watcher.start()
-
-    return race.promise
+    await delay()
+    watcher.stop()
 }
 
 test(tn`Should fire messages for online players`, t => {
+    t.plan(1)
     let api = makeApi('NAME: Hello!')
 
     let watcher = new ChatWatcher(api, ['NAME'])
@@ -221,6 +195,7 @@ test(tn`Should fire messages for online players`, t => {
 })
 
 test(tn`Should include the player name`, t => {
+    t.plan(1)
     let api = makeApi('NAME: Hello!')
 
     let watcher = new ChatWatcher(api, ['NAME'])
@@ -229,6 +204,7 @@ test(tn`Should include the player name`, t => {
 })
 
 test(tn`Should include the player message`, t => {
+    t.plan(1)
     let api = makeApi('NAME: Hello!')
 
     let watcher = new ChatWatcher(api, ['NAME'])
@@ -237,6 +213,7 @@ test(tn`Should include the player message`, t => {
 })
 
 test(tn`Should include the player message`, t => {
+    t.plan(1)
     let api = makeApi('NAME: Hello!')
 
     let watcher = new ChatWatcher(api, ['NAME'])
@@ -245,6 +222,7 @@ test(tn`Should include the player message`, t => {
 })
 
 test(tn`Should handle player names with colons`, t => {
+    t.plan(2)
     let api = makeApi('NAME: : Hello!')
 
     let watcher = new ChatWatcher(api, ['NAME: '])
@@ -256,6 +234,7 @@ test(tn`Should handle player names with colons`, t => {
 })
 
 test(tn`Should default to the longer name if a name is not online`, t => {
+    t.plan(2)
     let api = makeApi('NAME: : Hello!')
 
     let watcher = new ChatWatcher(api, [])
@@ -267,6 +246,7 @@ test(tn`Should default to the longer name if a name is not online`, t => {
 })
 
 test(tn`Should not fire events for invalid names`, async t => {
+    t.plan(1)
     let api = makeApi('AD: test')
 
     let watcher = new ChatWatcher(api, [])
@@ -280,6 +260,7 @@ test(tn`Should not fire events for invalid names`, async t => {
 
 // Partial mitigation for https://forums.theblockheads.net/t/the-message-bot/18040/1027
 test(tn`Should not return messages starting with / from SERVER`, async t => {
+    t.plan(1)
     let api = makeApi('SERVER: /test')
 
     let watcher = new ChatWatcher(api, [])
@@ -292,24 +273,24 @@ test(tn`Should not return messages starting with / from SERVER`, async t => {
 })
 
 test(tn`Should handle colons in messages`, async t => {
+    t.plan(2)
     let api = makeApi('NAME: : hi')
 
     let watcher = new ChatWatcher(api, ['NAME'])
 
-    return messageRace(watcher, ({name, message}) => {
+    messageRace(watcher, ({name, message}) => {
         t.is(name, 'NAME')
         t.is(message, ': hi')
     })
 })
 
 test(tn`Unparsed messages should be sent to other`, async t => {
+    t.plan(3)
     let api = makeApi(
         'using seed:1434298072',
         'SERVER: /test',
         'WORLD - Player Connected abc | 0.0.0.0 | asdf'
     )
-
-    t.plan(api.length)
 
     let watcher = new ChatWatcher(api, [])
     watcher.onOther.sub(() => t.pass())
@@ -319,14 +300,13 @@ test(tn`Unparsed messages should be sent to other`, async t => {
 })
 
 test(tn`Calling start multiple times should not start multiple listeners`, async t => {
+    t.plan(2)
     class MockWatcher extends ChatWatcher {
         stop() {
             t.pass()
             super.stop()
         }
     }
-
-    t.plan(2)
 
     let api = makeApi()
     let watcher = new MockWatcher(api, [])
@@ -338,10 +318,12 @@ test(tn`Calling start multiple times should not start multiple listeners`, async
 test(tn`Calling stop should not throw if the listener is not started`, t => {
     let api = makeApi()
     let watcher = new ChatWatcher(api, [])
-    t.notThrows(() => watcher.stop())
+    t.doesNotThrow(() => watcher.stop())
+    t.end()
 })
 
 test(tn`Should schedule chat checks even if the api throws`, async t => {
+    t.plan(1)
     let api = {
         getMessages(): Promise<{nextId: number, log: string[]}> { throw Error() }
     }
@@ -359,6 +341,7 @@ test(tn`Should schedule chat checks even if the api throws`, async t => {
 })
 
 test(tn`Should stop even if stop is called while waiting for an api response`, async t => {
+    t.plan(1)
     let watcher: ChatWatcher
     let api = {
         getMessages() {

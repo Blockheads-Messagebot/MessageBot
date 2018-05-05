@@ -1,5 +1,5 @@
 import { MessageBot, Storage, WorldApi, World } from './index'
-import * as ava from 'ava'
+import * as test from 'tape'
 import {
     WorldLists,
     WorldOverview,
@@ -77,60 +77,48 @@ class MockApi implements WorldApi {
     }
 }
 
-interface Context {
-    storage: MockStorage
-}
-
-ava.test.beforeEach(t => {
-    t.context = {...t.context, storage: new MockStorage() }
-})
-const test: ava.RegisterContextual<Context> = ava.test
-
-// Disable the chat watcher to avoid errors
-import {ChatWatcher} from './chatWatcher'
-ChatWatcher.prototype.start = () => {}
-
 const tn = ([s]: TemplateStringsArray) => `MessageBot - ${s}`
 
-type tParam = ava.GenericTestContext<ava.Context<Context>>
 const info = {name: 'NAME', id: 'some_id' }
-const makeBot = (t: tParam) => new MessageBot(t.context.storage, info)
+const makeBot = () => new MessageBot(new MockStorage(), info)
 
-const pass = (t: tParam) => () => t.pass()
-const fail = (t: tParam) => () => t.fail()
+const pass = (t: test.Test) => () => t.pass()
+const fail = (t: test.Test) => () => t.fail()
 
-
-// Note, this will run before all parallel tests
-// https://github.com/avajs/ava/issues/12
-test.serial(tn`Should throw an error if dependencies are not set`, t => {
-    t.throws(() => makeBot(t))
+test(tn`Should throw an error if dependencies are not set`, t => {
+    t.throws(() => makeBot())
+    t.end()
 })
 
-test.serial(tn`fetch should return the fetch instance set in the dependencies`, t => {
+test(tn`fetch should return the fetch instance set in the dependencies`, t => {
     let s = Symbol('fetch')
     MessageBot.dependencies = { Api: MockApi, async getWorlds() { return [] }, fetch: s } as any
-    let bot = makeBot(t)
+    let bot = makeBot()
     t.is(bot.fetch, s as any)
+    t.end()
 })
 
-test.serial(tn`Should not throw if dependencies are set`, t => {
+test(tn`Should not throw if dependencies are set`, t => {
     MessageBot.dependencies = {
         Api: MockApi,
         async getWorlds() { return [] },
         fetch: () => Promise.resolve(new Response())
     }
-    t.notThrows(() => makeBot(t))
+    t.doesNotThrow(makeBot)
+    t.end()
 })
 
 test(tn`Should set the world property`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     t.true(bot.world instanceof World)
+    t.end()
 })
 
 test(tn`extensionRegistered should fire when an extension is registered`, t => {
     MessageBot.extensionRegistered.sub(pass(t))
     MessageBot.registerExtension('empty', () => {})
     MessageBot.deregisterExtension('empty')
+    t.end()
 })
 
 test(tn`extensionRegistered should fire when an extension is reregistered`, t => {
@@ -138,13 +126,14 @@ test(tn`extensionRegistered should fire when an extension is reregistered`, t =>
     MessageBot.extensionRegistered.sub(pass(t))
     MessageBot.registerExtension('empty', () => { })
     MessageBot.deregisterExtension('empty')
-
+    t.end()
 })
 
 test(tn`extensionDeregistered should fire when an extension is deregistered`, t => {
     MessageBot.registerExtension('empty', () => { })
     MessageBot.extensionDeregistered.sub(pass(t))
     MessageBot.deregisterExtension('empty')
+    t.end()
 })
 
 test(tn`extensionDeregistered should not fire when an extension has not been registered`, t => {
@@ -153,6 +142,7 @@ test(tn`extensionDeregistered should not fire when an extension has not been reg
     MessageBot.deregisterExtension('empty')
     MessageBot.extensionDeregistered.unsub(f)
     t.pass()
+    t.end()
 })
 
 test(tn`extensions should be an array of currently registered extension ids`, t => {
@@ -160,10 +150,11 @@ test(tn`extensions should be an array of currently registered extension ids`, t 
     MessageBot.registerExtension('empty', () => {})
     t.deepEqual(MessageBot.extensions, ['empty'])
     MessageBot.deregisterExtension('empty')
+    t.end()
 })
 
 test(tn`getExports should return the exports property of an extension`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     let id = 'test'
     let exported = { prop: 'value' }
     MessageBot.registerExtension(id, ex => {
@@ -174,15 +165,17 @@ test(tn`getExports should return the exports property of an extension`, t => {
     // Cleanup
     bot.removeExtension(id, false)
     MessageBot.deregisterExtension(id)
+    t.end()
 })
 
 test(tn`getExports should return undefined if the extension has not been created`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     t.is(bot.getExports('test'), undefined)
+    t.end()
 })
 
 test(tn`addExtension should throw if an extension has already been added`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     let id = 'test'
     MessageBot.registerExtension(id, () => {})
     bot.addExtension(id)
@@ -190,18 +183,21 @@ test(tn`addExtension should throw if an extension has already been added`, t => 
     // Cleanup
     bot.removeExtension(id, false)
     MessageBot.deregisterExtension(id)
+    t.end()
 })
 
 test(tn`addExtension should throw if an extension has not been registered`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     let id = 'test'
     t.throws(() => bot.addExtension(id))
+    t.end()
 })
 
 test(tn`removeExtension should throw if an extension has not been loaded`, t => {
     let id = 'test'
-    let bot = makeBot(t)
+    let bot = makeBot()
     t.throws(() => bot.removeExtension(id, false))
+    t.end()
 })
 
 test(tn`removeExtension should call remove if the extension is not being uninstalled`, t => {
@@ -209,11 +205,12 @@ test(tn`removeExtension should call remove if the extension is not being uninsta
     MessageBot.registerExtension(id, ex => {
         ex.remove = () => t.pass()
     })
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.addExtension(id)
     bot.removeExtension(id, false)
 
     MessageBot.deregisterExtension(id)
+    t.end()
 })
 
 test(tn`removeExtension should call uninstall if the extension is not being uninstalled`, t => {
@@ -221,25 +218,27 @@ test(tn`removeExtension should call uninstall if the extension is not being unin
     MessageBot.registerExtension(id, ex => {
         ex.uninstall = () => t.pass()
     })
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.addExtension(id)
     bot.removeExtension(id, true)
 
     MessageBot.deregisterExtension(id)
+    t.end()
 })
 
 test(tn`send should inject variables`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.world.send = (message: string) => {
         t.is(message, 'Message VAR end.')
         return Promise.resolve()
     }
 
     bot.send('Message {{key}} end.', {key: 'VAR'})
+    t.end()
 })
 
 test(tn`send variable expansion should not be recursive`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.world.send = (message: string) => {
         t.is(message, 'Message {{VAR}} end.')
         return Promise.resolve()
@@ -247,41 +246,46 @@ test(tn`send variable expansion should not be recursive`, t => {
 
     bot.send('Message {{key}} end.', { key: '{{VAR}}', VAR: 'Other' })
     bot.send('Message {{key}} end.', { VAR: 'Other', key: '{{VAR}}' })
+    t.end()
 })
 
 test(tn`send should allow the usage of 'name'`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.world.send = (message: string) => {
         t.is(message, 'NAME Name name')
         return Promise.resolve()
     }
 
     bot.send('{{NAME}} {{Name}} {{name}}', { name: 'NaMe' })
+    t.end()
 })
 
 test(tn`Should allow not passing a params variable`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.world.send = (message: string) => {
         t.is(message, '{{fakeKey}}')
         return Promise.resolve()
     }
 
     bot.send('{{fakeKey}}')
+    t.end()
 })
 
 test(tn`send should not care if the send request rejects`, async t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     bot.world.send = () => Promise.reject(Error('Failed to send'))
     bot.send('Message')
     // If this fails, an unhandled rejection will be thrown
     t.pass()
+    t.end()
 })
 
 test(tn`extensions should be an array of currently loaded extensions`, t => {
-    let bot = makeBot(t)
+    let bot = makeBot()
     MessageBot.registerExtension('test', () => {})
     bot.addExtension('test')
     t.deepEqual(bot.extensions, ['test'])
 
     MessageBot.deregisterExtension('test')
+    t.end()
 })

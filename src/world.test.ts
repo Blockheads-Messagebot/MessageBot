@@ -1,4 +1,4 @@
-import test from 'ava'
+import * as test from 'tape'
 
 import { World, PlayerStorage } from './world'
 import {
@@ -10,6 +10,8 @@ import {
     WorldSizes,
     WorldStatus
 } from 'blockheads-api-interface'
+
+import { Player } from './player'
 import { Storage } from './storage'
 
 class MockStorage extends Storage {
@@ -70,17 +72,13 @@ const api: WorldApi = {
 
 const storage = new MockStorage()
 
-// Disable trying to watch chat
-import { ChatWatcher } from './chatWatcher'
-const oldChatWatcherStart = ChatWatcher.prototype.start
-ChatWatcher.prototype.start = function() {}
-
 // Helpers
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 const tn = ([s]: TemplateStringsArray) => `World - ${s}`
 
 test(tn`Should expose events`, t => {
+    t.plan(4 * 2)
     let world = new World(api, storage)
     let events: Array<keyof World> = ['onJoin', 'onLeave', 'onMessage', 'onOther']
 
@@ -92,13 +90,15 @@ test(tn`Should expose events`, t => {
 })
 
 test(tn`Should expose online players with the updated information from the overview`, async t => {
+    t.plan(1)
     let world = new World(api, storage)
 
-    await delay(500)
+    await delay(100)
     t.deepEqual(world.online, overview.online)
 })
 
 test(tn`Should expose all players in storage`, async t => {
+    t.plan(2)
     let players = {NAME: {ip: '0.0.0.0', ips: ['0.0.0.0'], joins: 1}}
     let storage = new MockStorage()
     storage.get = <T>(_key: string, _fallback: T): T => {
@@ -106,7 +106,7 @@ test(tn`Should expose all players in storage`, async t => {
     }
     let world = new World(api, storage)
 
-    await delay(500)
+    await delay(100)
     // There is one player in the storage
     t.is(world.players.length, 1)
     // The name is NAME
@@ -114,6 +114,7 @@ test(tn`Should expose all players in storage`, async t => {
 })
 
 test(tn`Should get the world status`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let world = new World(api, storage)
 
@@ -121,6 +122,7 @@ test(tn`Should get the world status`, async t => {
 })
 
 test(tn`Should cache overview api calls`, async t => {
+    t.plan(6)
     let storage = new MockStorage()
     let apiChecker = {
         ...api,
@@ -138,8 +140,6 @@ test(tn`Should cache overview api calls`, async t => {
         }
     }
 
-    t.plan(6)
-
     let world = new World(apiChecker, storage)
     for (let i = 0; i < 3; i++) {
         await world.getOverview(i == 2)
@@ -149,6 +149,7 @@ test(tn`Should cache overview api calls`, async t => {
 })
 
 test(tn`Should expose the overview safely`, async t => {
+    t.plan(Object.values(overview).filter((v: any) => typeof v == 'object').length + 1)
     let storage = new MockStorage()
     let world = new World(api, storage)
 
@@ -163,16 +164,18 @@ test(tn`Should expose the overview safely`, async t => {
 })
 
 test(tn`Should update the owner property when calling getOverview`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     storage.set = (_, value) => {
         t.is(value[overview.owner].owner, true)
     }
 
     new World(api, storage)
-    await delay(500)
+    await delay(100)
 })
 
 test(tn`Should return lists in a safe manner`, async t => {
+    t.plan(4)
     let storage = new MockStorage()
     let world = new World(api, storage)
 
@@ -184,6 +187,7 @@ test(tn`Should return lists in a safe manner`, async t => {
 })
 
 test(tn`Should set lists using the current lists`, async t => {
+    t.plan(2)
     let storage = new MockStorage()
     let testApi = {
         ...api,
@@ -204,6 +208,7 @@ test(tn`Should set lists using the current lists`, async t => {
 })
 
 test(tn`Should cache getLogs calls`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let testApi = {
         ...api,
@@ -213,14 +218,14 @@ test(tn`Should cache getLogs calls`, async t => {
         }
     }
 
-    t.plan(1)
-
     let world = new World(testApi, storage)
     await world.getLogs()
     await world.getLogs()
 })
 
 test(tn`Should return logs in a safe manner`, async t => {
+    t.plan(4)
+
     let logs: LogEntry[] = [{raw: '', message: '', timestamp: new Date()}]
     let storage = new MockStorage()
     let testApi = {
@@ -240,6 +245,8 @@ test(tn`Should return logs in a safe manner`, async t => {
 })
 
 test(tn`Should update the players object when fetching logs`, async t => {
+    t.plan(1)
+
     const storage = new MockStorage()
     storage.set('lastPlayersUpdate', 10)
     const world = new World({
@@ -265,23 +272,15 @@ test(tn`Should update the players object when fetching logs`, async t => {
 })
 
 test(tn`Should return a player object even for names that do not exist`, t => {
+    t.plan(1)
     let storage = new MockStorage()
     let world = new World(api, storage)
 
-    t.truthy(world.getPlayer('Does not exist'))
+    t.true(world.getPlayer('Does not exist') instanceof Player)
 })
 
-class MockWorldWatcher extends World {
-    startWatcher() {
-        oldChatWatcherStart.apply(this._chatWatcher)
-    }
-
-    stopWatcher() {
-        this._chatWatcher.stop()
-    }
-}
-
 test(tn`Should support adding commands`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -289,15 +288,16 @@ test(tn`Should support adding commands`, async t => {
             return { status: 'ok', log: ['NAME: /test'], nextId: 0 }
         }
     }
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
 
     world.addCommand('test', () => t.pass())
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
 })
 
 test(tn`Should not report messages not staring with / are commands`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -305,18 +305,19 @@ test(tn`Should not report messages not staring with / are commands`, async t => 
             return { status: 'ok', log: ['NAME: Hi'], nextId: 0 }
         }
     }
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
 
     world.addCommand('hi', () => t.fail())
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
     t.pass()
 })
 
 test(tn`Should throw if a command has already been added`, t => {
+    t.plan(1)
     let storage = new MockStorage()
-    let world = new MockWorldWatcher(api, storage)
+    let world = new World(api, storage)
 
     world.addCommand('test', () => {})
     try {
@@ -328,6 +329,7 @@ test(tn`Should throw if a command has already been added`, t => {
 })
 
 test(tn`Should support removing a command`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -335,17 +337,18 @@ test(tn`Should support removing a command`, async t => {
             return { status: 'ok', log: ['NAME: /test'], nextId: 0 }
         }
     }
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
 
     world.addCommand('test', () => t.fail())
     world.removeCommand('test')
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
     t.pass()
 })
 
 test(tn`Should pass other methods through to the api`, async t => {
+    t.plan(4)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -356,7 +359,6 @@ test(tn`Should pass other methods through to the api`, async t => {
     }
     let world = new World(mockApi, storage)
 
-    t.plan(4)
     await world.start()
     await world.stop()
     await world.restart()
@@ -364,6 +366,7 @@ test(tn`Should pass other methods through to the api`, async t => {
 })
 
 test(tn`Should update the player list when a player joins`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -374,11 +377,11 @@ test(tn`Should update the player list when a player joins`, async t => {
         }
     }
 
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
 
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
 
     t.deepEqual(storage.get<PlayerStorage>('players', {}), {
         OWNER: { ip: '', ips: [], joins: 0, owner: true },
@@ -387,6 +390,7 @@ test(tn`Should update the player list when a player joins`, async t => {
 })
 
 test(tn`Should add IPs if they are not yet recorded`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     storage.set('players', { TEST: { joins: 1, ip: '0.0.0.0', ips: [] } })
     let mockApi = {
@@ -400,11 +404,11 @@ test(tn`Should add IPs if they are not yet recorded`, async t => {
         }
     }
 
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
 
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
 
     t.deepEqual(storage.get<PlayerStorage>('players', {}), {
         OWNER: { ip: '', ips: [], joins: 0, owner: true },
@@ -413,6 +417,7 @@ test(tn`Should add IPs if they are not yet recorded`, async t => {
 })
 
 test(tn`Should send leave events`, async t => {
+    t.plan(1)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -426,14 +431,15 @@ test(tn`Should send leave events`, async t => {
         }
     }
 
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
     world.onLeave.sub(({name}) => t.is(name, 'TEST'))
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
 })
 
 test(tn`Names with leading colon-space`, async t => {
+    t.plan(2)
     let storage = new MockStorage()
     let mockApi = {
         ...api,
@@ -447,25 +453,27 @@ test(tn`Names with leading colon-space`, async t => {
         }
     }
 
-    let world = new MockWorldWatcher(mockApi, storage)
+    let world = new World(mockApi, storage)
     world.onLeave.sub(({name}) => t.is(name, ': TIMOTHY '))
-    world.startWatcher()
-    await delay(500)
+    world.startWatchingChat()
+    await delay(100)
     t.deepEqual(world.online, ['ONLINE'])
-    world.stopWatcher()
+    world.stopWatchingChat()
 })
 
 test(tn`Should send events when a message starting with / is sent`, t => {
+    t.plan(1)
     let storage = new MockStorage()
-    let world = new MockWorldWatcher(api, storage)
+    let world = new World(api, storage)
 
     world.onMessage.sub(({ message }) => t.is(message, '/command'))
     world.send('/command')
 })
 
 test(tn`addCommand should work with sent messages`, t => {
+    t.plan(1)
     let storage = new MockStorage()
-    let world = new MockWorldWatcher(api, storage)
+    let world = new World(api, storage)
 
     world.addCommand('test', () => t.pass())
     world.send('/test')
@@ -493,13 +501,13 @@ test(tn`when a player removes themselves from the admin list, they should not be
         }
     }
 
-    const world = new MockWorldWatcher(mockApi, storage)
+    const world = new World(mockApi, storage)
     world.onMessage.one(({ player }) => {
         t.is(player.name, 'NAME')
         t.true(player.isAdmin) // Admin when doing /unadmin
         world.onMessage.one(({ player }) => t.false(player.isAdmin)) // Not admin after
     })
-    world.startWatcher()
-    await delay(500)
-    world.stopWatcher()
+    world.startWatchingChat()
+    await delay(100)
+    world.stopWatchingChat()
 })

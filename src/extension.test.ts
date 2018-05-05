@@ -1,4 +1,4 @@
-import test from 'ava'
+import * as test from 'tape'
 
 import { MessageBotExtension } from './extension'
 import { MessageBot, World } from './index'
@@ -47,18 +47,21 @@ test(tn`Should save the bot instance`, t => {
     let bot = makeBot()
     let ex = new MessageBotExtension('test', bot)
     t.is(ex.bot, bot)
+    t.end()
 })
 
 test(tn`Should save the world instance`, t => {
     let bot = makeBot()
     let ex = new MessageBotExtension('test', bot)
     t.is(ex.world, bot.world)
+    t.end()
 })
 
 test(tn`Should save the world instance`, t => {
     let bot = makeBot()
     let ex = new MessageBotExtension('test', bot)
     t.is(ex.world, bot.world)
+    t.end()
 })
 
 test(tn`Should create a prefixed storage with the extension id`, t => {
@@ -68,6 +71,7 @@ test(tn`Should create a prefixed storage with the extension id`, t => {
         return bot.storage
     }
     new MessageBotExtension('test', bot)
+    t.end()
 })
 
 test(tn`Should clear the extension storage by default when uninstalled`, t => {
@@ -77,6 +81,7 @@ test(tn`Should clear the extension storage by default when uninstalled`, t => {
 
     let ex = new MessageBotExtension('test', bot)
     ex.uninstall()
+    t.end()
 })
 
 test(tn`Should remove the extension when uninstalling by default`, t => {
@@ -84,4 +89,5 @@ test(tn`Should remove the extension when uninstalling by default`, t => {
     ex.bot.storage.clear = () => {}
     ex.remove = () => t.pass()
     ex.uninstall()
+    t.end()
 })

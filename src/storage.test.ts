@@ -1,4 +1,4 @@
-import test from 'ava'
+import * as test from 'tape'
 import { Storage } from './storage'
 
 class MockStorage extends Storage {
@@ -31,6 +31,7 @@ test(tn`Should use the original value if no value is returned`, t => {
     s.with('key', fallback, () => {})
 
     t.deepEqual(s.storage.get('key'), fallback)
+    t.end()
 })
 
 test(tn`Should use the returned value if a value is returned`, t => {
@@ -39,4 +40,5 @@ test(tn`Should use the returned value if a value is returned`, t => {
     s.with('key', fallback, () => ({someKey: 'other'}))
 
     t.deepEqual(s.storage.get('key'), {someKey: 'other'})
+    t.end()
 })

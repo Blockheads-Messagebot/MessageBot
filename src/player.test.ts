@@ -1,4 +1,4 @@
-import test from 'ava'
+import * as test from 'tape'
 
 import { Player, PlayerInfo } from './player'
 import { WorldLists } from 'blockheads-api-interface'
@@ -16,21 +16,25 @@ function makePlayer(name: string, lists2: Partial<WorldLists> = {}, info: Partia
 test(tn`Should expose the player name`, t => {
     let player = makePlayer('NAME')
     t.is(player.name, 'NAME')
+    t.end()
 })
 
 test(tn`Should expose the player IP`, t => {
     let player = makePlayer('NAME')
     t.is(player.ip, defaultInfo.ip)
+    t.end()
 })
 
 test(tn`Should expose all player IPs`, t => {
     let player = makePlayer('NAME')
     t.deepEqual(player.ips, defaultInfo.ips)
+    t.end()
 })
 
 test(tn`Should expose the player joins`, t => {
     let player = makePlayer('NAME')
     t.is(player.joins, defaultInfo.joins)
+    t.end()
 })
 
 test(tn`Should correctly report if the player has joined`, t => {
@@ -39,111 +43,133 @@ test(tn`Should correctly report if the player has joined`, t => {
 
     t.is(player.hasJoined, true)
     t.is(player2.hasJoined, false)
+    t.end()
 })
 
 test(tn`Should report SERVER as the owner`, t => {
     let player = makePlayer('SERVER')
     t.is(player.isOwner, true)
+    t.end()
 })
 
 test(tn`Should correctly report owners`, t => {
     let player = makePlayer('NAME', {}, {owner: true})
     t.is(player.isOwner, true)
+    t.end()
 })
 
 test(tn`The owner should be an admin`, t => {
     let player = makePlayer('NAME', {}, {owner: true})
     t.is(player.isAdmin, true)
+    t.end()
 })
 
 test(tn`If the player is on the adminlist they should be an admin`, t => {
     let player = makePlayer('NAME', { adminlist: ['NAME']})
     t.is(player.isAdmin, true)
+    t.end()
 })
 
 test(tn`If the player is on both the admin and the modlist they should be an admin`, t => {
     let player = makePlayer('NAME', { adminlist: ['NAME'], modlist: ['NAME']})
     t.is(player.isAdmin, true)
+    t.end()
 })
 
 test(tn`If the player is on the modlist they should be a mod`, t => {
     let player = makePlayer('NAME', { modlist: ['NAME']})
     t.is(player.isMod, true)
+    t.end()
 })
 
 test(tn`If the player is on the adminlist and the modlist they should not be a mod`, t => {
     let player = makePlayer('NAME', { adminlist: ['NAME'], modlist: ['NAME'] })
     t.is(player.isMod, false)
+    t.end()
 })
 
 test(tn`If the player is on the adminlist they should be whitelisted`, t => {
     let player = makePlayer('NAME', {adminlist: ['NAME']})
     t.is(player.isWhitelisted, true)
+    t.end()
 })
 
 test(tn`If the player is on the modlist they should be whitelisted`, t => {
     let player = makePlayer('NAME', {modlist: ['NAME']})
     t.is(player.isWhitelisted, true)
+    t.end()
 })
 
 test(tn`If the player is on the whitelist they should be whitelisted`, t => {
     let player = makePlayer('NAME', {whitelist: ['NAME']})
     t.is(player.isWhitelisted, true)
+    t.end()
 })
 
 test(tn`If the player is an admin they should be staff`, t => {
     let player = makePlayer('NAME', {adminlist: ['NAME']})
     t.is(player.isStaff, true)
+    t.end()
 })
 
 test(tn`If the player is a mod they should be staff`, t => {
     let player = makePlayer('NAME', {modlist: ['NAME']})
     t.is(player.isStaff, true)
+    t.end()
 })
 
 test(tn`If the player is the owner they should be staff`, t => {
     let player = makePlayer('NAME', {}, {owner: true})
     t.is(player.isStaff, true)
+    t.end()
 })
 
 test(tn`If the player is not an admin, mod, or owner they should not be staff`, t => {
     let player = makePlayer('NAME')
     t.is(player.isStaff, false)
+    t.end()
 })
 
 test(tn`If the player is on the blacklist they should be banned`, t => {
     let player = makePlayer('NAME', {blacklist: ['NAME']})
     t.is(player.isBanned, true)
+    t.end()
 })
 
 test(tn`If the player is on the adminlist they should not be banned`, t => {
     let player = makePlayer('NAME', { blacklist: ['NAME'], adminlist: ['NAME'] })
     t.is(player.isBanned, false)
+    t.end()
 })
 
 test(tn`If the player is on the modlist they should not be banned`, t => {
     let player = makePlayer('NAME', { blacklist: ['NAME'], adminlist: ['NAME'] })
     t.is(player.isBanned, false)
+    t.end()
 })
 
 test(tn`If the player is the owner they should not be banned`, t => {
     let player = makePlayer('NAME', { blacklist: ['NAME'] }, {owner: true})
     t.is(player.isBanned, false)
+    t.end()
 })
 
 test(tn`If the player's ip is on the blacklist they should be banned`, t => {
     let player = makePlayer('NAME', { blacklist: [defaultInfo.ip]})
     t.is(player.isBanned, true)
+    t.end()
 })
 
 test(tn`If the player's name is not on the blacklist they should not be banned`, t => {
     let player = makePlayer('NAME', { blacklist: ['OTHER']})
     t.is(player.isBanned, false)
+    t.end()
 })
 
 test(tn`Device IDs should be removed from blacklist entries when checking if a player is banned`, t => {
     let player = makePlayer('NAME', { blacklist: ['NAME \\device_id']})
     t.is(player.isBanned, true)
+    t.end()
 })
 
 test(tn`Should check lists without case sensitivity`, t => {
@@ -155,4 +181,5 @@ test(tn`Should check lists without case sensitivity`, t => {
     t.is(player.isMod, true)
     player = makePlayer('NAME', { whitelist: ['name']})
     t.is(player.isWhitelisted, true)
+    t.end()
 })
