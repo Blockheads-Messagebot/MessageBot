@@ -289,3 +289,31 @@ test(tn`extensions should be an array of currently loaded extensions`, t => {
     MessageBot.deregisterExtension('test')
     t.end()
 })
+
+test(tn`The bot should not be started until bot.start() is called.`, async t => {
+    const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+    t.plan(2)
+    const oldDeps = MessageBot.dependencies
+
+    let started = false
+    MessageBot.dependencies = {
+        ...oldDeps,
+        Api: class extends MockApi {
+            async getMessages() {
+                t.equal(started, true)
+                return { nextId: 0, log: [] }
+            }
+        }
+    }
+    const bot = makeBot()
+
+    await delay(10)
+    started = true
+    bot.start()
+    await delay(10)
+    bot.world.stopWatchingChat()
+    MessageBot.dependencies = oldDeps
+    t.true(started)
+    t.end()
+})

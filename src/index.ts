@@ -98,6 +98,13 @@ export class MessageBot {
     }
 
     /**
+     * Starts listening to chat.
+     */
+    start() {
+        this.world.startWatchingChat()
+    }
+
+    /**
      * Gets the exports of an extension, returns undefined if the extension is not loaded.
      * @param id the extension id to get exports from
      */
