@@ -470,3 +470,36 @@ test(tn`addCommand should work with sent messages`, t => {
     world.addCommand('test', () => t.pass())
     world.send('/test')
 })
+
+test(tn`when a player removes themselves from the admin list, they should not be an admin`, async t => {
+    t.plan(3)
+
+    const storage = new MockStorage()
+    const mockApi = {
+        ...api,
+        async getMessages() {
+            return {
+                status: 'ok', log: [
+                    'NAME: /unadmin NAME',
+                    'NAME: Hello'
+                ], nextId: 0
+            }
+        },
+        async getLists() {
+            return {
+                ...lists,
+                adminlist: ['NAME']
+            }
+        }
+    }
+
+    const world = new MockWorldWatcher(mockApi, storage)
+    world.onMessage.one(({ player }) => {
+        t.is(player.name, 'NAME')
+        t.true(player.isAdmin) // Admin when doing /unadmin
+        world.onMessage.one(({ player }) => t.false(player.isAdmin)) // Not admin after
+    })
+    world.startWatcher()
+    await delay(500)
+    world.stopWatcher()
+})

@@ -4,12 +4,13 @@ import { Player, PlayerInfo } from './player'
 import { ChatWatcher } from './chatWatcher'
 import { Storage } from './storage'
 import { SimpleEvent, SafeSimpleEvent } from './events'
+import { updateLists } from './updateLists'
 
 const cloneDate = (d: Date) => new Date(d.getTime())
 
 const PLAYERS_KEY = 'players'
 const LAST_UPDATE_KEY = 'lastPlayersUpdate'
-export type PlayerStorage = {[name: string]: PlayerInfo}
+export type PlayerStorage = { [name: string]: PlayerInfo }
 
 export class World {
     protected _api: WorldApi
@@ -25,11 +26,11 @@ export class World {
     private _events = {
         onJoin: new SimpleEvent<Player>(),
         onLeave: new SimpleEvent<Player>(),
-        onMessage: new SimpleEvent<{player: Player, message: string}>(),
+        onMessage: new SimpleEvent<{ player: Player, message: string }>(),
     }
 
     protected _online: string[] = []
-    protected _lists: WorldLists = {adminlist: [], modlist: [], whitelist: [], blacklist: []}
+    protected _lists: WorldLists = { adminlist: [], modlist: [], whitelist: [], blacklist: [] }
     protected _commands: Map<string, (player: Player, args: string) => void> = new Map()
 
     /**
@@ -70,7 +71,7 @@ export class World {
      * Fires whenever a player or the server sends a message in chat.
      * Includes messages starting with /
      */
-    get onMessage(): SafeSimpleEvent<{player: Player, message: string}> {
+    get onMessage(): SafeSimpleEvent<{ player: Player, message: string }> {
         return this._events.onMessage.asEvent()
     }
 
@@ -153,7 +154,7 @@ export class World {
      */
     setLists = async (lists: Partial<WorldLists>): Promise<void> => {
         let currentLists = await this.getLists()
-        await this._api.setLists({...currentLists, ...lists})
+        await this._api.setLists({ ...currentLists, ...lists })
         await this.getLists(true)
     }
 
@@ -182,7 +183,7 @@ export class World {
      * @param message the message to send
      */
     send = (message: string): Promise<void> => {
-        if (message.startsWith('/')) this._events.onMessage.dispatch({ player: this.getPlayer('SERVER'), message})
+        if (message.startsWith('/')) this._events.onMessage.dispatch({ player: this.getPlayer('SERVER'), message })
         return this._api.send(message)
     }
     /**
@@ -191,7 +192,7 @@ export class World {
     getPlayer = (name: string): Player => {
         name = name.toLocaleUpperCase()
         let players = this._storage.get<PlayerStorage>(PLAYERS_KEY, {})
-        return new Player(name, players[name] || {ip: '', ips: [], joins: 0}, this._lists)
+        return new Player(name, players[name] || { ip: '', ips: [], joins: 0 }, this._lists)
     }
 
     /**
@@ -245,10 +246,12 @@ export class World {
         watcher.onLeave.sub(name => this._events.onLeave.dispatch(this.getPlayer(name)))
 
         watcher.onMessage.sub(({ name, message }) => {
-            this._events.onMessage.dispatch({ player: this.getPlayer(name), message })
+            const player = this.getPlayer(name)
+            this._events.onMessage.dispatch({ player, message })
+            updateLists(this._lists, player, message)
         })
 
-        this.onMessage.sub(({player, message}) => {
+        this.onMessage.sub(({ player, message }) => {
             if (/^\/[^ ]/.test(message)) {
                 const [, command, args] = message.match(/^\/([^ ]+) ?(.*)$/)!
                 const handler = this._commands.get(command.toLocaleUpperCase())
@@ -273,7 +276,7 @@ export class World {
         }
     }
 
-    protected _addUser({name, ip}: { name: string, ip: string }): void {
+    protected _addUser({ name, ip }: { name: string, ip: string }): void {
         name = name.toLocaleUpperCase()
         this._storage.with<PlayerStorage>(PLAYERS_KEY, {}, players => {
             const player = players[name] = players[name] || { ip, ips: [ip], joins: 0 }
