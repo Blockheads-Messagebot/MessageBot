@@ -511,3 +511,23 @@ test(tn`when a player removes themselves from the admin list, they should not be
     await delay(100)
     world.stopWatchingChat()
 })
+
+test(tn`Events should not be fired when parsing logs - #57`, async t => {
+    t.plan(1)
+
+    const world = new World({
+        ...api,
+        async getLogs() {
+            return [{
+                raw: '',
+                timestamp: new Date(Date.now() - 1000),
+                message: `${overview.name} - Player Connected | NAME | 0.0.0.0 | qwertyuiopasdfghjklzxcvbnm123456`
+            }]
+        }
+    }, new MockStorage())
+
+    world.onJoin.sub(() => t.fail('A join event should not have been fired.'))
+
+    await world.getLogs(true)
+    t.pass()
+})

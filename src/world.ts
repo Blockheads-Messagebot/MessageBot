@@ -251,7 +251,7 @@ export class World {
     protected _createWatcher(): void {
         let watcher = this._chatWatcher = new ChatWatcher(this._api, this._online)
 
-        watcher.onJoin.sub(arg => this._addUser(arg))
+        watcher.onJoin.sub(arg => this._userJoin(arg))
 
         watcher.onLeave.sub(name => this._events.onLeave.dispatch(this.getPlayer(name)))
 
@@ -280,11 +280,11 @@ export class World {
             if (!line.message.startsWith(`${name} - Player Connected`)) continue
 
             const [, user, ip] = line.message.match(/Connected ([^a-z]{3,}) \| ([\d.]+) \| .{32}$/)!
-            this._addUser({ name: user, ip })
+            this._recordJoin({ name: user, ip })
         }
     }
 
-    protected _addUser({ name, ip }: { name: string, ip: string }): void {
+    protected _recordJoin({ name, ip }: { name: string, ip: string }): void {
         name = name.toLocaleUpperCase()
         this._storage.with<PlayerStorage>(PLAYERS_KEY, {}, players => {
             const player = players[name] = players[name] || { ip, ips: [ip], joins: 0 }
@@ -292,8 +292,12 @@ export class World {
             player.ip = ip
             if (!player.ips.includes(ip)) player.ips.push(ip)
         })
-        this._events.onJoin.dispatch(this.getPlayer(name))
         // Prevent this join from being counted twice
         this._storage.set(LAST_UPDATE_KEY, Date.now())
+    }
+
+    protected _userJoin({ name, ip }: { name: string, ip: string }): void {
+        this._recordJoin({ name, ip })
+        this._events.onJoin.dispatch(this.getPlayer(name))
     }
 }
