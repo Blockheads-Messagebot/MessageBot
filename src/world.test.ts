@@ -533,7 +533,7 @@ test(tn`Events should not be fired when parsing logs - #57`, async t => {
 })
 
 test(tn`Messages should be sent in the order the send method was called`, async t => {
-    t.plan(1)
+    t.plan(4)
 
     const expected = [
         'First',
@@ -545,9 +545,8 @@ test(tn`Messages should be sent in the order the send method was called`, async 
         ...api,
         async send (message : string) {
             await delay(Math.random() * 100) //Random delay to check if <World>.send is executing them without order or if it's waiting for each to be sent.
-            if (message !== expected[0]) return t.fail('Sent messages to the API in incorrect order.')
+            t.is(message, expected[0])
             expected.shift()
-            if (expected.length === 0) t.pass()
         }
     }
     

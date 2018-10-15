@@ -31,7 +31,7 @@ export class World {
 
     private _messageQueue: {
         message: string,
-        callback: Function
+        callback: () => void
     }[]
 
     protected _online: string[] = []
@@ -319,7 +319,9 @@ export class World {
     protected async _executeMessageQueue () : Promise<void> {
         while (this._messageQueue.length > 0) {
             const {message, callback} = this._messageQueue[0]
-            await this._api.send(message)
+            try {
+                await this._api.send(message)
+            } catch (_) { }
             callback()
             this._messageQueue.shift()
         }
