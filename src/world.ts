@@ -29,6 +29,11 @@ export class World {
         onMessage: new SimpleEvent<{ player: Player, message: string }>(),
     }
 
+    private _messageQueue: {
+        message: string,
+        callback: Function
+    }[]
+
     protected _online: string[] = []
     protected _lists: WorldLists = { adminlist: [], modlist: [], whitelist: [], blacklist: [] }
     protected _commands: Map<string, (player: Player, args: string) => void> = new Map()
@@ -47,6 +52,7 @@ export class World {
         this._api = api
         this._storage = storage
         this._lastLogUpdate = storage.get(LAST_UPDATE_KEY, 0)
+        this._messageQueue = []
 
         this._createWatcher()
         this.getOverview() // Sets the owner, gets initial online players
@@ -184,7 +190,13 @@ export class World {
      */
     send = (message: string): Promise<void> => {
         if (message.startsWith('/')) this._events.onMessage.dispatch({ player: this.getPlayer('SERVER'), message })
-        return this._api.send(message)
+        return new Promise(resolve => {
+            this._messageQueue.push({
+                message,
+                callback: resolve
+            })
+            if (this._messageQueue.length === 1) this._executeMessageQueue()
+        })
     }
     /**
      * Gets a specific player by name
@@ -299,5 +311,17 @@ export class World {
     protected _userJoin({ name, ip }: { name: string, ip: string }): void {
         this._recordJoin({ name, ip })
         this._events.onJoin.dispatch(this.getPlayer(name))
+    }
+
+    /**
+     * Sends messages in the message queue one by one to prevent the api from concatting 2 messages into 1.
+     */
+    protected async _executeMessageQueue () : Promise<void> {
+        while (this._messageQueue.length > 0) {
+            const {message, callback} = this._messageQueue[0]
+            await this._api.send(message)
+            callback()
+            this._messageQueue.shift()
+        }
     }
 }
