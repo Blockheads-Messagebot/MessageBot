@@ -108,13 +108,14 @@ export class ChatWatcher {
                 let [, name, ip] = message.match(/Connected ([^a-z]{3,}) \| ([\d.]+) \| .{32}$/) as RegExpMatchArray
                 if (!this.online.includes(name)) {
                     this.online.includes(name) || this.online.push(name)
-                    this._onJoin.dispatch({name, ip})
+                    try {
+                        this._onJoin.dispatch({name, ip})
+                    } catch (error) {
+                        console.error(error)
+                    }
                     return
                 }
-            } catch (error) {
-                console.error(error)
-                return
-            }
+            } catch (_) { }
             return parseError()
         }
 
@@ -123,13 +124,14 @@ export class ChatWatcher {
                 let [, name] = message.match(/Disconnected ([^a-z]{3,})$/) as RegExpMatchArray
                 if (this.online.includes(name)) {
                     this.online.splice(this.online.indexOf(name), 1)
-                    this._onLeave.dispatch(name)
+                    try {
+                        this._onLeave.dispatch(name)
+                    } catch (error) {
+                        console.error(error)
+                    }
                     return
                 }
-            } catch (error) {
-                console.error(error)
-                return
-            }
+            } catch (_) { }
             return parseError()
         }
 
@@ -143,7 +145,7 @@ export class ChatWatcher {
                 try {
                     this._onMessage.dispatch({name, message})
                 } catch (error) {
-                    console.error(error)    
+                    console.error(error)
                 }
                 return
             }
