@@ -96,7 +96,11 @@ export class ChatWatcher {
      */
     protected parse = (message: string): void => {
         let parseError = () => {
-            this._onOther.dispatch(message)
+            try {
+                this._onOther.dispatch(message)
+            } catch (error) {
+                console.error(error)
+            }
         }
 
         if (/^[^a-z]+ - Player Connected /.test(message)) {
@@ -107,7 +111,10 @@ export class ChatWatcher {
                     this._onJoin.dispatch({name, ip})
                     return
                 }
-            } catch (_) { }
+            } catch (error) {
+                console.error(error)
+                return
+            }
             return parseError()
         }
 
@@ -119,7 +126,10 @@ export class ChatWatcher {
                     this._onLeave.dispatch(name)
                     return
                 }
-            } catch (_) { }
+            } catch (error) {
+                console.error(error)
+                return
+            }
             return parseError()
         }
 
@@ -130,8 +140,11 @@ export class ChatWatcher {
                 if (name == 'SERVER' && message.startsWith('/')) {
                     return parseError()
                 }
-
-                this._onMessage.dispatch({name, message})
+                try {
+                    this._onMessage.dispatch({name, message})
+                } catch (error) {
+                    console.error(error)    
+                }
                 return
             }
         }
