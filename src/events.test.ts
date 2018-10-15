@@ -55,3 +55,19 @@ test(`asEvent should return 'this' safe functions`, t => {
     unsub(pass)
     e.dispatch('')
 })
+
+test(`dispatch should not stop executing listeners if one listener throws an error`, t => {
+    t.plan(1)
+    const e = new SimpleEvent<string>()
+
+    const err = console.error
+    console.error = () => {}
+
+    e.sub(() => {
+        throw new Error('This should not stop dispatch')
+    })
+    e.sub(() => t.pass())
+    e.dispatch('')
+    console.error = err
+
+})

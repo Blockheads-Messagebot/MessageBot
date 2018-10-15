@@ -66,7 +66,11 @@ export class SimpleEvent<Argument> {
     dispatch(arg: Argument): void {
         this.subscribers.forEach(({listener, once}) => {
             if (once) this.unsub(listener)
-            listener(arg)
+            try {
+                listener(arg)
+            } catch (error) {
+                console.error(error)
+            }
         })
     }
 
