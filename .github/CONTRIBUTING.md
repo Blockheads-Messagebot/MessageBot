@@ -10,6 +10,8 @@ When a large rewrite is taking place, a branch for the primary feature will be a
 
 Please keep pull requests to one bugfix / feature, this makes them easier to review and more likely to be merged in.
 
+Don't bump the version - this will be done when publishing so that I can review changes to ensure semver is followed.
+
 #### Code style
 
 - Indent with 4 spaces
