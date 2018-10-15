@@ -96,11 +96,7 @@ export class ChatWatcher {
      */
     protected parse = (message: string): void => {
         let parseError = () => {
-            try {
-                this._onOther.dispatch(message)
-            } catch (error) {
-                console.error(error)
-            }
+            this._onOther.dispatch(message)
         }
 
         if (/^[^a-z]+ - Player Connected /.test(message)) {
@@ -108,11 +104,7 @@ export class ChatWatcher {
                 let [, name, ip] = message.match(/Connected ([^a-z]{3,}) \| ([\d.]+) \| .{32}$/) as RegExpMatchArray
                 if (!this.online.includes(name)) {
                     this.online.includes(name) || this.online.push(name)
-                    try {
-                        this._onJoin.dispatch({name, ip})
-                    } catch (error) {
-                        console.error(error)
-                    }
+                    this._onJoin.dispatch({name, ip})
                     return
                 }
             } catch (_) { }
@@ -124,11 +116,7 @@ export class ChatWatcher {
                 let [, name] = message.match(/Disconnected ([^a-z]{3,})$/) as RegExpMatchArray
                 if (this.online.includes(name)) {
                     this.online.splice(this.online.indexOf(name), 1)
-                    try {
-                        this._onLeave.dispatch(name)
-                    } catch (error) {
-                        console.error(error)
-                    }
+                    this._onLeave.dispatch(name)
                     return
                 }
             } catch (_) { }
@@ -142,11 +130,8 @@ export class ChatWatcher {
                 if (name == 'SERVER' && message.startsWith('/')) {
                     return parseError()
                 }
-                try {
-                    this._onMessage.dispatch({name, message})
-                } catch (error) {
-                    console.error(error)
-                }
+
+                this._onMessage.dispatch({name, message})
                 return
             }
         }
