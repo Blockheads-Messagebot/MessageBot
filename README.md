@@ -18,4 +18,4 @@ See [here](https://blockheads-messagebot.github.io/MessageBot/). For a simple ex
 
 ### Contributing
 
-See [CONTRIBUTING.md](https://github.com/Blockheads-Messagebot/MessageBot/.github/CONTRIBUTING.md).
+See [CONTRIBUTING.md](https://github.com/Blockheads-Messagebot/MessageBot/blob/master/.github/CONTRIBUTING.md).
