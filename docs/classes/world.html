@@ -88,6 +88,8 @@
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_api" class="tsd-kind-icon">_api</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_chatwatcher" class="tsd-kind-icon">_chat<wbr>Watcher</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_commands" class="tsd-kind-icon">_commands</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_firstchatupdate" class="tsd-kind-icon">_first<wbr>Chat<wbr>Update</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_lastlogupdate" class="tsd-kind-icon">_last<wbr>Log<wbr>Update</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_online" class="tsd-kind-icon">_online</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="world.html#_storage" class="tsd-kind-icon">_storage</a></li>
 							</ul>
@@ -106,9 +108,11 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="world.html#_adduser" class="tsd-kind-icon">_add<wbr>User</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="world.html#_createwatcher" class="tsd-kind-icon">_create<wbr>Watcher</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="world.html#_executemessagequeue" class="tsd-kind-icon">_execute<wbr>Message<wbr>Queue</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="world.html#_recordjoin" class="tsd-kind-icon">_record<wbr>Join</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="world.html#_updateplayers" class="tsd-kind-icon">_update<wbr>Players</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="world.html#_userjoin" class="tsd-kind-icon">_user<wbr>Join</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#addcommand" class="tsd-kind-icon">add<wbr>Command</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#getlists" class="tsd-kind-icon">get<wbr>Lists</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#getlogs" class="tsd-kind-icon">get<wbr>Logs</a></li>
@@ -120,7 +124,9 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#send" class="tsd-kind-icon">send</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#setlists" class="tsd-kind-icon">set<wbr>Lists</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#start" class="tsd-kind-icon">start</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#startwatchingchat" class="tsd-kind-icon">start<wbr>Watching<wbr>Chat</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#stop" class="tsd-kind-icon">stop</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="world.html#stopwatchingchat" class="tsd-kind-icon">stop<wbr>Watching<wbr>Chat</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-private-protected">
@@ -144,7 +150,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L33">world.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L49">world.ts:49</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -169,7 +175,7 @@
 					<div class="tsd-signature tsd-kind-icon">_api<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WorldApi</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L15">world.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L16">world.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -179,7 +185,7 @@
 					<div class="tsd-signature tsd-kind-icon">_chat<wbr>Watcher<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ChatWatcher</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L17">world.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L18">world.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -189,9 +195,40 @@
 					<div class="tsd-signature tsd-kind-icon">_commands<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Map()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L33">world.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L39">world.ts:39</a></li>
 						</ul>
 					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+					<a name="_firstchatupdate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _first<wbr>Chat<wbr>Update</h3>
+					<div class="tsd-signature tsd-kind-icon">_first<wbr>Chat<wbr>Update<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;Date.now()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L49">world.ts:49</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The first time joins were updated from chat
+							It is assumed that all joins from this point onwards have been counted.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+					<a name="_lastlogupdate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _last<wbr>Log<wbr>Update</h3>
+					<div class="tsd-signature tsd-kind-icon">_last<wbr>Log<wbr>Update<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L44">world.ts:44</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The last time joins were updated from the log</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-protected">
 					<a name="_online" class="tsd-anchor"></a>
@@ -199,7 +236,7 @@
 					<div class="tsd-signature tsd-kind-icon">_online<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L31">world.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L37">world.ts:37</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -209,7 +246,7 @@
 					<div class="tsd-signature tsd-kind-icon">_storage<span class="tsd-signature-symbol">:</span> <a href="storage.html" class="tsd-signature-type">Storage</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L16">world.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L17">world.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -226,7 +263,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L47">world.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L65">world.ts:65</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -248,7 +285,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L54">world.ts:54</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L72">world.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -270,7 +307,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L62">world.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L80">world.ts:80</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -293,7 +330,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L69">world.ts:69</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L87">world.ts:87</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -315,7 +352,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L77">world.ts:77</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L95">world.ts:95</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -337,7 +374,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L84">world.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L102">world.ts:102</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -353,16 +390,60 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
-					<a name="_adduser" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _add<wbr>User</h3>
+					<a name="_createwatcher" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _create<wbr>Watcher</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">_add<wbr>User<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">_create<wbr>Watcher<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L266">world.ts:266</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L263">world.ts:263</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Internal init function</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="_executemessagequeue" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _execute<wbr>Message<wbr>Queue</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">_execute<wbr>Message<wbr>Queue<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L319">world.ts:319</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sends messages in the message queue one by one to prevent the api from concatting 2 messages into 1.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="_recordjoin" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _record<wbr>Join</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">_record<wbr>Join<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L299">world.ts:299</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -378,28 +459,6 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
-					<a name="_createwatcher" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _create<wbr>Watcher</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">_create<wbr>Watcher<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L229">world.ts:229</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Internal init function</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
 					<a name="_updateplayers" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _update<wbr>Players</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
@@ -409,10 +468,35 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L251">world.ts:251</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L285">world.ts:285</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="_userjoin" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _user<wbr>Join</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">_user<wbr>Join<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L311">world.ts:311</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>__namedParameters: <span class="tsd-signature-type">object</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -426,7 +510,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L194">world.ts:194</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L218">world.ts:218</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -488,7 +572,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L123">world.ts:123</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L141">world.ts:141</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -516,7 +600,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L154">world.ts:154</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L172">world.ts:172</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -549,7 +633,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L92">world.ts:92</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L110">world.ts:110</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -577,7 +661,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L180">world.ts:180</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L204">world.ts:204</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -605,7 +689,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L118">world.ts:118</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L136">world.ts:136</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -627,7 +711,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L207">world.ts:207</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L231">world.ts:231</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -660,7 +744,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L224">world.ts:224</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L248">world.ts:248</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -682,7 +766,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L173">world.ts:173</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L191">world.ts:191</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -715,7 +799,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L143">world.ts:143</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L161">world.ts:161</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -749,7 +833,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L214">world.ts:214</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L238">world.ts:238</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -758,6 +842,28 @@
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="startwatchingchat" class="tsd-anchor"></a>
+					<h3>start<wbr>Watching<wbr>Chat</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">start<wbr>Watching<wbr>Chat<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L253">world.ts:253</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Starts the internal chat watcher</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -771,7 +877,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L219">world.ts:219</a></li>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L243">world.ts:243</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -780,6 +886,28 @@
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="stopwatchingchat" class="tsd-anchor"></a>
+					<h3>stop<wbr>Watching<wbr>Chat</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">stop<wbr>Watching<wbr>Chat<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L258">world.ts:258</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Stops the internal chat watcher.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -792,7 +920,7 @@
 					<div class="tsd-signature tsd-kind-icon">_lists<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L32">world.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L38">world.ts:38</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -801,7 +929,7 @@
 						<div class="tsd-signature tsd-kind-icon">adminlist<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L32">world.ts:32</a></li>
+								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L38">world.ts:38</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -811,7 +939,7 @@
 						<div class="tsd-signature tsd-kind-icon">blacklist<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L32">world.ts:32</a></li>
+								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L38">world.ts:38</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -821,7 +949,7 @@
 						<div class="tsd-signature tsd-kind-icon">modlist<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L32">world.ts:32</a></li>
+								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L38">world.ts:38</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -831,7 +959,7 @@
 						<div class="tsd-signature tsd-kind-icon">whitelist<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/459f30f/src/world.ts#L32">world.ts:32</a></li>
+								<li>Defined in <a href="https://github.com/Blockheads-Messagebot/MessageBot/blob/52bebf1/src/world.ts#L38">world.ts:38</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -881,6 +1009,12 @@
 								<a href="world.html#_commands" class="tsd-kind-icon">_commands</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+								<a href="world.html#_firstchatupdate" class="tsd-kind-icon">_first<wbr>Chat<wbr>Update</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+								<a href="world.html#_lastlogupdate" class="tsd-kind-icon">_last<wbr>Log<wbr>Update</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
 								<a href="world.html#_online" class="tsd-kind-icon">_online</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
@@ -905,13 +1039,19 @@
 								<a href="world.html#players" class="tsd-kind-icon">players</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
-								<a href="world.html#_adduser" class="tsd-kind-icon">_add<wbr>User</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
 								<a href="world.html#_createwatcher" class="tsd-kind-icon">_create<wbr>Watcher</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="world.html#_executemessagequeue" class="tsd-kind-icon">_execute<wbr>Message<wbr>Queue</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="world.html#_recordjoin" class="tsd-kind-icon">_record<wbr>Join</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
 								<a href="world.html#_updateplayers" class="tsd-kind-icon">_update<wbr>Players</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="world.html#_userjoin" class="tsd-kind-icon">_user<wbr>Join</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="world.html#addcommand" class="tsd-kind-icon">add<wbr>Command</a>
@@ -947,7 +1087,13 @@
 								<a href="world.html#start" class="tsd-kind-icon">start</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="world.html#startwatchingchat" class="tsd-kind-icon">start<wbr>Watching<wbr>Chat</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="world.html#stop" class="tsd-kind-icon">stop</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="world.html#stopwatchingchat" class="tsd-kind-icon">stop<wbr>Watching<wbr>Chat</a>
 							</li>
 							<li class=" tsd-kind-object-literal tsd-parent-kind-class tsd-is-protected">
 								<a href="world.html#_lists" class="tsd-kind-icon">_lists</a>
@@ -964,6 +1110,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../globals.html#playerstorage" class="tsd-kind-icon">Player<wbr>Storage</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#updatelists" class="tsd-kind-icon">update<wbr>Lists</a>
 					</li>
 				</ul>
 			</nav>
