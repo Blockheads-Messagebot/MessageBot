@@ -1,6 +1,6 @@
 {
   "name": "@bhmb/bot",
-  "version": "7.1.2",
+  "version": "7.1.3",
   "description": "A bot framework for the Blockheads game that supports extensions.",
   "main": "index.js",
   "types": "index.d.ts",
