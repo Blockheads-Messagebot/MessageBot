@@ -8,6 +8,8 @@ import { updateLists } from './updateLists'
 
 const cloneDate = (d: Date) => new Date(d.getTime())
 
+const delay = (time: number) => new Promise<void>(r => setTimeout(r, time))
+
 const PLAYERS_KEY = 'players'
 const LAST_UPDATE_KEY = 'lastPlayersUpdate'
 export type PlayerStorage = { [name: string]: PlayerInfo }
@@ -314,13 +316,14 @@ export class World {
     }
 
     /**
-     * Sends messages in the message queue one by one to prevent the api from concatting 2 messages into 1.
+     * Sends messages in the message queue one by one to prevent the api from concatenating 2 messages into 1.
      */
     protected async _executeMessageQueue () : Promise<void> {
         while (this._messageQueue.length > 0) {
             const {message, callback} = this._messageQueue[0]
             try {
                 await this._api.send(message)
+                await delay(1000)
             } catch (_) { }
             callback()
             this._messageQueue.shift()
