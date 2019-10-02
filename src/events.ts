@@ -64,7 +64,8 @@ export class SimpleEvent<Argument> {
      * @param arg the argument to call listeners with.
      */
     dispatch(arg: Argument): void {
-        this.subscribers.forEach(({listener, once}) => {
+        const clone = this.subscribers.slice(0)
+        clone.forEach(({listener, once}) => {
             if (once) this.unsub(listener)
             try {
                 listener(arg)
