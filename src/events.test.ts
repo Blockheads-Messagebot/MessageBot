@@ -71,3 +71,11 @@ test(`dispatch should not stop executing listeners if one listener throws an err
     console.error = err
 
 })
+
+test(`should not miss event listeners if 'once' is set`, t => {
+    t.plan(2)
+    const e = new SimpleEvent<string>()
+    e.one(() => t.pass())
+    e.sub(() => t.pass())
+    e.dispatch('')
+})
